@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
 import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -48,6 +48,15 @@ export default function JobFormScreen() {
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Refs for web input elements
+  const cargoTypeRef = useRef<any>(null);
+  const tonnageRef = useRef<any>(null);
+  const dimensionsRef = useRef<any>(null);
+  const loadingLocationRef = useRef<any>(null);
+  const deliveryLocationRef = useRef<any>(null);
+  const transportationCostRef = useRef<any>(null);
+  const commissionCostRef = useRef<any>(null);
+
   const colors = isDark ? Colors.dark : Colors.light;
 
   useEffect(() => {
@@ -59,33 +68,43 @@ export default function JobFormScreen() {
   }, []);
 
   const handleSave = async () => {
-    // Debug: Tüm state değerlerini kontrol et
-    console.log("=== SAVE BAŞLADI ===");
-    console.log("Route params:", route.params);
-    console.log("Job from params:", job);
-    console.log("Mode:", mode);
-    console.log("companyId state:", companyId);
-    console.log("cargoType state:", cargoType);
-    console.log("tonnage state:", tonnage);
-    console.log("dimensions state:", dimensions);
-    console.log("loadingLocation state:", loadingLocation);
-    console.log("deliveryLocation state:", deliveryLocation);
-    console.log("transportationCost state:", transportationCost);
-    console.log("commissionCost state:", commissionCost);
-
     setIsLoading(true);
     try {
+      // Web'de refs'ten values oku, native'de state'ten oku
+      let finalCargoType = cargoType;
+      let finalTonnage = tonnage;
+      let finalDimensions = dimensions;
+      let finalLoadingLocation = loadingLocation;
+      let finalDeliveryLocation = deliveryLocation;
+      let finalTransportationCost = transportationCost;
+      let finalCommissionCost = commissionCost;
+
+      if (Platform.OS === "web") {
+        finalCargoType = cargoTypeRef.current?.value || "";
+        finalTonnage = tonnageRef.current?.value || "";
+        finalDimensions = dimensionsRef.current?.value || "";
+        finalLoadingLocation = loadingLocationRef.current?.value || "";
+        finalDeliveryLocation = deliveryLocationRef.current?.value || "";
+        finalTransportationCost = transportationCostRef.current?.value || "";
+        finalCommissionCost = commissionCostRef.current?.value || "";
+      }
+
+      console.log("=== SAVE BAŞLADI ===");
+      console.log("Firma:", companyId);
+      console.log("Yükün Cinsi:", finalCargoType);
+      console.log("Tonaj:", finalTonnage);
+
       const data = {
         companyId,
-        cargoType: cargoType.trim(),
-        tonnage: tonnage.trim(),
-        dimensions: dimensions.trim(),
-        loadingLocation: loadingLocation.trim(),
-        deliveryLocation: deliveryLocation.trim(),
+        cargoType: finalCargoType.toString().trim(),
+        tonnage: finalTonnage.toString().trim(),
+        dimensions: finalDimensions.toString().trim(),
+        loadingLocation: finalLoadingLocation.toString().trim(),
+        deliveryLocation: finalDeliveryLocation.toString().trim(),
         loadingDate,
         deliveryDate,
-        transportationCost: transportationCost.trim(),
-        commissionCost: commissionCost.trim(),
+        transportationCost: finalTransportationCost.toString().trim(),
+        commissionCost: finalCommissionCost.toString().trim(),
       };
 
       console.log("İş verileri kaydediliyor:", data);
@@ -242,9 +261,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={cargoTypeRef}
               type="text"
-              value={cargoType}
-              onChange={(e) => setCargoType(e.target.value)}
+              defaultValue={cargoType}
               placeholder="Örn: Beton, Gıda, İnşaat Malzemesi"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
@@ -265,9 +284,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={tonnageRef}
               type="number"
-              value={tonnage}
-              onChange={(e) => setTonnage(e.target.value)}
+              defaultValue={tonnage}
               placeholder="Örn: 20"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
@@ -289,9 +308,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={dimensionsRef}
               type="text"
-              value={dimensions}
-              onChange={(e) => setDimensions(e.target.value)}
+              defaultValue={dimensions}
               placeholder="Örn: 3m x 2m x 1.5m"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
@@ -312,9 +331,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={loadingLocationRef}
               type="text"
-              value={loadingLocation}
-              onChange={(e) => setLoadingLocation(e.target.value)}
+              defaultValue={loadingLocation}
               placeholder="Şehir veya Adres"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
@@ -335,9 +354,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={deliveryLocationRef}
               type="text"
-              value={deliveryLocation}
-              onChange={(e) => setDeliveryLocation(e.target.value)}
+              defaultValue={deliveryLocation}
               placeholder="Şehir veya Adres"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
@@ -440,9 +459,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={transportationCostRef}
               type="number"
-              value={transportationCost}
-              onChange={(e) => setTransportationCost(e.target.value)}
+              defaultValue={transportationCost}
               placeholder="Örn: 5000"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
@@ -464,9 +483,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={commissionCostRef}
               type="number"
-              value={commissionCost}
-              onChange={(e) => setCommissionCost(e.target.value)}
+              defaultValue={commissionCost}
               placeholder="Örn: 250"
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             />
