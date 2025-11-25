@@ -77,7 +77,10 @@ export default function JobFormScreen() {
   };
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      console.log("Validation hatası:", errors);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -94,13 +97,18 @@ export default function JobFormScreen() {
         commissionCost: commissionCost.trim(),
       };
 
+      console.log("İş verileri kaydediliyor:", data);
+
       if (isEdit && job) {
-        await updateJob(job.id, data);
+        const result = await updateJob(job.id, data);
+        console.log("İş güncelleme sonucu:", result);
       } else {
-        await addJob(data);
+        const result = await addJob(data);
+        console.log("İş ekleme sonucu:", result);
       }
       navigation.goBack();
     } catch (error) {
+      console.error("Save hatası:", error);
       Alert.alert("Hata", "İş kaydı sırasında bir hata oluştu");
     } finally {
       setIsLoading(false);
@@ -333,11 +341,22 @@ export default function JobFormScreen() {
             Yükleme Tarihi
           </ThemedText>
           {Platform.OS === "web" ? (
-            <TextInput
-              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-              value={formatDate(loadingDate)}
-              onFocus={() => setShowLoadingDatePicker(true)}
-              placeholder="Tarih seçin"
+            <input
+              type="date"
+              value={new Date(loadingDate).toISOString().split('T')[0]}
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+                setLoadingDate(date.getTime());
+              }}
+              style={{
+                padding: `${Spacing.md}px`,
+                fontSize: 16,
+                borderWidth: 1,
+                borderColor: colors.borderDefault,
+                borderRadius: 8,
+                backgroundColor: colors.backgroundDefault,
+                color: colors.textDefault,
+              } as any}
             />
           ) : (
             <Pressable
@@ -363,11 +382,22 @@ export default function JobFormScreen() {
             Teslim Tarihi
           </ThemedText>
           {Platform.OS === "web" ? (
-            <TextInput
-              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-              value={formatDate(deliveryDate)}
-              onFocus={() => setShowDeliveryDatePicker(true)}
-              placeholder="Tarih seçin"
+            <input
+              type="date"
+              value={new Date(deliveryDate).toISOString().split('T')[0]}
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+                setDeliveryDate(date.getTime());
+              }}
+              style={{
+                padding: `${Spacing.md}px`,
+                fontSize: 16,
+                borderWidth: 1,
+                borderColor: colors.borderDefault,
+                borderRadius: 8,
+                backgroundColor: colors.backgroundDefault,
+                color: colors.textDefault,
+              } as any}
             />
           ) : (
             <Pressable
