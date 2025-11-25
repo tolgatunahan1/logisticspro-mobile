@@ -160,12 +160,6 @@ export default function JobListScreen() {
               >
                 <Feather name="edit" size={18} color={theme.link} />
               </Pressable>
-              <Pressable
-                onPress={() => handleDelete(job)}
-                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-              >
-                <Feather name="trash-2" size={18} color={Colors.light.error} />
-              </Pressable>
             </View>
           </View>
 
