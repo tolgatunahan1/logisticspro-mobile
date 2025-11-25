@@ -60,19 +60,25 @@ export default function JobListScreen() {
     }
   }, [jobs]);
 
-  const handleDelete = (job: PlannedJob) => {
+  const handleDelete = async (job: PlannedJob) => {
     const company = companies[job.companyId];
     Alert.alert(
       "İşi Sil",
-      `"${company?.name}" - ${job.cargoType}" iş kaydını silmek istediğinizden emin misiniz?`,
+      `"${company?.name}" - "${job.cargoType}" iş kaydını silmek istediğinizden emin misiniz?`,
       [
         { text: "İptal", style: "cancel" },
         {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
-            await deleteJob(job.id);
-            await loadData();
+            try {
+              await deleteJob(job.id);
+              await loadData();
+              setShowDetailModal(false);
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "İş silinirken hata oluştu");
+            }
           },
         },
       ]
@@ -125,8 +131,7 @@ export default function JobListScreen() {
   const renderJobItem = ({ item: job }: { item: PlannedJob }) => {
     const company = companies[job.companyId];
     return (
-      <Pressable
-        onPress={() => handleJobPress(job)}
+      <View
         style={[
           styles.jobCard,
           {
@@ -134,66 +139,71 @@ export default function JobListScreen() {
           },
         ]}
       >
-        <View style={styles.jobCardHeader}>
-          <View style={{ flex: 1 }}>
-            <ThemedText type="h4" numberOfLines={1}>
-              {company?.name || "Bilinmeyen Firma"}
-            </ThemedText>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              {job.cargoType}
-            </ThemedText>
+        <Pressable
+          onPress={() => handleJobPress(job)}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.jobCardHeader}>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="h4" numberOfLines={1}>
+                {company?.name || "Bilinmeyen Firma"}
+              </ThemedText>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                {job.cargoType}
+              </ThemedText>
+            </View>
+            <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
+              <Pressable
+                onPress={() => handleEditJob(job)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Feather name="edit" size={18} color={theme.link} />
+              </Pressable>
+              <Pressable
+                onPress={() => handleDelete(job)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Feather name="trash-2" size={18} color={Colors.light.error} />
+              </Pressable>
+            </View>
           </View>
-          <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
-            <Pressable
-              onPress={() => handleEditJob(job)}
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            >
-              <Feather name="edit" size={18} color={theme.link} />
-            </Pressable>
-            <Pressable
-              onPress={() => handleDelete(job)}
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            >
-              <Feather name="trash-2" size={18} color={Colors.light.error} />
-            </Pressable>
-          </View>
-        </View>
 
-        <View style={styles.jobCardDetails}>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Yükleme:
-            </ThemedText>
-            <ThemedText type="body" style={{ fontWeight: "600" }}>
-              {job.loadingLocation}
-            </ThemedText>
+          <View style={styles.jobCardDetails}>
+            <View style={styles.detailRow}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Yükleme:
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                {job.loadingLocation}
+              </ThemedText>
+            </View>
+            <View style={styles.detailRow}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Teslimat:
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                {job.deliveryLocation}
+              </ThemedText>
+            </View>
+            <View style={styles.detailRow}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Tarih:
+              </ThemedText>
+              <ThemedText type="body">
+                {formatDate(job.loadingDate)} - {formatDate(job.deliveryDate)}
+              </ThemedText>
+            </View>
+            <View style={styles.detailRow}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Tonaj:
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                {job.tonnage || "-"}
+              </ThemedText>
+            </View>
           </View>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Teslimat:
-            </ThemedText>
-            <ThemedText type="body" style={{ fontWeight: "600" }}>
-              {job.deliveryLocation}
-            </ThemedText>
-          </View>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Tarih:
-            </ThemedText>
-            <ThemedText type="body">
-              {formatDate(job.loadingDate)} - {formatDate(job.deliveryDate)}
-            </ThemedText>
-          </View>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Tonaj:
-            </ThemedText>
-            <ThemedText type="body" style={{ fontWeight: "600" }}>
-              {job.tonnage || "-"}
-            </ThemedText>
-          </View>
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     );
   };
 
