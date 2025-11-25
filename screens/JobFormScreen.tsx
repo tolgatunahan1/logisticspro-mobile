@@ -56,6 +56,7 @@ export default function JobFormScreen() {
   const deliveryLocationRef = useRef<any>(null);
   const transportationCostRef = useRef<any>(null);
   const commissionCostRef = useRef<any>(null);
+  const companyIdRef = useRef<any>(null);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -78,8 +79,10 @@ export default function JobFormScreen() {
       let finalDeliveryLocation = deliveryLocation;
       let finalTransportationCost = transportationCost;
       let finalCommissionCost = commissionCost;
+      let finalCompanyId = companyId;
 
       if (Platform.OS === "web") {
+        finalCompanyId = companyIdRef.current?.value || "";
         finalCargoType = cargoTypeRef.current?.value || "";
         finalTonnage = tonnageRef.current?.value || "";
         finalDimensions = dimensionsRef.current?.value || "";
@@ -90,12 +93,12 @@ export default function JobFormScreen() {
       }
 
       console.log("=== SAVE BAŞLADI ===");
-      console.log("Firma:", companyId);
+      console.log("Firma:", finalCompanyId);
       console.log("Yükün Cinsi:", finalCargoType);
       console.log("Tonaj:", finalTonnage);
 
       const data = {
-        companyId,
+        companyId: finalCompanyId,
         cargoType: finalCargoType.toString().trim(),
         tonnage: finalTonnage.toString().trim(),
         dimensions: finalDimensions.toString().trim(),
@@ -235,23 +238,38 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             İş Veren *
           </ThemedText>
-          <Pressable
-            onPress={() => setShowCompanyPicker(true)}
-            style={({ pressed }) => [
-              inputStyle,
-              {
-                backgroundColor: colors.backgroundDefault,
-                opacity: pressed ? 0.7 : 1,
-              },
-            ]}
-          >
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <ThemedText type="body">
-                {selectedCompany?.name || "Firma Seçin"}
-              </ThemedText>
-              <Feather name="chevron-down" size={20} color={colors.textSecondary} />
-            </View>
-          </Pressable>
+          {Platform.OS === "web" ? (
+            <select
+              ref={companyIdRef}
+              defaultValue={companyId}
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            >
+              <option value="">Firma Seçin</option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <Pressable
+              onPress={() => setShowCompanyPicker(true)}
+              style={({ pressed }) => [
+                inputStyle,
+                {
+                  backgroundColor: colors.backgroundDefault,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <ThemedText type="body">
+                  {selectedCompany?.name || "Firma Seçin"}
+                </ThemedText>
+                <Feather name="chevron-down" size={20} color={colors.textSecondary} />
+              </View>
+            </Pressable>
+          )}
         </View>
 
         {/* Cargo Type */}
