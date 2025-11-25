@@ -139,7 +139,7 @@ export default function JobFormScreen() {
   }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, isEdit, job, navigation]);
 
   const handleDelete = useCallback(() => {
-    if (!job) return;
+    if (!job?.id) return;
 
     Alert.alert(
       "İşi Sil",
@@ -151,8 +151,14 @@ export default function JobFormScreen() {
           style: "destructive",
           onPress: async () => {
             setIsLoading(true);
-            await deleteJob(job.id);
-            navigation.goBack();
+            try {
+              await deleteJob(job.id);
+              navigation.goBack();
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "İş silinirken bir hata oluştu");
+              setIsLoading(false);
+            }
           },
         },
       ]
