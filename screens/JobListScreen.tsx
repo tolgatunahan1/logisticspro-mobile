@@ -9,7 +9,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs } from "@/utils/storage";
+import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs, getCarriers, Carrier } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -25,12 +25,14 @@ export default function JobListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [currentCarrier, setCurrentCarrier] = useState<Carrier | null>(null);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
   const loadData = useCallback(async () => {
     const allJobs = await getJobs();
     const allCompanies = await getCompanies();
+    const allCarriers = await getCarriers();
     
     const companiesMap = allCompanies.reduce((acc, company) => {
       acc[company.id] = company;
@@ -40,6 +42,7 @@ export default function JobListScreen() {
     setJobs(allJobs);
     setCompanies(companiesMap);
     setFilteredJobs(allJobs);
+    setCurrentCarrier(allCarriers[0] || null);
   }, []);
 
   useFocusEffect(
@@ -97,7 +100,25 @@ export default function JobListScreen() {
 
   const handleShareJob = async (job: PlannedJob) => {
     const company = companies[job.companyId];
-    const message = `${company?.name || "İş"}\n\nYük: ${job.cargoType}\nTonaj: ${job.tonnage || "-"} T\nYükleme: ${job.loadingLocation}\nTeslimat: ${job.deliveryLocation}\nNakliye: ${job.transportationCost || "-"}\nKomisyon: ${job.commissionCost || "-"}`;
+    
+    let message = "*Nakliyeci Bilgileri*\n\n";
+    
+    if (currentCarrier) {
+      message += `*Ad Soyad:* ${currentCarrier.name}\n`;
+      message += `*Telefon:* ${currentCarrier.phone}\n`;
+      message += `*Araç Plakası:* ${currentCarrier.plate}\n`;
+      message += `*Dorse Tipi:* ${currentCarrier.vehicleType}\n`;
+    }
+    
+    message += `\n*Planlanan İş Detayları:*\n\n`;
+    message += `*Firma:* ${company?.name || "-"}\n`;
+    message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
+    message += `*Teslimat Yeri:* ${job.deliveryLocation || "-"}\n`;
+    message += `*Yük Cinsi:* ${job.cargoType || "-"}\n`;
+    message += `*Yük Tonajı:* ${job.tonnage || "-"}\n`;
+    message += `*Yük Ebatı:* ${job.dimensions || "-"}\n`;
+    message += `*Nakliye Bedeli:* ${job.transportationCost || "-"}\n`;
+    message += `*Komisyon Bedeli:* ${job.commissionCost || "-"}`;
     
     try {
       await Share.share({
