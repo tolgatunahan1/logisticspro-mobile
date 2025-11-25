@@ -332,20 +332,29 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Yükleme Tarihi
           </ThemedText>
-          <Pressable
-            onPress={() => setShowLoadingDatePicker(true)}
-            style={[
-              inputStyle,
-              {
-                backgroundColor: colors.backgroundDefault,
-              },
-            ]}
-          >
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <ThemedText type="body">{formatDate(loadingDate)}</ThemedText>
-              <Feather name="calendar" size={20} color={colors.textSecondary} />
-            </View>
-          </Pressable>
+          {Platform.OS === "web" ? (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              value={formatDate(loadingDate)}
+              onFocus={() => setShowLoadingDatePicker(true)}
+              placeholder="Tarih seçin"
+            />
+          ) : (
+            <Pressable
+              onPress={() => setShowLoadingDatePicker(true)}
+              style={[
+                inputStyle,
+                {
+                  backgroundColor: colors.backgroundDefault,
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <ThemedText type="body">{formatDate(loadingDate)}</ThemedText>
+                <Feather name="calendar" size={20} color={colors.textSecondary} />
+              </View>
+            </Pressable>
+          )}
         </View>
 
         {/* Delivery Date */}
@@ -353,20 +362,29 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Teslim Tarihi
           </ThemedText>
-          <Pressable
-            onPress={() => setShowDeliveryDatePicker(true)}
-            style={[
-              inputStyle,
-              {
-                backgroundColor: colors.backgroundDefault,
-              },
-            ]}
-          >
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <ThemedText type="body">{formatDate(deliveryDate)}</ThemedText>
-              <Feather name="calendar" size={20} color={colors.textSecondary} />
-            </View>
-          </Pressable>
+          {Platform.OS === "web" ? (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              value={formatDate(deliveryDate)}
+              onFocus={() => setShowDeliveryDatePicker(true)}
+              placeholder="Tarih seçin"
+            />
+          ) : (
+            <Pressable
+              onPress={() => setShowDeliveryDatePicker(true)}
+              style={[
+                inputStyle,
+                {
+                  backgroundColor: colors.backgroundDefault,
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <ThemedText type="body">{formatDate(deliveryDate)}</ThemedText>
+                <Feather name="calendar" size={20} color={colors.textSecondary} />
+              </View>
+            </Pressable>
+          )}
         </View>
 
         {/* Transportation Cost */}
@@ -449,8 +467,8 @@ export default function JobFormScreen() {
         </View>
       </Modal>
 
-      {/* Loading Date Picker */}
-      {showLoadingDatePicker && (
+      {/* Loading Date Picker - Native Only */}
+      {showLoadingDatePicker && Platform.OS !== "web" && (
         <DateTimePicker
           value={new Date(loadingDate)}
           mode="date"
@@ -460,8 +478,8 @@ export default function JobFormScreen() {
         />
       )}
 
-      {/* Delivery Date Picker */}
-      {showDeliveryDatePicker && (
+      {/* Delivery Date Picker - Native Only */}
+      {showDeliveryDatePicker && Platform.OS !== "web" && (
         <DateTimePicker
           value={new Date(deliveryDate)}
           mode="date"
