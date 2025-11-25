@@ -95,7 +95,8 @@ export default function JobListScreen() {
   };
 
   const handleJobPress = (job: PlannedJob) => {
-    setSelectedJob(job);
+    const updatedJob = jobs.find(j => j.id === job.id) || job;
+    setSelectedJob(updatedJob);
     setShowDetailModal(true);
   };
 
