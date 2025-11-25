@@ -41,7 +41,6 @@ export default function JobFormScreen() {
   const [showLoadingDatePicker, setShowLoadingDatePicker] = useState(false);
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -53,34 +52,7 @@ export default function JobFormScreen() {
     loadCompanies();
   }, []);
 
-  const validate = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!companyId) {
-      newErrors.companyId = "İş veren seçin";
-    }
-    if (!cargoType.trim()) {
-      newErrors.cargoType = "Yükün cinsi gerekli";
-    }
-    if (!tonnage.trim()) {
-      newErrors.tonnage = "Tonaj gerekli";
-    }
-    if (!loadingLocation.trim()) {
-      newErrors.loadingLocation = "Yükleme yeri gerekli";
-    }
-    if (!deliveryLocation.trim()) {
-      newErrors.deliveryLocation = "Teslimat yeri gerekli";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSave = async () => {
-    if (!validate()) {
-      console.log("Validation hatası:", errors);
-      return;
-    }
 
     setIsLoading(true);
     try {
@@ -242,11 +214,6 @@ export default function JobFormScreen() {
               <Feather name="chevron-down" size={20} color={colors.textSecondary} />
             </View>
           </Pressable>
-          {errors.companyId && (
-            <ThemedText type="small" style={{ color: Colors.light.error, marginTop: Spacing.xs }}>
-              {errors.companyId}
-            </ThemedText>
-          )}
         </View>
 
         {/* Cargo Type */}
@@ -260,11 +227,6 @@ export default function JobFormScreen() {
             value={cargoType}
             onChangeText={setCargoType}
           />
-          {errors.cargoType && (
-            <ThemedText type="small" style={{ color: Colors.light.error, marginTop: Spacing.xs }}>
-              {errors.cargoType}
-            </ThemedText>
-          )}
         </View>
 
         {/* Tonnage */}
@@ -279,11 +241,6 @@ export default function JobFormScreen() {
             value={tonnage}
             onChangeText={setTonnage}
           />
-          {errors.tonnage && (
-            <ThemedText type="small" style={{ color: Colors.light.error, marginTop: Spacing.xs }}>
-              {errors.tonnage}
-            </ThemedText>
-          )}
         </View>
 
         {/* Dimensions */}
@@ -310,11 +267,6 @@ export default function JobFormScreen() {
             value={loadingLocation}
             onChangeText={setLoadingLocation}
           />
-          {errors.loadingLocation && (
-            <ThemedText type="small" style={{ color: Colors.light.error, marginTop: Spacing.xs }}>
-              {errors.loadingLocation}
-            </ThemedText>
-          )}
         </View>
 
         {/* Delivery Location */}
@@ -328,11 +280,6 @@ export default function JobFormScreen() {
             value={deliveryLocation}
             onChangeText={setDeliveryLocation}
           />
-          {errors.deliveryLocation && (
-            <ThemedText type="small" style={{ color: Colors.light.error, marginTop: Spacing.xs }}>
-              {errors.deliveryLocation}
-            </ThemedText>
-          )}
         </View>
 
         {/* Loading Date */}
