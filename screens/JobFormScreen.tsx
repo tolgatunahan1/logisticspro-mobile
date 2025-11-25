@@ -22,7 +22,7 @@ export default function JobFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
 
-  const { job, mode } = route.params;
+  const { job, mode } = route.params || { mode: "add" };
   const isEdit = mode === "edit";
 
   const [companyId, setCompanyId] = useState(job?.companyId || "");
@@ -35,6 +35,12 @@ export default function JobFormScreen() {
   const [deliveryDate, setDeliveryDate] = useState(job?.deliveryDate || Date.now());
   const [transportationCost, setTransportationCost] = useState(job?.transportationCost || "");
   const [commissionCost, setCommissionCost] = useState(job?.commissionCost || "");
+
+  // Log state values for debugging
+  useEffect(() => {
+    console.log("JobFormScreen - Current State Values:");
+    console.log({ companyId, cargoType, tonnage, loadingLocation, deliveryLocation });
+  }, [companyId, cargoType, tonnage, loadingLocation, deliveryLocation]);
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [showCompanyPicker, setShowCompanyPicker] = useState(false);
@@ -53,6 +59,19 @@ export default function JobFormScreen() {
   }, []);
 
   const handleSave = async () => {
+    // Debug: Tüm state değerlerini kontrol et
+    console.log("=== SAVE BAŞLADI ===");
+    console.log("Route params:", route.params);
+    console.log("Job from params:", job);
+    console.log("Mode:", mode);
+    console.log("companyId state:", companyId);
+    console.log("cargoType state:", cargoType);
+    console.log("tonnage state:", tonnage);
+    console.log("dimensions state:", dimensions);
+    console.log("loadingLocation state:", loadingLocation);
+    console.log("deliveryLocation state:", deliveryLocation);
+    console.log("transportationCost state:", transportationCost);
+    console.log("commissionCost state:", commissionCost);
 
     setIsLoading(true);
     try {
@@ -221,12 +240,22 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Yükün Cinsi *
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Örn: Beton, Gıda, İnşaat Malzemesi"
-            value={cargoType}
-            onChangeText={setCargoType}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="text"
+              value={cargoType}
+              onChange={(e) => setCargoType(e.target.value)}
+              placeholder="Örn: Beton, Gıda, İnşaat Malzemesi"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Örn: Beton, Gıda, İnşaat Malzemesi"
+              value={cargoType}
+              onChangeText={setCargoType}
+            />
+          )}
         </View>
 
         {/* Tonnage */}
@@ -234,13 +263,23 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Yükün Tonajı *
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Örn: 20"
-            keyboardType="decimal-pad"
-            value={tonnage}
-            onChangeText={setTonnage}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="number"
+              value={tonnage}
+              onChange={(e) => setTonnage(e.target.value)}
+              placeholder="Örn: 20"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Örn: 20"
+              keyboardType="decimal-pad"
+              value={tonnage}
+              onChangeText={setTonnage}
+            />
+          )}
         </View>
 
         {/* Dimensions */}
@@ -248,12 +287,22 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Yükün Ebatı
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Örn: 3m x 2m x 1.5m"
-            value={dimensions}
-            onChangeText={setDimensions}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="text"
+              value={dimensions}
+              onChange={(e) => setDimensions(e.target.value)}
+              placeholder="Örn: 3m x 2m x 1.5m"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Örn: 3m x 2m x 1.5m"
+              value={dimensions}
+              onChangeText={setDimensions}
+            />
+          )}
         </View>
 
         {/* Loading Location */}
@@ -261,12 +310,22 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Nereden Yüklenicek *
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Şehir veya Adres"
-            value={loadingLocation}
-            onChangeText={setLoadingLocation}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="text"
+              value={loadingLocation}
+              onChange={(e) => setLoadingLocation(e.target.value)}
+              placeholder="Şehir veya Adres"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Şehir veya Adres"
+              value={loadingLocation}
+              onChangeText={setLoadingLocation}
+            />
+          )}
         </View>
 
         {/* Delivery Location */}
@@ -274,12 +333,22 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Nereye Teslim Edilicek *
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Şehir veya Adres"
-            value={deliveryLocation}
-            onChangeText={setDeliveryLocation}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="text"
+              value={deliveryLocation}
+              onChange={(e) => setDeliveryLocation(e.target.value)}
+              placeholder="Şehir veya Adres"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Şehir veya Adres"
+              value={deliveryLocation}
+              onChangeText={setDeliveryLocation}
+            />
+          )}
         </View>
 
         {/* Loading Date */}
@@ -369,13 +438,23 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Nakliye Bedeli
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Örn: 5000"
-            keyboardType="decimal-pad"
-            value={transportationCost}
-            onChangeText={setTransportationCost}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="number"
+              value={transportationCost}
+              onChange={(e) => setTransportationCost(e.target.value)}
+              placeholder="Örn: 5000"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Örn: 5000"
+              keyboardType="decimal-pad"
+              value={transportationCost}
+              onChangeText={setTransportationCost}
+            />
+          )}
         </View>
 
         {/* Commission Cost */}
@@ -383,13 +462,23 @@ export default function JobFormScreen() {
           <ThemedText type="h4" style={styles.label}>
             Komisyon Bedeli
           </ThemedText>
-          <TextInput
-            style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
-            placeholder="Örn: 250"
-            keyboardType="decimal-pad"
-            value={commissionCost}
-            onChangeText={setCommissionCost}
-          />
+          {Platform.OS === "web" ? (
+            <input
+              type="number"
+              value={commissionCost}
+              onChange={(e) => setCommissionCost(e.target.value)}
+              placeholder="Örn: 250"
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
+              placeholder="Örn: 250"
+              keyboardType="decimal-pad"
+              value={commissionCost}
+              onChangeText={setCommissionCost}
+            />
+          )}
         </View>
       </View>
 
