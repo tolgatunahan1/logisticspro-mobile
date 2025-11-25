@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -14,6 +14,20 @@ import { Carrier, getCarriers, searchCarriers, deleteCarrier, getVehicleTypeLabe
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const formatPhoneForCall = (phone: string): string => {
+  return phone.replace(/\s/g, "").replace(/[^\d+]/g, "");
+};
+
+const formatPhoneForWhatsApp = (phone: string): string => {
+  let cleaned = phone.replace(/\s/g, "").replace(/[^\d]/g, "");
+  if (cleaned.startsWith("0")) {
+    cleaned = "90" + cleaned.substring(1);
+  } else if (!cleaned.startsWith("90") && cleaned.length === 10) {
+    cleaned = "90" + cleaned;
+  }
+  return cleaned;
+};
 
 export default function CarrierListScreen() {
   const { theme, isDark } = useTheme();
@@ -81,8 +95,38 @@ export default function CarrierListScreen() {
     navigation.navigate("Settings");
   };
 
-  const handleCallPress = (phone: string) => {
-    Alert.alert("Arama", `${phone} numarasını arayın`);
+  const handleCallPress = async (phone: string) => {
+    const phoneNumber = formatPhoneForCall(phone);
+    const url = `tel:${phoneNumber}`;
+    
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Hata", "Telefon araması yapılamıyor");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Telefon araması başlatılamadı");
+    }
+  };
+
+  const handleWhatsAppPress = async (phone: string, name: string) => {
+    const phoneNumber = formatPhoneForWhatsApp(phone);
+    const message = encodeURIComponent(`Merhaba ${name}`);
+    const url = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+    
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        const webUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+        await Linking.openURL(webUrl);
+      }
+    } catch (error) {
+      Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
+    }
   };
 
   const filteredCarriers = searchCarriers(carriers, searchQuery);
@@ -103,16 +147,30 @@ export default function CarrierListScreen() {
           <ThemedText type="h4" style={styles.cardName}>
             {item.name}
           </ThemedText>
-          <View style={styles.cardRow}>
-            <Pressable
-              onPress={() => handleCallPress(item.phone)}
-              style={styles.phoneButton}
-            >
-              <Feather name="phone" size={14} color={theme.link} />
-              <ThemedText type="small" style={{ color: theme.link, marginLeft: Spacing.xs }}>
-                {item.phone}
-              </ThemedText>
-            </Pressable>
+          <View style={styles.phoneRow}>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              {item.phone}
+            </ThemedText>
+            <View style={styles.contactButtons}>
+              <Pressable
+                onPress={() => handleCallPress(item.phone)}
+                style={({ pressed }) => [
+                  styles.contactButton,
+                  { backgroundColor: colors.success, opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Feather name="phone" size={14} color="#FFFFFF" />
+              </Pressable>
+              <Pressable
+                onPress={() => handleWhatsAppPress(item.phone, item.name)}
+                style={({ pressed }) => [
+                  styles.contactButton,
+                  { backgroundColor: "#25D366", opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Feather name="message-circle" size={14} color="#FFFFFF" />
+              </Pressable>
+            </View>
           </View>
           <View style={styles.cardDetails}>
             <View style={styles.detailItem}>
@@ -274,24 +332,32 @@ const styles = StyleSheet.create({
   },
   cardMain: {
     flex: 1,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   cardName: {
     marginBottom: Spacing.xs,
   },
-  cardRow: {
+  phoneRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingRight: Spacing.sm,
   },
-  phoneButton: {
+  contactButtons: {
     flexDirection: "row",
+    gap: Spacing.sm,
+  },
+  contactButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
+    justifyContent: "center",
   },
   cardDetails: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.lg,
-    marginTop: Spacing.xs,
   },
   detailItem: {
     flexDirection: "row",
