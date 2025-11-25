@@ -284,7 +284,7 @@ export default function JobListScreen() {
                       Tonaj
                     </ThemedText>
                     <ThemedText type="h4">
-                      {selectedJob.tonnage || "-"} T
+                      {selectedJob.tonnage || "-"}
                     </ThemedText>
                   </View>
 
