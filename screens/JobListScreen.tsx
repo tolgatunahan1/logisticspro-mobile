@@ -106,7 +106,7 @@ export default function JobListScreen() {
     message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
     message += `*Teslimat Yeri:* ${job.deliveryLocation || "-"}\n`;
     message += `*Yük Cinsi:* ${job.cargoType || "-"}\n`;
-    message += `*Yük Tonajı:* ${job.tonnage || "-"}\n`;
+    message += `*Yük Tonajı:* ${job.tonnage ? `${job.tonnage}` : "-"}\n`;
     message += `*Yük Ebatı:* ${job.dimensions || "-"}\n`;
     message += `*Nakliye Bedeli:* ${job.transportationCost || "-"}\n`;
     message += `*Komisyon Bedeli:* ${job.commissionCost || "-"}`;
