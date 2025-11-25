@@ -90,14 +90,11 @@ export default function JobListScreen() {
   const renderJobItem = ({ item: job }: { item: PlannedJob }) => {
     const company = companies[job.companyId];
     return (
-      <Pressable
-        onPress={() => handleJobPress(job)}
-        style={({ pressed }) => [
+      <View
+        style={[
           styles.jobCard,
           {
             backgroundColor: colors.backgroundDefault,
-            opacity: pressed ? 0.9 : 1,
-            transform: [{ scale: pressed ? 0.98 : 1 }],
           },
         ]}
       >
@@ -110,12 +107,30 @@ export default function JobListScreen() {
               {job.cargoType}
             </ThemedText>
           </View>
-          <Pressable
-            onPress={() => handleDelete(job)}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-          >
-            <Feather name="trash-2" size={18} color={Colors.light.error} />
-          </Pressable>
+          <View style={{ flexDirection: "row", gap: Spacing.sm, alignItems: "center" }}>
+            <Pressable
+              onPress={() => handleJobPress(job)}
+              style={({ pressed }) => [
+                {
+                  paddingHorizontal: Spacing.md,
+                  paddingVertical: Spacing.sm,
+                  backgroundColor: theme.link,
+                  borderRadius: BorderRadius.md,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                Düzenle
+              </ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={() => handleDelete(job)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Feather name="trash-2" size={18} color={Colors.light.error} />
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.jobCardDetails}>
@@ -148,11 +163,11 @@ export default function JobListScreen() {
               Tonaj:
             </ThemedText>
             <ThemedText type="body" style={{ fontWeight: "600" }}>
-              {job.tonnage} T
+              {job.tonnage || "-"} T
             </ThemedText>
           </View>
         </View>
-      </Pressable>
+      </View>
     );
   };
 
