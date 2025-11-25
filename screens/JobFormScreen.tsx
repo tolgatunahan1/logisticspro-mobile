@@ -251,6 +251,7 @@ export default function JobFormScreen() {
           {Platform.OS === "web" ? (
             <select
               ref={companyIdRef}
+              key={`company-${companyId}`}
               defaultValue={companyId}
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             >
