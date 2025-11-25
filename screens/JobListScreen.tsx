@@ -101,16 +101,7 @@ export default function JobListScreen() {
   const handleShareJob = async (job: PlannedJob) => {
     const company = companies[job.companyId];
     
-    let message = "*Nakliyeci Bilgileri*\n\n";
-    
-    if (currentCarrier) {
-      message += `*Ad Soyad:* ${currentCarrier.name}\n`;
-      message += `*Telefon:* ${currentCarrier.phone}\n`;
-      message += `*Araç Plakası:* ${currentCarrier.plate}\n`;
-      message += `*Dorse Tipi:* ${currentCarrier.vehicleType}\n`;
-    }
-    
-    message += `\n*Planlanan İş Detayları:*\n\n`;
+    let message = "*Yeni Sefer Programı*\n\n";
     message += `*Firma:* ${company?.name || "-"}\n`;
     message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
     message += `*Teslimat Yeri:* ${job.deliveryLocation || "-"}\n`;
