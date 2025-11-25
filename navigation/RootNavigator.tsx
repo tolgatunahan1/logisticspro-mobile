@@ -3,19 +3,25 @@ import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import LoginScreen from "@/screens/LoginScreen";
+import HomeScreen from "@/screens/HomeScreen";
 import CarrierListScreen from "@/screens/CarrierListScreen";
 import CarrierFormScreen from "@/screens/CarrierFormScreen";
+import CompanyListScreen from "@/screens/CompanyListScreen";
+import CompanyFormScreen from "@/screens/CompanyFormScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
-import { Carrier } from "@/utils/storage";
+import { Carrier, Company } from "@/utils/storage";
 
 export type RootStackParamList = {
   Login: undefined;
+  Home: undefined;
   CarrierList: undefined;
   CarrierForm: { carrier?: Carrier; mode: "add" | "edit" };
+  CompanyList: undefined;
+  CompanyForm: { company?: Company; mode: "add" | "edit" };
   Settings: undefined;
 };
 
@@ -42,10 +48,17 @@ export default function RootNavigator() {
       {user ? (
         <>
           <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              headerTitle: () => <HeaderTitle title="Nakliyeci Kayıt" />,
+            }}
+          />
+          <Stack.Screen
             name="CarrierList"
             component={CarrierListScreen}
             options={{
-              headerTitle: () => <HeaderTitle title="Nakliyeci Kayıt" />,
+              headerTitle: "Nakliyeciler",
             }}
           />
           <Stack.Screen
@@ -53,6 +66,21 @@ export default function RootNavigator() {
             component={CarrierFormScreen}
             options={({ route }) => ({
               headerTitle: route.params.mode === "add" ? "Nakliyeci Ekle" : "Düzenle",
+              presentation: "modal",
+            })}
+          />
+          <Stack.Screen
+            name="CompanyList"
+            component={CompanyListScreen}
+            options={{
+              headerTitle: "Firmalar",
+            }}
+          />
+          <Stack.Screen
+            name="CompanyForm"
+            component={CompanyFormScreen}
+            options={({ route }) => ({
+              headerTitle: route.params.mode === "add" ? "Firma Ekle" : "Düzenle",
               presentation: "modal",
             })}
           />
