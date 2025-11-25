@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, TextInput } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Sharing from "expo-sharing";
+import * as WebBrowser from "expo-web-browser";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -23,6 +25,8 @@ export default function JobListScreen() {
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
   const [filteredJobs, setFilteredJobs] = useState<PlannedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -84,7 +88,31 @@ export default function JobListScreen() {
   };
 
   const handleJobPress = (job: PlannedJob) => {
+    setSelectedJob(job);
+    setShowDetailModal(true);
+  };
+
+  const handleEditJob = (job: PlannedJob) => {
+    setShowDetailModal(false);
     navigation.navigate("JobForm", { job, mode: "edit" });
+  };
+
+  const handleShareJob = async (job: PlannedJob) => {
+    const company = companies[job.companyId];
+    const message = `*${company?.name || "İş"}*\n\n📦 *Yük:* ${job.cargoType}\n⚖️ *Tonaj:* ${job.tonnage || "-"} T\n📍 *Yükleme:* ${job.loadingLocation}\n📍 *Teslimat:* ${job.deliveryLocation}\n💰 *Nakliye:* ${job.transportationCost || "-"}\n💰 *Komisyon:* ${job.commissionCost || "-"}`;
+    
+    try {
+      if (Platform.OS === "web") {
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        await WebBrowser.openBrowserAsync(whatsappUrl);
+      } else {
+        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
+        await WebBrowser.openBrowserAsync(whatsappUrl);
+      }
+    } catch (error) {
+      console.error("Share hatası:", error);
+      Alert.alert("Hata", "WhatsApp açılamadı");
+    }
   };
 
   const renderJobItem = ({ item: job }: { item: PlannedJob }) => {
@@ -107,22 +135,12 @@ export default function JobListScreen() {
               {job.cargoType}
             </ThemedText>
           </View>
-          <View style={{ flexDirection: "row", gap: Spacing.sm, alignItems: "center" }}>
+          <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
             <Pressable
-              onPress={() => handleJobPress(job)}
-              style={({ pressed }) => [
-                {
-                  paddingHorizontal: Spacing.md,
-                  paddingVertical: Spacing.sm,
-                  backgroundColor: theme.link,
-                  borderRadius: BorderRadius.md,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
+              onPress={() => handleEditJob(job)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
             >
-              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                Düzenle
-              </ThemedText>
+              <Feather name="edit" size={18} color={theme.link} />
             </Pressable>
             <Pressable
               onPress={() => handleDelete(job)}
@@ -214,6 +232,142 @@ export default function JobListScreen() {
         scrollEnabled={true}
       />
 
+      {/* Detail Modal */}
+      <Modal
+        visible={showDetailModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDetailModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">İş Detayları</ThemedText>
+              <Pressable onPress={() => setShowDetailModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            {/* Modal Body */}
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              {selectedJob && (
+                <View style={{ gap: Spacing.lg }}>
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Firma Adı
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Yükün Cinsi
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.cargoType || "-"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Tonaj
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.tonnage || "-"} T
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Ebat
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.dimensions || "-"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Yükleme Yeri
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.loadingLocation || "-"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Teslimat Yeri
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.deliveryLocation || "-"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Yükleme Tarihi
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {formatDate(selectedJob.loadingDate)}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Teslimat Tarihi
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {formatDate(selectedJob.deliveryDate)}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Nakliye Bedeli
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.transportationCost || "-"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Komisyon Bedeli
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {selectedJob.commissionCost || "-"}
+                    </ThemedText>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Modal Footer - Share Button */}
+            {selectedJob && (
+              <Pressable
+                onPress={() => handleShareJob(selectedJob)}
+                style={({ pressed }) => [
+                  styles.shareButton,
+                  {
+                    backgroundColor: theme.link,
+                    opacity: pressed ? 0.9 : 1,
+                  },
+                ]}
+              >
+                <Feather name="share-2" size={20} color="#FFFFFF" />
+                <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                  Bu İşi Paylaş
+                </ThemedText>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <Pressable
         onPress={handleAddPress}
         style={({ pressed }) => [
@@ -295,5 +449,40 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    maxHeight: "80%",
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  modalBody: {
+    maxHeight: "60%",
+    marginBottom: Spacing.lg,
+  },
+  detailSection: {
+    gap: Spacing.sm,
+  },
+  shareButton: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
