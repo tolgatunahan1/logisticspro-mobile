@@ -139,9 +139,14 @@ export default function JobFormScreen() {
   }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, isEdit, job, navigation]);
 
   const handleDelete = useCallback(() => {
-    if (!job?.id) return;
+    console.log("handleDelete çağrıldı, job:", job);
+    if (!job?.id) {
+      console.log("Job ID yok, return");
+      return;
+    }
 
     const jobId = job.id;
+    console.log("Silme işlemi başlıyor, jobId:", jobId);
 
     Alert.alert(
       "İşi Sil",
@@ -152,9 +157,11 @@ export default function JobFormScreen() {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
+            console.log("Sil butonuna basıldı, siliniyor:", jobId);
             setIsLoading(true);
             try {
-              await deleteJob(jobId);
+              const result = await deleteJob(jobId);
+              console.log("Silme başarılı:", result);
               navigation.goBack();
             } catch (error) {
               console.error("Silme hatası:", error);
@@ -165,7 +172,7 @@ export default function JobFormScreen() {
         },
       ]
     );
-  }, [job?.id, navigation]);
+  }, [job, navigation]);
 
   const handleCancel = () => {
     navigation.goBack();
