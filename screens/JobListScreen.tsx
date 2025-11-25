@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -181,10 +181,9 @@ export default function JobListScreen() {
           ]}
         >
           <Feather name="search" size={18} color={colors.textSecondary} />
-          <input
+          <TextInput
             style={[styles.searchInput, { color: theme.text }]}
             placeholder="İş ara..."
-            placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={handleSearch}
           />

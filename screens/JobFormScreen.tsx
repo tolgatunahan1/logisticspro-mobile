@@ -249,7 +249,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Örn: Beton, Gıda, İnşaat Malzemesi"
-            placeholderTextColor={colors.textSecondary}
             value={cargoType}
             onChangeText={setCargoType}
           />
@@ -268,7 +267,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Örn: 20"
-            placeholderTextColor={colors.textSecondary}
             keyboardType="decimal-pad"
             value={tonnage}
             onChangeText={setTonnage}
@@ -288,7 +286,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Örn: 3m x 2m x 1.5m"
-            placeholderTextColor={colors.textSecondary}
             value={dimensions}
             onChangeText={setDimensions}
           />
@@ -302,7 +299,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Şehir veya Adres"
-            placeholderTextColor={colors.textSecondary}
             value={loadingLocation}
             onChangeText={setLoadingLocation}
           />
@@ -321,7 +317,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Şehir veya Adres"
-            placeholderTextColor={colors.textSecondary}
             value={deliveryLocation}
             onChangeText={setDeliveryLocation}
           />
@@ -382,7 +377,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Örn: 5000"
-            placeholderTextColor={colors.textSecondary}
             keyboardType="decimal-pad"
             value={transportationCost}
             onChangeText={setTransportationCost}
@@ -397,7 +391,6 @@ export default function JobFormScreen() {
           <TextInput
             style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
             placeholder="Örn: 250"
-            placeholderTextColor={colors.textSecondary}
             keyboardType="decimal-pad"
             value={commissionCost}
             onChangeText={setCommissionCost}
