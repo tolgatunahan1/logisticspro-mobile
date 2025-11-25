@@ -118,7 +118,8 @@ export default function JobListScreen() {
   const renderJobItem = ({ item: job }: { item: PlannedJob }) => {
     const company = companies[job.companyId];
     return (
-      <View
+      <Pressable
+        onPress={() => handleJobPress(job)}
         style={[
           styles.jobCard,
           {
@@ -185,7 +186,7 @@ export default function JobListScreen() {
             </ThemedText>
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   };
 
