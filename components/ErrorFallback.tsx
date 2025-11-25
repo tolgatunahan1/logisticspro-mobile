@@ -58,12 +58,14 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       ) : null}
 
       <View style={styles.content}>
-        <ThemedText type="h1" style={styles.title}>
-          Something went wrong
+        <Feather name="truck" size={64} color={theme.text} style={{ opacity: 0.5 }} />
+        
+        <ThemedText type="h2" style={styles.title}>
+          Bir sorun olustu
         </ThemedText>
 
         <ThemedText type="body" style={styles.message}>
-          Please reload the app to continue.
+          Nakliyeci Kayit uygulamasinda beklenmeyen bir hata olustu. Lutfen uygulamayi yeniden baslatin.
         </ThemedText>
 
         <Pressable
@@ -81,7 +83,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             type="body"
             style={[styles.buttonText, { color: theme.buttonText }]}
           >
-            Try Again
+            Yeniden Baslat
           </ThemedText>
         </Pressable>
       </View>
@@ -97,7 +99,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             <ThemedView style={styles.modalContainer}>
               <View style={styles.modalHeader}>
                 <ThemedText type="h2" style={styles.modalTitle}>
-                  Error Details
+                  Hata Detaylari
                 </ThemedText>
                 <Pressable
                   onPress={() => setIsModalVisible(false)}
@@ -161,12 +163,11 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
-    lineHeight: 40,
+    marginTop: Spacing.lg,
   },
   message: {
     textAlign: "center",
     opacity: 0.7,
-    lineHeight: 24,
   },
   topButton: {
     position: "absolute",
@@ -182,17 +183,10 @@ const styles = StyleSheet.create({
   },
   button: {
     paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.xs,
     paddingHorizontal: Spacing["2xl"],
     minWidth: 200,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: Spacing.md,
   },
   buttonText: {
     fontWeight: "600",
@@ -240,7 +234,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
-    lineHeight: 18,
     width: "100%",
   },
 });
