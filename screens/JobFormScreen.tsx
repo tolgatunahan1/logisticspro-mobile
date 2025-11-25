@@ -141,6 +141,8 @@ export default function JobFormScreen() {
   const handleDelete = useCallback(() => {
     if (!job?.id) return;
 
+    const jobId = job.id;
+
     Alert.alert(
       "İşi Sil",
       "Bu iş kaydını silmek istediğinizden emin misiniz?",
@@ -152,7 +154,7 @@ export default function JobFormScreen() {
           onPress: async () => {
             setIsLoading(true);
             try {
-              await deleteJob(job.id);
+              await deleteJob(jobId);
               navigation.goBack();
             } catch (error) {
               console.error("Silme hatası:", error);
@@ -163,7 +165,7 @@ export default function JobFormScreen() {
         },
       ]
     );
-  }, [job, navigation]);
+  }, [job?.id, navigation]);
 
   const handleCancel = () => {
     navigation.goBack();
@@ -214,7 +216,7 @@ export default function JobFormScreen() {
               disabled={isLoading}
               style={({ pressed }) => [styles.headerButton, { opacity: pressed || isLoading ? 0.6 : 1 }]}
             >
-              <Feather name="trash-2" size={20} color={Colors.light.error} />
+              <Feather name="trash-2" size={20} color="#EF4444" />
             </Pressable>
           )}
           <Pressable
