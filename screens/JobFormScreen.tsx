@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect, useRef } from "react";
+import React, { useState, useLayoutEffect, useEffect, useRef, useCallback } from "react";
 import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -70,7 +70,7 @@ export default function JobFormScreen() {
     loadCompanies();
   }, []);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     setIsLoading(true);
     try {
       // Web'de refs'ten values oku, native'de state'ten oku
@@ -136,9 +136,9 @@ export default function JobFormScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, isEdit, job, navigation]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!job) return;
 
     Alert.alert(
@@ -157,7 +157,7 @@ export default function JobFormScreen() {
         },
       ]
     );
-  };
+  }, [job, navigation]);
 
   const handleCancel = () => {
     navigation.goBack();
@@ -227,7 +227,7 @@ export default function JobFormScreen() {
         </View>
       ),
     });
-  }, [navigation, isLoading, isEdit, job]);
+  }, [navigation, isLoading, handleSave, handleDelete]);
 
   const inputStyle = [
     styles.input,
