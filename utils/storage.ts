@@ -20,8 +20,25 @@ export interface Company {
   updatedAt: number;
 }
 
+export interface PlannedJob {
+  id: string;
+  companyId: string;
+  cargoType: string;
+  tonnage: string;
+  dimensions: string;
+  loadingLocation: string;
+  deliveryLocation: string;
+  loadingDate: number;
+  deliveryDate: number;
+  transportationCost: string;
+  commissionCost: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 const CARRIERS_STORAGE_KEY = "@nakliyeci_carriers";
 const COMPANIES_STORAGE_KEY = "@nakliyeci_companies";
+const JOBS_STORAGE_KEY = "@nakliyeci_jobs";
 
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -193,6 +210,90 @@ export const searchCompanies = (companies: Company[], query: string): Company[] 
       c.phone.includes(lowerQuery) ||
       c.contactPerson.toLowerCase().includes(lowerQuery) ||
       c.address.toLowerCase().includes(lowerQuery)
+  );
+};
+
+// Job functions
+export const getJobs = async (): Promise<PlannedJob[]> => {
+  try {
+    const stored = await AsyncStorage.getItem(JOBS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return [];
+  } catch (error) {
+    console.error("Failed to get jobs:", error);
+    return [];
+  }
+};
+
+export const saveJobs = async (jobs: PlannedJob[]): Promise<boolean> => {
+  try {
+    await AsyncStorage.setItem(JOBS_STORAGE_KEY, JSON.stringify(jobs));
+    return true;
+  } catch (error) {
+    console.error("Failed to save jobs:", error);
+    return false;
+  }
+};
+
+export const addJob = async (job: Omit<PlannedJob, "id" | "createdAt" | "updatedAt">): Promise<PlannedJob | null> => {
+  try {
+    const jobs = await getJobs();
+    const newJob: PlannedJob = {
+      ...job,
+      id: generateId(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    jobs.unshift(newJob);
+    await saveJobs(jobs);
+    return newJob;
+  } catch (error) {
+    console.error("Failed to add job:", error);
+    return null;
+  }
+};
+
+export const updateJob = async (id: string, updates: Partial<Omit<PlannedJob, "id" | "createdAt">>): Promise<boolean> => {
+  try {
+    const jobs = await getJobs();
+    const index = jobs.findIndex((j) => j.id === id);
+    if (index === -1) return false;
+    
+    jobs[index] = {
+      ...jobs[index],
+      ...updates,
+      updatedAt: Date.now(),
+    };
+    await saveJobs(jobs);
+    return true;
+  } catch (error) {
+    console.error("Failed to update job:", error);
+    return false;
+  }
+};
+
+export const deleteJob = async (id: string): Promise<boolean> => {
+  try {
+    const jobs = await getJobs();
+    const filtered = jobs.filter((j) => j.id !== id);
+    await saveJobs(filtered);
+    return true;
+  } catch (error) {
+    console.error("Failed to delete job:", error);
+    return false;
+  }
+};
+
+export const searchJobs = (jobs: PlannedJob[], query: string): PlannedJob[] => {
+  if (!query.trim()) return jobs;
+  const lowerQuery = query.toLowerCase().trim();
+  return jobs.filter(
+    (j) =>
+      j.cargoType.toLowerCase().includes(lowerQuery) ||
+      j.loadingLocation.toLowerCase().includes(lowerQuery) ||
+      j.deliveryLocation.toLowerCase().includes(lowerQuery)
   );
 };
 
