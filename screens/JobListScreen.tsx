@@ -1,11 +1,9 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Sharing from "expo-sharing";
-import * as WebBrowser from "expo-web-browser";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -99,19 +97,16 @@ export default function JobListScreen() {
 
   const handleShareJob = async (job: PlannedJob) => {
     const company = companies[job.companyId];
-    const message = `*${company?.name || "İş"}*\n\n📦 *Yük:* ${job.cargoType}\n⚖️ *Tonaj:* ${job.tonnage || "-"} T\n📍 *Yükleme:* ${job.loadingLocation}\n📍 *Teslimat:* ${job.deliveryLocation}\n💰 *Nakliye:* ${job.transportationCost || "-"}\n💰 *Komisyon:* ${job.commissionCost || "-"}`;
+    const message = `${company?.name || "İş"}\n\nYük: ${job.cargoType}\nTonaj: ${job.tonnage || "-"} T\nYükleme: ${job.loadingLocation}\nTeslimat: ${job.deliveryLocation}\nNakliye: ${job.transportationCost || "-"}\nKomisyon: ${job.commissionCost || "-"}`;
     
     try {
-      if (Platform.OS === "web") {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        await WebBrowser.openBrowserAsync(whatsappUrl);
-      } else {
-        const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
-        await WebBrowser.openBrowserAsync(whatsappUrl);
-      }
+      await Share.share({
+        message,
+        title: "İşi Paylaş",
+      });
     } catch (error) {
       console.error("Share hatası:", error);
-      Alert.alert("Hata", "WhatsApp açılamadı");
+      Alert.alert("Hata", "Paylaşma işlemi başarısız oldu");
     }
   };
 
