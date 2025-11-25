@@ -57,6 +57,8 @@ export default function JobFormScreen() {
   const transportationCostRef = useRef<any>(null);
   const commissionCostRef = useRef<any>(null);
   const companyIdRef = useRef<any>(null);
+  const loadingDateRef = useRef<any>(null);
+  const deliveryDateRef = useRef<any>(null);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -80,6 +82,8 @@ export default function JobFormScreen() {
       let finalTransportationCost = transportationCost;
       let finalCommissionCost = commissionCost;
       let finalCompanyId = companyId;
+      let finalLoadingDate = loadingDate;
+      let finalDeliveryDate = deliveryDate;
 
       if (Platform.OS === "web") {
         finalCompanyId = companyIdRef.current?.value || "";
@@ -90,6 +94,12 @@ export default function JobFormScreen() {
         finalDeliveryLocation = deliveryLocationRef.current?.value || "";
         finalTransportationCost = transportationCostRef.current?.value || "";
         finalCommissionCost = commissionCostRef.current?.value || "";
+        if (loadingDateRef.current?.value) {
+          finalLoadingDate = new Date(loadingDateRef.current.value).getTime();
+        }
+        if (deliveryDateRef.current?.value) {
+          finalDeliveryDate = new Date(deliveryDateRef.current.value).getTime();
+        }
       }
 
       console.log("=== SAVE BAŞLADI ===");
@@ -104,8 +114,8 @@ export default function JobFormScreen() {
         dimensions: finalDimensions.toString().trim(),
         loadingLocation: finalLoadingLocation.toString().trim(),
         deliveryLocation: finalDeliveryLocation.toString().trim(),
-        loadingDate,
-        deliveryDate,
+        loadingDate: finalLoadingDate,
+        deliveryDate: finalDeliveryDate,
         transportationCost: finalTransportationCost.toString().trim(),
         commissionCost: finalCommissionCost.toString().trim(),
       };
@@ -395,12 +405,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={loadingDateRef}
               type="date"
-              value={new Date(loadingDate).toISOString().split('T')[0]}
-              onChange={(e) => {
-                const date = new Date(e.target.value);
-                setLoadingDate(date.getTime());
-              }}
+              defaultValue={new Date(loadingDate).toISOString().split('T')[0]}
               style={{
                 padding: `${Spacing.md}px`,
                 fontSize: 16,
@@ -436,12 +443,9 @@ export default function JobFormScreen() {
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
+              ref={deliveryDateRef}
               type="date"
-              value={new Date(deliveryDate).toISOString().split('T')[0]}
-              onChange={(e) => {
-                const date = new Date(e.target.value);
-                setDeliveryDate(date.getTime());
-              }}
+              defaultValue={new Date(deliveryDate).toISOString().split('T')[0]}
               style={{
                 padding: `${Spacing.md}px`,
                 fontSize: 16,
