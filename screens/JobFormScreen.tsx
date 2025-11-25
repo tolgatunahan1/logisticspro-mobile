@@ -86,7 +86,7 @@ export default function JobFormScreen() {
       let finalDeliveryDate = deliveryDate;
 
       if (Platform.OS === "web") {
-        finalCompanyId = companyIdRef.current?.value || "";
+        finalCompanyId = companyId;
         finalCargoType = cargoTypeRef.current?.value || "";
         finalTonnage = tonnageRef.current?.value || "";
         finalDimensions = dimensionsRef.current?.value || "";
@@ -251,8 +251,8 @@ export default function JobFormScreen() {
           {Platform.OS === "web" ? (
             <select
               ref={companyIdRef}
-              key={`company-${companyId}`}
-              defaultValue={companyId}
+              value={companyId}
+              onChange={(e) => setCompanyId(e.target.value)}
               style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault } as any}
             >
               <option value="">Firma Seçin</option>
