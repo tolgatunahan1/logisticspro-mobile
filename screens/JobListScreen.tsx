@@ -189,7 +189,7 @@ export default function JobListScreen() {
               Tonaj:
             </ThemedText>
             <ThemedText type="body" style={{ fontWeight: "600" }}>
-              {job.tonnage || "-"} T
+              {job.tonnage || "-"}
             </ThemedText>
           </View>
         </View>
