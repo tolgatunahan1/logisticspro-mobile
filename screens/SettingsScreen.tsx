@@ -59,18 +59,9 @@ export default function SettingsScreen() {
     setIsAdding(false);
   };
 
-  const handleDeleteIBAN = (id: string) => {
-    Alert.alert("İbanı Sil", "Bu İBANı silmek istediğinizden emin misiniz?", [
-      { text: "İptal", style: "cancel" },
-      {
-        text: "Sil",
-        style: "destructive",
-        onPress: async () => {
-          await deleteIBAN(id);
-          await loadIBANs();
-        },
-      },
-    ]);
+  const handleDeleteIBAN = async (id: string) => {
+    await deleteIBAN(id);
+    await loadIBANs();
   };
 
 
@@ -102,7 +93,7 @@ export default function SettingsScreen() {
                       {iban.ibanNumber}
                     </ThemedText>
                   </View>
-                  <Pressable onPress={() => handleDeleteIBAN(iban.id)}>
+                  <Pressable onPress={() => handleDeleteIBAN(iban.id)} hitSlop={8}>
                     <Feather name="trash-2" size={18} color={colors.destructive} />
                   </Pressable>
                 </View>
