@@ -212,6 +212,24 @@ export default function CompanyFormScreen() {
         {renderInput("Yetkili Kişi", contactPerson, setContactPerson, "contactPerson", { placeholder: "Yetkili adı", autoCapitalize: "words" })}
         {renderInput("Adres", address, setAddress, "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true })}
 
+        {isEdit ? (
+          <Pressable
+            onPress={handleDelete}
+            disabled={isLoading}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              {
+                backgroundColor: colors.destructive,
+                opacity: pressed || isLoading ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Feather name="trash-2" size={18} color={colors.buttonText} />
+            <ThemedText type="body" style={[styles.deleteButtonText, { color: colors.buttonText }]}>
+              Firmayı Sil
+            </ThemedText>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </ThemedView>
   );

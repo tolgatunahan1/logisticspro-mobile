@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView, PanResponder, Animated } from "react-native";
+import React, { useState, useCallback } from "react";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -41,7 +41,6 @@ export default function CarrierListScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const panXRef = useRef<{ [key: string]: Animated.Value }>({});
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -133,121 +132,40 @@ export default function CarrierListScreen() {
 
   const filteredCarriers = searchCarriers(carriers, searchQuery);
 
-  const handleSwipeDelete = (carrier: Carrier) => {
-    Alert.alert(
-      "Nakliyeciyi Sil",
-      `"${carrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
-      [
-        { text: "İptal", style: "cancel", onPress: () => resetSwipe(carrier.id) },
+  const renderCarrierItem = ({ item }: { item: Carrier }) => (
+    <View
+      style={[
+        styles.card,
         {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteCarrier(carrier.id);
-              await loadCarriers();
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
-            }
-          },
+          backgroundColor: colors.backgroundDefault,
         },
-      ]
-    );
-  };
-
-  const resetSwipe = (carrierId: string) => {
-    if (panXRef.current[carrierId]) {
-      Animated.spring(panXRef.current[carrierId], {
-        toValue: 0,
-        useNativeDriver: false,
-      }).start();
-    }
-  };
-
-  const renderCarrierItem = ({ item }: { item: Carrier }) => {
-    if (!panXRef.current[item.id]) {
-      panXRef.current[item.id] = new Animated.Value(0);
-    }
-
-    const panX = panXRef.current[item.id];
-    const deleteWidth = 80;
-
-    const panResponder = useRef(
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: (evt, gestureState) => Math.abs(gestureState.dx) > 10,
-        onPanResponderMove: (evt, gestureState) => {
-          if (gestureState.dx < 0) {
-            panX.setValue(Math.min(0, gestureState.dx));
-          }
-        },
-        onPanResponderRelease: (evt, gestureState) => {
-          if (gestureState.dx < -deleteWidth / 2) {
-            Animated.spring(panX, { toValue: -deleteWidth, useNativeDriver: false }).start();
-          } else {
-            Animated.spring(panX, { toValue: 0, useNativeDriver: false }).start();
-          }
-        },
-      })
-    ).current;
-
-    return (
-      <View
-        style={{ overflow: "hidden", marginBottom: Spacing.md, borderRadius: BorderRadius.sm }}
-        {...panResponder.panHandlers}
+      ]}
+    >
+      <Pressable
+        onPress={() => {
+          setSelectedCarrier(item);
+          setShowDetailModal(true);
+        }}
+        style={{ flex: 1 }}
       >
-        <Animated.View
-          style={{
-            transform: [{ translateX: panX }],
-            flexDirection: "row",
-          }}
-        >
-          <Pressable
-            onPress={() => {
-              setSelectedCarrier(item);
-              setShowDetailModal(true);
-            }}
-            style={[
-              styles.card,
-              {
-                backgroundColor: colors.backgroundDefault,
-                flex: 1,
-              },
-            ]}
-          >
-            <View style={styles.cardHeader}>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="h4" numberOfLines={1}>
-                  {item.name}
-                </ThemedText>
-              </View>
-              <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
-                <Pressable
-                  onPress={() => handleEditPress(item)}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                >
-                  <Feather name="edit" size={18} color={theme.link} />
-                </Pressable>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleSwipeDelete(item)}
-            style={{
-              width: deleteWidth,
-              backgroundColor: colors.destructive,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Feather name="trash-2" size={20} color={colors.buttonText} />
-          </Pressable>
-        </Animated.View>
-      </View>
-    );
-  };
+        <View style={styles.cardHeader}>
+          <View style={{ flex: 1 }}>
+            <ThemedText type="h4" numberOfLines={1}>
+              {item.name}
+            </ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
+            <Pressable
+              onPress={() => handleEditPress(item)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Feather name="edit" size={18} color={theme.link} />
+            </Pressable>
+          </View>
+        </View>
+      </Pressable>
+    </View>
+  );
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
