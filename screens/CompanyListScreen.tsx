@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -149,40 +149,19 @@ export default function CompanyListScreen() {
           <View style={{ flex: 1 }}>
             <ThemedText type="h4" numberOfLines={1}>
               {item.name}
-              </ThemedText>
-            </View>
+            </ThemedText>
           </View>
-          {item.address ? (
-            <View style={styles.addressRow}>
-              <Feather name="map-pin" size={14} color={colors.textSecondary} />
-              <ThemedText type="small" style={{ color: colors.textSecondary, marginLeft: Spacing.xs, flex: 1 }} numberOfLines={1}>
-                {item.address}
-              </ThemedText>
-            </View>
-          ) : null}
+          <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
+            <Pressable
+              onPress={() => handleEditPress(item)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Feather name="edit" size={18} color={theme.link} />
+            </Pressable>
+          </View>
         </View>
-        <View style={styles.cardActions}>
-          <Pressable
-            onPress={() => handleEditPress(item)}
-            style={({ pressed }) => [
-              styles.actionButton,
-              { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Feather name="edit-2" size={18} color={theme.link} />
-          </Pressable>
-          <Pressable
-            onPress={() => handleDeletePress(item)}
-            style={({ pressed }) => [
-              styles.actionButton,
-              { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Feather name="trash-2" size={18} color={colors.destructive} />
-          </Pressable>
-        </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 
   const renderEmptyState = () => (
@@ -238,6 +217,139 @@ export default function CompanyListScreen() {
         showsVerticalScrollIndicator={false}
       />
 
+      {/* Detail Modal */}
+      <Modal
+        visible={showDetailModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDetailModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Firma Detayları</ThemedText>
+              <Pressable onPress={() => setShowDetailModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            {/* Modal Body */}
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              {selectedCompany && (
+                <View style={{ gap: Spacing.lg }}>
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Firma Adı
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCompany.name}</ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Telefon
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCompany.phone}</ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Yetkili Kişi
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCompany.contactPerson}</ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Adres
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCompany.address || "-"}</ThemedText>
+                  </View>
+
+                  {/* Action Buttons */}
+                  <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+                    <Pressable
+                      onPress={() => {
+                        setShowDetailModal(false);
+                        handleCallPress(selectedCompany.phone);
+                      }}
+                      style={({ pressed }) => [
+                        styles.actionButtonLarge,
+                        { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1 },
+                      ]}
+                    >
+                      <Feather name="phone" size={18} color="#FFFFFF" />
+                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        Ara
+                      </ThemedText>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setShowDetailModal(false);
+                        handleWhatsAppPress(selectedCompany.phone, selectedCompany.name);
+                      }}
+                      style={({ pressed }) => [
+                        styles.actionButtonLarge,
+                        { backgroundColor: "#25D366", opacity: pressed ? 0.8 : 1 },
+                      ]}
+                    >
+                      <Feather name="message-circle" size={18} color="#FFFFFF" />
+                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        WhatsApp
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Modal Footer - Edit and Delete Buttons */}
+            {selectedCompany && (
+              <View style={{ flexDirection: "row", gap: Spacing.md }}>
+                <Pressable
+                  onPress={() => {
+                    setShowDetailModal(false);
+                    handleEditPress(selectedCompany);
+                  }}
+                  style={({ pressed }) => [
+                    styles.editButton,
+                    {
+                      backgroundColor: theme.link,
+                      opacity: pressed ? 0.9 : 1,
+                      flex: 1,
+                    },
+                  ]}
+                >
+                  <Feather name="edit" size={20} color="#FFFFFF" />
+                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Düzenle
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setShowDetailModal(false);
+                    handleDeletePress(selectedCompany);
+                  }}
+                  style={({ pressed }) => [
+                    styles.editButton,
+                    {
+                      backgroundColor: colors.destructive,
+                      opacity: pressed ? 0.9 : 1,
+                      flex: 1,
+                    },
+                  ]}
+                >
+                  <Feather name="trash-2" size={20} color="#FFFFFF" />
+                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Sil
+                  </ThemedText>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <Pressable
         onPress={handleAddPress}
         style={({ pressed }) => [
@@ -284,58 +396,52 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     padding: Spacing.lg,
   },
-  cardContent: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
   },
-  cardMain: {
+  modalOverlay: {
     flex: 1,
-    gap: Spacing.sm,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
-  cardName: {
-    marginBottom: Spacing.xs,
+  modalContent: {
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    paddingBottom: Spacing["3xl"],
+    maxHeight: "80%",
   },
-  phoneRow: {
+  modalHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingRight: Spacing.sm,
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(128, 128, 128, 0.2)",
   },
-  contactButtons: {
+  modalBody: {
+    padding: Spacing.lg,
+  },
+  detailSection: {
+    gap: Spacing.xs,
+  },
+  actionButtonLarge: {
     flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  contactButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-  },
-  cardDetails: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.lg,
-  },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  addressRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardActions: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  actionButton: {
-    width: 36,
-    height: 36,
+    height: Spacing.buttonHeight,
     borderRadius: BorderRadius.xs,
+    gap: Spacing.sm,
+  },
+  editButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.xs,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
   },
   emptyState: {
     flex: 1,
