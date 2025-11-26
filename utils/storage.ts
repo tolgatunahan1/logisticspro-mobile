@@ -55,10 +55,19 @@ export interface CompletedJob {
   updatedAt: number;
 }
 
+export interface IBAN {
+  id: string;
+  ibanNumber: string;
+  nameSurname: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 const CARRIERS_STORAGE_KEY = "@nakliyeci_carriers";
 const COMPANIES_STORAGE_KEY = "@nakliyeci_companies";
 const JOBS_STORAGE_KEY = "@nakliyeci_jobs";
 const COMPLETED_JOBS_STORAGE_KEY = "@nakliyeci_completed_jobs";
+const IBANS_STORAGE_KEY = "@nakliyeci_ibans";
 
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -413,4 +422,58 @@ export const searchCompletedJobs = (jobs: CompletedJob[], query: string): Comple
       j.deliveryLocation.toLowerCase().includes(lowerQuery) ||
       j.notes.toLowerCase().includes(lowerQuery)
   );
+};
+
+// IBAN functions
+export const getIBANs = async (): Promise<IBAN[]> => {
+  try {
+    const stored = await AsyncStorage.getItem(IBANS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return [];
+  } catch (error) {
+    console.error("Failed to get IBANs:", error);
+    return [];
+  }
+};
+
+export const saveIBANs = async (ibans: IBAN[]): Promise<boolean> => {
+  try {
+    await AsyncStorage.setItem(IBANS_STORAGE_KEY, JSON.stringify(ibans));
+    return true;
+  } catch (error) {
+    console.error("Failed to save IBANs:", error);
+    return false;
+  }
+};
+
+export const addIBAN = async (iban: Omit<IBAN, "id" | "createdAt" | "updatedAt">): Promise<IBAN | null> => {
+  try {
+    const ibans = await getIBANs();
+    const newIBAN: IBAN = {
+      ...iban,
+      id: generateId(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    ibans.unshift(newIBAN);
+    await saveIBANs(ibans);
+    return newIBAN;
+  } catch (error) {
+    console.error("Failed to add IBAN:", error);
+    return null;
+  }
+};
+
+export const deleteIBAN = async (id: string): Promise<boolean> => {
+  try {
+    const ibans = await getIBANs();
+    const filtered = ibans.filter((i) => i.id !== id);
+    await saveIBANs(filtered);
+    return true;
+  } catch (error) {
+    console.error("Failed to delete IBAN:", error);
+    return false;
+  }
 };
