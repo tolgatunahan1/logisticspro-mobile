@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { ThemedText } from "@/components/ThemedText";
@@ -46,20 +46,36 @@ export default function AvailabilityScreen() {
     loadData();
   }, [loadData]));
 
+  const handleDelete = async (id: string) => {
+    Alert.alert("Sil", "Emin misiniz?", [
+      { text: "İptal", style: "cancel" },
+      {
+        text: "Sil",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const success = await deleteCarrierAvailability(id);
+            if (success) {
+              await loadData();
+            }
+          } catch (e) {
+            console.error("Delete error:", e);
+          }
+        },
+      },
+    ]);
+  };
+
   const handleSave = async () => {
     try {
-      if (isRegistered) {
-        if (!selectedCarrier) {
-          Alert.alert("Hata", "Nakliyeci seçiniz");
-          return;
-        }
-      } else {
-        if (!carrierName.trim()) {
-          Alert.alert("Hata", "Adı giriniz");
-          return;
-        }
+      if (isRegistered && !selectedCarrier) {
+        Alert.alert("Hata", "Nakliyeci seçiniz");
+        return;
       }
-
+      if (!isRegistered && !carrierName.trim()) {
+        Alert.alert("Hata", "Adı giriniz");
+        return;
+      }
       if (!currentLocation.trim()) {
         Alert.alert("Hata", "Bulunduğu yeri giriniz");
         return;
@@ -74,7 +90,6 @@ export default function AvailabilityScreen() {
       }
 
       const expiresAt = Date.now() + 12 * 60 * 60 * 1000;
-
       const result = await addCarrierAvailability({
         carrierId: isRegistered ? selectedCarrier!.id : undefined,
         carrierName: isRegistered ? selectedCarrier!.name : carrierName.trim(),
@@ -88,8 +103,6 @@ export default function AvailabilityScreen() {
       });
 
       if (result) {
-        Alert.alert("Başarı", "Kaydedildi");
-        setModalVisible(false);
         setCarrierName("");
         setCarrierPhone("");
         setVehicleType("");
@@ -98,33 +111,12 @@ export default function AvailabilityScreen() {
         setNotes("");
         setSelectedCarrier(null);
         setIsRegistered(true);
+        setModalVisible(false);
         await loadData();
       }
     } catch (e) {
       console.error("Save error:", e);
-      Alert.alert("Hata", "Kaydedilemedi");
     }
-  };
-
-  const handleDelete = (id: string) => {
-    Alert.alert("Sil", "Silmek istediğinize emin misiniz?", [
-      { text: "İptal" },
-      {
-        text: "Sil",
-        onPress: async () => {
-          try {
-            const ok = await deleteCarrierAvailability(id);
-            if (ok) {
-              await loadData();
-              Alert.alert("Başarı", "Silindi");
-            }
-          } catch (e) {
-            console.error("Delete error:", e);
-            Alert.alert("Hata", "Silinemiyor");
-          }
-        },
-      },
-    ]);
   };
 
   const renderItem = ({ item }: { item: CarrierAvailability }) => (
@@ -189,176 +181,176 @@ export default function AvailabilityScreen() {
       </View>
 
       <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <ScreenScrollView>
-          <View style={[s.modal, { paddingHorizontal: 12, paddingTop: 12 }]}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <ThemedText type="h3">Yeni Bildiri</ThemedText>
-              <Pressable onPress={() => setModalVisible(false)}>
-                <Feather name="x" size={24} color={colors.text} />
-              </Pressable>
-            </View>
-
-            <View style={{ marginBottom: 12 }}>
-              <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 8 }}>
-                Tip
-              </ThemedText>
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <Pressable
-                  onPress={() => {
-                    setIsRegistered(true);
-                    setSelectedCarrier(null);
-                  }}
-                  style={[s.toggleBtn, { backgroundColor: isRegistered ? theme.link : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
-                >
-                  <ThemedText type="small" style={{ color: isRegistered ? "white" : colors.text, fontWeight: "600", fontSize: 12 }}>
-                    Kayıtlı
-                  </ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    setIsRegistered(false);
-                    setSelectedCarrier(null);
-                  }}
-                  style={[s.toggleBtn, { backgroundColor: !isRegistered ? theme.link : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
-                >
-                  <ThemedText type="small" style={{ color: !isRegistered ? "white" : colors.text, fontWeight: "600", fontSize: 12 }}>
-                    Kayıtsız
-                  </ThemedText>
+        <View style={[s.modalWrapper, { backgroundColor: colors.backgroundDefault }]}>
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+            <View style={[s.modal, { paddingHorizontal: 12, paddingTop: 12 }]}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <ThemedText type="h3">Yeni Bildiri</ThemedText>
+                <Pressable onPress={() => setModalVisible(false)}>
+                  <Feather name="x" size={24} color={colors.text} />
                 </Pressable>
               </View>
-            </View>
 
-            {isRegistered ? (
               <View style={{ marginBottom: 12 }}>
                 <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 8 }}>
-                  Seç
+                  Tip
                 </ThemedText>
-                <View style={[s.list, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)" }]}>
-                  {carriers.length === 0 ? (
-                    <ThemedText type="small" style={{ color: colors.textSecondary, padding: 8 }}>
-                      Kayıtlı yok
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Pressable
+                    onPress={() => {
+                      setIsRegistered(true);
+                      setSelectedCarrier(null);
+                    }}
+                    style={[s.toggleBtn, { backgroundColor: isRegistered ? theme.link : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
+                  >
+                    <ThemedText type="small" style={{ color: isRegistered ? "white" : colors.text, fontWeight: "600", fontSize: 12 }}>
+                      Kayıtlı
                     </ThemedText>
-                  ) : (
-                    carriers.map((c) => (
-                      <Pressable
-                        key={c.id}
-                        onPress={() => setSelectedCarrier(c)}
-                        style={[s.listItem, selectedCarrier?.id === c.id && { backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0.08)" }]}
-                      >
-                        <View>
-                          <ThemedText type="small">{c.name}</ThemedText>
-                          <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>
-                            {c.phone}
-                          </ThemedText>
-                        </View>
-                        {selectedCarrier?.id === c.id && <Feather name="check" size={16} color={theme.link} />}
-                      </Pressable>
-                    ))
-                  )}
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setIsRegistered(false);
+                      setSelectedCarrier(null);
+                    }}
+                    style={[s.toggleBtn, { backgroundColor: !isRegistered ? theme.link : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
+                  >
+                    <ThemedText type="small" style={{ color: !isRegistered ? "white" : colors.text, fontWeight: "600", fontSize: 12 }}>
+                      Kayıtsız
+                    </ThemedText>
+                  </Pressable>
                 </View>
               </View>
-            ) : (
-              <>
+
+              {isRegistered ? (
                 <View style={{ marginBottom: 12 }}>
-                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                    Ad
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 8 }}>
+                    Seç
                   </ThemedText>
-                  <TextInput
-                    placeholder="Adı Soyadı"
-                    value={carrierName}
-                    onChangeText={setCarrierName}
-                    placeholderTextColor={colors.textSecondary}
-                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                  />
+                  <View style={[s.list, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)" }]}>
+                    {carriers.length === 0 ? (
+                      <ThemedText type="small" style={{ color: colors.textSecondary, padding: 8 }}>
+                        Kayıtlı yok
+                      </ThemedText>
+                    ) : (
+                      carriers.map((c) => (
+                        <Pressable
+                          key={c.id}
+                          onPress={() => setSelectedCarrier(c)}
+                          style={[s.listItem, selectedCarrier?.id === c.id && { backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0.08)" }]}
+                        >
+                          <View>
+                            <ThemedText type="small">{c.name}</ThemedText>
+                            <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>
+                              {c.phone}
+                            </ThemedText>
+                          </View>
+                          {selectedCarrier?.id === c.id && <Feather name="check" size={16} color={theme.link} />}
+                        </Pressable>
+                      ))
+                    )}
+                  </View>
                 </View>
-                <View style={{ marginBottom: 12 }}>
-                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                    Tel
-                  </ThemedText>
-                  <TextInput
-                    placeholder="Phone"
-                    value={carrierPhone}
-                    onChangeText={setCarrierPhone}
-                    keyboardType="phone-pad"
-                    placeholderTextColor={colors.textSecondary}
-                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                  />
-                </View>
-                <View style={{ marginBottom: 12 }}>
-                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                    Araç
-                  </ThemedText>
-                  <TextInput
-                    placeholder="Kamyon, Pickup, vb"
-                    value={vehicleType}
-                    onChangeText={setVehicleType}
-                    placeholderTextColor={colors.textSecondary}
-                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                  />
-                </View>
-              </>
-            )}
+              ) : (
+                <>
+                  <View style={{ marginBottom: 12 }}>
+                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                      Ad
+                    </ThemedText>
+                    <TextInput
+                      placeholder="Adı Soyadı"
+                      value={carrierName}
+                      onChangeText={setCarrierName}
+                      placeholderTextColor={colors.textSecondary}
+                      style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                    />
+                  </View>
+                  <View style={{ marginBottom: 12 }}>
+                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                      Tel
+                    </ThemedText>
+                    <TextInput
+                      placeholder="Phone"
+                      value={carrierPhone}
+                      onChangeText={setCarrierPhone}
+                      keyboardType="phone-pad"
+                      placeholderTextColor={colors.textSecondary}
+                      style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                    />
+                  </View>
+                  <View style={{ marginBottom: 12 }}>
+                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                      Araç
+                    </ThemedText>
+                    <TextInput
+                      placeholder="Kamyon, Pickup, vb"
+                      value={vehicleType}
+                      onChangeText={setVehicleType}
+                      placeholderTextColor={colors.textSecondary}
+                      style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                    />
+                  </View>
+                </>
+              )}
 
-            <View style={{ marginBottom: 12 }}>
-              <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                Bulunduğu Yer
-              </ThemedText>
-              <TextInput
-                placeholder="İstanbul, Ankara, vb"
-                value={currentLocation}
-                onChangeText={setCurrentLocation}
-                placeholderTextColor={colors.textSecondary}
-                style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-              />
-            </View>
-
-            <View style={{ marginBottom: 12 }}>
-              <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                Gideceği Yer
-              </ThemedText>
-              <TextInput
-                placeholder="İzmir, Bursa, vb"
-                value={destinationLocation}
-                onChangeText={setDestinationLocation}
-                placeholderTextColor={colors.textSecondary}
-                style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-              />
-            </View>
-
-            <View style={{ marginBottom: 16 }}>
-              <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                Durum
-              </ThemedText>
-              <TextInput
-                placeholder="Parça yük, tam yük, vb"
-                value={notes}
-                onChangeText={setNotes}
-                multiline
-                numberOfLines={2}
-                placeholderTextColor={colors.textSecondary}
-                style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 60 }]}
-              />
-            </View>
-
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              <Pressable
-                onPress={() => setModalVisible(false)}
-                style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
-              >
-                <ThemedText type="small" style={{ fontWeight: "600" }}>
-                  İptal
+              <View style={{ marginBottom: 12 }}>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                  Bulunduğu Yer
                 </ThemedText>
-              </Pressable>
-              <Pressable onPress={handleSave} style={[s.actionBtn, { backgroundColor: theme.link }]}>
-                <ThemedText type="small" style={{ fontWeight: "600", color: "white" }}>
-                  Kaydet
-                </ThemedText>
-              </Pressable>
-            </View>
+                <TextInput
+                  placeholder="İstanbul, Ankara, vb"
+                  value={currentLocation}
+                  onChangeText={setCurrentLocation}
+                  placeholderTextColor={colors.textSecondary}
+                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                />
+              </View>
 
-            <View style={{ height: 20 }} />
-          </View>
-        </ScreenScrollView>
+              <View style={{ marginBottom: 12 }}>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                  Gideceği Yer
+                </ThemedText>
+                <TextInput
+                  placeholder="İzmir, Bursa, vb"
+                  value={destinationLocation}
+                  onChangeText={setDestinationLocation}
+                  placeholderTextColor={colors.textSecondary}
+                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                />
+              </View>
+
+              <View style={{ marginBottom: 16 }}>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                  Durum
+                </ThemedText>
+                <TextInput
+                  placeholder="Parça yük, tam yük, vb"
+                  value={notes}
+                  onChangeText={setNotes}
+                  multiline
+                  numberOfLines={2}
+                  placeholderTextColor={colors.textSecondary}
+                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 60 }]}
+                />
+              </View>
+
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 20 }}>
+                <Pressable
+                  onPress={() => setModalVisible(false)}
+                  style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
+                >
+                  <ThemedText type="small" style={{ fontWeight: "600" }}>
+                    İptal
+                  </ThemedText>
+                </Pressable>
+                <Pressable onPress={handleSave} style={[s.actionBtn, { backgroundColor: theme.link }]}>
+                  <ThemedText type="small" style={{ fontWeight: "600", color: "white" }}>
+                    Kaydet
+                  </ThemedText>
+                </Pressable>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
       </Modal>
     </ScreenScrollView>
   );
@@ -372,7 +364,8 @@ const s = StyleSheet.create({
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 },
   deleteBtn: { padding: 4 },
   divider: { height: 1, marginBottom: 6 },
-  modal: { flex: 1 },
+  modalWrapper: { flex: 1 },
+  modal: { paddingBottom: 20 },
   toggleBtn: { flex: 1, paddingVertical: 8, borderRadius: BorderRadius.sm, alignItems: "center" },
   list: { borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: "rgba(0,0,0,0.05)", maxHeight: 180 },
   listItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.03)" },
