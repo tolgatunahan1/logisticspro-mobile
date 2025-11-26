@@ -10,12 +10,14 @@ import CompanyListScreen from "@/screens/CompanyListScreen";
 import CompanyFormScreen from "@/screens/CompanyFormScreen";
 import JobListScreen from "@/screens/JobListScreen";
 import JobFormScreen from "@/screens/JobFormScreen";
+import CompletedJobListScreen from "@/screens/CompletedJobListScreen";
+import CompletedJobFormScreen from "@/screens/CompletedJobFormScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
-import { Carrier, Company, PlannedJob } from "@/utils/storage";
+import { Carrier, Company, PlannedJob, CompletedJob } from "@/utils/storage";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -26,6 +28,8 @@ export type RootStackParamList = {
   CompanyForm: { company?: Company; mode: "add" | "edit" };
   JobList: undefined;
   JobForm: { job?: PlannedJob; mode: "add" | "edit" };
+  CompletedJobList: undefined;
+  CompletedJobForm: { job?: CompletedJob; mode: "add" | "edit" };
   Settings: undefined;
 };
 
@@ -98,6 +102,21 @@ export default function RootNavigator() {
           <Stack.Screen
             name="JobForm"
             component={JobFormScreen}
+            options={({ route }) => ({
+              headerTitle: route.params.mode === "add" ? "İş Ekle" : "Düzenle",
+              presentation: "modal",
+            })}
+          />
+          <Stack.Screen
+            name="CompletedJobList"
+            component={CompletedJobListScreen}
+            options={{
+              headerTitle: "Gerçekleşen İşler",
+            }}
+          />
+          <Stack.Screen
+            name="CompletedJobForm"
+            component={CompletedJobFormScreen}
             options={({ route }) => ({
               headerTitle: route.params.mode === "add" ? "İş Ekle" : "Düzenle",
               presentation: "modal",

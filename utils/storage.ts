@@ -36,9 +36,28 @@ export interface PlannedJob {
   updatedAt: number;
 }
 
+export interface CompletedJob {
+  id: string;
+  companyId: string;
+  cargoType: string;
+  tonnage: string;
+  dimensions: string;
+  loadingLocation: string;
+  deliveryLocation: string;
+  loadingDate: number;
+  deliveryDate: number;
+  transportationCost: string;
+  commissionCost: string;
+  completionDate: number;
+  notes: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 const CARRIERS_STORAGE_KEY = "@nakliyeci_carriers";
 const COMPANIES_STORAGE_KEY = "@nakliyeci_companies";
 const JOBS_STORAGE_KEY = "@nakliyeci_jobs";
+const COMPLETED_JOBS_STORAGE_KEY = "@nakliyeci_completed_jobs";
 
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -308,4 +327,89 @@ export const VEHICLE_TYPES = [
 export const getVehicleTypeLabel = (value: string): string => {
   const found = VEHICLE_TYPES.find((v) => v.value === value);
   return found ? found.label : value;
+};
+
+// Completed Job functions
+export const getCompletedJobs = async (): Promise<CompletedJob[]> => {
+  try {
+    const stored = await AsyncStorage.getItem(COMPLETED_JOBS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return [];
+  } catch (error) {
+    console.error("Failed to get completed jobs:", error);
+    return [];
+  }
+};
+
+export const saveCompletedJobs = async (jobs: CompletedJob[]): Promise<boolean> => {
+  try {
+    await AsyncStorage.setItem(COMPLETED_JOBS_STORAGE_KEY, JSON.stringify(jobs));
+    return true;
+  } catch (error) {
+    console.error("Failed to save completed jobs:", error);
+    return false;
+  }
+};
+
+export const addCompletedJob = async (job: Omit<CompletedJob, "id" | "createdAt" | "updatedAt">): Promise<CompletedJob | null> => {
+  try {
+    const jobs = await getCompletedJobs();
+    const newJob: CompletedJob = {
+      ...job,
+      id: generateId(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    jobs.unshift(newJob);
+    await saveCompletedJobs(jobs);
+    return newJob;
+  } catch (error) {
+    console.error("Failed to add completed job:", error);
+    return null;
+  }
+};
+
+export const updateCompletedJob = async (id: string, updates: Partial<Omit<CompletedJob, "id" | "createdAt">>): Promise<boolean> => {
+  try {
+    const jobs = await getCompletedJobs();
+    const index = jobs.findIndex((j) => j.id === id);
+    if (index === -1) return false;
+    
+    jobs[index] = {
+      ...jobs[index],
+      ...updates,
+      updatedAt: Date.now(),
+    };
+    await saveCompletedJobs(jobs);
+    return true;
+  } catch (error) {
+    console.error("Failed to update completed job:", error);
+    return false;
+  }
+};
+
+export const deleteCompletedJob = async (id: string): Promise<boolean> => {
+  try {
+    const jobs = await getCompletedJobs();
+    const filtered = jobs.filter((j) => j.id !== id);
+    await saveCompletedJobs(filtered);
+    return true;
+  } catch (error) {
+    console.error("Failed to delete completed job:", error);
+    return false;
+  }
+};
+
+export const searchCompletedJobs = (jobs: CompletedJob[], query: string): CompletedJob[] => {
+  if (!query.trim()) return jobs;
+  const lowerQuery = query.toLowerCase().trim();
+  return jobs.filter(
+    (j) =>
+      j.cargoType.toLowerCase().includes(lowerQuery) ||
+      j.loadingLocation.toLowerCase().includes(lowerQuery) ||
+      j.deliveryLocation.toLowerCase().includes(lowerQuery) ||
+      j.notes.toLowerCase().includes(lowerQuery)
+  );
 };

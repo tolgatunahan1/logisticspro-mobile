@@ -10,7 +10,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getCarriers, getCompanies, getJobs } from "@/utils/storage";
+import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -24,6 +24,7 @@ export default function HomeScreen() {
   const [carrierCount, setCarrierCount] = useState(0);
   const [companyCount, setCompanyCount] = useState(0);
   const [jobCount, setJobCount] = useState(0);
+  const [completedJobCount, setCompletedJobCount] = useState(0);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -32,9 +33,11 @@ export default function HomeScreen() {
     const carriers = await getCarriers();
     const companies = await getCompanies();
     const jobs = await getJobs();
+    const completedJobs = await getCompletedJobs();
     setCarrierCount(carriers.length);
     setCompanyCount(companies.length);
     setJobCount(jobs.length);
+    setCompletedJobCount(completedJobs.length);
   }, []);
 
   useFocusEffect(
@@ -202,6 +205,25 @@ export default function HomeScreen() {
                   <ThemedText type="body">Planlanan İşler</ThemedText>
                   <ThemedText type="small" style={{ color: colors.textSecondary }}>
                     {jobCount} iş
+                  </ThemedText>
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  setDrawerVisible(false);
+                  navigation.navigate("CompletedJobList");
+                }}
+                style={({ pressed }) => [
+                  styles.drawerItem,
+                  { opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Feather name="check-circle" size={20} color={colors.success} />
+                <View style={{ flex: 1 }}>
+                  <ThemedText type="body">Gerçekleşen İşler</ThemedText>
+                  <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                    {completedJobCount} iş
                   </ThemedText>
                 </View>
               </Pressable>
