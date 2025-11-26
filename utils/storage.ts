@@ -32,6 +32,7 @@ export interface PlannedJob {
   deliveryDate: number;
   transportationCost: string;
   commissionCost: string;
+  notes: string;
   createdAt: number;
   updatedAt: number;
 }

@@ -35,6 +35,7 @@ export default function JobFormScreen() {
   const [deliveryDate, setDeliveryDate] = useState(job?.deliveryDate || Date.now());
   const [transportationCost, setTransportationCost] = useState(job?.transportationCost || "");
   const [commissionCost, setCommissionCost] = useState(job?.commissionCost || "");
+  const [notes, setNotes] = useState(job?.notes || "");
 
   // Log state values for debugging
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function JobFormScreen() {
   const deliveryLocationRef = useRef<any>(null);
   const transportationCostRef = useRef<any>(null);
   const commissionCostRef = useRef<any>(null);
+  const notesRef = useRef<any>(null);
   const companyIdRef = useRef<any>(null);
   const loadingDateRef = useRef<any>(null);
   const deliveryDateRef = useRef<any>(null);
@@ -81,6 +83,7 @@ export default function JobFormScreen() {
       let finalDeliveryLocation = deliveryLocation;
       let finalTransportationCost = transportationCost;
       let finalCommissionCost = commissionCost;
+      let finalNotes = notes;
       let finalCompanyId = companyId;
       let finalLoadingDate = loadingDate;
       let finalDeliveryDate = deliveryDate;
@@ -94,6 +97,7 @@ export default function JobFormScreen() {
         finalDeliveryLocation = deliveryLocationRef.current?.value || "";
         finalTransportationCost = transportationCostRef.current?.value || "";
         finalCommissionCost = commissionCostRef.current?.value || "";
+        finalNotes = notesRef.current?.value || "";
         if (loadingDateRef.current?.value) {
           finalLoadingDate = new Date(loadingDateRef.current.value).getTime();
         }
@@ -118,6 +122,7 @@ export default function JobFormScreen() {
         deliveryDate: finalDeliveryDate,
         transportationCost: finalTransportationCost.toString().trim(),
         commissionCost: finalCommissionCost.toString().trim(),
+        notes: finalNotes.toString().trim(),
       };
 
       console.log("İş verileri kaydediliyor:", data);
@@ -136,7 +141,7 @@ export default function JobFormScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, isEdit, job, navigation]);
+  }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, notes, isEdit, job, navigation]);
 
   const handleCancel = () => {
     navigation.goBack();
@@ -490,6 +495,30 @@ export default function JobFormScreen() {
               keyboardType="decimal-pad"
               value={commissionCost}
               onChangeText={setCommissionCost}
+            />
+          )}
+        </View>
+
+        {/* Notes */}
+        <View style={styles.section}>
+          <ThemedText type="h4" style={styles.label}>
+            Notlar
+          </ThemedText>
+          {Platform.OS === "web" ? (
+            <textarea
+              ref={notesRef}
+              defaultValue={notes}
+              placeholder="İş hakkında ek notlar ekleyin..."
+              style={{ padding: `${Spacing.md}px`, fontSize: 16, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8, backgroundColor: colors.backgroundDefault, color: colors.textDefault, minHeight: 100, fontFamily: "system-ui" } as any}
+            />
+          ) : (
+            <TextInput
+              style={[inputStyle, { backgroundColor: colors.backgroundDefault, height: 100, textAlignVertical: "top" }]}
+              placeholder="İş hakkında ek notlar ekleyin..."
+              multiline
+              numberOfLines={4}
+              value={notes}
+              onChangeText={setNotes}
             />
           )}
         </View>
