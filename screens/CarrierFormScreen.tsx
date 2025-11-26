@@ -21,7 +21,8 @@ export default function CarrierFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   
-  const { carrier, mode } = route.params;
+  const carrier = route.params?.carrier || null;
+  const mode = route.params?.mode || "add";
   const isEdit = mode === "edit";
 
   const [name, setName] = useState(carrier?.name || "");
@@ -82,9 +83,12 @@ export default function CarrierFormScreen() {
   const handleDelete = () => {
     if (!carrier) return;
 
+    const carrierId = carrier.id;
+    const carrierName = carrier.name;
+
     Alert.alert(
       "Nakliyeciyi Sil",
-      `"${carrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
+      `"${carrierName}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
       [
         { text: "İptal", style: "cancel" },
         {
@@ -92,7 +96,9 @@ export default function CarrierFormScreen() {
           style: "destructive",
           onPress: async () => {
             setIsLoading(true);
-            const success = await deleteCarrier(carrier.id);
+            console.log("Deleting carrier with ID:", carrierId);
+            const success = await deleteCarrier(carrierId);
+            console.log("Delete result:", success);
             if (success) {
               navigation.goBack();
             } else {

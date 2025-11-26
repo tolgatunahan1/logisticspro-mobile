@@ -21,7 +21,8 @@ export default function CompanyFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   
-  const { company, mode } = route.params;
+  const company = route.params?.company || null;
+  const mode = route.params?.mode || "add";
   const isEdit = mode === "edit";
 
   const [name, setName] = useState(company?.name || "");
@@ -78,9 +79,12 @@ export default function CompanyFormScreen() {
   const handleDelete = () => {
     if (!company) return;
 
+    const companyId = company.id;
+    const companyName = company.name;
+
     Alert.alert(
       "Firmayı Sil",
-      `"${company.name}" adlı firmayı silmek istediğinizden emin misiniz?`,
+      `"${companyName}" adlı firmayı silmek istediğinizden emin misiniz?`,
       [
         { text: "İptal", style: "cancel" },
         {
@@ -88,7 +92,9 @@ export default function CompanyFormScreen() {
           style: "destructive",
           onPress: async () => {
             setIsLoading(true);
-            const success = await deleteCompany(company.id);
+            console.log("Deleting company with ID:", companyId);
+            const success = await deleteCompany(companyId);
+            console.log("Delete result:", success);
             if (success) {
               navigation.goBack();
             } else {
