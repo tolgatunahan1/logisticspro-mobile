@@ -134,6 +134,16 @@ Ayarlar → Editor Preferences → Auto-Format: On
 ✅ TypeScript dosyaları: LF line endings
 ✅ Tutarlı formatting kuralları
 
+**8. Gereksiz Klasörleri İgnore Et - Yapıldı**
+```
+.replitignore dosyası oluşturuldu
+```
+✅ node_modules (paketi tekrar yükleme)
+✅ .expo (cache dosyaları)
+✅ dist (build çıktıları)
+✅ .git, .vscode, .DS_Store, *.log da ignored
+✅ Replit çok daha hafif çalışacak
+
 ## Notes
 - Data is stored locally on the device using AsyncStorage
 - For true cross-device sync, a backend service would be required
