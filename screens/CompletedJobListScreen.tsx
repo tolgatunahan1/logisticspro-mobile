@@ -38,7 +38,6 @@ export default function CompletedJobListScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerBackTitle: "",
-      headerShown: false,
     });
   }, [navigation]);
 
@@ -804,7 +803,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing["5xl"] + Spacing.xl,
+    paddingTop: Spacing["3xl"],
     paddingBottom: Spacing.lg,
     gap: Spacing.lg,
   },
