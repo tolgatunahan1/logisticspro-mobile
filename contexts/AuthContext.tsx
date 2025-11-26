@@ -61,17 +61,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginAdmin = async (username: string, password: string): Promise<boolean> => {
-    if (!username.trim() || !password.trim()) return false;
+    if (!username.trim() || !password.trim()) {
+      console.error("Admin login: Empty username or password");
+      return false;
+    }
 
     try {
       const admin = await getAdmin();
-      if (admin && admin.username === username && admin.password === password) {
-        const userData: User = { username: admin.username, type: "admin" };
-        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-        setUser(userData);
-        return true;
+      console.log("Admin data:", admin ? "Found" : "Not found");
+      
+      if (!admin) {
+        console.error("No admin found in storage");
+        return false;
       }
-      return false;
+      
+      if (admin.username !== username) {
+        console.error("Admin username mismatch");
+        return false;
+      }
+      
+      if (admin.password !== password) {
+        console.error("Admin password mismatch");
+        return false;
+      }
+      
+      const userData: User = { username: admin.username, type: "admin" };
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      setUser(userData);
+      return true;
     } catch (error) {
       console.error("Failed to login admin:", error);
       return false;

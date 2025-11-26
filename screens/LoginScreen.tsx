@@ -74,10 +74,23 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      const success = isAdmin ? await loginAdmin(username, password) : await loginUser(username, password);
-      if (!success) {
-        setError("Giriş başarısız. Bilgileri kontrol edin.");
+      let success = false;
+      if (isAdmin) {
+        console.log("Admin login attempt:", username);
+        success = await loginAdmin(username, password);
+        console.log("Admin login result:", success);
+      } else {
+        console.log("User login attempt:", username);
+        success = await loginUser(username, password);
+        console.log("User login result:", success);
       }
+      
+      if (!success) {
+        setError(isAdmin ? "Admin bilgileri yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Giriş sırasında hata oluştu");
     } finally {
       setIsLoading(false);
     }

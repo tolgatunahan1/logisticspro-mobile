@@ -40,12 +40,21 @@ export default function AdminPanelScreen() {
         text: "Onayla",
         onPress: async () => {
           setLoading(true);
-          const success = await approveUser(user.id);
-          if (success) {
-            Alert.alert("Başarılı", `${user.username} onaylandı`);
-            await loadPendingUsers();
+          try {
+            const success = await approveUser(user.id);
+            if (success) {
+              Alert.alert("Başarılı", `${user.username} onaylandı`);
+              await new Promise(resolve => setTimeout(resolve, 100));
+              await loadPendingUsers();
+            } else {
+              Alert.alert("Hata", "Onaylama başarısız oldu");
+            }
+          } catch (error) {
+            console.error("Approve error:", error);
+            Alert.alert("Hata", "Onaylama sırasında hata oluştu");
+          } finally {
+            setLoading(false);
           }
-          setLoading(false);
         },
       },
     ]);
@@ -59,12 +68,21 @@ export default function AdminPanelScreen() {
         style: "destructive",
         onPress: async () => {
           setLoading(true);
-          const success = await rejectUser(user.id);
-          if (success) {
-            Alert.alert("Başarılı", `${user.username} reddedildi`);
-            await loadPendingUsers();
+          try {
+            const success = await rejectUser(user.id);
+            if (success) {
+              Alert.alert("Başarılı", `${user.username} reddedildi`);
+              await new Promise(resolve => setTimeout(resolve, 100));
+              await loadPendingUsers();
+            } else {
+              Alert.alert("Hata", "Reddetme başarısız oldu");
+            }
+          } catch (error) {
+            console.error("Reject error:", error);
+            Alert.alert("Hata", "Reddetme sırasında hata oluştu");
+          } finally {
+            setLoading(false);
           }
-          setLoading(false);
         },
       },
     ]);

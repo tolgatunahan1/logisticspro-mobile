@@ -64,7 +64,6 @@ export const requestSignup = async (username: string, password: string): Promise
   try {
     const users = await getUsers();
     
-    // Kontrol: Zaten var mı?
     if (users.some((u) => u.username === username)) {
       return false;
     }
@@ -89,11 +88,20 @@ export const requestSignup = async (username: string, password: string): Promise
 export const approveUser = async (userId: string): Promise<boolean> => {
   try {
     const users = await getUsers();
-    const user = users.find((u) => u.id === userId);
-    if (!user) return false;
+    const userIndex = users.findIndex((u) => u.id === userId);
+    
+    if (userIndex === -1) {
+      console.error("User not found:", userId);
+      return false;
+    }
 
-    user.status = "approved";
+    users[userIndex].status = "approved";
     await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    
+    const updated = await getUsers();
+    const approvedUser = updated.find((u) => u.id === userId);
+    console.log("User approved:", approvedUser);
+    
     return true;
   } catch (error) {
     console.error("Failed to approve user:", error);
@@ -144,7 +152,6 @@ export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
     const admin = await getAdmin();
     if (!admin) {
-      // Eğer admin yoksa, default admin'i oluştur
       const defaultAdmin: AdminUser = {
         username: "tolgatunahan",
         password: "1Liraversene",
