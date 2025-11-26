@@ -57,9 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      await AsyncStorage.clear();
       setUser(null);
     } catch (error) {
       console.error("Failed to logout:", error);
+      setUser(null);
     }
   };
 

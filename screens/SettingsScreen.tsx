@@ -3,6 +3,7 @@ import { StyleSheet, View, Pressable, Alert, TextInput, Modal, ScrollView } from
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -80,8 +81,8 @@ export default function SettingsScreen() {
         {
           text: "Çıkış Yap",
           style: "destructive",
-          onPress: async () => {
-            await logout();
+          onPress: () => {
+            logout();
           },
         },
       ]
