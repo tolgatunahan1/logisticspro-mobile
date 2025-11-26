@@ -284,8 +284,9 @@ export default function SettingsScreen() {
                   secureTextEntry
                   editable={!isUpdating}
                 />
-              </   
-          </View>
+              </View>
+
+            </View>
 
             <View style={styles.modalButtons}>
               <Pressable
