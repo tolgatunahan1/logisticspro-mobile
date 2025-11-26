@@ -57,15 +57,12 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: "home" | "wallet" = "home";
-
           if (route.name === "HomeTab") {
-            iconName = "home";
+            return <Feather name="home" size={24} color={color} />;
           } else if (route.name === "WalletTab") {
-            iconName = "wallet";
+            return <Feather name="credit-card" size={24} color={color} />;
           }
-
-          return <Feather name={iconName} size={size} color={color} />;
+          return null;
         },
         tabBarActiveTintColor: theme.link,
         tabBarInactiveTintColor: colors.textSecondary,
@@ -73,13 +70,15 @@ export default function BottomTabNavigator() {
           backgroundColor: colors.backgroundDefault,
           borderTopColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: Spacing.sm,
+          height: 70,
+          paddingBottom: Spacing.md,
+          paddingTop: Spacing.xs,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: "600",
-          marginTop: Spacing.xs,
+          marginTop: Spacing.sm,
+          paddingBottom: Spacing.xs,
         },
         headerShown: false,
       })}
