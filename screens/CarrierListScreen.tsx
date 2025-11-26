@@ -117,15 +117,10 @@ export default function CarrierListScreen() {
     const phoneNumber = formatPhoneForWhatsApp(phone);
     
     try {
-      const url = `whatsapp://send?phone=${phoneNumber}`;
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
-      }
+      const webUrl = `https://wa.me/${phoneNumber}`;
+      await Linking.openURL(webUrl);
     } catch (error) {
-      Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
+      Alert.alert("Hata", "WhatsApp açılamadı. Lütfen daha sonra tekrar deneyin.");
     }
   };
 
