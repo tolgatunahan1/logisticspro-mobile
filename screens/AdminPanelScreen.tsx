@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, Pressable, Alert, ScrollView } from "react-native";
+import { View, StyleSheet, Pressable, ScrollView, Modal, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -17,7 +17,21 @@ export default function AdminPanelScreen() {
 
   const [pendingUsers, setPendingUsers] = useState<AppUser[]>([]);
   const [approvedUsers, setApprovedUsers] = useState<AppUser[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    onConfirm: (() => Promise<void>) | null;
+    onCancel: (() => void) | null;
+    isLoading: boolean;
+  }>({
+    visible: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+    onCancel: null,
+    isLoading: false,
+  });
 
   const loadUsers = useCallback(async () => {
     try {
@@ -43,78 +57,77 @@ export default function AdminPanelScreen() {
     }, [loadUsers])
   );
 
-  const handleApprove = (user: AppUser) => {
+  const handleApprove = useCallback((user: AppUser) => {
     console.log("👆 APPROVE BUTTON PRESSED:", user.username);
     
-    Alert.alert(
-      "Kullanıcı Onayla",
-      `${user.username} kullanıcısını onaylamak istiyor musunuz?\n\nBu kullanıcı onaylandıktan sonra ${user.username}/${user.password} ile giriş yapabilecek.`,
-      [
-        { text: "İptal", style: "cancel", onPress: () => console.log("Approve cancelled") },
-        {
-          text: "ONAYLA",
-          style: "default",
-          onPress: async () => {
-            console.log("✋ APPROVAL CONFIRMED FOR:", user.username);
-            setLoading(true);
-            try {
-              const success = await approveUser(user.id);
-              console.log("Result:", success);
-              
-              if (success) {
-                Alert.alert("✅ Başarılı", `${user.username} onaylandı!\n\nGiriş: ${user.username}\nŞifre: ${user.password}`);
-                // Force reload after short delay
-                await new Promise(r => setTimeout(r, 1000));
-                await loadUsers();
-              } else {
-                Alert.alert("❌ Hata", "Onaylama başarısız");
-              }
-            } catch (err) {
-              console.error("Approve error:", err);
-              Alert.alert("❌ Hata", String(err));
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
-    );
-  };
+    const confirmAction = async () => {
+      console.log("✋ APPROVAL CONFIRMED FOR:", user.username);
+      setConfirmDialog(prev => ({ ...prev, isLoading: true }));
+      try {
+        const success = await approveUser(user.id);
+        console.log("Approve result:", success);
+        
+        if (success) {
+          Alert.alert("✅ Başarılı", `${user.username} onaylandı!\n\nGiriş: ${user.username}\nŞifre: ${user.password}`);
+          await new Promise(r => setTimeout(r, 800));
+          setConfirmDialog(prev => ({ ...prev, visible: false, isLoading: false }));
+          await loadUsers();
+        } else {
+          Alert.alert("❌ Hata", "Onaylama başarısız oldu");
+          setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+        }
+      } catch (err) {
+        console.error("Approve error:", err);
+        Alert.alert("❌ Hata", String(err));
+        setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+    
+    setConfirmDialog({
+      visible: true,
+      title: "Kullanıcı Onayla",
+      message: `${user.username} kullanıcısını onaylamak istiyor musunuz?\n\nGiriş: ${user.username}\nŞifre: ${user.password}`,
+      onConfirm: confirmAction,
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+      isLoading: false,
+    });
+  }, [loadUsers]);
 
-  const handleReject = (user: AppUser) => {
+  const handleReject = useCallback((user: AppUser) => {
     console.log("👆 REJECT BUTTON PRESSED:", user.username);
     
-    Alert.alert(
-      "Kullanıcı Reddet",
-      `${user.username} kullanıcısını reddetmek istiyor musunuz?`,
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "REDDET",
-          style: "destructive",
-          onPress: async () => {
-            console.log("✋ REJECTION CONFIRMED FOR:", user.username);
-            setLoading(true);
-            try {
-              const success = await rejectUser(user.id);
-              if (success) {
-                Alert.alert("✅ Başarılı", `${user.username} reddedildi`);
-                await new Promise(r => setTimeout(r, 1000));
-                await loadUsers();
-              } else {
-                Alert.alert("❌ Hata", "Reddetme başarısız");
-              }
-            } catch (err) {
-              console.error("Reject error:", err);
-              Alert.alert("❌ Hata", String(err));
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
-    );
-  };
+    const confirmAction = async () => {
+      console.log("✋ REJECTION CONFIRMED FOR:", user.username);
+      setConfirmDialog(prev => ({ ...prev, isLoading: true }));
+      try {
+        const success = await rejectUser(user.id);
+        console.log("Reject result:", success);
+        
+        if (success) {
+          Alert.alert("✅ Başarılı", `${user.username} reddedildi`);
+          await new Promise(r => setTimeout(r, 800));
+          setConfirmDialog(prev => ({ ...prev, visible: false, isLoading: false }));
+          await loadUsers();
+        } else {
+          Alert.alert("❌ Hata", "Reddetme başarısız");
+          setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+        }
+      } catch (err) {
+        console.error("Reject error:", err);
+        Alert.alert("❌ Hata", String(err));
+        setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+    
+    setConfirmDialog({
+      visible: true,
+      title: "Kullanıcı Reddet",
+      message: `${user.username} kullanıcısını reddetmek istiyor musunuz?`,
+      onConfirm: confirmAction,
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+      isLoading: false,
+    });
+  }, [loadUsers]);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString("tr-TR", {
@@ -167,12 +180,12 @@ export default function AdminPanelScreen() {
                   <View style={styles.userActions}>
                     <Pressable
                       onPress={() => handleApprove(user)}
-                      disabled={loading}
+                      disabled={confirmDialog.isLoading}
                       style={({ pressed }) => [
                         styles.actionButton,
                         {
                           backgroundColor: colors.success,
-                          opacity: pressed || loading ? 0.6 : 1,
+                          opacity: pressed || confirmDialog.isLoading ? 0.6 : 1,
                         },
                       ]}
                     >
@@ -184,12 +197,12 @@ export default function AdminPanelScreen() {
 
                     <Pressable
                       onPress={() => handleReject(user)}
-                      disabled={loading}
+                      disabled={confirmDialog.isLoading}
                       style={({ pressed }) => [
                         styles.actionButton,
                         {
                           backgroundColor: colors.destructive,
-                          opacity: pressed || loading ? 0.6 : 1,
+                          opacity: pressed || confirmDialog.isLoading ? 0.6 : 1,
                         },
                       ]}
                     >
@@ -257,6 +270,70 @@ export default function AdminPanelScreen() {
           </ThemedText>
         </Pressable>
       </ScrollView>
+
+      {/* Confirmation Dialog Modal */}
+      <Modal
+        visible={confirmDialog.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (confirmDialog.onCancel) confirmDialog.onCancel();
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.dialogBox, { backgroundColor: colors.backgroundDefault }]}>
+            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+              {confirmDialog.title}
+            </ThemedText>
+            
+            <ThemedText type="body" style={{ color: colors.textSecondary, marginBottom: Spacing.lg, lineHeight: 24 }}>
+              {confirmDialog.message}
+            </ThemedText>
+
+            <View style={styles.dialogActions}>
+              <Pressable
+                onPress={() => {
+                  if (confirmDialog.onCancel) confirmDialog.onCancel();
+                }}
+                disabled={confirmDialog.isLoading}
+                style={({ pressed }) => [
+                  styles.dialogButton,
+                  {
+                    backgroundColor: colors.backgroundRoot,
+                    opacity: pressed || confirmDialog.isLoading ? 0.6 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ fontWeight: "600" }}>
+                  İPTAL
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                onPress={async () => {
+                  console.log("🔘 CONFIRM BUTTON PRESSED");
+                  if (confirmDialog.onConfirm) {
+                    console.log("🎬 Executing confirm action");
+                    await confirmDialog.onConfirm();
+                  }
+                }}
+                disabled={confirmDialog.isLoading}
+                style={({ pressed }) => [
+                  styles.dialogButton,
+                  {
+                    backgroundColor: confirmDialog.title.includes("Reddet") ? colors.destructive : colors.success,
+                    opacity: pressed || confirmDialog.isLoading ? 0.6 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "700" }}>
+                  {confirmDialog.isLoading ? "İŞLEMLENİYOR..." : confirmDialog.title.includes("Reddet") ? "REDDET" : "ONAYLA"}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -316,5 +393,28 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginTop: Spacing["2xl"],
     marginBottom: Spacing["2xl"],
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dialogBox: {
+    marginHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.xl,
+    minWidth: 280,
+  },
+  dialogActions: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  dialogButton: {
+    flex: 1,
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
