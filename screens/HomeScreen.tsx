@@ -106,7 +106,7 @@ export default function HomeScreen() {
           </ThemedText>
         </View>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Row 1 */}
         <View style={styles.statsContainer}>
           <View
             style={[
@@ -141,6 +141,45 @@ export default function HomeScreen() {
                 Firma
               </ThemedText>
               <ThemedText type="h3">{companyCount}</ThemedText>
+            </View>
+          </View>
+        </View>
+
+        {/* Stats Cards - Row 2 */}
+        <View style={styles.statsContainer}>
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                borderLeftColor: colors.warning,
+              },
+            ]}
+          >
+            <Feather name="calendar" size={24} color={colors.warning} />
+            <View style={styles.statContent}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Planlanan
+              </ThemedText>
+              <ThemedText type="h3">{jobCount}</ThemedText>
+            </View>
+          </View>
+
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                borderLeftColor: colors.success,
+              },
+            ]}
+          >
+            <Feather name="check-circle" size={24} color={colors.success} />
+            <View style={styles.statContent}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Gerçekleşen
+              </ThemedText>
+              <ThemedText type="h3">{completedJobCount}</ThemedText>
             </View>
           </View>
         </View>
@@ -192,8 +231,8 @@ export default function HomeScreen() {
               transform: [{ scale: pressed ? 0.98 : 1 }],
               borderRadius: 0,
               marginTop: 0,
-              borderBottomLeftRadius: 20,
-              borderBottomRightRadius: 20,
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
             },
           ]}
         >
@@ -209,6 +248,70 @@ export default function HomeScreen() {
             <ThemedText type="h3">Firmalar</ThemedText>
             <ThemedText type="body" style={{ color: colors.textSecondary }}>
               {companyCount} kayıt
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
+        </Pressable>
+
+        <Pressable
+          onPress={() => navigation.navigate("JobList")}
+          style={({ pressed }) => [
+            styles.menuCard,
+            {
+              backgroundColor: colors.backgroundDefault,
+              opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+              borderRadius: 0,
+              marginTop: 0,
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.warning, borderRadius: 16 },
+            ]}
+          >
+            <Feather name="calendar" size={32} color="#FFFFFF" />
+          </View>
+          <View style={styles.menuCardContent}>
+            <ThemedText type="h3">Planlanan İşler</ThemedText>
+            <ThemedText type="body" style={{ color: colors.textSecondary }}>
+              {jobCount} iş
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
+        </Pressable>
+
+        <Pressable
+          onPress={() => navigation.navigate("CompletedJobList")}
+          style={({ pressed }) => [
+            styles.menuCard,
+            {
+              backgroundColor: colors.backgroundDefault,
+              opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+              borderRadius: 0,
+              marginTop: 0,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.success, borderRadius: 16 },
+            ]}
+          >
+            <Feather name="check-circle" size={32} color="#FFFFFF" />
+          </View>
+          <View style={styles.menuCardContent}>
+            <ThemedText type="h3">Gerçekleşen İşler</ThemedText>
+            <ThemedText type="body" style={{ color: colors.textSecondary }}>
+              {completedJobCount} iş
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
