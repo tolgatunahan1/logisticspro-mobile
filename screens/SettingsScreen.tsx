@@ -1,11 +1,9 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, TextInput, Modal, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Alert, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
-import * as Sharing from "expo-sharing";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -13,6 +11,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN } from "@/utils/storage";
+import { AccountSettingsModal } from "@/components/AccountSettingsModal";
+import { IBANListModal } from "@/components/IBANListModal";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
@@ -91,8 +91,7 @@ export default function SettingsScreen() {
     if (success) {
       Alert.alert("Başarılı", "Hesap bilgileri güncellendi");
       setShowAccountModal(false);
-      
-      // Bildirim gönder (Expo Go'da çalışır)
+
       try {
         await Notifications.presentNotificationAsync({
           title: "Hesap Bilgileri Güncellendi",
@@ -118,9 +117,7 @@ export default function SettingsScreen() {
           text: "Çıkış Yap",
           style: "destructive",
           onPress: () => {
-            console.log("Logout button pressed");
             logout();
-            console.log("Logout called");
           },
         },
       ]
@@ -232,181 +229,27 @@ export default function SettingsScreen() {
         </Pressable>
       </ScrollView>
 
-      <Modal visible={showAccountModal} transparent animationType="slide">
-        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">Hesap Ayarları</ThemedText>
-              <Pressable onPress={() => setShowAccountModal(false)}>
-                <Feather name="x" size={24} color={colors.text} />
-              </Pressable>
-            </View>
+      <AccountSettingsModal
+        visible={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        editUsername={editUsername}
+        editPassword={editPassword}
+        setEditUsername={setEditUsername}
+        setEditPassword={setEditPassword}
+        isUpdating={isUpdating}
+        onSave={handleUpdateProfile}
+      />
 
-            <View style={styles.modalInputs}>
-              <View>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                  Kullanıcı Adı
-                </ThemedText>
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: colors.border,
-                      color: colors.text,
-                      backgroundColor: colors.backgroundRoot,
-                    },
-                  ]}
-                  placeholder="Kullanıcı Adınız"
-                  placeholderTextColor={colors.textSecondary}
-                  value={editUsername}
-                  onChangeText={setEditUsername}
-                  editable={!isUpdating}
-                />
-              </View>
-
-              <View>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                  Şifre
-                </ThemedText>
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: colors.border,
-                      color: colors.text,
-                      backgroundColor: colors.backgroundRoot,
-                    },
-                  ]}
-                  placeholder="Yeni Şifreniz"
-                  placeholderTextColor={colors.textSecondary}
-                  value={editPassword}
-                  onChangeText={setEditPassword}
-                  secureTextEntry
-                  editable={!isUpdating}
-                />
-              </View>
-
-            </View>
-
-            <View style={styles.modalButtons}>
-              <Pressable
-                onPress={() => setShowAccountModal(false)}
-                style={({ pressed }) => [
-                  { flex: 1, paddingVertical: Spacing.md, borderRadius: BorderRadius.sm, opacity: pressed ? 0.7 : 1 },
-                  { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" },
-                ]}
-              >
-                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600" }}>
-                  İptal
-                </ThemedText>
-              </Pressable>
-              <Pressable
-                onPress={handleUpdateProfile}
-                disabled={isUpdating}
-                style={({ pressed }) => [
-                  {
-                    flex: 1,
-                    paddingVertical: Spacing.md,
-                    borderRadius: BorderRadius.sm,
-                    backgroundColor: theme.link,
-                    opacity: pressed || isUpdating ? 0.8 : 1,
-                  },
-                ]}
-              >
-                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600", color: "#FFFFFF" }}>
-                  {isUpdating ? "Güncelleniyor..." : "Kaydet"}
-                </ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal visible={showAddModal} transparent animationType="slide">
-        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">İBAN Ekle</ThemedText>
-              <Pressable onPress={() => setShowAddModal(false)}>
-                <Feather name="x" size={24} color={colors.text} />
-              </Pressable>
-            </View>
-
-            <View style={styles.modalInputs}>
-              <View>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                  Ad Soyad
-                </ThemedText>
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: colors.border,
-                      color: colors.text,
-                      backgroundColor: colors.backgroundRoot,
-                    },
-                  ]}
-                  placeholder="Adınız Soyadınız"
-                  placeholderTextColor={colors.textSecondary}
-                  value={nameInput}
-                  onChangeText={setNameInput}
-                />
-              </View>
-
-              <View>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                  IBAN Numarası
-                </ThemedText>
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: colors.border,
-                      color: colors.text,
-                      backgroundColor: colors.backgroundRoot,
-                    },
-                  ]}
-                  placeholder="TR00 0000 0000..."
-                  placeholderTextColor={colors.textSecondary}
-                  value={ibanInput}
-                  onChangeText={setIbanInput}
-                />
-              </View>
-            </View>
-
-            <View style={styles.modalButtons}>
-              <Pressable
-                onPress={() => setShowAddModal(false)}
-                style={({ pressed }) => [
-                  { flex: 1, paddingVertical: Spacing.md, borderRadius: BorderRadius.sm, opacity: pressed ? 0.7 : 1 },
-                  { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" },
-                ]}
-              >
-                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600" }}>
-                  İptal
-                </ThemedText>
-              </Pressable>
-              <Pressable
-                onPress={handleAddIBAN}
-                disabled={isAdding}
-                style={({ pressed }) => [
-                  {
-                    flex: 1,
-                    paddingVertical: Spacing.md,
-                    borderRadius: BorderRadius.sm,
-                    backgroundColor: theme.link,
-                    opacity: pressed || isAdding ? 0.8 : 1,
-                  },
-                ]}
-              >
-                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600", color: "#FFFFFF" }}>
-                  Kaydet
-                </ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <IBANListModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        nameInput={nameInput}
+        setNameInput={setNameInput}
+        ibanInput={ibanInput}
+        setIbanInput={setIbanInput}
+        isAdding={isAdding}
+        onSave={handleAddIBAN}
+      />
     </ThemedView>
   );
 }
@@ -480,34 +323,5 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontWeight: "600",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.lg,
-    borderTopRightRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    gap: Spacing.lg,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  modalInputs: {
-    gap: Spacing.md,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.sm,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    fontSize: 16,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: Spacing.md,
   },
 });

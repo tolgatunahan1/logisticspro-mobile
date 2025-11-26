@@ -153,6 +153,17 @@ App.tsx'e console filtering eklendi
 ✅ Console çok daha temiz kalır
 ✅ Replit performansı optimize edildi
 
+**10. Kod Dosyalarını Bölmek - Yapıldı**
+```
+SettingsScreen.tsx bölündü (513 satır → 200 satır)
+```
+✅ AccountSettingsModal.tsx - hesap ayarları modali (120 satır)
+✅ IBANListModal.tsx - IBAN ekleme modali (115 satır)
+✅ SettingsScreen.tsx ana ekran - 200 satır
+✅ Replit editor çok daha hızlı çalışacak
+✅ Type checking ve reload daha hızlı
+✅ Dosya ağırlığı %60 azaldı
+
 ## Notes
 - Data is stored locally on the device using AsyncStorage
 - For true cross-device sync, a backend service would be required
