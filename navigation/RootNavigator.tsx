@@ -67,6 +67,7 @@ export default function RootNavigator() {
             component={CarrierListScreen}
             options={{
               headerTitle: "Nakliyeciler",
+              headerBackTitleVisible: false,
             }}
           />
           <Stack.Screen
@@ -75,6 +76,7 @@ export default function RootNavigator() {
             options={({ route }) => ({
               headerTitle: route.params.mode === "add" ? "Nakliyeci Ekle" : "Düzenle",
               presentation: "modal",
+              headerBackTitleVisible: false,
             })}
           />
           <Stack.Screen
@@ -82,6 +84,7 @@ export default function RootNavigator() {
             component={CompanyListScreen}
             options={{
               headerTitle: "Firmalar",
+              headerBackTitleVisible: false,
             }}
           />
           <Stack.Screen
@@ -90,6 +93,7 @@ export default function RootNavigator() {
             options={({ route }) => ({
               headerTitle: route.params.mode === "add" ? "Firma Ekle" : "Düzenle",
               presentation: "modal",
+              headerBackTitleVisible: false,
             })}
           />
           <Stack.Screen
@@ -97,6 +101,7 @@ export default function RootNavigator() {
             component={JobListScreen}
             options={{
               headerTitle: "Planlanan İşler",
+              headerBackTitleVisible: false,
             }}
           />
           <Stack.Screen
@@ -105,6 +110,7 @@ export default function RootNavigator() {
             options={({ route }) => ({
               headerTitle: route.params.mode === "add" ? "İş Ekle" : "Düzenle",
               presentation: "modal",
+              headerBackTitleVisible: false,
             })}
           />
           <Stack.Screen
@@ -112,6 +118,7 @@ export default function RootNavigator() {
             component={CompletedJobListScreen}
             options={{
               headerTitle: "Gerçekleşen İşler",
+              headerBackTitleVisible: false,
             }}
           />
           <Stack.Screen
@@ -120,6 +127,7 @@ export default function RootNavigator() {
             options={({ route }) => ({
               headerTitle: route.params.mode === "add" ? "İş Ekle" : "Düzenle",
               presentation: "modal",
+              headerBackTitleVisible: false,
             })}
           />
           <Stack.Screen
@@ -127,6 +135,7 @@ export default function RootNavigator() {
             component={SettingsScreen}
             options={{
               headerTitle: "Ayarlar",
+              headerBackTitleVisible: false,
             }}
           />
         </>
