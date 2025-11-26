@@ -188,62 +188,92 @@ export default function SettingsScreen() {
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
                   Veri Toplama ve Kullanım
                 </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  LogisticsPRO, tüm kişisel verilerinizi cihazınızda yerel olarak saklar. Hiçbir veri sunucuya, buluta veya üçüncü taraf hizmetlerine gönderilmez.
+                </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  LogisticsPRO, kişisel verilerinizi cihazınızda yerel olarak saklar. Hiçbir veri sunucuya gönderilmez. Verilerin kontrolü tamamen sizde kalır.
+                  Veriler yalnızca sizin tarafından erişilir. Geliştirici veya başka hiç kimse verilerinize erişemez.
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  GDPR Uyumluluğu
+                  GDPR ve KVKK Uyumluluğu
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
-                  LogisticsPRO, GDPR (Avrupa Genel Veri Koruma Yönetmeliği) ve KVKK (Kişisel Verileri Koruma Kanunu) uyumludur. Aşağıdaki hakları tanırız:
+                  Uygulama Avrupa Birliği Genel Veri Koruma Yönetmeliği (GDPR) ve Türk Kişisel Verileri Koruma Kanunu (KVKK) tamamen uyumludur.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, fontWeight: "600", marginBottom: Spacing.sm }}>
+                  Kullanıcı Hakları:
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Erişim Hakkı - Verilerinizi istediğiniz zaman görüntüleyin
+                  • Erişim - Tüm verilerinizi görüntüleme hakkı
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Portabilite Hakkı - Verilerinizi indirin (JSON formatında)
+                  • Taşınabilirlik - Verilerinizi JSON formatında export etme hakkı
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Silinme Hakkı - Tüm verilerinizi tamamen silin
+                  • Silinme - Tüm verilerinizi kalıcı olarak silme hakkı
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Düzeltme Hakkı - Verilerinizi istediğiniz zaman değiştirin
+                  • Düzeltme - Verilerinizi istediğiniz zaman güncelleme hakkı
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Kısıtlama - Veri işlemesinin sınırlandırılmasını talep etme hakkı
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  Güvenlik Önlemleri
+                  Güvenlik Teknolojileri
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.sm }}>
+                  Hassas veriler (şifreler, IBAN) aşağıdaki güvenlik katmanları ile korunmaktadır:
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  Hassas veriler (IBAN, şifreler) iOS Keychain ve Android Keystore tarafından korunan güvenli depolamada tutulur. Tüm veriler cihazda şifrelenir.
+                  • iOS Keychain - Apple'ın işletim sistemi düzeyinde güvenli depolama
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Android Keystore - Donanım tarafından desteklenen kriptografik anahtar yönetimi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Veri Şifreleme - Hassas bilgiler cihazda şifrelenip saklanır
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Yerel Depolama - Tüm veriler cihazın yerel dosya sisteminde tutulur
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  Veri Yönetimi Araçları
+                  Verileriniz Hakkında Bilgi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.sm }}>
+                  Uygulama aşağıdaki kategorilerde veriler saklayabilir:
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  Ayarlar sayfasında "Veri Yönetimi" bölümünde:
+                  • Taşıyıcı bilgileri (ad, telefon, araç tipi)
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Verileri İndir - Tüm verilerinizi JSON dosyası olarak export edin
+                  • Firma ve müşteri bilgileri
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Verileri Sil - Tüm kişisel verilerinizi kalıcı olarak silin
+                  • İş ve proje detayları
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • IBAN ve banka bilgileri (Keychain'de şifrelenmiş)
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Ödeme ve komisyon kayıtları
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  Üçüncü Taraf Uygulamalar
+                  Sızıntı Olmayan Mimarı
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  LogisticsPRO üçüncü taraf hizmetlerine veri göndermez. Uygulama tamamen bağımsız çalışır.
+                  LogisticsPRO tamamen offline çalışır ve hiçbir ağ bağlantısı gerektirmez. İnternet olup olmadığı uygulamanın çalışmasını etkilemez.
                 </ThemedText>
               </View>
 
@@ -272,7 +302,7 @@ export default function SettingsScreen() {
                 LogisticsPRO
               </ThemedText>
               <ThemedText type="body" style={[styles.version, { color: colors.textSecondary }]}>
-                Sürüm 1.0.0
+                Sürüm 1.0.1 (Security Edition)
               </ThemedText>
 
               <View style={styles.divider} />
@@ -281,20 +311,47 @@ export default function SettingsScreen() {
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
                   Hakkında
                 </ThemedText>
+                <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 22, marginBottom: Spacing.md }}>
+                  LogisticsPRO, nakliye ve lojistik firmaları için profesyonel taşıyıcı yönetim uygulamasıdır. Taşıyıcı kayıt, iş planlama, takip ve ödeme yönetimini basit ve hızlı hale getirmek için tasarlanmıştır.
+                </ThemedText>
                 <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 22 }}>
-                  LogisticsPRO, nakliye ve lojistik firmaları için taşıyıcı yönetim uygulamasıdır. Taşıyıcıları kolayca kaydetmek, işleri planlayıp takip etmek ve ödeme bilgilerini yönetmek için tasarlanmıştır.
+                  Uygulama, taşıyıcıların bulunabilirliğini, işlerin takip edilmesini ve WhatsApp entegrasyonu ile hızlı bilgi paylaşımını destekler. Cüzdan sistemi ile gelirlerinizi ve komisyonlarınızı kolayca yönetin.
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  Tasarım ve Geliştirme
+                  Temel Özellikler
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Taşıyıcı yönetimi ve kayıt
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Firma ve müşteri yönetimi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Planlanan ve gerçekleşen işler
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • WhatsApp ile hızlı iletişim
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • IBAN ve ödeme yönetimi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Cüzdan ve komisyon takibi
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Geliştirici
                 </ThemedText>
                 <ThemedText type="body" style={{ color: colors.textSecondary, marginBottom: Spacing.md, fontWeight: "600" }}>
                   Tolga Tunahan
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  Kodlayan ve tasarlayan: Tolga Tunahan
+                  Tasarım, geliştirme ve proje yönetimi
                 </ThemedText>
               </View>
 
@@ -335,8 +392,20 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  İletişim ve Destek
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  Herhangi bir sorun, soru veya geri bildiriminiz için iletişime geçin.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
                 <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
                   © 2025 Tolga Tunahan. Tüm hakları saklıdır.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20, marginTop: Spacing.md }}>
+                  Güncelleme: November 2025
                 </ThemedText>
               </View>
             </ScrollView>
