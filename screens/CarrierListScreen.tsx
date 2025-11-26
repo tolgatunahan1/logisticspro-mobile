@@ -311,6 +311,36 @@ export default function CarrierListScreen() {
                     >
                       <Feather name="message-circle" size={24} color="#FFFFFF" />
                     </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        Alert.alert(
+                          "Nakliyeciyi Sil",
+                          `"${selectedCarrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
+                          [
+                            { text: "İptal", style: "cancel" },
+                            {
+                              text: "Sil",
+                              style: "destructive",
+                              onPress: async () => {
+                                try {
+                                  await deleteCarrier(selectedCarrier.id);
+                                  setShowDetailModal(false);
+                                  await loadCarriers();
+                                } catch (error) {
+                                  Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+                                }
+                              },
+                            },
+                          ]
+                        );
+                      }}
+                      style={({ pressed }) => [
+                        styles.actionButtonRound,
+                        { backgroundColor: colors.destructive, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
+                      ]}
+                    >
+                      <Feather name="trash-2" size={24} color="#FFFFFF" />
+                    </Pressable>
                   </View>
                 </View>
               )}
