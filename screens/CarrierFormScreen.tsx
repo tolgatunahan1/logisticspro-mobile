@@ -92,8 +92,14 @@ export default function CarrierFormScreen() {
           style: "destructive",
           onPress: async () => {
             setIsLoading(true);
-            await deleteCarrier(carrier.id);
-            navigation.goBack();
+            try {
+              await deleteCarrier(carrier.id);
+              navigation.goBack();
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+              setIsLoading(false);
+            }
           },
         },
       ]

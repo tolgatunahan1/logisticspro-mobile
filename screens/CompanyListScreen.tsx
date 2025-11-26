@@ -295,25 +295,6 @@ export default function CompanyListScreen() {
                 </View>
               )}
             </ScrollView>
-
-            {/* Modal Footer - Delete Button Only */}
-            {selectedCompany && (
-              <Pressable
-                onPress={() => handleDeletePress(selectedCompany)}
-                style={({ pressed }) => [
-                  styles.deleteButton,
-                  {
-                    backgroundColor: colors.destructive,
-                    opacity: pressed ? 0.9 : 1,
-                  },
-                ]}
-              >
-                <Feather name="trash-2" size={20} color="#FFFFFF" />
-                <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                  Sil
-                </ThemedText>
-              </Pressable>
-            )}
           </View>
         </View>
       </Modal>
