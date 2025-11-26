@@ -174,28 +174,26 @@ export default function AdminPanelScreen() {
     });
   }, [loadUsers]);
 
-  const handleLogoutPress = async () => {
-    console.log("🚪 LOGOUT BUTTON PRESSED - ÇIKIŞ BAŞLATILIYOR");
-    try {
-      await logout();
-      console.log("✅ LOGOUT COMPLETE - Clearing UI");
-      await new Promise(r => setTimeout(r, 200));
-      
-      // Web: Reload page (AsyncStorage temiz, Login render edilecek)
-      // Native: Navigation reset
+  const handleLogoutPress = () => {
+    console.log("🚪 LOGOUT BUTTON CLICKED - ÇIKIŞ BAŞLADI");
+    
+    logout().then(() => {
+      console.log("✅ LOGOUT DONE - Redirecting");
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.location) {
+          console.log("🌐 Reloading page");
+          window.location.reload();
+        } else {
+          console.log("📱 Navigation reset");
+          (navigation as any).reset({ index: 0, routes: [{ name: 'Login' }] });
+        }
+      }, 100);
+    }).catch((err) => {
+      console.error("❌ Logout error:", err);
       if (typeof window !== 'undefined' && window.location) {
-        console.log("🌐 WEB PLATFORM - Page reload");
         window.location.reload();
-      } else {
-        console.log("📱 NATIVE PLATFORM - Navigation reset");
-        (navigation as any).reset({
-          index: 0,
-          routes: [{ name: 'Login' }],
-        });
       }
-    } catch (error) {
-      console.error("❌ Logout error:", error);
-    }
+    });
   };
 
   const formatDate = (timestamp: number) => {
