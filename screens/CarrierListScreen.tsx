@@ -315,6 +315,25 @@ export default function CarrierListScreen() {
                 </View>
               )}
             </ScrollView>
+
+            {/* Modal Footer - Delete Button Only */}
+            {selectedCarrier && (
+              <Pressable
+                onPress={() => handleDeletePress(selectedCarrier)}
+                style={({ pressed }) => [
+                  styles.deleteButton,
+                  {
+                    backgroundColor: colors.destructive,
+                    opacity: pressed ? 0.9 : 1,
+                  },
+                ]}
+              >
+                <Feather name="trash-2" size={20} color="#FFFFFF" />
+                <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                  Sil
+                </ThemedText>
+              </Pressable>
+            )}
           </View>
         </View>
       </Modal>
@@ -415,6 +434,17 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xs,
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.xs,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
   emptyState: {
     flex: 1,
