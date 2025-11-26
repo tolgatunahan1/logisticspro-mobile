@@ -181,7 +181,7 @@ export default function AvailabilityScreen() {
         </Pressable>
       </View>
 
-      <View style={[styles.divider, { borderColor: colors.borderColor }]} />
+      <View style={[styles.divider, { borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)" }]} />
 
       <View style={styles.availabilityDetails}>
         <View style={styles.detailRow}>
@@ -339,7 +339,7 @@ export default function AvailabilityScreen() {
                     styles.input,
                     {
                       backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
-                      borderColor: colors.borderColor,
+                      borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                       flexDirection: "row",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -356,7 +356,7 @@ export default function AvailabilityScreen() {
                   <View
                     style={[
                       styles.carrierList,
-                      { backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)", borderColor: colors.borderColor },
+                      { backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)", borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)" },
                     ]}
                   >
                     <ScrollView scrollEnabled={carriers.length > 5} nestedScrollEnabled>
@@ -375,7 +375,7 @@ export default function AvailabilityScreen() {
                               paddingVertical: Spacing.md,
                               paddingHorizontal: Spacing.md,
                               borderBottomWidth: 1,
-                              borderBottomColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                              borderBottomColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                             }}
                           >
                             <ThemedText type="body">{carrier.name}</ThemedText>
@@ -420,7 +420,7 @@ export default function AvailabilityScreen() {
                       {
                         backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
                         color: colors.text,
-                        borderColor: colors.borderColor,
+                        borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                       },
                     ]}
                   />
@@ -442,7 +442,7 @@ export default function AvailabilityScreen() {
                       {
                         backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
                         color: colors.text,
-                        borderColor: colors.borderColor,
+                        borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                       },
                     ]}
                   />
@@ -463,7 +463,7 @@ export default function AvailabilityScreen() {
                       {
                         backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
                         color: colors.text,
-                        borderColor: colors.borderColor,
+                        borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                       },
                     ]}
                   />
@@ -486,7 +486,7 @@ export default function AvailabilityScreen() {
                   {
                     backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
                     color: colors.text,
-                    borderColor: colors.borderColor,
+                    borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                   },
                 ]}
               />
@@ -507,7 +507,7 @@ export default function AvailabilityScreen() {
                   {
                     backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
                     color: colors.text,
-                    borderColor: colors.borderColor,
+                    borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                   },
                 ]}
               />
@@ -531,7 +531,7 @@ export default function AvailabilityScreen() {
                   {
                     backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
                     color: colors.text,
-                    borderColor: colors.borderColor,
+                    borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                   },
                 ]}
               />
