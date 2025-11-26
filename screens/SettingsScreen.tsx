@@ -8,16 +8,13 @@ import * as Notifications from "expo-notifications";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN } from "@/utils/storage";
-import { AccountSettingsModal } from "@/components/AccountSettingsModal";
 import { IBANListModal } from "@/components/IBANListModal";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user, updateProfile } = useAuth();
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [ibans, setIbans] = useState<IBAN[]>([]);
@@ -25,10 +22,6 @@ export default function SettingsScreen() {
   const [ibanInput, setIbanInput] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-  const [showAccountModal, setShowAccountModal] = useState(false);
-  const [editUsername, setEditUsername] = useState(user?.username || "");
-  const [editPassword, setEditPassword] = useState(user?.password || "");
-  const [isUpdating, setIsUpdating] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
@@ -80,56 +73,10 @@ export default function SettingsScreen() {
     ]);
   };
 
-  const handleUpdateProfile = async () => {
-    if (!editUsername.trim() || !editPassword.trim()) {
-      Alert.alert("Hata", "Kullanıcı adı ve şifre boş olamaz");
-      return;
-    }
-
-    setIsUpdating(true);
-    const success = await updateProfile(editUsername.trim(), editPassword.trim());
-    setIsUpdating(false);
-
-    if (success) {
-      Alert.alert("Başarılı", "Hesap bilgileri güncellendi");
-      setShowAccountModal(false);
-
-      try {
-        await Notifications.presentNotificationAsync({
-          title: "Hesap Bilgileri Güncellendi",
-          body: `Kullanıcı adı: ${editUsername}`,
-          data: { type: "account_update" },
-          sound: true,
-        });
-      } catch (error) {
-        console.log("Bildirim: Cihazda Expo Go'da test et");
-      }
-    } else {
-      Alert.alert("Hata", "Hesap bilgileri güncellenemedi");
-    }
-  };
-
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl * 2, paddingBottom: insets.bottom + Spacing.xl }}>
-        <Pressable onPress={() => setShowAccountModal(true)}>
-          <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-            <View style={styles.userInfo}>
-              <View style={[styles.avatar, { backgroundColor: theme.link }]}>
-                <Feather name="user" size={24} color={colors.buttonText} />
-              </View>
-              <View style={styles.userDetails}>
-                <ThemedText type="h4">{user?.username}</ThemedText>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Oturum açık
-                </ThemedText>
-              </View>
-              <Feather name="edit-2" size={18} color={theme.link} />
-            </View>
-          </View>
-        </Pressable>
-
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.sectionHeader}>
             <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
@@ -217,17 +164,6 @@ export default function SettingsScreen() {
 
 
       </ScrollView>
-
-      <AccountSettingsModal
-        visible={showAccountModal}
-        onClose={() => setShowAccountModal(false)}
-        editUsername={editUsername}
-        editPassword={editPassword}
-        setEditUsername={setEditUsername}
-        setEditPassword={setEditPassword}
-        isUpdating={isUpdating}
-        onSave={handleUpdateProfile}
-      />
 
       <IBANListModal
         visible={showAddModal}
