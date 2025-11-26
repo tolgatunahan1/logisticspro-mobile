@@ -77,27 +77,39 @@ export default function CompanyFormScreen() {
   };
 
   const handleDelete = () => {
-    if (!company) return;
+    if (!company) {
+      Alert.alert("Hata", "Firma verisi bulunamadı");
+      return;
+    }
+
+    const companyId = company.id;
+    const companyName = company.name;
 
     Alert.alert(
       "Firmayı Sil",
-      `"${company.name}" adlı firmayı silmek istediğinizden emin misiniz?`,
+      `"${companyName}" adlı firmayı silmek istediğinizden emin misiniz?`,
       [
         { text: "İptal", style: "cancel" },
         {
           text: "Sil",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            console.log("Silme başladı, ID:", companyId);
             setIsLoading(true);
-            deleteCompany(company.id)
-              .then(() => {
+            try {
+              const result = await deleteCompany(companyId);
+              console.log("Silme sonucu:", result);
+              if (result) {
                 navigation.goBack();
-              })
-              .catch((error) => {
-                console.error("Silme hatası:", error);
-                Alert.alert("Hata", "Firma silinirken hata oluştu");
+              } else {
+                Alert.alert("Hata", "Firma silinemedi");
                 setIsLoading(false);
-              });
+              }
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "Firma silinirken hata oluştu");
+              setIsLoading(false);
+            }
           },
         },
       ]

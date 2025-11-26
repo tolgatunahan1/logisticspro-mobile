@@ -81,27 +81,39 @@ export default function CarrierFormScreen() {
   };
 
   const handleDelete = () => {
-    if (!carrier) return;
+    if (!carrier) {
+      Alert.alert("Hata", "Nakliyeci verisi bulunamadı");
+      return;
+    }
+
+    const carrierId = carrier.id;
+    const carrierName = carrier.name;
 
     Alert.alert(
       "Nakliyeciyi Sil",
-      `"${carrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
+      `"${carrierName}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
       [
         { text: "İptal", style: "cancel" },
         {
           text: "Sil",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            console.log("Silme başladı, ID:", carrierId);
             setIsLoading(true);
-            deleteCarrier(carrier.id)
-              .then(() => {
+            try {
+              const result = await deleteCarrier(carrierId);
+              console.log("Silme sonucu:", result);
+              if (result) {
                 navigation.goBack();
-              })
-              .catch((error) => {
-                console.error("Silme hatası:", error);
-                Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+              } else {
+                Alert.alert("Hata", "Nakliyeci silinemedi");
                 setIsLoading(false);
-              });
+              }
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+              setIsLoading(false);
+            }
           },
         },
       ]
