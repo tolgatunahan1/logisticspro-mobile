@@ -3,6 +3,7 @@ import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import LoginScreen from "@/screens/LoginScreen";
+import AdminPanelScreen from "@/screens/AdminPanelScreen";
 import BottomTabNavigator from "@/navigation/BottomTabNavigator";
 import CarrierListScreen from "@/screens/CarrierListScreen";
 import CarrierFormScreen from "@/screens/CarrierFormScreen";
@@ -54,14 +55,23 @@ export default function RootNavigator() {
       }}
     >
       {user ? (
-        <>
+        user.type === "admin" ? (
           <Stack.Screen
-            name="MainTabs"
-            component={BottomTabNavigator}
+            name="AdminPanel"
+            component={AdminPanelScreen}
             options={{
               headerShown: false,
             }}
           />
+        ) : (
+          <>
+            <Stack.Screen
+              name="MainTabs"
+              component={BottomTabNavigator}
+              options={{
+                headerShown: false,
+              }}
+            />
           <Stack.Screen
             name="CarrierList"
             component={CarrierListScreen}
@@ -132,15 +142,16 @@ export default function RootNavigator() {
               headerBackTitleVisible: false,
             })}
           />
-          <Stack.Screen
-            name="Settings"
-            component={SettingsScreen}
-            options={{
-              headerTitle: "Ayarlar",
-              headerBackTitleVisible: false,
-            }}
-          />
-        </>
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{
+                headerTitle: "Ayarlar",
+                headerBackTitleVisible: false,
+              }}
+            />
+          </>
+        )
       ) : (
         <Stack.Screen
           name="Login"
