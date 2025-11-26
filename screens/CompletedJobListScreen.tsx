@@ -4,6 +4,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Linking from "expo-linking";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -31,6 +32,74 @@ export default function CompletedJobListScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  // Helper function to send carrier info to company via WhatsApp
+  const shareCarrierInfoWithCompany = useCallback(async () => {
+    if (!selectedJob) return;
+
+    const company = companies[selectedJob.companyId];
+    const carrier = carriers[selectedJob.carrierId];
+
+    if (!company?.phone || !carrier) {
+      Alert.alert("Hata", "Firma veya Nakliyeci bilgileri eksik");
+      return;
+    }
+
+    const message = `Nakliyeci Bilgileri:
+    
+Adı: ${carrier.name || "-"}
+Telefon: ${carrier.phone || "-"}
+Araç Plakası: ${carrier.plate || "-"}
+Araç Tipi: ${carrier.vehicleType ? getVehicleTypeLabel(carrier.vehicleType) : "-"}`;
+
+    const phoneNumber = company.phone.replace(/\D/g, "");
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+    try {
+      const supported = await Linking.canOpenURL(whatsappUrl);
+      if (supported) {
+        await Linking.openURL(whatsappUrl);
+      } else {
+        Alert.alert("Hata", "WhatsApp uygulaması yüklü değil");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Bağlantı açılamadı");
+    }
+  }, [selectedJob, companies, carriers]);
+
+  // Helper function to send company info to carrier via WhatsApp
+  const shareCompanyInfoWithCarrier = useCallback(async () => {
+    if (!selectedJob) return;
+
+    const company = companies[selectedJob.companyId];
+    const carrier = carriers[selectedJob.carrierId];
+
+    if (!carrier?.phone || !company) {
+      Alert.alert("Hata", "Firma veya Nakliyeci bilgileri eksik");
+      return;
+    }
+
+    const message = `Firma Bilgileri:
+    
+Adı: ${company.name || "-"}
+Telefon: ${company.phone || "-"}
+İletişim Kişisi: ${company.contactPerson || "-"}
+Adres: ${company.address || "-"}`;
+
+    const phoneNumber = carrier.phone.replace(/\D/g, "");
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+    try {
+      const supported = await Linking.canOpenURL(whatsappUrl);
+      if (supported) {
+        await Linking.openURL(whatsappUrl);
+      } else {
+        Alert.alert("Hata", "WhatsApp uygulaması yüklü değil");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Bağlantı açılamadı");
+    }
+  }, [selectedJob, companies, carriers]);
 
   const loadData = useCallback(async () => {
     const allJobs = await getCompletedJobs();
@@ -256,6 +325,24 @@ export default function CompletedJobListScreen() {
                         {companies[selectedJob.companyId]?.address || "-"}
                       </ThemedText>
                     </View>
+
+                    {/* Share Carrier Info Button */}
+                    <Pressable
+                      onPress={shareCarrierInfoWithCompany}
+                      style={({ pressed }) => [
+                        styles.shareButton,
+                        {
+                          backgroundColor: "#25D366",
+                          opacity: pressed ? 0.9 : 1,
+                          marginTop: Spacing.md,
+                        },
+                      ]}
+                    >
+                      <Feather name="message-circle" size={18} color="#FFFFFF" />
+                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        Nakliyeci Bilgilerini Paylaş
+                      </ThemedText>
+                    </Pressable>
                   </View>
 
                   {/* Carrier Information Section */}
@@ -301,6 +388,24 @@ export default function CompletedJobListScreen() {
                         {carriers[selectedJob.carrierId]?.vehicleType ? getVehicleTypeLabel(carriers[selectedJob.carrierId].vehicleType) : "-"}
                       </ThemedText>
                     </View>
+
+                    {/* Share Company Info Button */}
+                    <Pressable
+                      onPress={shareCompanyInfoWithCarrier}
+                      style={({ pressed }) => [
+                        styles.shareButton,
+                        {
+                          backgroundColor: "#25D366",
+                          opacity: pressed ? 0.9 : 1,
+                          marginTop: Spacing.md,
+                        },
+                      ]}
+                    >
+                      <Feather name="message-circle" size={18} color="#FFFFFF" />
+                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        Firma Bilgilerini Paylaş
+                      </ThemedText>
+                    </Pressable>
                   </View>
 
                   {/* Cargo Information Section */}
