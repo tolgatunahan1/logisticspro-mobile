@@ -1,77 +1,86 @@
 import { Platform } from "react-native";
 
-// iOS 26 Modern Color System
-const tintColorLight = "#0A84FF";
-const tintColorDark = "#0A84FF";
+// Logistics Professional Color System - Bright & Modern
+const primaryBlue = "#0066FF";      // Vibrant logistics blue
+const accentOrange = "#FF8C00";     // Energetic amber/orange
+const lightBackground = "#F7F9FC";  // Soft blue-gray background
 
 export const Colors = {
   light: {
     // Primary Text
-    text: "#1D1D1D",
-    textSecondary: "#8E8E93",
-    textTertiary: "#C7C7CC",
+    text: "#1A1A1A",
+    textSecondary: "#6B7280",
+    textTertiary: "#9CA3AF",
     buttonText: "#FFFFFF",
     
     // Tabs & Navigation
-    tabIconDefault: "#8E8E93",
-    tabIconSelected: tintColorLight,
+    tabIconDefault: "#9CA3AF",
+    tabIconSelected: primaryBlue,
     
     // Links & Actions
-    link: "#0A84FF",
+    link: primaryBlue,
     
-    // Backgrounds
+    // Backgrounds - BRIGHT & AIRY
     backgroundRoot: "#FFFFFF",
-    backgroundDefault: "#F5F5F7",
-    backgroundSecondary: "#EFEFEF",
-    backgroundTertiary: "#E5E5EA",
+    backgroundDefault: "#F7F9FC",
+    backgroundSecondary: "#F0F4F8",
+    backgroundTertiary: "#E5EBF2",
     
     // Borders
-    border: "#D1D1D6",
+    border: "#E5E7EB",
     
-    // System Colors
-    success: "#34C759",
-    destructive: "#FF3B30",
-    warning: "#FF9500",
+    // System Colors - Logistics themed
+    success: "#10B981",
+    destructive: "#EF4444",
+    warning: accentOrange,
     
-    // Glass Effects
-    inputBackground: "rgba(255, 255, 255, 0.8)",
-    glassOverlay: "rgba(255, 255, 255, 0.12)",
-    glassBorder: "rgba(255, 255, 255, 0.3)",
-    glassBlur: "rgba(0, 0, 0, 0.05)",
+    // Glass Effects - Bright & Blue-tinted
+    inputBackground: "rgba(255, 255, 255, 0.9)",
+    glassOverlay: "rgba(0, 102, 255, 0.06)",
+    glassBorder: "rgba(0, 102, 255, 0.15)",
+    glassBlur: "rgba(0, 102, 255, 0.03)",
+    
+    // Logistics Brand Colors
+    primaryBlue: primaryBlue,
+    accentOrange: accentOrange,
   },
   dark: {
     // Primary Text
     text: "#FFFFFF",
-    textSecondary: "#A1A1A6",
-    textTertiary: "#5A5A5F",
+    textSecondary: "#D1D5DB",
+    textTertiary: "#9CA3AF",
     buttonText: "#FFFFFF",
     
     // Tabs & Navigation
-    tabIconDefault: "#A1A1A6",
-    tabIconSelected: tintColorDark,
+    tabIconDefault: "#9CA3AF",
+    tabIconSelected: "#3B82F6",
     
     // Links & Actions
-    link: "#0A84FF",
+    link: "#3B82F6",
     
-    // Backgrounds
-    backgroundRoot: "#0A0A0A",
-    backgroundDefault: "#1C1C1E",
-    backgroundSecondary: "#2C2C2E",
-    backgroundTertiary: "#3A3A3C",
+    // Backgrounds - Dark but not too dark
+    backgroundRoot: "#0F172A",
+    backgroundDefault: "#1E293B",
+    backgroundSecondary: "#334155",
+    backgroundTertiary: "#475569",
     
     // Borders
-    border: "#424245",
+    border: "#475569",
     
     // System Colors
-    success: "#34C759",
-    destructive: "#FF3B30",
-    warning: "#FF9500",
+    success: "#10B981",
+    destructive: "#EF4444",
+    warning: "#FFA726",
     
-    // Glass Effects
-    inputBackground: "rgba(30, 30, 32, 0.8)",
-    glassOverlay: "rgba(255, 255, 255, 0.08)",
-    glassBorder: "rgba(255, 255, 255, 0.2)",
-    glassBlur: "rgba(255, 255, 255, 0.05)",
+    // Glass Effects - Blue-tinted
+    inputBackground: "rgba(30, 41, 59, 0.9)",
+    glassOverlay: "rgba(59, 130, 246, 0.08)",
+    glassBorder: "rgba(59, 130, 246, 0.20)",
+    glassBlur: "rgba(59, 130, 246, 0.05)",
+    
+    // Logistics Brand Colors
+    primaryBlue: "#3B82F6",
+    accentOrange: "#FFA726",
   },
 };
 
@@ -164,28 +173,28 @@ export const Fonts = Platform.select({
 // Shadow Styles for Elevation
 export const Shadows = {
   xs: {
-    shadowColor: "#000",
+    shadowColor: "#0066FF",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   sm: {
-    shadowColor: "#000",
+    shadowColor: "#0066FF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
   md: {
-    shadowColor: "#000",
+    shadowColor: "#0066FF",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 8,
   },
   lg: {
-    shadowColor: "#000",
+    shadowColor: "#0066FF",
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.2,
     shadowRadius: 24,

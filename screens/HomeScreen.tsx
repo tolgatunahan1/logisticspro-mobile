@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Modal } from "react-native";
+import { StyleSheet, View, Pressable, Modal, ScrollView } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -12,6 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { AnimatedTruck } from "@/components/AnimatedTruck";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -84,7 +85,71 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.content, { paddingTop: headerHeight + Spacing.xl }]}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: headerHeight + Spacing.xl, paddingBottom: Spacing.xl },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Animated Truck Hero */}
+        <View style={styles.heroSection}>
+          <AnimatedTruck />
+          <ThemedText type="h2" style={styles.heroTitle}>
+            Nakliye Yönetimine Hoşgeldiniz
+          </ThemedText>
+          <ThemedText
+            type="body"
+            style={[styles.heroSubtitle, { color: colors.textSecondary }]}
+          >
+            Tüm sevkiyatlarınızı ve taşıyıcılarınızı kolayca yönetin
+          </ThemedText>
+        </View>
+
+        {/* Stats Cards */}
+        <View style={styles.statsContainer}>
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                borderLeftColor: theme.link,
+              },
+            ]}
+          >
+            <Feather name="truck" size={24} color={theme.link} />
+            <View style={styles.statContent}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Taşıyıcı
+              </ThemedText>
+              <ThemedText type="h3">{carrierCount}</ThemedText>
+            </View>
+          </View>
+
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                borderLeftColor: colors.success,
+              },
+            ]}
+          >
+            <Feather name="briefcase" size={24} color={colors.success} />
+            <View style={styles.statContent}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Firma
+              </ThemedText>
+              <ThemedText type="h3">{companyCount}</ThemedText>
+            </View>
+          </View>
+        </View>
+
+        {/* Menu Cards */}
+        <ThemedText type="h4" style={[styles.sectionHeader, { color: colors.textSecondary }]}>
+          Hızlı Erişim
+        </ThemedText>
+
         <Pressable
           onPress={() => navigation.navigate("CarrierList")}
           style={({ pressed }) => [
@@ -93,10 +158,19 @@ export default function HomeScreen() {
               backgroundColor: colors.backgroundDefault,
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.98 : 1 }],
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
             },
           ]}
         >
-          <View style={[styles.iconContainer, { backgroundColor: theme.link }]}>
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: theme.link, borderRadius: 16 },
+            ]}
+          >
             <Feather name="truck" size={32} color="#FFFFFF" />
           </View>
           <View style={styles.menuCardContent}>
@@ -116,10 +190,19 @@ export default function HomeScreen() {
               backgroundColor: colors.backgroundDefault,
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.98 : 1 }],
+              borderRadius: 0,
+              marginTop: 0,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
             },
           ]}
         >
-          <View style={[styles.iconContainer, { backgroundColor: colors.success }]}>
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: colors.success, borderRadius: 16 },
+            ]}
+          >
             <Feather name="briefcase" size={32} color="#FFFFFF" />
           </View>
           <View style={styles.menuCardContent}>
@@ -130,7 +213,7 @@ export default function HomeScreen() {
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
         </Pressable>
-      </View>
+      </ScrollView>
 
       <Modal
         visible={drawerVisible}
@@ -240,9 +323,42 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    flex: 1,
     paddingHorizontal: Spacing.xl,
     gap: Spacing.lg,
+  },
+  heroSection: {
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+    gap: Spacing.md,
+  },
+  heroTitle: {
+    textAlign: "center",
+  },
+  heroSubtitle: {
+    textAlign: "center",
+    marginHorizontal: Spacing.lg,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  statCard: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    borderLeftWidth: 4,
+    gap: Spacing.md,
+  },
+  statContent: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  sectionHeader: {
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   menuCard: {
     flexDirection: "row",
