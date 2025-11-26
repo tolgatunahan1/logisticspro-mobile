@@ -46,11 +46,24 @@ export default function App() {
     logPlatform();
     
     if (typeof document !== 'undefined') {
+      // Prevent pinch zoom
       const preventPinch = (e: any) => {
         if (e.touches && e.touches.length > 1) {
           e.preventDefault();
         }
       };
+
+      // Add global CSS to prevent input auto-zoom on focus
+      const style = document.createElement('style');
+      style.textContent = `
+        input, textarea, select {
+          font-size: 16px !important;
+        }
+        input:focus, textarea:focus, select:focus {
+          font-size: 16px !important;
+        }
+      `;
+      document.head.appendChild(style);
 
       document.addEventListener('touchmove', preventPinch, { passive: false });
       return () => document.removeEventListener('touchmove', preventPinch);
