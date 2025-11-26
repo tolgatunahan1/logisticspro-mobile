@@ -149,14 +149,6 @@ export default function JobListScreen() {
               <ThemedText type="h4" numberOfLines={1}>
                 {company?.name || "Bilinmeyen Firma"}
               </ThemedText>
-              <View style={styles.detailRow}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Ürünün Cinsi:
-                </ThemedText>
-                <ThemedText type="body" style={{ fontWeight: "600" }}>
-                  {job.cargoType}
-                </ThemedText>
-              </View>
             </View>
             <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
               <Pressable
@@ -165,41 +157,6 @@ export default function JobListScreen() {
               >
                 <Feather name="edit" size={18} color={theme.link} />
               </Pressable>
-            </View>
-          </View>
-
-          <View style={styles.jobCardDetails}>
-            <View style={styles.detailRow}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Yükleme:
-              </ThemedText>
-              <ThemedText type="body" style={{ fontWeight: "600" }}>
-                {job.loadingLocation}
-              </ThemedText>
-            </View>
-            <View style={styles.detailRow}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Teslimat:
-              </ThemedText>
-              <ThemedText type="body" style={{ fontWeight: "600" }}>
-                {job.deliveryLocation}
-              </ThemedText>
-            </View>
-            <View style={styles.detailRow}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Tarih:
-              </ThemedText>
-              <ThemedText type="body">
-                {formatDate(job.loadingDate)} - {formatDate(job.deliveryDate)}
-              </ThemedText>
-            </View>
-            <View style={styles.detailRow}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Tonaj:
-              </ThemedText>
-              <ThemedText type="body" style={{ fontWeight: "600" }}>
-                {job.tonnage || "-"}
-              </ThemedText>
             </View>
           </View>
         </Pressable>
