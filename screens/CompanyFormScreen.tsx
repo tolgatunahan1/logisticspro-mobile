@@ -28,7 +28,6 @@ export default function CompanyFormScreen() {
   const [name, setName] = useState(company?.name || "");
   const [phone, setPhone] = useState(company?.phone || "");
   const [address, setAddress] = useState(company?.address || "");
-  const [contactPerson, setContactPerson] = useState(company?.contactPerson || "");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -42,9 +41,6 @@ export default function CompanyFormScreen() {
     }
     if (!phone.trim()) {
       newErrors.phone = "Telefon numarası gerekli";
-    }
-    if (!contactPerson.trim()) {
-      newErrors.contactPerson = "Yetkili kişi gerekli";
     }
 
     setErrors(newErrors);
@@ -60,7 +56,6 @@ export default function CompanyFormScreen() {
         name: name.trim(),
         phone: phone.trim(),
         address: address.trim(),
-        contactPerson: contactPerson.trim(),
       };
 
       if (isEdit && company) {
@@ -108,7 +103,7 @@ export default function CompanyFormScreen() {
         </Pressable>
       ),
     });
-  }, [navigation, theme, isLoading, name, phone, address, contactPerson]);
+  }, [navigation, theme, isLoading, name, phone, address]);
 
   const renderInput = (
     label: string,
@@ -169,7 +164,6 @@ export default function CompanyFormScreen() {
       >
         {renderInput("Firma Adı", name, setName, "name", { placeholder: "Firma adı", autoCapitalize: "words" })}
         {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
-        {renderInput("Yetkili Kişi", contactPerson, setContactPerson, "contactPerson", { placeholder: "Yetkili adı", autoCapitalize: "words" })}
         {renderInput("Adres", address, setAddress, "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true })}
 
       </ScrollView>
