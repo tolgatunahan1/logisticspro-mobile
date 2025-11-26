@@ -176,18 +176,25 @@ export default function AdminPanelScreen() {
 
   const handleLogoutPress = async () => {
     console.log("🚪 LOGOUT BUTTON PRESSED - ÇIKIŞ BAŞLATILIYOR");
-    console.log("📞 Calling logout() from AuthContext");
     try {
       await logout();
-      console.log("✅ LOGOUT COMPLETED - Resetting navigation to Login");
-      await new Promise(r => setTimeout(r, 300));
-      (navigation as any).reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
+      console.log("✅ LOGOUT COMPLETE - Clearing UI");
+      await new Promise(r => setTimeout(r, 200));
+      
+      // Web: Reload page (AsyncStorage temiz, Login render edilecek)
+      // Native: Navigation reset
+      if (typeof window !== 'undefined' && window.location) {
+        console.log("🌐 WEB PLATFORM - Page reload");
+        window.location.reload();
+      } else {
+        console.log("📱 NATIVE PLATFORM - Navigation reset");
+        (navigation as any).reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      }
     } catch (error) {
       console.error("❌ Logout error:", error);
-      Alert.alert("Hata", "Çıkış sırasında hata oluştu");
     }
   };
 
