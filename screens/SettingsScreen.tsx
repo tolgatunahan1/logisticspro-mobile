@@ -91,14 +91,16 @@ export default function SettingsScreen() {
       Alert.alert("Başarılı", "Hesap bilgileri güncellendi");
       setShowAccountModal(false);
       
+      // Bildirim gönder (Expo Go'da çalışır)
       try {
         await Notifications.presentNotificationAsync({
           title: "Hesap Bilgileri Güncellendi",
           body: `Kullanıcı adı: ${editUsername}`,
           data: { type: "account_update" },
+          sound: true,
         });
       } catch (error) {
-        console.error("Bildirim gönderilemedi:", error);
+        console.log("Bildirim: Cihazda Expo Go'da test et");
       }
     } else {
       Alert.alert("Hata", "Hesap bilgileri güncellenemedi");
