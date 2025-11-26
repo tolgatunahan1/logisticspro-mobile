@@ -85,8 +85,14 @@ export default function CompanyListScreen() {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
-            await deleteCompany(company.id);
-            loadCompanies();
+            try {
+              await deleteCompany(company.id);
+              await loadCompanies();
+              setShowDetailModal(false);
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "Firma silinirken hata oluştu");
+            }
           },
         },
       ]

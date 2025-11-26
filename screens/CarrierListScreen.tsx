@@ -85,8 +85,14 @@ export default function CarrierListScreen() {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
-            await deleteCarrier(carrier.id);
-            loadCarriers();
+            try {
+              await deleteCarrier(carrier.id);
+              await loadCarriers();
+              setShowDetailModal(false);
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+            }
           },
         },
       ]
