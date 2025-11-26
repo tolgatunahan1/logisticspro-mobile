@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Contacts from "expo-contacts";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -104,6 +105,43 @@ export default function CarrierFormScreen() {
     navigation.goBack();
   };
 
+  const handleSelectContact = async (fieldType: "name" | "phone") => {
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("İzin Gerekli", "Rehbere erişim izni verilmesi gereklidir");
+        return;
+      }
+
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.FirstName, Contacts.Fields.LastName],
+      });
+
+      if (data.length === 0) {
+        Alert.alert("Rehber Boş", "Rehberde kişi bulunmuyor");
+        return;
+      }
+
+      const contactOptions = data.map((contact, index) => ({
+        text: `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "İsimsiz",
+        onPress: () => {
+          if (fieldType === "name") {
+            setName(`${contact.firstName || ""} ${contact.lastName || ""}`.trim());
+          } else if (fieldType === "phone" && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+            setPhone(contact.phoneNumbers[0].number);
+          }
+        },
+      }));
+
+      contactOptions.push({ text: "İptal", onPress: () => {} });
+
+      Alert.alert("Rehberden Seç", "Bir kişi seçin", contactOptions);
+    } catch (error) {
+      console.error("Rehber hatası:", error);
+      Alert.alert("Hata", "Rehbere erişilirken bir hata oluştu");
+    }
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -143,12 +181,25 @@ export default function CarrierFormScreen() {
       placeholder?: string;
       keyboardType?: "default" | "phone-pad";
       autoCapitalize?: "none" | "sentences" | "words" | "characters";
+      showContactButton?: boolean;
+      contactFieldType?: "name" | "phone";
     }
   ) => (
     <View style={styles.inputContainer}>
-      <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-        {label}
-      </ThemedText>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+          {label}
+        </ThemedText>
+        {options?.showContactButton && (
+          <Pressable
+            onPress={() => handleSelectContact(options.contactFieldType || "name")}
+            disabled={isLoading}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Feather name="users" size={18} color={theme.link} />
+          </Pressable>
+        )}
+      </View>
       <TextInput
         style={[
           styles.input,
@@ -186,8 +237,8 @@ export default function CarrierFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {renderInput("Ad Soyad", name, setName, "name", { placeholder: "Nakliyeci adı", autoCapitalize: "words" })}
-        {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
+        {renderInput("Ad Soyad", name, setName, "name", { placeholder: "Nakliyeci adı", autoCapitalize: "words", showContactButton: Platform.OS !== "web", contactFieldType: "name" })}
+        {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad", showContactButton: Platform.OS !== "web", contactFieldType: "phone" })}
         {renderInput("Plaka", plate, (text) => setPlate(text.toUpperCase()), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
         
         <View style={styles.inputContainer}>

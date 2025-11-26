@@ -1,9 +1,10 @@
 import React, { useState, useLayoutEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Platform } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Contacts from "expo-contacts";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -100,6 +101,45 @@ export default function CompanyFormScreen() {
     navigation.goBack();
   };
 
+  const handleSelectContact = async (fieldType: "name" | "phone" | "contactPerson") => {
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("İzin Gerekli", "Rehbere erişim izni verilmesi gereklidir");
+        return;
+      }
+
+      const { data } = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.FirstName, Contacts.Fields.LastName],
+      });
+
+      if (data.length === 0) {
+        Alert.alert("Rehber Boş", "Rehberde kişi bulunmuyor");
+        return;
+      }
+
+      const contactOptions = data.map((contact) => ({
+        text: `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "İsimsiz",
+        onPress: () => {
+          if (fieldType === "name") {
+            setName(`${contact.firstName || ""} ${contact.lastName || ""}`.trim());
+          } else if (fieldType === "contactPerson") {
+            setContactPerson(`${contact.firstName || ""} ${contact.lastName || ""}`.trim());
+          } else if (fieldType === "phone" && contact.phoneNumbers && contact.phoneNumbers.length > 0) {
+            setPhone(contact.phoneNumbers[0].number);
+          }
+        },
+      }));
+
+      contactOptions.push({ text: "İptal", onPress: () => {} });
+
+      Alert.alert("Rehberden Seç", "Bir kişi seçin", contactOptions);
+    } catch (error) {
+      console.error("Rehber hatası:", error);
+      Alert.alert("Hata", "Rehbere erişilirken bir hata oluştu");
+    }
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -140,12 +180,25 @@ export default function CompanyFormScreen() {
       keyboardType?: "default" | "phone-pad";
       autoCapitalize?: "none" | "sentences" | "words" | "characters";
       multiline?: boolean;
+      showContactButton?: boolean;
+      contactFieldType?: "name" | "phone" | "contactPerson";
     }
   ) => (
     <View style={styles.inputContainer}>
-      <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-        {label}
-      </ThemedText>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+          {label}
+        </ThemedText>
+        {options?.showContactButton && (
+          <Pressable
+            onPress={() => handleSelectContact(options.contactFieldType || "name")}
+            disabled={isLoading}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Feather name="users" size={18} color={theme.link} />
+          </Pressable>
+        )}
+      </View>
       <TextInput
         style={[
           styles.input,
@@ -187,9 +240,9 @@ export default function CompanyFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {renderInput("Firma Adı", name, setName, "name", { placeholder: "Firma adı", autoCapitalize: "words" })}
-        {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
-        {renderInput("Yetkili Kişi", contactPerson, setContactPerson, "contactPerson", { placeholder: "Yetkili adı", autoCapitalize: "words" })}
+        {renderInput("Firma Adı", name, setName, "name", { placeholder: "Firma adı", autoCapitalize: "words", showContactButton: Platform.OS !== "web", contactFieldType: "name" })}
+        {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad", showContactButton: Platform.OS !== "web", contactFieldType: "phone" })}
+        {renderInput("Yetkili Kişi", contactPerson, setContactPerson, "contactPerson", { placeholder: "Yetkili adı", autoCapitalize: "words", showContactButton: Platform.OS !== "web", contactFieldType: "contactPerson" })}
         {renderInput("Adres", address, setAddress, "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true })}
 
         {isEdit ? (
