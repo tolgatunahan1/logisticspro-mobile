@@ -34,6 +34,7 @@ export default function AvailabilityScreen() {
   const loadData = useCallback(async () => {
     try {
       const data = await getCarrierAvailabilities();
+      console.log("Loaded availabilities:", data?.length || 0);
       setAvailabilities(data || []);
       const list = await getCarriers();
       setCarriers(list || []);
@@ -47,23 +48,38 @@ export default function AvailabilityScreen() {
   }, [loadData]));
 
   const handleDelete = async (id: string) => {
-    Alert.alert("Sil", "Emin misiniz?", [
-      { text: "İptal", style: "cancel" },
-      {
-        text: "Sil",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const success = await deleteCarrierAvailability(id);
-            if (success) {
-              await loadData();
-            }
-          } catch (e) {
-            console.error("Delete error:", e);
-          }
+    console.log("Deleting availability:", id);
+    
+    Alert.alert(
+      "Sil",
+      "Emin misiniz?",
+      [
+        {
+          text: "İptal",
+          style: "cancel",
         },
-      },
-    ]);
+        {
+          text: "Sil",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              console.log("Delete confirmed, calling deleteCarrierAvailability");
+              const result = await deleteCarrierAvailability(id);
+              console.log("Delete result:", result);
+              
+              if (result) {
+                console.log("Delete successful, reloading data");
+                await loadData();
+                console.log("Data reloaded");
+              }
+            } catch (error) {
+              console.error("Delete error:", error);
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const handleSave = async () => {
@@ -132,7 +148,13 @@ export default function AvailabilityScreen() {
             </ThemedText>
           )}
         </View>
-        <Pressable onPress={() => handleDelete(item.id)} style={s.deleteBtn}>
+        <Pressable 
+          onPress={() => {
+            console.log("Delete button pressed for:", item.id);
+            handleDelete(item.id);
+          }} 
+          style={s.deleteBtn}
+        >
           <Feather name="trash-2" size={14} color="#EF4444" />
         </Pressable>
       </View>
