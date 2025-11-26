@@ -210,7 +210,7 @@ export default function JobFormScreen() {
     <>
       <ScrollView
       style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }}
+      contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl + 300 }}
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.content}>
