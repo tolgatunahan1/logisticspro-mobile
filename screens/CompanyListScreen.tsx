@@ -295,50 +295,6 @@ export default function CompanyListScreen() {
                 </View>
               )}
             </ScrollView>
-
-            {/* Modal Footer - Edit and Delete Buttons */}
-            {selectedCompany && (
-              <View style={{ flexDirection: "row", gap: Spacing.md }}>
-                <Pressable
-                  onPress={() => {
-                    setShowDetailModal(false);
-                    handleEditPress(selectedCompany);
-                  }}
-                  style={({ pressed }) => [
-                    styles.editButton,
-                    {
-                      backgroundColor: theme.link,
-                      opacity: pressed ? 0.9 : 1,
-                      flex: 1,
-                    },
-                  ]}
-                >
-                  <Feather name="edit" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Düzenle
-                  </ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    setShowDetailModal(false);
-                    handleDeletePress(selectedCompany);
-                  }}
-                  style={({ pressed }) => [
-                    styles.editButton,
-                    {
-                      backgroundColor: colors.destructive,
-                      opacity: pressed ? 0.9 : 1,
-                      flex: 1,
-                    },
-                  ]}
-                >
-                  <Feather name="trash-2" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Sil
-                  </ThemedText>
-                </Pressable>
-              </View>
-            )}
           </View>
         </View>
       </Modal>
