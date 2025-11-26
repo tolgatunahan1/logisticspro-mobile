@@ -806,6 +806,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing["5xl"] + Spacing["2xl"],
     paddingBottom: Spacing.lg,
     gap: Spacing.lg,
   },
