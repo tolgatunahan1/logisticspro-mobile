@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ThemedText } from "@/components/ThemedText";
 import { ScreenKeyboardAwareScrollView } from "@/components/ScreenKeyboardAwareScrollView";
 import { useTheme } from "@/hooks/useTheme";
@@ -14,19 +15,26 @@ import {
   CarrierAvailability,
   Carrier,
 } from "@/utils/storage";
+import { RootStackParamList } from "@/navigation/RootNavigator";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function AvailabilityScreen() {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
+  const navigation = useNavigation<NavigationProp>();
 
   const [availabilities, setAvailabilities] = useState<CarrierAvailability[]>([]);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [isRegistered, setIsRegistered] = useState(true);
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+  const [showCarrierList, setShowCarrierList] = useState(false);
 
   // Form fields
   const [carrierName, setCarrierName] = useState("");
   const [carrierPhone, setCarrierPhone] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
   const [destinationLocation, setDestinationLocation] = useState("");
   const [notes, setNotes] = useState("");
@@ -44,37 +52,80 @@ export default function AvailabilityScreen() {
     }, [loadData])
   );
 
+  const handleSelectRegisteredCarrier = (carrier: Carrier) => {
+    setSelectedCarrier(carrier);
+    setCarrierName(carrier.name);
+    setCarrierPhone(carrier.phone);
+    setVehicleType(carrier.vehicleType);
+    setShowCarrierList(false);
+  };
+
   const handleAddAvailability = async () => {
     if (!carrierName.trim() || !currentLocation.trim() || !destinationLocation.trim() || !notes.trim()) {
       Alert.alert("Uyarı", "Lütfen tüm alanları doldurunuz");
       return;
     }
 
-    // 12 saat sonrası expire
     const expiresAt = Date.now() + 12 * 60 * 60 * 1000;
 
     const result = await addCarrierAvailability({
+      carrierId: isRegistered ? selectedCarrier?.id : undefined,
       carrierName: carrierName.trim(),
       carrierPhone: carrierPhone.trim() || undefined,
       currentLocation: currentLocation.trim(),
       destinationLocation: destinationLocation.trim(),
       notes: notes.trim(),
       capacity: "boş",
+      loadType: vehicleType || undefined,
       expiresAt,
     });
 
     if (result) {
-      Alert.alert("Başarılı", "Nakliyeci uygunluğu kaydedildi");
-      setCarrierName("");
-      setCarrierPhone("");
-      setCurrentLocation("");
-      setDestinationLocation("");
-      setNotes("");
-      setModalVisible(false);
-      await loadData();
+      // Kayıtsız nakliyeci ise - kayıt etme önerisini göster
+      if (!isRegistered) {
+        Alert.alert(
+          "Nakliyeci Kayıt",
+          `${carrierName} sistemde kayıtlı değil. Kayıt etmek ister misiniz?`,
+          [
+            { text: "İptal", onPress: () => handleSuccess() },
+            {
+              text: "Kayıt Et",
+              onPress: () => {
+                handleSuccess();
+                setTimeout(() => {
+                  navigation.navigate("CarrierForm", {
+                    mode: "add",
+                    initialData: {
+                      name: carrierName,
+                      phone: carrierPhone || "",
+                      vehicleType: vehicleType || "kamyon",
+                    },
+                  });
+                }, 300);
+              },
+            },
+          ]
+        );
+      } else {
+        handleSuccess();
+      }
     } else {
       Alert.alert("Hata", "Kaydedilemedi");
     }
+  };
+
+  const handleSuccess = () => {
+    Alert.alert("Başarılı", "Nakliyeci uygunluğu kaydedildi");
+    setCarrierName("");
+    setCarrierPhone("");
+    setVehicleType("");
+    setCurrentLocation("");
+    setDestinationLocation("");
+    setNotes("");
+    setSelectedCarrier(null);
+    setIsRegistered(true);
+    setModalVisible(false);
+    loadData();
   };
 
   const handleDeleteAvailability = (id: string) => {
@@ -163,9 +214,12 @@ export default function AvailabilityScreen() {
             onPress={() => {
               setCarrierName("");
               setCarrierPhone("");
+              setVehicleType("");
               setCurrentLocation("");
               setDestinationLocation("");
               setNotes("");
+              setSelectedCarrier(null);
+              setIsRegistered(true);
               setModalVisible(true);
             }}
             style={[styles.addButton, { backgroundColor: theme.link }]}
@@ -210,7 +264,13 @@ export default function AvailabilityScreen() {
               </ThemedText>
               <View style={styles.toggleGroup}>
                 <Pressable
-                  onPress={() => setIsRegistered(true)}
+                  onPress={() => {
+                    setIsRegistered(true);
+                    setSelectedCarrier(null);
+                    setCarrierName("");
+                    setCarrierPhone("");
+                    setVehicleType("");
+                  }}
                   style={[
                     styles.toggleButton,
                     {
@@ -226,7 +286,13 @@ export default function AvailabilityScreen() {
                   </ThemedText>
                 </Pressable>
                 <Pressable
-                  onPress={() => setIsRegistered(false)}
+                  onPress={() => {
+                    setIsRegistered(false);
+                    setSelectedCarrier(null);
+                    setCarrierName("");
+                    setCarrierPhone("");
+                    setVehicleType("");
+                  }}
                   style={[
                     styles.toggleButton,
                     {
@@ -244,48 +310,149 @@ export default function AvailabilityScreen() {
               </View>
             </View>
 
-            {/* Carrier Name */}
-            <View style={styles.formSection}>
-              <ThemedText type="h3" style={{ marginBottom: Spacing.sm }}>
-                Nakliyeci Adı
-              </ThemedText>
-              <TextInput
-                placeholder="Adı Soyadı"
-                placeholderTextColor={colors.textSecondary}
-                value={carrierName}
-                onChangeText={setCarrierName}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
-                    color: colors.text,
-                    borderColor: colors.borderColor,
-                  },
-                ]}
-              />
-            </View>
+            {/* Registered Carrier Selection */}
+            {isRegistered ? (
+              <View style={styles.formSection}>
+                <ThemedText type="h3" style={{ marginBottom: Spacing.sm }}>
+                  Nakliyeci Seç
+                </ThemedText>
+                <Pressable
+                  onPress={() => setShowCarrierList(!showCarrierList)}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                      borderColor: colors.borderColor,
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    },
+                  ]}
+                >
+                  <ThemedText type="body" style={{ color: selectedCarrier ? colors.text : colors.textSecondary }}>
+                    {selectedCarrier ? selectedCarrier.name : "Nakliyeci seçin"}
+                  </ThemedText>
+                  <Feather name={showCarrierList ? "chevron-up" : "chevron-down"} size={20} color={colors.textSecondary} />
+                </Pressable>
 
-            {/* Phone */}
-            <View style={styles.formSection}>
-              <ThemedText type="h3" style={{ marginBottom: Spacing.sm }}>
-                Telefon (İsteğe bağlı)
-              </ThemedText>
-              <TextInput
-                placeholder="0123456789"
-                placeholderTextColor={colors.textSecondary}
-                value={carrierPhone}
-                onChangeText={setCarrierPhone}
-                keyboardType="phone-pad"
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
-                    color: colors.text,
-                    borderColor: colors.borderColor,
-                  },
-                ]}
-              />
-            </View>
+                {showCarrierList && (
+                  <View
+                    style={[
+                      styles.carrierList,
+                      { backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)", borderColor: colors.borderColor },
+                    ]}
+                  >
+                    <ScrollView scrollEnabled={carriers.length > 5} nestedScrollEnabled>
+                      {carriers.length === 0 ? (
+                        <View style={{ padding: Spacing.md, alignItems: "center" }}>
+                          <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                            Kayıtlı nakliyeci yok
+                          </ThemedText>
+                        </View>
+                      ) : (
+                        carriers.map((carrier) => (
+                          <Pressable
+                            key={carrier.id}
+                            onPress={() => handleSelectRegisteredCarrier(carrier)}
+                            style={{
+                              paddingVertical: Spacing.md,
+                              paddingHorizontal: Spacing.md,
+                              borderBottomWidth: 1,
+                              borderBottomColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                            }}
+                          >
+                            <ThemedText type="body">{carrier.name}</ThemedText>
+                            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                              {carrier.phone}
+                            </ThemedText>
+                          </Pressable>
+                        ))
+                      )}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {selectedCarrier && (
+                  <View style={[styles.selectedInfo, { backgroundColor: isDark ? "rgba(34, 197, 94, 0.1)" : "rgba(34, 197, 94, 0.05)" }]}>
+                    <Feather name="check-circle" size={16} color="#22C55E" />
+                    <View style={{ marginLeft: Spacing.sm, flex: 1 }}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Telefon: {selectedCarrier.phone}
+                      </ThemedText>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Araç: {selectedCarrier.vehicleType}
+                      </ThemedText>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <>
+                {/* Carrier Name */}
+                <View style={styles.formSection}>
+                  <ThemedText type="h3" style={{ marginBottom: Spacing.sm }}>
+                    Nakliyeci Adı
+                  </ThemedText>
+                  <TextInput
+                    placeholder="Adı Soyadı"
+                    placeholderTextColor={colors.textSecondary}
+                    value={carrierName}
+                    onChangeText={setCarrierName}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                        color: colors.text,
+                        borderColor: colors.borderColor,
+                      },
+                    ]}
+                  />
+                </View>
+
+                {/* Phone */}
+                <View style={styles.formSection}>
+                  <ThemedText type="h3" style={{ marginBottom: Spacing.sm }}>
+                    Telefon
+                  </ThemedText>
+                  <TextInput
+                    placeholder="0123456789"
+                    placeholderTextColor={colors.textSecondary}
+                    value={carrierPhone}
+                    onChangeText={setCarrierPhone}
+                    keyboardType="phone-pad"
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                        color: colors.text,
+                        borderColor: colors.borderColor,
+                      },
+                    ]}
+                  />
+                </View>
+
+                {/* Vehicle Type */}
+                <View style={styles.formSection}>
+                  <ThemedText type="h3" style={{ marginBottom: Spacing.sm }}>
+                    Araç Tipi
+                  </ThemedText>
+                  <TextInput
+                    placeholder="Kamyon, Pickup, vb..."
+                    placeholderTextColor={colors.textSecondary}
+                    value={vehicleType}
+                    onChangeText={setVehicleType}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+                        color: colors.text,
+                        borderColor: colors.borderColor,
+                      },
+                    ]}
+                  />
+                </View>
+              </>
+            )}
 
             {/* Current Location */}
             <View style={styles.formSection}>
@@ -461,6 +628,19 @@ const styles = StyleSheet.create({
   textArea: {
     textAlignVertical: "top",
     paddingTop: Spacing.md,
+  },
+  carrierList: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.sm,
+    maxHeight: 250,
+  },
+  selectedInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.sm,
   },
   buttonGroup: {
     flexDirection: "row",

@@ -23,7 +23,7 @@ export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
   CarrierList: undefined;
-  CarrierForm: { carrier?: Carrier; mode: "add" | "edit" };
+  CarrierForm: { carrier?: Carrier; mode: "add" | "edit"; initialData?: { name?: string; phone?: string; vehicleType?: string } };
   CompanyList: undefined;
   CompanyForm: { company?: Company; mode: "add" | "edit" };
   JobList: undefined;

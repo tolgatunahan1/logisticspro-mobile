@@ -23,12 +23,13 @@ export default function CarrierFormScreen() {
   
   const carrier = route.params?.carrier;
   const mode = route.params?.mode || "add";
+  const initialData = route.params?.initialData;
   const isEdit = mode === "edit" && !!carrier;
 
-  const [name, setName] = useState(carrier?.name || "");
-  const [phone, setPhone] = useState(carrier?.phone || "");
+  const [name, setName] = useState(carrier?.name || initialData?.name || "");
+  const [phone, setPhone] = useState(carrier?.phone || initialData?.phone || "");
   const [plate, setPlate] = useState(carrier?.plate || "");
-  const [vehicleType, setVehicleType] = useState(carrier?.vehicleType || "kamyon");
+  const [vehicleType, setVehicleType] = useState(carrier?.vehicleType || initialData?.vehicleType || "kamyon");
   const [isLoading, setIsLoading] = useState(false);
   const [showVehiclePicker, setShowVehiclePicker] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
