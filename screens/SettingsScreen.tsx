@@ -215,60 +215,6 @@ export default function SettingsScreen() {
           </View>
         </Pressable>
 
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-            Veri Yönetimi
-          </ThemedText>
-          <View style={{ gap: Spacing.md }}>
-            <Pressable
-              onPress={async () => {
-                try {
-                  const { exportAllData } = await import("@/utils/storage");
-                  const data = await exportAllData();
-                  Alert.alert("Başarılı", "Veriler export edildi:\n\n" + JSON.stringify(data).substring(0, 100) + "...");
-                } catch (error) {
-                  Alert.alert("Hata", "Veriler indirilemedi");
-                }
-              }}
-              style={({ pressed }) => [
-                styles.addButton,
-                {
-                  backgroundColor: theme.link,
-                  opacity: pressed ? 0.8 : 1,
-                },
-              ]}
-            >
-              <Feather name="download" size={18} color="#FFFFFF" />
-              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                Verileri İndir
-              </ThemedText>
-            </Pressable>
-
-            <Pressable
-              onPress={async () => {
-                try {
-                  const { deleteAllData } = await import("@/utils/storage");
-                  await deleteAllData();
-                  Alert.alert("Başarılı", "Tüm veriler silindi");
-                } catch (error) {
-                  Alert.alert("Hata", "Veriler silinirken hata oluştu");
-                }
-              }}
-              style={({ pressed }) => [
-                styles.addButton,
-                {
-                  backgroundColor: colors.destructive,
-                  opacity: pressed ? 0.8 : 1,
-                },
-              ]}
-            >
-              <Feather name="trash-2" size={18} color="#FFFFFF" />
-              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                Tüm Verileri Sil
-              </ThemedText>
-            </Pressable>
-          </View>
-        </View>
 
       </ScrollView>
 
