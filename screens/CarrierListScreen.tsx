@@ -41,6 +41,9 @@ export default function CarrierListScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [carrierToDelete, setCarrierToDelete] = useState<Carrier | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -313,26 +316,8 @@ export default function CarrierListScreen() {
                     </Pressable>
                     <Pressable
                       onPress={() => {
-                        Alert.alert(
-                          "Nakliyeciyi Sil",
-                          `"${selectedCarrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
-                          [
-                            { text: "İptal", style: "cancel" },
-                            {
-                              text: "Sil",
-                              style: "destructive",
-                              onPress: async () => {
-                                try {
-                                  await deleteCarrier(selectedCarrier.id);
-                                  setShowDetailModal(false);
-                                  await loadCarriers();
-                                } catch (error) {
-                                  Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
-                                }
-                              },
-                            },
-                          ]
-                        );
+                        setCarrierToDelete(selectedCarrier);
+                        setShowDeleteConfirm(true);
                       }}
                       style={({ pressed }) => [
                         styles.actionButtonRound,
@@ -345,6 +330,61 @@ export default function CarrierListScreen() {
                 </View>
               )}
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showDeleteConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteConfirm(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
+          <View style={{
+            backgroundColor: colors.backgroundDefault,
+            borderRadius: BorderRadius.md,
+            padding: Spacing.lg,
+            width: "80%",
+            maxWidth: 300,
+          }}>
+            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>Nakliyeciyi Sil</ThemedText>
+            <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+              "{carrierToDelete?.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?
+            </ThemedText>
+            <View style={{ flexDirection: "row", gap: Spacing.md, justifyContent: "flex-end" }}>
+              <Pressable
+                onPress={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                style={({ pressed }) => [
+                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: theme.link }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  if (!carrierToDelete) return;
+                  setIsDeleting(true);
+                  try {
+                    await deleteCarrier(carrierToDelete.id);
+                    setShowDeleteConfirm(false);
+                    setShowDetailModal(false);
+                    await loadCarriers();
+                  } catch (error) {
+                    console.error("Delete error:", error);
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+                style={({ pressed }) => [
+                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: colors.destructive }}>Sil</ThemedText>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>

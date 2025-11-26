@@ -41,6 +41,9 @@ export default function CompanyListScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -293,26 +296,8 @@ export default function CompanyListScreen() {
                     </Pressable>
                     <Pressable
                       onPress={() => {
-                        Alert.alert(
-                          "Firmayı Sil",
-                          `"${selectedCompany.name}" adlı firmayı silmek istediğinizden emin misiniz?`,
-                          [
-                            { text: "İptal", style: "cancel" },
-                            {
-                              text: "Sil",
-                              style: "destructive",
-                              onPress: async () => {
-                                try {
-                                  await deleteCompany(selectedCompany.id);
-                                  setShowDetailModal(false);
-                                  await loadCompanies();
-                                } catch (error) {
-                                  Alert.alert("Hata", "Firma silinirken hata oluştu");
-                                }
-                              },
-                            },
-                          ]
-                        );
+                        setCompanyToDelete(selectedCompany);
+                        setShowDeleteConfirm(true);
                       }}
                       style={({ pressed }) => [
                         styles.actionButtonRound,
@@ -325,6 +310,61 @@ export default function CompanyListScreen() {
                 </View>
               )}
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showDeleteConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteConfirm(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
+          <View style={{
+            backgroundColor: colors.backgroundDefault,
+            borderRadius: BorderRadius.md,
+            padding: Spacing.lg,
+            width: "80%",
+            maxWidth: 300,
+          }}>
+            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>Firmayı Sil</ThemedText>
+            <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+              "{companyToDelete?.name}" adlı firmayı silmek istediğinizden emin misiniz?
+            </ThemedText>
+            <View style={{ flexDirection: "row", gap: Spacing.md, justifyContent: "flex-end" }}>
+              <Pressable
+                onPress={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                style={({ pressed }) => [
+                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: theme.link }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  if (!companyToDelete) return;
+                  setIsDeleting(true);
+                  try {
+                    await deleteCompany(companyToDelete.id);
+                    setShowDeleteConfirm(false);
+                    setShowDetailModal(false);
+                    await loadCompanies();
+                  } catch (error) {
+                    console.error("Delete error:", error);
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+                style={({ pressed }) => [
+                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: colors.destructive }}>Sil</ThemedText>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
