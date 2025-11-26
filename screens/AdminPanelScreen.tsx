@@ -320,7 +320,15 @@ export default function AdminPanelScreen() {
 
         {/* Çıkış Butonu */}
         <Pressable
-          onPress={handleLogoutPress}
+          onPress={async () => {
+            console.log("🔴 LOGOUT CLICKED");
+            await logout();
+            console.log("🟢 LOGOUT DONE");
+            if (typeof window !== 'undefined') {
+              console.log("🟡 RELOADING PAGE");
+              window.location.reload();
+            }
+          }}
           style={({ pressed }) => [
             styles.logoutButton,
             {

@@ -118,18 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("💾 Storage cleared");
       setUser(null);
       console.log("✅ LOGOUT COMPLETE");
-      
-      // Web platform: reload page immediately
-      if (typeof window !== 'undefined' && window.location) {
-        console.log("🌐 WEB - Reloading");
-        setTimeout(() => window.location.reload(), 200);
-      }
     } catch (error) {
       console.error("❌ Logout error:", error);
       setUser(null);
-      if (typeof window !== 'undefined' && window.location) {
-        setTimeout(() => window.location.reload(), 200);
-      }
     }
   };
 
