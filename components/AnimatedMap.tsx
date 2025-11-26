@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { StyleSheet, View, Dimensions } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,17 +11,15 @@ import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 import { ThemedText } from "@/components/ThemedText";
 
-const { width } = Dimensions.get("window");
-
 export function AnimatedMap() {
   const { theme, isDark } = useTheme();
-  const positionX = useSharedValue(10);
-  const positionY = useSharedValue(20);
+  const positionX = useSharedValue(80);
+  const positionY = useSharedValue(45);
 
   useEffect(() => {
     // Yatay hareket (Batı -> Doğu -> Batı)
     positionX.value = withRepeat(
-      withTiming(240, {
+      withTiming(180, {
         duration: 3000,
         easing: Easing.inOut(Easing.ease),
       }),
@@ -31,7 +29,7 @@ export function AnimatedMap() {
 
     // Dikey hareket (Kuzey -> Güney -> Kuzey)
     positionY.value = withRepeat(
-      withTiming(140, {
+      withTiming(100, {
         duration: 3500,
         easing: Easing.inOut(Easing.ease),
       }),
@@ -49,173 +47,160 @@ export function AnimatedMap() {
 
   return (
     <View style={styles.container}>
-      {/* Türkiye Haritası Konteyner */}
+      {/* Türkiye Haritası Şekli - Çerçeve olarak */}
       <View
         style={[
           styles.mapContainer,
           {
             backgroundColor: isDark ? "#1a2a3a" : "#f0f4f9",
-            borderColor: theme.link,
           },
         ]}
       >
-        {/* Bölgeler - Türkiye'nin simgesel temsili */}
+        {/* Türkiye Haritası Çerçevesi - Basitleştirilmiş Şekil */}
         
-        {/* Karadeniz Bölgesi */}
+        {/* Kuzey Sınırı */}
         <View
           style={[
-            styles.region,
+            styles.border,
             {
-              top: 15,
+              top: 30,
+              left: 50,
+              width: 180,
+              height: 15,
+              borderTopLeftRadius: 40,
+              borderTopRightRadius: 50,
+              backgroundColor: theme.link,
+              opacity: 0.25,
+            },
+          ]}
+        />
+
+        {/* Batı Sınırı */}
+        <View
+          style={[
+            styles.border,
+            {
               left: 30,
-              width: 90,
-              height: 25,
-              borderRadius: 12,
+              top: 45,
+              width: 20,
+              height: 80,
+              borderRadius: 10,
               backgroundColor: theme.link,
-              opacity: 0.08,
+              opacity: 0.25,
             },
           ]}
         />
 
-        {/* Marmara Bölgesi */}
+        {/* Doğu Sınırı */}
         <View
           style={[
-            styles.region,
+            styles.border,
             {
-              top: 25,
-              left: 15,
-              width: 40,
-              height: 50,
-              borderRadius: 20,
-              backgroundColor: theme.link,
-              opacity: 0.08,
-            },
-          ]}
-        />
-
-        {/* Ege Bölgesi */}
-        <View
-          style={[
-            styles.region,
-            {
+              right: 20,
               top: 50,
-              left: 10,
-              width: 35,
-              height: 60,
-              borderRadius: 18,
+              width: 20,
+              height: 70,
+              borderRadius: 10,
               backgroundColor: theme.link,
-              opacity: 0.08,
+              opacity: 0.25,
             },
           ]}
         />
 
-        {/* İç Anadolu Bölgesi */}
+        {/* Güney Sınırı */}
+        <View
+          style={[
+            styles.border,
+            {
+              bottom: 25,
+              left: 55,
+              width: 170,
+              height: 15,
+              borderBottomLeftRadius: 35,
+              borderBottomRightRadius: 45,
+              backgroundColor: theme.link,
+              opacity: 0.25,
+            },
+          ]}
+        />
+
+        {/* İç Bölgeler - Az opacity ile */}
+        {/* Karadeniz */}
+        <View
+          style={[
+            styles.region,
+            {
+              top: 35,
+              left: 70,
+              width: 90,
+              height: 20,
+              backgroundColor: theme.link,
+              opacity: 0.06,
+              borderRadius: 10,
+            },
+          ]}
+        />
+
+        {/* Marmara */}
         <View
           style={[
             styles.region,
             {
               top: 45,
-              left: 75,
-              width: 70,
-              height: 50,
-              borderRadius: 15,
-              backgroundColor: theme.link,
-              opacity: 0.08,
-            },
-          ]}
-        />
-
-        {/* Akdeniz Bölgesi */}
-        <View
-          style={[
-            styles.region,
-            {
-              top: 110,
-              left: 60,
-              width: 60,
+              left: 45,
+              width: 45,
               height: 30,
-              borderRadius: 15,
               backgroundColor: theme.link,
-              opacity: 0.08,
+              opacity: 0.06,
+              borderRadius: 8,
             },
           ]}
         />
 
-        {/* Doğu Anadolu Bölgesi */}
+        {/* Ege */}
         <View
           style={[
             styles.region,
             {
               top: 60,
-              right: 15,
-              width: 50,
-              height: 45,
-              borderRadius: 12,
+              left: 35,
+              width: 35,
+              height: 50,
               backgroundColor: theme.link,
-              opacity: 0.08,
+              opacity: 0.06,
+              borderRadius: 8,
             },
           ]}
         />
 
-        {/* Şehir Noktaları */}
-        {/* İstanbul */}
+        {/* Akdeniz */}
         <View
           style={[
-            styles.cityPoint,
+            styles.region,
             {
-              top: 30,
-              left: 20,
+              bottom: 35,
+              left: 80,
+              width: 60,
+              height: 25,
               backgroundColor: theme.link,
-              opacity: 0.6,
+              opacity: 0.06,
+              borderRadius: 8,
             },
           ]}
         />
 
-        {/* Ankara */}
+        {/* Doğu */}
         <View
           style={[
-            styles.cityPoint,
+            styles.region,
             {
               top: 65,
-              left: 100,
+              right: 30,
+              width: 50,
+              height: 40,
               backgroundColor: theme.link,
-              opacity: 0.5,
-            },
-          ]}
-        />
-
-        {/* İzmir */}
-        <View
-          style={[
-            styles.cityPoint,
-            {
-              top: 85,
-              left: 25,
-              backgroundColor: theme.link,
-              opacity: 0.5,
-            },
-          ]}
-        />
-
-        {/* Antalya */}
-        <View
-          style={[
-            styles.cityPoint,
-            {
-              top: 125,
-              left: 85,
-              backgroundColor: theme.link,
-              opacity: 0.5,
-            },
-          ]}
-        />
-
-        {/* Harita Sınırı */}
-        <View
-          style={[
-            styles.mapBorder,
-            {
-              borderColor: theme.link,
+              opacity: 0.06,
+              borderRadius: 8,
             },
           ]}
         />
@@ -263,8 +248,7 @@ const styles = StyleSheet.create({
   mapContainer: {
     width: 300,
     height: 190,
-    borderRadius: 20,
-    borderWidth: 2,
+    borderRadius: 12,
     position: "relative",
     overflow: "hidden",
     shadowColor: "#0066FF",
@@ -273,24 +257,11 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 8,
   },
+  border: {
+    position: "absolute",
+  },
   region: {
     position: "absolute",
-  },
-  cityPoint: {
-    position: "absolute",
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-  },
-  mapBorder: {
-    position: "absolute",
-    top: 25,
-    left: 10,
-    width: 280,
-    height: 140,
-    borderWidth: 1.5,
-    borderRadius: 30,
-    opacity: 0.2,
   },
   lightPoint: {
     position: "absolute",
