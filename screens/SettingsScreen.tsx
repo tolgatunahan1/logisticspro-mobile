@@ -417,7 +417,7 @@ export default function SettingsScreen() {
                   © 2025 Tolga Tunahan. Tüm hakları saklıdır.
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20, marginTop: Spacing.md }}>
-                  Updated: November 26, 2025
+                  Güncelleme: 26 Kasım 2025
                 </ThemedText>
               </View>
             </ScrollView>
