@@ -52,17 +52,12 @@ export default function CompletedJobListScreen() {
       phoneNumber = "90" + phoneNumber;
     }
     
-    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
     try {
-      const supported = await Linking.canOpenURL(whatsappUrl);
-      if (supported) {
-        await Linking.openURL(whatsappUrl);
-      } else {
-        Alert.alert("Hata", "WhatsApp uygulaması yüklü değil");
-      }
+      await Linking.openURL(whatsappUrl);
     } catch (error) {
-      Alert.alert("Hata", "Bağlantı açılamadı");
+      Alert.alert("Hata", "WhatsApp açılamadı. Lütfen WhatsApp uygulamasının yüklü olduğundan emin olun.");
     }
   }, [selectedJob, companies, carriers]);
 
@@ -85,17 +80,12 @@ export default function CompletedJobListScreen() {
       phoneNumber = "90" + phoneNumber;
     }
     
-    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
     try {
-      const supported = await Linking.canOpenURL(whatsappUrl);
-      if (supported) {
-        await Linking.openURL(whatsappUrl);
-      } else {
-        Alert.alert("Hata", "WhatsApp uygulaması yüklü değil");
-      }
+      await Linking.openURL(whatsappUrl);
     } catch (error) {
-      Alert.alert("Hata", "Bağlantı açılamadı");
+      Alert.alert("Hata", "WhatsApp açılamadı. Lütfen WhatsApp uygulamasının yüklü olduğundan emin olun.");
     }
   }, [selectedJob, companies, carriers]);
 
