@@ -140,14 +140,19 @@ export const validatePassword = (password: string): boolean => {
   return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
 };
 
-// Dev function - Admin bilgisini resetle
-export const resetAdminPassword = async (username: string, password: string): Promise<boolean> => {
+export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
-    const admin: AdminUser = { username, password, createdAt: Date.now() };
-    await AsyncStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(admin));
-    return true;
+    const admin = await getAdmin();
+    if (!admin) {
+      // Eğer admin yoksa, default admin'i oluştur
+      const defaultAdmin: AdminUser = {
+        username: "tolgatunahan",
+        password: "1Liraversene",
+        createdAt: Date.now(),
+      };
+      await AsyncStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(defaultAdmin));
+    }
   } catch (error) {
-    console.error("Failed to reset admin:", error);
-    return false;
+    console.error("Failed to initialize default admin:", error);
   }
 };

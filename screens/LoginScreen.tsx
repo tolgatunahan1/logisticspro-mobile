@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getAdmin, createAdmin, requestSignup, validatePassword, resetAdminPassword } from "@/utils/userManagement";
+import { getAdmin, createAdmin, requestSignup, validatePassword, initializeDefaultAdmin } from "@/utils/userManagement";
 
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
@@ -22,11 +22,11 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const initializeApp = async () => {
-      await resetAdminPassword("tolgatunahan", "1Liraversene");
+    const init = async () => {
+      await initializeDefaultAdmin();
       await checkAdminExists();
     };
-    initializeApp();
+    init();
   }, []);
 
   const checkAdminExists = async () => {

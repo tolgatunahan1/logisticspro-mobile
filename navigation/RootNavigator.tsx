@@ -54,7 +54,15 @@ export default function RootNavigator() {
         ...getCommonScreenOptions({ theme, isDark }),
       }}
     >
-      {user ? user.type === "admin" ? (
+      {!user ? (
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+      ) : user.type === "admin" ? (
         <Stack.Screen
           name="AdminPanel"
           component={AdminPanelScreen}
@@ -150,14 +158,6 @@ export default function RootNavigator() {
             }}
           />
         </>
-      ) : (
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
       )}
     </Stack.Navigator>
   );
