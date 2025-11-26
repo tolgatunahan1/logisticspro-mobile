@@ -41,6 +41,7 @@ export default function CarrierListScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [deletingCarrierId, setDeletingCarrierId] = useState<string | null>(null);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -132,40 +133,83 @@ export default function CarrierListScreen() {
 
   const filteredCarriers = searchCarriers(carriers, searchQuery);
 
-  const renderCarrierItem = ({ item }: { item: Carrier }) => (
-    <View
-      style={[
-        styles.card,
+  const handleSwipeDelete = (carrier: Carrier) => {
+    Alert.alert(
+      "Nakliyeciyi Sil",
+      `"${carrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
+      [
+        { text: "İptal", style: "cancel", onPress: () => setDeletingCarrierId(null) },
         {
-          backgroundColor: colors.backgroundDefault,
+          text: "Sil",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteCarrier(carrier.id);
+              await loadCarriers();
+              setDeletingCarrierId(null);
+            } catch (error) {
+              console.error("Silme hatası:", error);
+              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+              setDeletingCarrierId(null);
+            }
+          },
         },
-      ]}
-    >
-      <Pressable
-        onPress={() => {
-          setSelectedCarrier(item);
-          setShowDetailModal(true);
-        }}
-        style={{ flex: 1 }}
+      ]
+    );
+  };
+
+  const renderCarrierItem = ({ item }: { item: Carrier }) => {
+    const isDeleting = deletingCarrierId === item.id;
+    return (
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: isDeleting ? colors.destructive : colors.backgroundDefault,
+            flexDirection: "row",
+          },
+        ]}
       >
-        <View style={styles.cardHeader}>
+        <Pressable
+          onPress={() => {
+            setSelectedCarrier(item);
+            setShowDetailModal(true);
+          }}
+          onLongPress={() => setDeletingCarrierId(item.id)}
+          style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+        >
           <View style={{ flex: 1 }}>
-            <ThemedText type="h4" numberOfLines={1}>
-              {item.name}
-            </ThemedText>
+            <View style={styles.cardHeader}>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="h4" numberOfLines={1} style={{ color: isDeleting ? colors.buttonText : theme.text }}>
+                  {item.name}
+                </ThemedText>
+              </View>
+              {!isDeleting && (
+                <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
+                  <Pressable
+                    onPress={() => handleEditPress(item)}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                  >
+                    <Feather name="edit" size={18} color={theme.link} />
+                  </Pressable>
+                </View>
+              )}
+            </View>
           </View>
-          <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
-            <Pressable
-              onPress={() => handleEditPress(item)}
-              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            >
-              <Feather name="edit" size={18} color={theme.link} />
-            </Pressable>
-          </View>
-        </View>
-      </Pressable>
-    </View>
-  );
+        </Pressable>
+        
+        {isDeleting && (
+          <Pressable
+            onPress={() => handleSwipeDelete(item)}
+            style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
+          >
+            <Feather name="trash-2" size={20} color={colors.buttonText} />
+          </Pressable>
+        )}
+      </View>
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>

@@ -235,27 +235,6 @@ export default function CarrierFormScreen() {
           ) : null}
         </View>
 
-        {carrier && mode === "edit" ? (
-          <Pressable
-            onPress={() => {
-              console.log("Sil tuşuna basıldı");
-              handleDelete();
-            }}
-            disabled={isLoading}
-            style={({ pressed }) => [
-              styles.deleteButton,
-              {
-                backgroundColor: colors.destructive,
-                opacity: pressed || isLoading ? 0.8 : 1,
-              },
-            ]}
-          >
-            <Feather name="trash-2" size={18} color={colors.buttonText} />
-            <ThemedText type="body" style={[styles.deleteButtonText, { color: colors.buttonText }]}>
-              Nakliyeciyi Sil
-            </ThemedText>
-          </Pressable>
-        ) : null}
       </ScrollView>
 
       <Modal
