@@ -21,8 +21,10 @@ export default function AdminPanelScreen() {
 
   const loadUsers = useCallback(async () => {
     try {
+      console.log("Loading users...");
       const pending = await getPendingUsers();
       const approved = await getApprovedUsers();
+      console.log("Users loaded:", { pending: pending.length, approved: approved.length });
       setPendingUsers(pending);
       setApprovedUsers(approved);
     } catch (error) {
@@ -47,9 +49,13 @@ export default function AdminPanelScreen() {
           onPress: async () => {
             setLoading(true);
             try {
+              console.log("Approving user:", user.username);
               const success = await approveUser(user.id);
+              console.log("Approve result:", success);
               if (success) {
                 Alert.alert("Başarılı", `${user.username} onaylandı ve giriş yapabilir`);
+                // Delay and reload
+                await new Promise(resolve => setTimeout(resolve, 500));
                 await loadUsers();
               } else {
                 Alert.alert("Hata", "Onaylama başarısız oldu");
@@ -78,9 +84,13 @@ export default function AdminPanelScreen() {
           onPress: async () => {
             setLoading(true);
             try {
+              console.log("Rejecting user:", user.username);
               const success = await rejectUser(user.id);
+              console.log("Reject result:", success);
               if (success) {
                 Alert.alert("Başarılı", `${user.username} reddedildi`);
+                // Delay and reload
+                await new Promise(resolve => setTimeout(resolve, 500));
                 await loadUsers();
               } else {
                 Alert.alert("Hata", "Reddetme başarısız");
