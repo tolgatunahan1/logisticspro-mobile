@@ -556,7 +556,12 @@ export const getCompanyWallet = async (): Promise<CompanyWallet> => {
     let transactions: WalletTransaction[] = [];
     if (stored) {
       const parsedWallet = JSON.parse(stored);
-      transactions = parsedWallet.transactions || [];
+      const allTransactions = parsedWallet.transactions || [];
+      // Silinmiş seferlerin transaction'larını filtrele
+      const completedJobIds = new Set(completedJobs.map((job) => job.id));
+      transactions = allTransactions.filter(
+        (tx: WalletTransaction) => completedJobIds.has(tx.completedJobId)
+      );
     }
     
     const wallet: CompanyWallet = {
@@ -602,6 +607,9 @@ export const markCommissionAsPaid = async (completedJobId: string): Promise<bool
     if (jobIndex === -1) return false;
 
     const job = jobs[jobIndex];
+    const carriers = await getCarriers();
+    const carrier = carriers.find((c) => c.id === job.carrierId);
+    const carrierName = carrier?.name || "Bilinmeyen Nakliyeci";
 
     jobs[jobIndex] = {
       ...job,
@@ -610,8 +618,19 @@ export const markCommissionAsPaid = async (completedJobId: string): Promise<bool
     };
     await saveCompletedJobs(jobs);
 
-    // Cüzdan otomatik hesaplanır
+    // Transaction ekle
     const wallet = await getCompanyWallet();
+    const commissionAmount = parseFloat(job.commissionCost) || 0;
+    const description = `${carrierName} - ${job.loadingLocation} → ${job.deliveryLocation}`;
+    
+    wallet.transactions.push({
+      id: generateId(),
+      completedJobId,
+      amount: commissionAmount,
+      type: "income",
+      description,
+      createdAt: Date.now(),
+    });
     wallet.updatedAt = Date.now();
     await saveCompanyWallet(wallet);
 
