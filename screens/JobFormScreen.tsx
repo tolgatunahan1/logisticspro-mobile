@@ -222,7 +222,7 @@ export default function JobFormScreen() {
         {/* Company Selector */}
         <View style={styles.section}>
           <ThemedText type="h4" style={styles.label}>
-            İş Veren *
+            İş Veren
           </ThemedText>
           {Platform.OS === "web" ? (
             <select
@@ -262,7 +262,7 @@ export default function JobFormScreen() {
         {/* Cargo Type */}
         <View style={styles.section}>
           <ThemedText type="h4" style={styles.label}>
-            Yükün Cinsi *
+            Yükün Cinsi
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
@@ -285,7 +285,7 @@ export default function JobFormScreen() {
         {/* Tonnage */}
         <View style={styles.section}>
           <ThemedText type="h4" style={styles.label}>
-            Yükün Tonajı *
+            Yükün Tonajı
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
@@ -332,7 +332,7 @@ export default function JobFormScreen() {
         {/* Loading Location */}
         <View style={styles.section}>
           <ThemedText type="h4" style={styles.label}>
-            Nereden Yüklenicek *
+            Nereden Yüklenicek
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
@@ -355,7 +355,7 @@ export default function JobFormScreen() {
         {/* Delivery Location */}
         <View style={styles.section}>
           <ThemedText type="h4" style={styles.label}>
-            Nereye Teslim Edilicek *
+            Nereye Teslim Edilicek
           </ThemedText>
           {Platform.OS === "web" ? (
             <input
