@@ -88,11 +88,10 @@ export default function CompanyFormScreen() {
           style: "destructive",
           onPress: async () => {
             setIsLoading(true);
-            try {
-              await deleteCompany(company.id);
+            const success = await deleteCompany(company.id);
+            if (success) {
               navigation.goBack();
-            } catch (error) {
-              console.error("Silme hatası:", error);
+            } else {
               Alert.alert("Hata", "Firma silinirken hata oluştu");
               setIsLoading(false);
             }
