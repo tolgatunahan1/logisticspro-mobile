@@ -40,24 +40,15 @@ export default function AvailabilityScreen() {
     loadData();
   }, [loadData]));
 
-  const handleDelete = (item: CarrierAvailability) => {
-    Alert.alert("Sil", "Bu bildiriyi silmek istediğiniz emin misiniz?", [
-      { text: "İptal", style: "cancel" },
-      {
-        text: "Sil",
-        style: "destructive",
-        onPress: async () => {
-          const backup = [...availabilities];
-          setAvailabilities(prev => prev.filter(a => a.id !== item.id));
-          
-          const success = await deleteCarrierAvailability(item.id);
-          if (!success) {
-            setAvailabilities(backup);
-            Alert.alert("Hata", "Bildiri silinemedi");
-          }
-        },
-      },
-    ]);
+  const handleDelete = async (item: CarrierAvailability) => {
+    const backup = [...availabilities];
+    setAvailabilities(prev => prev.filter(a => a.id !== item.id));
+    
+    const success = await deleteCarrierAvailability(item.id);
+    if (!success) {
+      setAvailabilities(backup);
+      Alert.alert("Hata", "Bildiri silinemedi");
+    }
   };
 
   const handleSave = async () => {
@@ -131,6 +122,7 @@ export default function AvailabilityScreen() {
         <Pressable 
           onPress={() => handleDelete(item)}
           style={s.deleteBtn}
+          hitSlop={8}
         >
           <Feather name="trash-2" size={14} color="#EF4444" />
         </Pressable>
