@@ -15,7 +15,7 @@ import { getIBANs, addIBAN, deleteIBAN, IBAN } from "@/utils/storage";
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [ibans, setIbans] = useState<IBAN[]>([]);
@@ -23,6 +23,10 @@ export default function SettingsScreen() {
   const [ibanInput, setIbanInput] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [editUsername, setEditUsername] = useState(user?.username || "");
+  const [editPassword, setEditPassword] = useState(user?.password || "");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const loadIBANs = useCallback(async () => {
     const data = await getIBANs();
@@ -72,6 +76,24 @@ export default function SettingsScreen() {
     ]);
   };
 
+  const handleUpdateProfile = async () => {
+    if (!editUsername.trim() || !editPassword.trim()) {
+      Alert.alert("Hata", "Kullanıcı adı ve şifre boş olamaz");
+      return;
+    }
+
+    setIsUpdating(true);
+    const success = await updateProfile(editUsername.trim(), editPassword.trim());
+    setIsUpdating(false);
+
+    if (success) {
+      Alert.alert("Başarılı", "Hesap bilgileri güncellendi");
+      setShowAccountModal(false);
+    } else {
+      Alert.alert("Hata", "Hesap bilgileri güncellenemedi");
+    }
+  };
+
   const handleLogout = () => {
     Alert.alert(
       "Çıkış Yap",
@@ -94,19 +116,22 @@ export default function SettingsScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl * 2, paddingBottom: insets.bottom + Spacing.xl }}>
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <View style={styles.userInfo}>
-            <View style={[styles.avatar, { backgroundColor: theme.link }]}>
-              <Feather name="user" size={24} color={colors.buttonText} />
-            </View>
-            <View style={styles.userDetails}>
-              <ThemedText type="h4">{user?.username}</ThemedText>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Oturum açık
-              </ThemedText>
+        <Pressable onPress={() => setShowAccountModal(true)}>
+          <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.userInfo}>
+              <View style={[styles.avatar, { backgroundColor: theme.link }]}>
+                <Feather name="user" size={24} color={colors.buttonText} />
+              </View>
+              <View style={styles.userDetails}>
+                <ThemedText type="h4">{user?.username}</ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Oturum açık
+                </ThemedText>
+              </View>
+              <Feather name="edit-2" size={18} color={theme.link} />
             </View>
           </View>
-        </View>
+        </Pressable>
 
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.sectionHeader}>
@@ -192,6 +217,95 @@ export default function SettingsScreen() {
           </ThemedText>
         </Pressable>
       </ScrollView>
+
+      <Modal visible={showAccountModal} transparent animationType="slide">
+        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Hesap Ayarları</ThemedText>
+              <Pressable onPress={() => setShowAccountModal(false)}>
+                <Feather name="x" size={24} color={colors.text} />
+              </Pressable>
+            </View>
+
+            <View style={styles.modalInputs}>
+              <View>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
+                  Kullanıcı Adı
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.backgroundRoot,
+                    },
+                  ]}
+                  placeholder="Kullanıcı Adınız"
+                  placeholderTextColor={colors.textSecondary}
+                  value={editUsername}
+                  onChangeText={setEditUsername}
+                  editable={!isUpdating}
+                />
+              </View>
+
+              <View>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
+                  Şifre
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.backgroundRoot,
+                    },
+                  ]}
+                  placeholder="Yeni Şifreniz"
+                  placeholderTextColor={colors.textSecondary}
+                  value={editPassword}
+                  onChangeText={setEditPassword}
+                  secureTextEntry
+                  editable={!isUpdating}
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                onPress={() => setShowAccountModal(false)}
+                style={({ pressed }) => [
+                  { flex: 1, paddingVertical: Spacing.md, borderRadius: BorderRadius.sm, opacity: pressed ? 0.7 : 1 },
+                  { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" },
+                ]}
+              >
+                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600" }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleUpdateProfile}
+                disabled={isUpdating}
+                style={({ pressed }) => [
+                  {
+                    flex: 1,
+                    paddingVertical: Spacing.md,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: theme.link,
+                    opacity: pressed || isUpdating ? 0.8 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600", color: "#FFFFFF" }}>
+                  {isUpdating ? "Güncelleniyor..." : "Kaydet"}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={showAddModal} transparent animationType="slide">
         <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>

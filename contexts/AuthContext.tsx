@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface User {
   username: string;
+  password?: string;
 }
 
 interface AuthContextType {
@@ -10,6 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateProfile: (username: string, password: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,12 +46,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const userData: User = { username: username.trim() };
+      const userData: User = { username: username.trim(), password: password.trim() };
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
       setUser(userData);
       return true;
     } catch (error) {
       console.error("Failed to save auth:", error);
+      return false;
+    }
+  };
+
+  const updateProfile = async (username: string, password: string): Promise<boolean> => {
+    if (!username.trim() || !password.trim()) {
+      return false;
+    }
+
+    try {
+      const userData: User = { username: username.trim(), password: password.trim() };
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      setUser(userData);
+      return true;
+    } catch (error) {
+      console.error("Failed to update profile:", error);
       return false;
     }
   };
@@ -67,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
