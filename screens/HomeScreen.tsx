@@ -12,7 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { AnimatedTruck } from "@/components/AnimatedTruck";
+import { AnimatedMap } from "@/components/AnimatedMap";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -92,9 +92,9 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Animated Truck Hero */}
+        {/* Animated Map Hero */}
         <View style={styles.heroSection}>
-          <AnimatedTruck />
+          <AnimatedMap />
           <ThemedText type="h2" style={styles.heroTitle}>
             Nakliye Yönetimine Hoşgeldiniz
           </ThemedText>
