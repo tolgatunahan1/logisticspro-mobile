@@ -45,15 +45,14 @@ export default function CompletedJobListScreen() {
       return;
     }
 
-    const message = `Nakliyeci Bilgileri:
-    
-Adı: ${carrier.name || "-"}
-Telefon: ${carrier.phone || "-"}
-Araç Plakası: ${carrier.plate || "-"}
-Araç Tipi: ${carrier.vehicleType ? getVehicleTypeLabel(carrier.vehicleType) : "-"}`;
+    const message = `Nakliyeci Bilgileri:\n\nAdı: ${carrier.name || "-"}\nTelefon: ${carrier.phone || "-"}\nAraç Plakası: ${carrier.plate || "-"}\nAraç Tipi: ${carrier.vehicleType ? getVehicleTypeLabel(carrier.vehicleType) : "-"}`;
 
-    const phoneNumber = company.phone.replace(/\D/g, "");
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    let phoneNumber = company.phone.replace(/\D/g, "");
+    if (!phoneNumber.startsWith("90")) {
+      phoneNumber = "90" + phoneNumber;
+    }
+    
+    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
     try {
       const supported = await Linking.canOpenURL(whatsappUrl);
@@ -79,15 +78,14 @@ Araç Tipi: ${carrier.vehicleType ? getVehicleTypeLabel(carrier.vehicleType) : "
       return;
     }
 
-    const message = `Firma Bilgileri:
-    
-Adı: ${company.name || "-"}
-Telefon: ${company.phone || "-"}
-İletişim Kişisi: ${company.contactPerson || "-"}
-Adres: ${company.address || "-"}`;
+    const message = `Firma Bilgileri:\n\nAdı: ${company.name || "-"}\nTelefon: ${company.phone || "-"}\nİletişim Kişisi: ${company.contactPerson || "-"}\nAdres: ${company.address || "-"}`;
 
-    const phoneNumber = carrier.phone.replace(/\D/g, "");
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    let phoneNumber = carrier.phone.replace(/\D/g, "");
+    if (!phoneNumber.startsWith("90")) {
+      phoneNumber = "90" + phoneNumber;
+    }
+    
+    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
     try {
       const supported = await Linking.canOpenURL(whatsappUrl);
@@ -330,16 +328,22 @@ Adres: ${company.address || "-"}`;
                     <Pressable
                       onPress={shareCarrierInfoWithCompany}
                       style={({ pressed }) => [
-                        styles.shareButton,
                         {
                           backgroundColor: "#25D366",
                           opacity: pressed ? 0.9 : 1,
                           marginTop: Spacing.md,
+                          paddingVertical: Spacing.sm,
+                          paddingHorizontal: Spacing.md,
+                          borderRadius: BorderRadius.sm,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: Spacing.sm,
                         },
                       ]}
                     >
-                      <Feather name="message-circle" size={18} color="#FFFFFF" />
-                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                      <Feather name="message-circle" size={16} color="#FFFFFF" />
+                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                         Nakliyeci Bilgilerini Paylaş
                       </ThemedText>
                     </Pressable>
@@ -393,16 +397,22 @@ Adres: ${company.address || "-"}`;
                     <Pressable
                       onPress={shareCompanyInfoWithCarrier}
                       style={({ pressed }) => [
-                        styles.shareButton,
                         {
                           backgroundColor: "#25D366",
                           opacity: pressed ? 0.9 : 1,
                           marginTop: Spacing.md,
+                          paddingVertical: Spacing.sm,
+                          paddingHorizontal: Spacing.md,
+                          borderRadius: BorderRadius.sm,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: Spacing.sm,
                         },
                       ]}
                     >
-                      <Feather name="message-circle" size={18} color="#FFFFFF" />
-                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                      <Feather name="message-circle" size={16} color="#FFFFFF" />
+                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                         Firma Bilgilerini Paylaş
                       </ThemedText>
                     </Pressable>
