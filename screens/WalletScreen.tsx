@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert } from "react-native";
+import { StyleSheet, View, Pressable, Alert, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -47,59 +47,73 @@ export default function WalletScreen() {
 
   return (
     <ScreenScrollView>
-      <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-        <View style={styles.sectionHeader}>
-          <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>
-            Şirket Cüzdanı
-          </ThemedText>
-        </View>
+      {/* Header Stats */}
+      <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg }]}>
         {wallet && (
-          <View style={{ gap: Spacing.lg }}>
+          <View style={{ gap: Spacing.md }}>
+            {/* Balance Card */}
             <View
               style={[
-                styles.walletCard,
-                { backgroundColor: isDark ? "rgba(33, 150, 243, 0.1)" : "rgba(33, 150, 243, 0.05)" },
+                styles.balanceCard,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(99, 102, 241, 0.15)"
+                    : "rgba(99, 102, 241, 0.08)",
+                  borderColor: isDark
+                    ? "rgba(99, 102, 241, 0.3)"
+                    : "rgba(99, 102, 241, 0.2)",
+                },
               ]}
             >
-              <View style={styles.walletCardContent}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
                   Cüzdan Bakiyesi
                 </ThemedText>
-                <ThemedText type="h2" style={{ color: theme.link, fontWeight: "700", marginTop: Spacing.sm }}>
+                <ThemedText type="h2" style={{ color: theme.link, fontWeight: "700" }}>
                   {wallet.totalBalance.toFixed(2)} ₺
                 </ThemedText>
               </View>
-              <View style={[styles.walletIcon, { backgroundColor: theme.link }]}>
-                <Feather name="wallet" size={32} color="#FFFFFF" />
+              <View style={[styles.statsIcon, { backgroundColor: theme.link }]}>
+                <Feather name="credit-card" size={20} color="#FFFFFF" />
               </View>
             </View>
 
+            {/* Total Earned Card */}
             <View
               style={[
-                styles.walletCard,
-                { backgroundColor: isDark ? "rgba(76, 175, 80, 0.1)" : "rgba(76, 175, 80, 0.05)" },
+                styles.balanceCard,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(34, 197, 94, 0.15)"
+                    : "rgba(34, 197, 94, 0.08)",
+                  borderColor: isDark
+                    ? "rgba(34, 197, 94, 0.3)"
+                    : "rgba(34, 197, 94, 0.2)",
+                },
               ]}
             >
-              <View style={styles.walletCardContent}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
                   Toplam Kazanç
                 </ThemedText>
-                <ThemedText type="h3" style={{ color: "#4CAF50", fontWeight: "700", marginTop: Spacing.sm }}>
+                <ThemedText type="h3" style={{ color: "#22C55E", fontWeight: "700" }}>
                   {wallet.totalEarned.toFixed(2)} ₺
                 </ThemedText>
               </View>
-              <View style={[styles.walletIcon, { backgroundColor: "#4CAF50" }]}>
-                <Feather name="trending-up" size={32} color="#FFFFFF" />
+              <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
+                <Feather name="trending-up" size={20} color="#FFFFFF" />
               </View>
             </View>
           </View>
         )}
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-        <View style={styles.sectionHeader}>
-          <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-            Ödeme Bekleyen İşler
+      {/* Pending Payments Section */}
+      <View style={[styles.section, { marginTop: Spacing.xl }]}>
+        {/* Section Header */}
+        <View style={[styles.sectionHeader, { paddingHorizontal: Spacing.lg }]}>
+          <ThemedText type="h4" style={{ fontWeight: "700" }}>
+            Bekleyen Ödemeler
           </ThemedText>
           {unpaidCommissions.length > 0 && (
             <View
@@ -115,73 +129,140 @@ export default function WalletScreen() {
           )}
         </View>
 
+        {/* Table */}
         {unpaidCommissions.length > 0 ? (
-          <View style={{ gap: Spacing.md }}>
-            {unpaidCommissions.map((job) => (
+          <View style={[styles.tableContainer, { marginHorizontal: Spacing.lg }]}>
+            {/* Table Header */}
+            <View
+              style={[
+                styles.tableHeader,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(0, 0, 0, 0.3)"
+                    : "rgba(0, 0, 0, 0.05)",
+                  borderTopLeftRadius: BorderRadius.md,
+                  borderTopRightRadius: BorderRadius.md,
+                },
+              ]}
+            >
+              <ThemedText
+                type="small"
+                style={[styles.tableHeaderCell, { flex: 2, fontWeight: "600" }]}
+              >
+                Rota
+              </ThemedText>
+              <ThemedText
+                type="small"
+                style={[styles.tableHeaderCell, { flex: 1, fontWeight: "600", textAlign: "right" }]}
+              >
+                Komisyon
+              </ThemedText>
+              <ThemedText
+                type="small"
+                style={[styles.tableHeaderCell, { flex: 1, fontWeight: "600", textAlign: "center" }]}
+              >
+                İşlem
+              </ThemedText>
+            </View>
+
+            {/* Table Rows */}
+            {unpaidCommissions.map((job, index) => (
               <View
                 key={job.id}
                 style={[
-                  styles.jobCard,
-                  { backgroundColor: isDark ? "rgba(255, 193, 7, 0.1)" : "rgba(255, 193, 7, 0.05)" },
+                  styles.tableRow,
+                  {
+                    backgroundColor: colors.backgroundDefault,
+                    borderBottomWidth: index < unpaidCommissions.length - 1 ? 1 : 0,
+                    borderBottomColor: isDark
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.05)",
+                    borderBottomLeftRadius: index === unpaidCommissions.length - 1 ? BorderRadius.md : 0,
+                    borderBottomRightRadius: index === unpaidCommissions.length - 1 ? BorderRadius.md : 0,
+                  },
                 ]}
               >
-                <View style={{ flex: 1 }}>
-                  <ThemedText type="small" style={{ fontWeight: "600", color: colors.textPrimary }}>
+                {/* Route Info */}
+                <View style={{ flex: 2 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.xs }}>
                     {job.cargoType}
                   </ThemedText>
-                  <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
+                  <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>
                     {job.loadingLocation} → {job.deliveryLocation}
                   </ThemedText>
-                  <View style={{ marginTop: Spacing.md, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                    <ThemedText type="h4" style={{ color: theme.link, fontWeight: "700" }}>
-                      {parseFloat(job.commissionCost).toFixed(2)} ₺
-                    </ThemedText>
-                    <Pressable
-                      onPress={() => handleMarkAsPaid(job.id)}
-                      disabled={isMarkingPaid === job.id}
-                      style={({ pressed }) => [
-                        styles.paidButton,
-                        {
-                          backgroundColor: theme.link,
-                          opacity: pressed || isMarkingPaid === job.id ? 0.7 : 1,
-                        },
-                      ]}
-                    >
-                      <Feather name="check-circle" size={16} color="#FFFFFF" />
-                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        {isMarkingPaid === job.id ? "İşleniyor..." : "Ödendi"}
-                      </ThemedText>
-                    </Pressable>
-                  </View>
+                </View>
+
+                {/* Commission Amount */}
+                <ThemedText
+                  type="body"
+                  style={[
+                    { flex: 1, textAlign: "right", color: theme.link, fontWeight: "700" },
+                  ]}
+                >
+                  {parseFloat(job.commissionCost).toFixed(2)} ₺
+                </ThemedText>
+
+                {/* Action Button */}
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <Pressable
+                    onPress={() => handleMarkAsPaid(job.id)}
+                    disabled={isMarkingPaid === job.id}
+                    style={({ pressed }) => [
+                      styles.payButton,
+                      {
+                        backgroundColor: theme.link,
+                        opacity: pressed || isMarkingPaid === job.id ? 0.7 : 1,
+                      },
+                    ]}
+                  >
+                    <Feather
+                      name={isMarkingPaid === job.id ? "loader" : "check"}
+                      size={14}
+                      color="#FFFFFF"
+                    />
+                  </Pressable>
                 </View>
               </View>
             ))}
           </View>
         ) : (
-          <View style={styles.emptyState}>
+          <View style={[styles.emptyState, { marginHorizontal: Spacing.lg }]}>
             <Feather name="check-circle" size={48} color={colors.textSecondary} />
-            <ThemedText type="body" style={{ color: colors.textSecondary, marginTop: Spacing.md, textAlign: "center" }}>
+            <ThemedText type="body" style={{ color: colors.textSecondary, marginTop: Spacing.md }}>
               Tüm ödemeler tamamlanmıştır
             </ThemedText>
           </View>
         )}
       </View>
 
+      {/* Transaction History */}
       {wallet && wallet.transactions.length > 0 && (
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <View style={styles.sectionHeader}>
-            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-              İşlem Geçmişi
+        <View style={[styles.section, { marginTop: Spacing.lg }]}>
+          <View style={{ paddingHorizontal: Spacing.lg }}>
+            <ThemedText type="h4" style={{ fontWeight: "700", marginBottom: Spacing.md }}>
+              Son İşlemler
             </ThemedText>
           </View>
-          <View style={{ gap: Spacing.sm }}>
-            {wallet.transactions.slice(0, 5).map((transaction) => (
-              <View key={transaction.id} style={styles.transactionItem}>
+
+          <View style={[styles.transactionList, { marginHorizontal: Spacing.lg }]}>
+            {wallet.transactions.slice(0, 5).map((transaction, index) => (
+              <View
+                key={transaction.id}
+                style={[
+                  styles.transactionRow,
+                  {
+                    borderBottomWidth: index < Math.min(wallet.transactions.length - 1, 4) ? 1 : 0,
+                    borderBottomColor: isDark
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.05)",
+                  },
+                ]}
+              >
                 <View style={{ flex: 1 }}>
                   <ThemedText type="small" style={{ fontWeight: "600" }}>
                     {transaction.description}
                   </ThemedText>
-                  <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
+                  <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs, fontSize: 11 }}>
                     {new Date(transaction.createdAt).toLocaleDateString("tr-TR")}
                   </ThemedText>
                 </View>
@@ -193,61 +274,73 @@ export default function WalletScreen() {
           </View>
         </View>
       )}
+
+      <View style={{ height: Spacing.xl }} />
     </ScreenScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginHorizontal: Spacing.lg,
-    marginVertical: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
+  statsContainer: {
+    gap: Spacing.md,
+  },
+  balanceCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
     borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    gap: Spacing.md,
+  },
+  statsIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.sm,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  section: {
     gap: Spacing.md,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Spacing.md,
   },
   badge: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
-    minWidth: 28,
+    minWidth: 24,
     alignItems: "center",
     justifyContent: "center",
   },
-  walletCard: {
+  tableContainer: {
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.05)",
+  },
+  tableHeader: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.md,
-  },
-  walletCardContent: {
-    flex: 1,
-  },
-  walletIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: BorderRadius.md,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  jobCard: {
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.sm,
-  },
-  paidButton: {
-    flexDirection: "row",
-    gap: Spacing.sm,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
+    gap: Spacing.md,
+    alignItems: "center",
+  },
+  tableHeaderCell: {
+    color: "rgba(0, 0, 0, 0.6)",
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.md,
+    alignItems: "center",
+  },
+  payButton: {
+    width: 32,
+    height: 32,
     borderRadius: BorderRadius.sm,
     justifyContent: "center",
     alignItems: "center",
@@ -255,13 +348,20 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: "center",
     paddingVertical: Spacing.xl * 2,
+    borderRadius: BorderRadius.md,
+    backgroundColor: "rgba(0, 0, 0, 0.02)",
   },
-  transactionItem: {
+  transactionList: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.05)",
+    overflow: "hidden",
+  },
+  transactionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
+    paddingHorizontal: Spacing.md,
   },
 });
