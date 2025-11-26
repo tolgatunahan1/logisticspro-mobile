@@ -25,6 +25,9 @@ export default function JobListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<PlannedJob | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [currentCarrier, setCurrentCarrier] = useState<Carrier | null>(null);
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -60,29 +63,9 @@ export default function JobListScreen() {
     }
   }, [jobs]);
 
-  const handleDelete = async (job: PlannedJob) => {
-    const company = companies[job.companyId];
-    Alert.alert(
-      "İşi Sil",
-      `"${company?.name}" - "${job.cargoType}" iş kaydını silmek istediğinizden emin misiniz?`,
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteJob(job.id);
-              await loadData();
-              setShowDetailModal(false);
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              Alert.alert("Hata", "İş silinirken hata oluştu");
-            }
-          },
-        },
-      ]
-    );
+  const handleDeletePress = (job: PlannedJob) => {
+    setJobToDelete(job);
+    setShowDeleteConfirm(true);
   };
 
   const formatDate = (timestamp: number) => {
@@ -203,6 +186,62 @@ export default function JobListScreen() {
         scrollEnabled={true}
       />
 
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteConfirm(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
+          <View style={{
+            backgroundColor: colors.backgroundDefault,
+            borderRadius: BorderRadius.md,
+            padding: Spacing.lg,
+            width: "80%",
+            maxWidth: 300,
+          }}>
+            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>İşi Sil</ThemedText>
+            <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+              "{companies[jobToDelete?.companyId || ""]?.name || "İş"}" - "{jobToDelete?.cargoType}" işini silmek istediğinizden emin misiniz?
+            </ThemedText>
+            <View style={{ flexDirection: "row", gap: Spacing.md, justifyContent: "flex-end" }}>
+              <Pressable
+                onPress={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                style={({ pressed }) => [
+                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: theme.link }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  if (!jobToDelete) return;
+                  setIsDeleting(true);
+                  try {
+                    await deleteJob(jobToDelete.id);
+                    setShowDeleteConfirm(false);
+                    setShowDetailModal(false);
+                    await loadData();
+                  } catch (error) {
+                    console.error("Delete error:", error);
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+                style={({ pressed }) => [
+                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: colors.destructive }}>Sil</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Detail Modal */}
       <Modal
         visible={showDetailModal}
@@ -317,23 +356,42 @@ export default function JobListScreen() {
               )}
             </ScrollView>
 
-            {/* Modal Footer - Share Button */}
+            {/* Modal Footer - Share and Delete Buttons */}
             {selectedJob && (
-              <Pressable
-                onPress={() => handleShareJob(selectedJob)}
-                style={({ pressed }) => [
-                  styles.shareButton,
-                  {
-                    backgroundColor: theme.link,
-                    opacity: pressed ? 0.9 : 1,
-                  },
-                ]}
-              >
-                <Feather name="share-2" size={20} color="#FFFFFF" />
-                <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                  Bu İşi Paylaş
-                </ThemedText>
-              </Pressable>
+              <View style={{ flexDirection: "row", gap: Spacing.md }}>
+                <Pressable
+                  onPress={() => handleShareJob(selectedJob)}
+                  style={({ pressed }) => [
+                    styles.shareButton,
+                    {
+                      backgroundColor: theme.link,
+                      opacity: pressed ? 0.9 : 1,
+                      flex: 1,
+                    },
+                  ]}
+                >
+                  <Feather name="share-2" size={20} color="#FFFFFF" />
+                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Paylaş
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  onPress={() => handleDeletePress(selectedJob)}
+                  style={({ pressed }) => [
+                    styles.shareButton,
+                    {
+                      backgroundColor: colors.destructive,
+                      opacity: pressed ? 0.9 : 1,
+                      flex: 1,
+                    },
+                  ]}
+                >
+                  <Feather name="trash-2" size={20} color="#FFFFFF" />
+                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Sil
+                  </ThemedText>
+                </Pressable>
+              </View>
             )}
           </View>
         </View>
