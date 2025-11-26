@@ -113,17 +113,12 @@ export default function CompanyListScreen() {
     const phoneNumber = formatPhoneForWhatsApp(phone);
     
     try {
-      if (Platform.OS === "web") {
-        const webUrl = `https://wa.me/${phoneNumber}`;
-        await Linking.openURL(webUrl);
+      const url = `whatsapp://send?phone=${phoneNumber}`;
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
       } else {
-        const url = `https://wa.me/${phoneNumber}`;
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-          await Linking.openURL(url);
-        } else {
-          Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
-        }
+        Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
       }
     } catch (error) {
       Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
