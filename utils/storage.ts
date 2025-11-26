@@ -429,24 +429,6 @@ export const deleteCompletedJob = async (id: string): Promise<boolean> => {
     
     if (!jobToDelete) return false;
 
-    // Eğer komisyon ödenmişse, cüzdandan geri çıkar
-    if (jobToDelete.commissionPaid) {
-      const wallet = await getCompanyWallet();
-      const commissionAmount = parseFloat(jobToDelete.commissionCost) || 0;
-      
-      wallet.totalBalance -= commissionAmount;
-      wallet.transactions.push({
-        id: generateId(),
-        completedJobId: id,
-        amount: commissionAmount,
-        type: "payment",
-        description: `${jobToDelete.cargoType} seferinden komisyon geri alındı`,
-        createdAt: Date.now(),
-      });
-      wallet.updatedAt = Date.now();
-      await saveCompanyWallet(wallet);
-    }
-
     // Planlı işi geri yükle
     if (jobToDelete.plannedJobId) {
       const plannedJobs = await getJobs();
@@ -473,8 +455,14 @@ export const deleteCompletedJob = async (id: string): Promise<boolean> => {
       }
     }
     
+    // Sefer sil - cüzdan otomatik hesaplanır
     const filtered = completedJobs.filter((j) => j.id !== id);
     await saveCompletedJobs(filtered);
+    
+    // Cüzdanı güncelle (otomatik olarak yeni hesaplanan değerlerle)
+    const wallet = await getCompanyWallet();
+    await saveCompanyWallet(wallet);
+    
     return true;
   } catch (error) {
     console.error("Failed to delete completed job:", error);
@@ -592,13 +580,12 @@ export const saveCompanyWallet = async (wallet: CompanyWallet): Promise<boolean>
 
 export const markCommissionAsPaid = async (completedJobId: string): Promise<boolean> => {
   try {
-    // Güncelleştirilmiş işi işaretleyin
+    // Sefer işaretini değiştir
     const jobs = await getCompletedJobs();
     const jobIndex = jobs.findIndex((j) => j.id === completedJobId);
     if (jobIndex === -1) return false;
 
     const job = jobs[jobIndex];
-    const commissionAmount = parseFloat(job.commissionCost) || 0;
 
     jobs[jobIndex] = {
       ...job,
@@ -607,18 +594,8 @@ export const markCommissionAsPaid = async (completedJobId: string): Promise<bool
     };
     await saveCompletedJobs(jobs);
 
-    // Cüzdanı güncelleyin
+    // Cüzdan otomatik hesaplanır
     const wallet = await getCompanyWallet();
-    wallet.totalBalance += commissionAmount;
-    wallet.totalEarned += commissionAmount;
-    wallet.transactions.push({
-      id: generateId(),
-      completedJobId,
-      amount: commissionAmount,
-      type: "income",
-      description: `${job.cargoType} seferinden komisyon`,
-      createdAt: Date.now(),
-    });
     wallet.updatedAt = Date.now();
     await saveCompanyWallet(wallet);
 
