@@ -21,9 +21,9 @@ export default function CompanyFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   
-  const company = route.params?.company || null;
+  const company = route.params?.company;
   const mode = route.params?.mode || "add";
-  const isEdit = mode === "edit";
+  const isEdit = mode === "edit" && !!company;
 
   const [name, setName] = useState(company?.name || "");
   const [phone, setPhone] = useState(company?.phone || "");
@@ -212,9 +212,12 @@ export default function CompanyFormScreen() {
         {renderInput("Yetkili Kişi", contactPerson, setContactPerson, "contactPerson", { placeholder: "Yetkili adı", autoCapitalize: "words" })}
         {renderInput("Adres", address, setAddress, "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true })}
 
-        {isEdit ? (
+        {company && mode === "edit" ? (
           <Pressable
-            onPress={handleDelete}
+            onPress={() => {
+              console.log("Sil tuşuna basıldı");
+              handleDelete();
+            }}
             disabled={isLoading}
             style={({ pressed }) => [
               styles.deleteButton,

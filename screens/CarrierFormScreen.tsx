@@ -21,9 +21,9 @@ export default function CarrierFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   
-  const carrier = route.params?.carrier || null;
+  const carrier = route.params?.carrier;
   const mode = route.params?.mode || "add";
-  const isEdit = mode === "edit";
+  const isEdit = mode === "edit" && !!carrier;
 
   const [name, setName] = useState(carrier?.name || "");
   const [phone, setPhone] = useState(carrier?.phone || "");
@@ -235,9 +235,12 @@ export default function CarrierFormScreen() {
           ) : null}
         </View>
 
-        {isEdit ? (
+        {carrier && mode === "edit" ? (
           <Pressable
-            onPress={handleDelete}
+            onPress={() => {
+              console.log("Sil tuşuna basıldı");
+              handleDelete();
+            }}
             disabled={isLoading}
             style={({ pressed }) => [
               styles.deleteButton,
