@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { StyleSheet, View, Pressable, Alert, TextInput, Modal, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useSafeAreaInsets, useFocusEffect } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
