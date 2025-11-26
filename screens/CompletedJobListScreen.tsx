@@ -213,31 +213,112 @@ export default function CompletedJobListScreen() {
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               {selectedJob && (
                 <View style={{ gap: Spacing.lg }}>
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Firma Adı
+                  {/* Company Information Section */}
+                  <View style={{
+                    backgroundColor: colors.backgroundDefault,
+                    padding: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    gap: Spacing.md,
+                    marginBottom: Spacing.md,
+                  }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                      Gönderen Firma
                     </ThemedText>
-                    <ThemedText type="h4">
-                      {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
-                    </ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Firma Adı
+                      </ThemedText>
+                      <ThemedText type="h4">
+                        {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Telefon
+                      </ThemedText>
+                      <ThemedText type="body">
+                        {companies[selectedJob.companyId]?.phone || "-"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        İletişim Kişisi
+                      </ThemedText>
+                      <ThemedText type="body">
+                        {companies[selectedJob.companyId]?.contactPerson || "-"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Adres
+                      </ThemedText>
+                      <ThemedText type="body">
+                        {companies[selectedJob.companyId]?.address || "-"}
+                      </ThemedText>
+                    </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Nakliyeci
+                  {/* Carrier Information Section */}
+                  <View style={{
+                    backgroundColor: colors.backgroundDefault,
+                    padding: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    gap: Spacing.md,
+                    marginBottom: Spacing.md,
+                  }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                      Nakliyeci Bilgileri
                     </ThemedText>
-                    <ThemedText type="h4">
-                      {carriers[selectedJob.carrierId]?.name || "Bilinmeyen Nakliyeci"}
-                    </ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Nakliyeci Adı
+                      </ThemedText>
+                      <ThemedText type="h4">
+                        {carriers[selectedJob.carrierId]?.name || "Bilinmeyen Nakliyeci"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Telefon
+                      </ThemedText>
+                      <ThemedText type="body">
+                        {carriers[selectedJob.carrierId]?.phone || "-"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Araç Plakası
+                      </ThemedText>
+                      <ThemedText type="body">
+                        {carriers[selectedJob.carrierId]?.plate || "-"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Araç Tipi
+                      </ThemedText>
+                      <ThemedText type="body">
+                        {carriers[selectedJob.carrierId]?.vehicleType || "-"}
+                      </ThemedText>
+                    </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Yükün Cinsi
+                  {/* Cargo Information Section */}
+                  <View style={{
+                    gap: Spacing.md,
+                    marginTop: Spacing.md,
+                  }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                      Yük Bilgileri
                     </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.cargoType || "-"}
-                    </ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Yükün Cinsi
+                      </ThemedText>
+                      <ThemedText type="h4">
+                        {selectedJob.cargoType || "-"}
+                      </ThemedText>
+                    </View>
                   </View>
 
                   <View style={styles.detailSection}>
