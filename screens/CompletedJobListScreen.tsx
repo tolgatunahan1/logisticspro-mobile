@@ -10,7 +10,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel } from "@/utils/storage";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -30,6 +30,8 @@ export default function CompletedJobListScreen() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<CompletedJob | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [ibans, setIbans] = useState<IBAN[]>([]);
+  const [showIBANModal, setShowIBANModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -89,10 +91,42 @@ export default function CompletedJobListScreen() {
     }
   }, [selectedJob, companies, carriers]);
 
+  // Helper function to share IBAN with carrier via WhatsApp
+  const shareIBANWithCarrier = useCallback(
+    async (selectedIBAN: IBAN) => {
+      if (!selectedJob) return;
+
+      const carrier = carriers[selectedJob.carrierId];
+
+      if (!carrier?.phone) {
+        Alert.alert("Hata", "Nakliyeci telefon numarası eksik");
+        return;
+      }
+
+      const message = `Ödeme Bilgileri:\n\nAd Soyad: ${selectedIBAN.nameSurname}\nİBAN: ${selectedIBAN.ibanNumber}`;
+
+      let phoneNumber = carrier.phone.replace(/\D/g, "");
+      if (!phoneNumber.startsWith("90")) {
+        phoneNumber = "90" + phoneNumber;
+      }
+
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+      try {
+        await Linking.openURL(whatsappUrl);
+        setShowIBANModal(false);
+      } catch (error) {
+        Alert.alert("Hata", "WhatsApp açılamadı. Lütfen WhatsApp uygulamasının yüklü olduğundan emin olun.");
+      }
+    },
+    [selectedJob, carriers]
+  );
+
   const loadData = useCallback(async () => {
     const allJobs = await getCompletedJobs();
     const allCompanies = await getCompanies();
     const allCarriers = await getCarriers();
+    const allIbans = await getIBANs();
     
     const companiesMap = allCompanies.reduce((acc, company) => {
       acc[company.id] = company;
@@ -108,6 +142,7 @@ export default function CompletedJobListScreen() {
     setCompanies(companiesMap);
     setCarriers(carriersMap);
     setFilteredJobs(allJobs);
+    setIbans(allIbans);
   }, []);
 
   useFocusEffect(
@@ -406,6 +441,30 @@ export default function CompletedJobListScreen() {
                         Firma Bilgilerini Paylaş
                       </ThemedText>
                     </Pressable>
+
+                    {/* Share IBAN Button */}
+                    <Pressable
+                      onPress={() => setShowIBANModal(true)}
+                      style={({ pressed }) => [
+                        {
+                          backgroundColor: theme.link,
+                          opacity: pressed ? 0.9 : 1,
+                          marginTop: Spacing.md,
+                          paddingVertical: Spacing.sm,
+                          paddingHorizontal: Spacing.md,
+                          borderRadius: BorderRadius.sm,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: Spacing.sm,
+                        },
+                      ]}
+                    >
+                      <Feather name="credit-card" size={16} color="#FFFFFF" />
+                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        Kayıtlı İBANı Paylaş
+                      </ThemedText>
+                    </Pressable>
                   </View>
 
                   {/* Cargo Information Section */}
@@ -628,6 +687,71 @@ export default function CompletedJobListScreen() {
             </View>
           </View>
         )}
+      </Modal>
+
+      {/* IBAN Selection Modal */}
+      <Modal visible={showIBANModal} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: Spacing.lg }}>
+          <View style={{ backgroundColor: colors.backgroundDefault, borderRadius: BorderRadius.lg, maxHeight: "70%", width: "100%" }}>
+            <View style={{ padding: Spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <ThemedText type="h3" style={{ fontWeight: "700" }}>
+                İBAN Seç
+              </ThemedText>
+            </View>
+
+            <ScrollView style={{ maxHeight: "100%" }}>
+              {ibans.length > 0 ? (
+                <View style={{ padding: Spacing.lg, gap: Spacing.md }}>
+                  {ibans.map((iban) => (
+                    <Pressable
+                      key={iban.id}
+                      onPress={() => shareIBANWithCarrier(iban)}
+                      style={({ pressed }) => [
+                        {
+                          backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                          padding: Spacing.md,
+                          borderRadius: BorderRadius.sm,
+                          opacity: pressed ? 0.7 : 1,
+                        },
+                      ]}
+                    >
+                      <ThemedText type="small" style={{ fontWeight: "600" }}>
+                        {iban.nameSurname}
+                      </ThemedText>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
+                        {iban.ibanNumber}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                <View style={{ padding: Spacing.lg, alignItems: "center" }}>
+                  <ThemedText type="body" style={{ color: colors.textSecondary, textAlign: "center" }}>
+                    Kayıtlı İBAN bulunamadı. Lütfen Ayarlar'dan İBAN ekleyin.
+                  </ThemedText>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={{ padding: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
+              <Pressable
+                onPress={() => setShowIBANModal(false)}
+                style={({ pressed }) => [
+                  {
+                    paddingVertical: Spacing.md,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600" }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
       </Modal>
 
       <Pressable
