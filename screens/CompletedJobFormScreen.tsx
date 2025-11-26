@@ -501,40 +501,41 @@ export default function CompletedJobFormScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Loading Date Picker */}
-      {showLoadingDatePicker && Platform.OS !== "web" && (
-        <DateTimePicker
-          value={new Date(loadingDate)}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleLoadingDateChange}
-          onTouchCancel={() => setShowLoadingDatePicker(false)}
-        />
-      )}
-
-      {/* Delivery Date Picker */}
-      {showDeliveryDatePicker && Platform.OS !== "web" && (
-        <DateTimePicker
-          value={new Date(deliveryDate)}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDeliveryDateChange}
-          onTouchCancel={() => setShowDeliveryDatePicker(false)}
-        />
-      )}
-
-      {/* Completion Date Picker */}
-      {showCompletionDatePicker && Platform.OS !== "web" && (
-        <DateTimePicker
-          value={new Date(completionDate)}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleCompletionDateChange}
-          onTouchCancel={() => setShowCompletionDatePicker(false)}
-        />
-      )}
     </ScrollView>
+
+    {/* Loading Date Picker - Outside ScrollView for Expo Go */}
+    {showLoadingDatePicker && Platform.OS !== "web" && (
+      <DateTimePicker
+        value={new Date(loadingDate)}
+        mode="date"
+        display={Platform.OS === "ios" ? "spinner" : "default"}
+        onChange={handleLoadingDateChange}
+        onTouchCancel={() => setShowLoadingDatePicker(false)}
+      />
+    )}
+
+    {/* Delivery Date Picker - Outside ScrollView for Expo Go */}
+    {showDeliveryDatePicker && Platform.OS !== "web" && (
+      <DateTimePicker
+        value={new Date(deliveryDate)}
+        mode="date"
+        display={Platform.OS === "ios" ? "spinner" : "default"}
+        onChange={handleDeliveryDateChange}
+        onTouchCancel={() => setShowDeliveryDatePicker(false)}
+      />
+    )}
+
+    {/* Completion Date Picker - Outside ScrollView for Expo Go */}
+    {showCompletionDatePicker && Platform.OS !== "web" && (
+      <DateTimePicker
+        value={new Date(completionDate)}
+        mode="date"
+        display={Platform.OS === "ios" ? "spinner" : "default"}
+        onChange={handleCompletionDateChange}
+        onTouchCancel={() => setShowCompletionDatePicker(false)}
+      />
+    )}
+    </>
   );
 }
 
