@@ -175,25 +175,8 @@ export default function AdminPanelScreen() {
   }, [loadUsers]);
 
   const handleLogoutPress = () => {
-    console.log("🚪 LOGOUT BUTTON CLICKED - ÇIKIŞ BAŞLADI");
-    
-    logout().then(() => {
-      console.log("✅ LOGOUT DONE - Redirecting");
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window.location) {
-          console.log("🌐 Reloading page");
-          window.location.reload();
-        } else {
-          console.log("📱 Navigation reset");
-          (navigation as any).reset({ index: 0, routes: [{ name: 'Login' }] });
-        }
-      }, 100);
-    }).catch((err) => {
-      console.error("❌ Logout error:", err);
-      if (typeof window !== 'undefined' && window.location) {
-        window.location.reload();
-      }
-    });
+    console.log("👉 LOGOUT BUTTON PRESSED");
+    logout();
   };
 
   const formatDate = (timestamp: number) => {

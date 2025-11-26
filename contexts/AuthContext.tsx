@@ -112,19 +112,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    console.log("🚪 LOGOUT STARTED - Clearing session");
+    console.log("🚪 LOGOUT STARTED");
     try {
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-      console.log("💾 Storage cleared - removeItem succeeded");
-      
-      const verify = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      console.log("✅ VERIFICATION - Auth data after logout:", verify === null ? "CLEARED ✓" : "STILL EXISTS ✗");
-      
+      console.log("💾 Storage cleared");
       setUser(null);
-      console.log("✅ LOGOUT COMPLETE - User state cleared, should navigate to Login");
+      console.log("✅ LOGOUT COMPLETE");
+      
+      // Web platform: reload page immediately
+      if (typeof window !== 'undefined' && window.location) {
+        console.log("🌐 WEB - Reloading");
+        setTimeout(() => window.location.reload(), 200);
+      }
     } catch (error) {
       console.error("❌ Logout error:", error);
       setUser(null);
+      if (typeof window !== 'undefined' && window.location) {
+        setTimeout(() => window.location.reload(), 200);
+      }
     }
   };
 
