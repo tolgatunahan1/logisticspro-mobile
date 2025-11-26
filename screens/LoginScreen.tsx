@@ -56,7 +56,7 @@ export default function LoginScreen() {
             resizeMode="contain"
           />
           <ThemedText type="h2" style={styles.title}>
-            Nakliyeci Kayıt
+            LogisticsPRO
           </ThemedText>
           <ThemedText type="body" style={[styles.subtitle, { color: colors.textSecondary }]}>
             Devam etmek için giriş yapın

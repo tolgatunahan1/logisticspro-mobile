@@ -1,4 +1,4 @@
-# Nakliyeci Kayıt - Carrier Registration App
+# LogisticsPRO - Carrier Registration App
 
 ## Overview
 A mobile application for registering and managing carriers (nakliyeci). Users can log in with a username and password, and all users with the same credentials can view and edit the shared carrier data.

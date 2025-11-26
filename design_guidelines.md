@@ -1,4 +1,4 @@
-# Nakliyeci Kayıt - Apple iOS 26+ Modern Design Guidelines
+# LogisticsPRO - Apple iOS 26+ Modern Design Guidelines
 
 ## Design Philosophy: Liquid Glass UI + Minimal Modern
 

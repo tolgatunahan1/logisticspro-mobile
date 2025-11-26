@@ -31,7 +31,7 @@ function HomeStackScreen() {
         name="Home"
         component={HomeScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="Nakliyeci Kayıt" />,
+          headerTitle: () => <HeaderTitle title="LogisticsPRO" />,
         }}
       />
     </HomeStack.Navigator>

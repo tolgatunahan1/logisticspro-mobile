@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Nakliyeci Kayıt",
-    "slug": "nakliyeci-kayit",
+    "name": "LogisticsPRO",
+    "slug": "logisticspro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "nakliyecikayit",
+    "scheme": "logisticspro",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nakliyeci.kayit"
+      "bundleIdentifier": "com.logisticspro"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.nakliyeci.kayit"
+      "package": "com.logisticspro"
     },
     "web": {
       "output": "single",
