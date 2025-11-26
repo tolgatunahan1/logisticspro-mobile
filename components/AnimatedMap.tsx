@@ -13,91 +13,31 @@ import { useTheme } from "@/hooks/useTheme";
 export function AnimatedMap() {
   const { theme, isDark } = useTheme();
   const translateX = useSharedValue(0);
-  const scale = useSharedValue(1);
 
   useEffect(() => {
     // Yatay hareket
     translateX.value = withRepeat(
-      withTiming(120, {
-        duration: 2000,
+      withTiming(100, {
+        duration: 2500,
         easing: Easing.inOut(Easing.ease),
       }),
       -1,
       true
     );
-
-    // Ölçek pulse efekti
-    scale.value = withRepeat(
-      withTiming(1.08, {
-        duration: 1200,
-        easing: Easing.inOut(Easing.ease),
-      }),
-      -1,
-      true
-    );
-  }, [translateX, scale]);
+  }, [translateX]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { scale: scale.value },
-    ],
+    transform: [{ translateX: translateX.value }],
   }));
 
   return (
     <View style={styles.container}>
-      {/* Mini Tır Animasyonu */}
-      <Animated.View style={[styles.truckWrapper, animatedStyle]}>
-        {/* Tır Kabini */}
-        <View
-          style={[
-            styles.cabin,
-            {
-              backgroundColor: theme.link,
-            },
-          ]}
-        >
-          {/* Tır İkonu */}
-          <Feather
-            name="truck"
-            size={40}
-            color="#FFFFFF"
-            style={styles.truckIcon}
-          />
+      {/* Animasyonlu Tır */}
+      <Animated.View style={[styles.truckContainer, animatedStyle]}>
+        {/* Tır Görseli */}
+        <View style={[styles.truck, { backgroundColor: theme.link }]}>
+          <Feather name="truck" size={50} color="#FFFFFF" />
         </View>
-
-        {/* Tır Kasası */}
-        <View
-          style={[
-            styles.cargo,
-            {
-              backgroundColor: theme.link,
-              opacity: 0.8,
-            },
-          ]}
-        />
-
-        {/* Ön Tekerlek */}
-        <View
-          style={[
-            styles.wheel,
-            styles.frontWheel,
-            {
-              borderColor: theme.link,
-            },
-          ]}
-        />
-
-        {/* Arka Tekerlek */}
-        <View
-          style={[
-            styles.wheel,
-            styles.rearWheel,
-            {
-              borderColor: theme.link,
-            },
-          ]}
-        />
       </Animated.View>
 
       {/* Yol */}
@@ -105,7 +45,9 @@ export function AnimatedMap() {
         style={[
           styles.road,
           {
-            backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+            backgroundColor: isDark
+              ? "rgba(255,255,255,0.08)"
+              : "rgba(0,0,0,0.08)",
           },
         ]}
       />
@@ -117,58 +59,30 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 24,
-    gap: 16,
+    paddingVertical: 32,
+    gap: 20,
   },
-  truckWrapper: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 0,
+  truckContainer: {
+    width: 80,
+    height: 80,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  cabin: {
-    width: 30,
-    height: 30,
-    borderRadius: 6,
+  truck: {
+    width: 80,
+    height: 80,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#0066FF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  truckIcon: {
-    textAlign: "center",
-  },
-  cargo: {
-    width: 50,
-    height: 25,
-    borderRadius: 4,
-    shadowColor: "#0066FF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  wheel: {
-    position: "absolute",
-    borderWidth: 2.5,
-    borderRadius: 50,
-    bottom: -8,
-  },
-  frontWheel: {
-    width: 14,
-    height: 14,
-    left: 18,
-  },
-  rearWheel: {
-    width: 16,
-    height: 16,
-    right: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
   },
   road: {
-    height: 4,
-    width: 280,
+    height: 3,
+    width: 240,
     borderRadius: 2,
   },
 });
