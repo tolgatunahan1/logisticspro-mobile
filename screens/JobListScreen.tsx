@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useLayoutEffect } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -36,6 +36,12 @@ export default function JobListScreen() {
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitle: "",
+    });
+  }, [navigation]);
 
   const loadData = useCallback(async () => {
     const allJobs = await getJobs();
@@ -603,7 +609,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
+    paddingTop: Spacing["3xl"],
+    paddingBottom: Spacing.lg,
     gap: Spacing.lg,
   },
   jobCard: {
