@@ -178,6 +178,7 @@ export default function CompletedJobFormScreen() {
       <ScrollView
       style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
       contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.content}>
         {/* Company Selector */}
