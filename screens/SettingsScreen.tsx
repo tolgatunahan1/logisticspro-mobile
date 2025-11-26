@@ -88,7 +88,7 @@ export default function SettingsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.lg, paddingBottom: insets.bottom + Spacing.xl }}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl * 2, paddingBottom: insets.bottom + Spacing.xl }}>
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.userInfo}>
             <View style={[styles.avatar, { backgroundColor: theme.link }]}>
