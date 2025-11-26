@@ -61,8 +61,20 @@ export default function AvailabilityScreen() {
   };
 
   const handleAddAvailability = async () => {
-    if (!carrierName.trim() || !currentLocation.trim() || !destinationLocation.trim() || !notes.trim()) {
+    // Kayıtlı nakliyeci seçilmesi gerekli
+    if (isRegistered && !selectedCarrier) {
+      Alert.alert("Uyarı", "Lütfen nakliyeci seçiniz");
+      return;
+    }
+
+    if (!currentLocation.trim() || !destinationLocation.trim() || !notes.trim()) {
       Alert.alert("Uyarı", "Lütfen tüm alanları doldurunuz");
+      return;
+    }
+
+    // Kayıtsız nakliyeci için ad gerekli
+    if (!isRegistered && !carrierName.trim()) {
+      Alert.alert("Uyarı", "Lütfen nakliyeci adı giriniz");
       return;
     }
 
@@ -70,13 +82,13 @@ export default function AvailabilityScreen() {
 
     const result = await addCarrierAvailability({
       carrierId: isRegistered ? selectedCarrier?.id : undefined,
-      carrierName: carrierName.trim(),
-      carrierPhone: carrierPhone.trim() || undefined,
+      carrierName: carrierName.trim() || (selectedCarrier?.name || ""),
+      carrierPhone: carrierPhone.trim() || (selectedCarrier?.phone || undefined),
       currentLocation: currentLocation.trim(),
       destinationLocation: destinationLocation.trim(),
       notes: notes.trim(),
       capacity: "boş",
-      loadType: vehicleType || undefined,
+      loadType: vehicleType || (selectedCarrier?.vehicleType || undefined),
       expiresAt,
     });
 
