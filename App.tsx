@@ -11,6 +11,24 @@ import RootNavigator from "@/navigation/RootNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 
+// Suppress unnecessary console warnings/logs for Replit performance
+if (typeof console !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    const message = args[0]?.toString?.() || '';
+    // Suppress known harmless warnings
+    if (
+      message.includes('shadow') ||
+      message.includes('pointerEvents') ||
+      message.includes('Non-serializable values') ||
+      message.includes('ViewPropTypes')
+    ) {
+      return;
+    }
+    originalWarn(...args);
+  };
+}
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
