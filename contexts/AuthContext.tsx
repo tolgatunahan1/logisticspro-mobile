@@ -34,9 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (storedAuth) {
         const parsed = JSON.parse(storedAuth);
         setUser(parsed);
+      } else {
+        const defaultUser: User = { username: "LogisticsPRO", type: "user" };
+        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(defaultUser));
+        setUser(defaultUser);
       }
     } catch (error) {
       console.error("Failed to load auth:", error);
+      const defaultUser: User = { username: "LogisticsPRO", type: "user" };
+      setUser(defaultUser);
     } finally {
       setIsLoading(false);
     }

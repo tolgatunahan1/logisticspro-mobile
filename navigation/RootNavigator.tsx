@@ -2,7 +2,6 @@ import React from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import LoginScreen from "@/screens/LoginScreen";
 import BottomTabNavigator from "@/navigation/BottomTabNavigator";
 import CarrierListScreen from "@/screens/CarrierListScreen";
 import CarrierFormScreen from "@/screens/CarrierFormScreen";
@@ -53,16 +52,7 @@ export default function RootNavigator() {
         ...getCommonScreenOptions({ theme, isDark }),
       }}
     >
-      {!user ? (
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-      ) : (
-        <>
+      <>
           <Stack.Screen
             name="MainTabs"
             component={BottomTabNavigator}
