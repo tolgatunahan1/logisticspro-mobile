@@ -102,6 +102,7 @@ export default function RootNavigator() {
             options={{
               headerTitle: "Planlanan İşler",
               headerBackTitleVisible: false,
+              headerBackTitle: "",
             }}
           />
           <Stack.Screen
@@ -119,6 +120,7 @@ export default function RootNavigator() {
             options={{
               headerTitle: "Gerçekleşen İşler",
               headerBackTitleVisible: false,
+              headerBackTitle: "",
             }}
           />
           <Stack.Screen

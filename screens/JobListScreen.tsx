@@ -213,33 +213,36 @@ export default function JobListScreen() {
     </View>
   );
 
+  const renderSearchHeader = () => (
+    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
+      <View
+        style={[
+          styles.searchBox,
+          {
+            backgroundColor: colors.backgroundDefault,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Feather name="search" size={18} color={colors.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: theme.text }]}
+          placeholder="İş ara..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+      </View>
+    </View>
+  );
+
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
-        <View
-          style={[
-            styles.searchBox,
-            {
-              backgroundColor: colors.backgroundDefault,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <Feather name="search" size={18} color={colors.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="İş ara..."
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-        </View>
-      </View>
-
       <FlatList
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />
@@ -609,7 +612,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing["3xl"],
     paddingBottom: Spacing.lg,
     gap: Spacing.lg,
   },
