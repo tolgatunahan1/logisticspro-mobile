@@ -2,8 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import { View } from "react-native";
-import { BlurView } from "expo-blur";
+import { StyleSheet } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing } from "@/constants/theme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
@@ -58,49 +57,32 @@ export default function BottomTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          if (route.name === "HomeTab") {
-            return <Feather name="home" size={24} color={color} />;
-          } else if (route.name === "WalletTab") {
-            return <Feather name="wallet" size={24} color={color} />;
+        tabBarIcon: ({ focused, color }) => {
+          let iconName: "home" | "shopping-bag" = "home";
+          if (route.name === "WalletTab") {
+            iconName = "shopping-bag";
           }
-          return null;
+          return <Feather name={iconName} size={22} color={color} />;
         },
         tabBarActiveTintColor: theme.link,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-          elevation: 0,
-          height: 75,
-          paddingBottom: Spacing.md,
-          paddingTop: Spacing.sm,
+          backgroundColor: colors.backgroundDefault,
+          borderTopWidth: 1,
+          borderTopColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)",
+          height: 68,
+          paddingBottom: Spacing.sm,
+          paddingTop: Spacing.xs,
+          elevation: 8,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
-        tabBarBackground: () => (
-          <BlurView intensity={90} style={{ flex: 1, overflow: "hidden" }}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: isDark
-                  ? "rgba(30, 30, 30, 0.4)"
-                  : "rgba(255, 255, 255, 0.6)",
-                borderTopColor: isDark
-                  ? "rgba(255, 255, 255, 0.15)"
-                  : "rgba(0, 0, 0, 0.08)",
-                borderTopWidth: 1,
-              }}
-            />
-          </BlurView>
-        ),
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: "600",
-          marginTop: Spacing.sm,
-          paddingBottom: Spacing.xs,
+          marginTop: Spacing.xs,
         },
         headerShown: false,
       })}
