@@ -138,7 +138,7 @@ export default function JobFormScreen() {
     }
   }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, isEdit, job, navigation]);
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     console.log("handleDelete çağrıldı, job:", job);
     if (!job?.id) {
       console.log("Job ID yok, return");
@@ -148,30 +148,35 @@ export default function JobFormScreen() {
     const jobId = job.id;
     console.log("Silme işlemi başlıyor, jobId:", jobId);
 
-    Alert.alert(
-      "İşi Sil",
-      "Bu iş kaydını silmek istediğinizden emin misiniz?",
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            console.log("Sil butonuna basıldı, siliniyor:", jobId);
-            setIsLoading(true);
-            try {
-              const result = await deleteJob(jobId);
-              console.log("Silme başarılı:", result);
-              navigation.goBack();
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              Alert.alert("Hata", "İş silinirken bir hata oluştu");
-              setIsLoading(false);
-            }
-          },
-        },
-      ]
-    );
+    const confirmed = Platform.OS === "web" 
+      ? window.confirm("Bu iş kaydını silmek istediğinizden emin misiniz?")
+      : await new Promise((resolve) => {
+          Alert.alert(
+            "İşi Sil",
+            "Bu iş kaydını silmek istediğinizden emin misiniz?",
+            [
+              { text: "İptal", style: "cancel", onPress: () => resolve(false) },
+              { text: "Sil", style: "destructive", onPress: () => resolve(true) },
+            ]
+          );
+        });
+
+    if (!confirmed) {
+      console.log("Silme iptal edildi");
+      return;
+    }
+
+    console.log("Sil butonuna basıldı, siliniyor:", jobId);
+    setIsLoading(true);
+    try {
+      const result = await deleteJob(jobId);
+      console.log("Silme başarılı, sonuç:", result);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Silme hatası:", error);
+      Alert.alert("Hata", "İş silinirken bir hata oluştu");
+      setIsLoading(false);
+    }
   }, [job, navigation]);
 
   const handleCancel = () => {
