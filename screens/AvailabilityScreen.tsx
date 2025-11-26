@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { ThemedText } from "@/components/ThemedText";
@@ -190,7 +190,7 @@ export default function AvailabilityScreen() {
 
       <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={[s.modalWrapper, { backgroundColor: colors.backgroundDefault }]}>
-          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false} scrollEnabled={false} pinchGestureEnabled={false}>
             <View style={[s.modal, { paddingHorizontal: 12, paddingTop: 12 }]}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <ThemedText type="h3">Yeni Bildiri</ThemedText>
@@ -269,6 +269,12 @@ export default function AvailabilityScreen() {
                       value={carrierName}
                       onChangeText={setCarrierName}
                       placeholderTextColor={colors.textSecondary}
+                      onFocus={(e) => {
+                        if (Platform.OS === 'web') {
+                          e.target.blur();
+                          setTimeout(() => e.target.focus(), 100);
+                        }
+                      }}
                       style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                     />
                   </View>
@@ -282,6 +288,12 @@ export default function AvailabilityScreen() {
                       onChangeText={setCarrierPhone}
                       keyboardType="phone-pad"
                       placeholderTextColor={colors.textSecondary}
+                      onFocus={(e) => {
+                        if (Platform.OS === 'web') {
+                          e.target.blur();
+                          setTimeout(() => e.target.focus(), 100);
+                        }
+                      }}
                       style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                     />
                   </View>
@@ -294,6 +306,12 @@ export default function AvailabilityScreen() {
                       value={vehicleType}
                       onChangeText={setVehicleType}
                       placeholderTextColor={colors.textSecondary}
+                      onFocus={(e) => {
+                        if (Platform.OS === 'web') {
+                          e.target.blur();
+                          setTimeout(() => e.target.focus(), 100);
+                        }
+                      }}
                       style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                     />
                   </View>
@@ -309,6 +327,12 @@ export default function AvailabilityScreen() {
                   value={currentLocation}
                   onChangeText={setCurrentLocation}
                   placeholderTextColor={colors.textSecondary}
+                  onFocus={(e) => {
+                    if (Platform.OS === 'web') {
+                      e.target.blur();
+                      setTimeout(() => e.target.focus(), 100);
+                    }
+                  }}
                   style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                 />
               </View>
@@ -322,6 +346,12 @@ export default function AvailabilityScreen() {
                   value={destinationLocation}
                   onChangeText={setDestinationLocation}
                   placeholderTextColor={colors.textSecondary}
+                  onFocus={(e) => {
+                    if (Platform.OS === 'web') {
+                      e.target.blur();
+                      setTimeout(() => e.target.focus(), 100);
+                    }
+                  }}
                   style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                 />
               </View>
@@ -337,6 +367,12 @@ export default function AvailabilityScreen() {
                   multiline
                   numberOfLines={2}
                   placeholderTextColor={colors.textSecondary}
+                  onFocus={(e) => {
+                    if (Platform.OS === 'web') {
+                      e.target.blur();
+                      setTimeout(() => e.target.focus(), 100);
+                    }
+                  }}
                   style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 60 }]}
                 />
               </View>
