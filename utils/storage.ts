@@ -539,21 +539,37 @@ export const deleteIBAN = async (id: string): Promise<boolean> => {
 // Company Wallet functions
 export const getCompanyWallet = async (): Promise<CompanyWallet> => {
   try {
+    // Gerçekleşen seferleri oku
+    const completedJobs = await getCompletedJobs();
+    
+    // Ödenmişlerin toplam tutarını hesapla
+    const totalBalance = completedJobs
+      .filter((job) => job.commissionPaid)
+      .reduce((sum, job) => sum + (parseFloat(job.commissionCost) || 0), 0);
+    
+    // Tüm komisyonların toplam tutarını hesapla
+    const totalEarned = completedJobs
+      .reduce((sum, job) => sum + (parseFloat(job.commissionCost) || 0), 0);
+    
+    // Depolanmış veriyi al (geçmiş işlemler için)
     const stored = await AsyncStorage.getItem(COMPANY_WALLET_STORAGE_KEY);
+    let transactions: WalletTransaction[] = [];
     if (stored) {
-      return JSON.parse(stored);
+      const parsedWallet = JSON.parse(stored);
+      transactions = parsedWallet.transactions || [];
     }
-    const newWallet: CompanyWallet = {
+    
+    const wallet: CompanyWallet = {
       id: generateId(),
-      totalBalance: 0,
-      totalEarned: 0,
-      totalPaid: 0,
-      transactions: [],
+      totalBalance,
+      totalEarned,
+      totalPaid: totalEarned - totalBalance,
+      transactions,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    await saveCompanyWallet(newWallet);
-    return newWallet;
+    
+    return wallet;
   } catch (error) {
     console.error("Failed to get company wallet:", error);
     return {
