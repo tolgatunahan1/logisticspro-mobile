@@ -80,7 +80,9 @@ export default function SettingsScreen() {
         {
           text: "Çıkış Yap",
           style: "destructive",
-          onPress: logout,
+          onPress: async () => {
+            await logout();
+          },
         },
       ]
     );
