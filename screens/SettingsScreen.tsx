@@ -29,6 +29,7 @@ export default function SettingsScreen() {
   const [editUsername, setEditUsername] = useState(user?.username || "");
   const [editPassword, setEditPassword] = useState(user?.password || "");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   const loadIBANs = useCallback(async () => {
     const data = await getIBANs();
@@ -199,17 +200,20 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <View style={styles.infoRow}>
-            <Feather name="info" size={20} color={colors.textSecondary} />
-            <View style={styles.infoText}>
-              <ThemedText type="body">Uygulama Hakkında</ThemedText>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Nakliyeci Kayıt v1.0.0
-              </ThemedText>
+        <Pressable onPress={() => setShowAboutModal(true)}>
+          <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.infoRow}>
+              <Feather name="info" size={20} color={colors.textSecondary} />
+              <View style={styles.infoText}>
+                <ThemedText type="body">Hakkında</ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  LogisticsPRO v1.0.0
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
             </View>
           </View>
-        </View>
+        </Pressable>
 
         <Pressable
           onPress={handleLogout}
@@ -250,6 +254,69 @@ export default function SettingsScreen() {
         isAdding={isAdding}
         onSave={handleAddIBAN}
       />
+
+      {/* About Modal */}
+      {showAboutModal && (
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <Pressable onPress={() => setShowAboutModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.aboutContent} showsVerticalScrollIndicator={false}>
+              <ThemedText type="h4" style={styles.appName}>
+                LogisticsPRO
+              </ThemedText>
+              <ThemedText type="body" style={[styles.version, { color: colors.textSecondary }]}>
+                Sürüm 1.0.0
+              </ThemedText>
+
+              <View style={styles.divider} />
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Hakkında
+                </ThemedText>
+                <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 22 }}>
+                  LogisticsPRO, nakliye ve lojistik firmaları için taşıyıcı yönetim uygulamasıdır. Taşıyıcıları kolayca kaydetmek, işleri planlayıp takip etmek ve ödeme bilgilerini yönetmek için tasarlanmıştır.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Tasarım ve Geliştirme
+                </ThemedText>
+                <ThemedText type="body" style={{ color: colors.textSecondary, marginBottom: Spacing.md, fontWeight: "600" }}>
+                  Tolga Tunahan
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  Kodlayan ve tasarlayan: Tolga Tunahan
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Lisanslama
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  LogisticsPRO tescilli yazılımdır. Telif hakkı © 2025 Tolga Tunahan. Tüm hakları saklıdır.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.md, lineHeight: 20 }}>
+                  Bu uygulama Expo, React Native, React Navigation ve açık kaynak topluluğu tarafından geliştirilen teknolojiler kullanarak oluşturulmuştur.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
+                  © 2025 Tolga Tunahan. Tüm hakları saklıdır.
+                </ThemedText>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </ThemedView>
   );
 }
@@ -323,5 +390,39 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontWeight: "600",
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+    zIndex: 1000,
+  },
+  modalContent: {
+    maxHeight: "90%",
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: Spacing.lg,
+  },
+  aboutContent: {
+    paddingBottom: Spacing.xl,
+  },
+  appName: {
+    textAlign: "center",
+    marginBottom: Spacing.sm,
+  },
+  version: {
+    textAlign: "center",
+    marginBottom: Spacing.xl,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    marginBottom: Spacing.xl,
   },
 });
