@@ -7,7 +7,6 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 
 export function AnimatedMap() {
@@ -17,8 +16,8 @@ export function AnimatedMap() {
   useEffect(() => {
     // Yatay hareket
     translateX.value = withRepeat(
-      withTiming(100, {
-        duration: 2500,
+      withTiming(90, {
+        duration: 2800,
         easing: Easing.inOut(Easing.ease),
       }),
       -1,
@@ -33,10 +32,57 @@ export function AnimatedMap() {
   return (
     <View style={styles.container}>
       {/* Animasyonlu Tır */}
-      <Animated.View style={[styles.truckContainer, animatedStyle]}>
-        {/* Tır Görseli */}
-        <View style={[styles.truck, { backgroundColor: theme.link }]}>
-          <Feather name="truck" size={50} color="#FFFFFF" />
+      <Animated.View style={[styles.truckWrapper, animatedStyle]}>
+        <View style={styles.truck}>
+          {/* Tır Kasası - Ana Gövde */}
+          <View
+            style={[
+              styles.cargo,
+              {
+                backgroundColor: theme.link,
+              },
+            ]}
+          >
+            {/* Kasa Pencereleri */}
+            <View style={styles.windowRow}>
+              <View style={[styles.window, { opacity: 0.3 }]} />
+              <View style={[styles.window, { opacity: 0.2 }]} />
+            </View>
+          </View>
+
+          {/* Tır Kabini - Sürücü Bölümü */}
+          <View
+            style={[
+              styles.cabin,
+              {
+                backgroundColor: theme.link,
+              },
+            ]}
+          >
+            {/* Kabin Penceresi */}
+            <View style={[styles.cabinWindow, { opacity: 0.4 }]} />
+          </View>
+
+          {/* Ön Tamponu */}
+          <View style={[styles.bumper, { backgroundColor: theme.link }]} />
+
+          {/* Ön Tekerlekler - Çift */}
+          <View style={styles.wheelAxle}>
+            <View style={[styles.wheel, { borderColor: theme.link }]} />
+            <View style={[styles.wheel, { borderColor: theme.link }]} />
+          </View>
+
+          {/* Arka Tekerlekler - Dörtlü */}
+          <View style={styles.rearWheels}>
+            <View style={styles.wheelPair}>
+              <View style={[styles.wheel, { borderColor: theme.link }]} />
+              <View style={[styles.wheel, { borderColor: theme.link }]} />
+            </View>
+            <View style={styles.wheelPair}>
+              <View style={[styles.wheel, { borderColor: theme.link }]} />
+              <View style={[styles.wheel, { borderColor: theme.link }]} />
+            </View>
+          </View>
         </View>
       </Animated.View>
 
@@ -59,30 +105,87 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 32,
-    gap: 20,
+    paddingVertical: 28,
+    gap: 16,
   },
-  truckContainer: {
-    width: 80,
-    height: 80,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  truck: {
-    width: 80,
-    height: 80,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
+  truckWrapper: {
     shadowColor: "#0066FF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 8,
   },
+  truck: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    height: 60,
+    backgroundColor: "transparent",
+  },
+  cargo: {
+    width: 70,
+    height: 48,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    justifyContent: "space-around",
+  },
+  windowRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  window: {
+    width: 14,
+    height: 10,
+    backgroundColor: "rgba(255,255,255,0.5)",
+    borderRadius: 2,
+  },
+  cabin: {
+    width: 38,
+    height: 42,
+    borderRadius: 6,
+    justifyContent: "center",
+    paddingLeft: 8,
+    paddingTop: 8,
+  },
+  cabinWindow: {
+    width: 18,
+    height: 16,
+    backgroundColor: "rgba(255,255,255,0.4)",
+    borderRadius: 3,
+  },
+  bumper: {
+    width: 12,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 2,
+  },
+  wheelAxle: {
+    flexDirection: "row",
+    gap: 10,
+    marginLeft: 8,
+    alignItems: "flex-end",
+  },
+  rearWheels: {
+    flexDirection: "row",
+    gap: 6,
+    marginLeft: 4,
+    alignItems: "flex-end",
+  },
+  wheelPair: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  wheel: {
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
+    borderWidth: 2.5,
+  },
   road: {
     height: 3,
-    width: 240,
-    borderRadius: 2,
+    width: 260,
+    borderRadius: 1.5,
   },
 });
