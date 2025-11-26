@@ -76,28 +76,24 @@ export default function CompanyFormScreen() {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!company) return;
-
-    const companyId = company.id;
-    const companyName = company.name;
 
     Alert.alert(
       "Firmayı Sil",
-      `"${companyName}" adlı firmayı silmek istediğinizden emin misiniz?`,
+      `"${company.name}" adlı firmayı silmek istediğinizden emin misiniz?`,
       [
         { text: "İptal", style: "cancel" },
         {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
-            setIsLoading(true);
-            console.log("Deleting company with ID:", companyId);
-            const success = await deleteCompany(companyId);
-            console.log("Delete result:", success);
-            if (success) {
+            try {
+              setIsLoading(true);
+              await deleteCompany(company.id);
               navigation.goBack();
-            } else {
+            } catch (error) {
+              console.error("Silme hatası:", error);
               Alert.alert("Hata", "Firma silinirken hata oluştu");
               setIsLoading(false);
             }
