@@ -427,7 +427,28 @@ export const deleteCompletedJob = async (id: string): Promise<boolean> => {
     const completedJobs = await getCompletedJobs();
     const jobToDelete = completedJobs.find((j) => j.id === id);
     
-    if (jobToDelete && jobToDelete.plannedJobId) {
+    if (!jobToDelete) return false;
+
+    // Eğer komisyon ödenmişse, cüzdandan geri çıkar
+    if (jobToDelete.commissionPaid) {
+      const wallet = await getCompanyWallet();
+      const commissionAmount = parseFloat(jobToDelete.commissionCost) || 0;
+      
+      wallet.totalBalance -= commissionAmount;
+      wallet.transactions.push({
+        id: generateId(),
+        completedJobId: id,
+        amount: commissionAmount,
+        type: "payment",
+        description: `${jobToDelete.cargoType} seferinden komisyon geri alındı`,
+        createdAt: Date.now(),
+      });
+      wallet.updatedAt = Date.now();
+      await saveCompanyWallet(wallet);
+    }
+
+    // Planlı işi geri yükle
+    if (jobToDelete.plannedJobId) {
       const plannedJobs = await getJobs();
       const plannedJobExists = plannedJobs.some((j) => j.id === jobToDelete.plannedJobId);
       
