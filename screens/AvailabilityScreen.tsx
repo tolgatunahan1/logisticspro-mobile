@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { ThemedText } from "@/components/ThemedText";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { useTheme } from "@/hooks/useTheme";
@@ -11,35 +10,27 @@ import {
   getCarrierAvailabilities,
   addCarrierAvailability,
   deleteCarrierAvailability,
-  getCarriers,
   CarrierAvailability,
-  Carrier,
 } from "@/utils/storage";
 
 export default function AvailabilityScreen() {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const [availabilities, setAvailabilities] = useState<CarrierAvailability[]>([]);
-  const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(true);
-  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
-  const [carrierName, setCarrierName] = useState("");
-  const [carrierPhone, setCarrierPhone] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
   const [destinationLocation, setDestinationLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [deletedItem, setDeletedItem] = useState<CarrierAvailability | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
       const data = await getCarrierAvailabilities();
       setAvailabilities(data || []);
-      const list = await getCarriers();
-      setCarriers(list || []);
     } catch (e) {
       console.error("Load error:", e);
     }
@@ -50,36 +41,29 @@ export default function AvailabilityScreen() {
   }, [loadData]));
 
   const handleDelete = (item: CarrierAvailability) => {
-    const backup = [...availabilities];
-    
-    // Hemen state'ten sil
-    setAvailabilities(prev => prev.filter(a => a.id !== item.id));
-    setDeletedItem(item);
-    
-    // Storage'dan sil
-    deleteCarrierAvailability(item.id).then(success => {
-      if (!success) {
-        // Hata varsa geri yükle
-        setAvailabilities(backup);
-        setDeletedItem(null);
-        Alert.alert("Hata", "Silinemiyor");
-      }
-    }).catch(error => {
-      // Hata varsa geri yükle
-      console.error("Delete error:", error);
-      setAvailabilities(backup);
-      setDeletedItem(null);
-      Alert.alert("Hata", "Silinemiyor");
-    });
+    Alert.alert("Sil", "Bu bildiriyi silmek istediğiniz emin misiniz?", [
+      { text: "İptal", style: "cancel" },
+      {
+        text: "Sil",
+        style: "destructive",
+        onPress: async () => {
+          const backup = [...availabilities];
+          setAvailabilities(prev => prev.filter(a => a.id !== item.id));
+          
+          const success = await deleteCarrierAvailability(item.id);
+          if (!success) {
+            setAvailabilities(backup);
+            Alert.alert("Hata", "Bildiri silinemedi");
+          }
+        },
+      },
+    ]);
   };
 
   const handleSave = async () => {
     try {
-      if (isRegistered && !selectedCarrier) {
-        Alert.alert("Hata", "Nakliyeci seçiniz");
-        return;
-      }
-      if (!isRegistered && !carrierName.trim()) {
+      // Validasyon
+      if (!name.trim()) {
         Alert.alert("Hata", "Adı giriniz");
         return;
       }
@@ -96,54 +80,38 @@ export default function AvailabilityScreen() {
         return;
       }
 
+      setIsSaving(true);
+
       const expiresAt = Date.now() + 12 * 60 * 60 * 1000;
       const result = await addCarrierAvailability({
-        carrierId: isRegistered ? selectedCarrier!.id : undefined,
-        carrierName: isRegistered ? selectedCarrier!.name : carrierName.trim(),
-        carrierPhone: isRegistered ? selectedCarrier!.phone : carrierPhone.trim() || undefined,
+        carrierName: name.trim(),
+        carrierPhone: phone.trim() || undefined,
         currentLocation: currentLocation.trim(),
         destinationLocation: destinationLocation.trim(),
         notes: notes.trim(),
         capacity: "boş",
-        loadType: isRegistered ? selectedCarrier!.vehicleType : vehicleType.trim() || undefined,
+        loadType: vehicleType.trim() || undefined,
         expiresAt,
       });
 
       if (result) {
-        const isUnregistered = !isRegistered;
-        const newCarrierData = {
-          carrierName: carrierName.trim(),
-          carrierPhone: carrierPhone.trim(),
-          vehicleType: vehicleType.trim(),
-        };
-        
-        setCarrierName("");
-        setCarrierPhone("");
+        setName("");
+        setPhone("");
         setVehicleType("");
         setCurrentLocation("");
         setDestinationLocation("");
         setNotes("");
-        setSelectedCarrier(null);
-        setIsRegistered(true);
         setModalVisible(false);
         await loadData();
-        
-        // Kayıtsız kullanıcı kaydedilmişse kayıt sayfasına yönlendir
-        if (isUnregistered) {
-          Alert.alert("Başarılı", "Bildiri kaydedildi. Nakliyeci kayıt sayfasına yönlendiriliyorsunuz.", [
-            {
-              text: "Tamam",
-              onPress: () => {
-                navigation.navigate("CarrierForm", { 
-                  prefilledData: newCarrierData 
-                });
-              },
-            },
-          ]);
-        }
+        Alert.alert("Başarılı", "Bildiri kaydedildi");
+      } else {
+        Alert.alert("Hata", "Bildiri kaydedilemedi");
       }
     } catch (e) {
       console.error("Save error:", e);
+      Alert.alert("Hata", "Bir hata oluştu");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -175,6 +143,11 @@ export default function AvailabilityScreen() {
         <ThemedText type="small" style={{ fontSize: 11, color: colors.textSecondary }}>
           {item.notes}
         </ThemedText>
+        {item.loadType && (
+          <ThemedText type="small" style={{ fontSize: 11, color: colors.textSecondary }}>
+            🚚 {item.loadType}
+          </ThemedText>
+        )}
       </View>
     </View>
   );
@@ -223,105 +196,47 @@ export default function AvailabilityScreen() {
               </View>
 
               <View style={{ marginBottom: 12 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 8 }}>
-                  Tip
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                  Ad
                 </ThemedText>
-                <View style={{ flexDirection: "row", gap: 8 }}>
-                  <Pressable
-                    onPress={() => {
-                      setIsRegistered(true);
-                      setSelectedCarrier(null);
-                    }}
-                    style={[s.toggleBtn, { backgroundColor: isRegistered ? theme.link : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
-                  >
-                    <ThemedText type="small" style={{ color: isRegistered ? "white" : colors.text, fontWeight: "600", fontSize: 12 }}>
-                      Kayıtlı
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      setIsRegistered(false);
-                      setSelectedCarrier(null);
-                    }}
-                    style={[s.toggleBtn, { backgroundColor: !isRegistered ? theme.link : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
-                  >
-                    <ThemedText type="small" style={{ color: !isRegistered ? "white" : colors.text, fontWeight: "600", fontSize: 12 }}>
-                      Kayıtsız
-                    </ThemedText>
-                  </Pressable>
-                </View>
+                <TextInput
+                  placeholder="Adı Soyadı"
+                  value={name}
+                  onChangeText={setName}
+                  placeholderTextColor={colors.textSecondary}
+                  editable={!isSaving}
+                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                />
               </View>
 
-              {isRegistered ? (
-                <View style={{ marginBottom: 12 }}>
-                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 8 }}>
-                    Seç
-                  </ThemedText>
-                  <View style={[s.list, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)" }]}>
-                    {carriers.length === 0 ? (
-                      <ThemedText type="small" style={{ color: colors.textSecondary, padding: 8 }}>
-                        Kayıtlı yok
-                      </ThemedText>
-                    ) : (
-                      carriers.map((c) => (
-                        <Pressable
-                          key={c.id}
-                          onPress={() => setSelectedCarrier(c)}
-                          style={[s.listItem, selectedCarrier?.id === c.id && { backgroundColor: isDark ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0.08)" }]}
-                        >
-                          <View>
-                            <ThemedText type="small">{c.name}</ThemedText>
-                            <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>
-                              {c.phone}
-                            </ThemedText>
-                          </View>
-                          {selectedCarrier?.id === c.id && <Feather name="check" size={16} color={theme.link} />}
-                        </Pressable>
-                      ))
-                    )}
-                  </View>
-                </View>
-              ) : (
-                <>
-                  <View style={{ marginBottom: 12 }}>
-                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                      Ad
-                    </ThemedText>
-                    <TextInput
-                      placeholder="Adı Soyadı"
-                      value={carrierName}
-                      onChangeText={setCarrierName}
-                      placeholderTextColor={colors.textSecondary}
-                      style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                    />
-                  </View>
-                  <View style={{ marginBottom: 12 }}>
-                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                      Tel
-                    </ThemedText>
-                    <TextInput
-                      placeholder="Phone"
-                      value={carrierPhone}
-                      onChangeText={setCarrierPhone}
-                      keyboardType="phone-pad"
-                      placeholderTextColor={colors.textSecondary}
-                      style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                    />
-                  </View>
-                  <View style={{ marginBottom: 12 }}>
-                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                      Araç
-                    </ThemedText>
-                    <TextInput
-                      placeholder="Kamyon, Pickup, vb"
-                      value={vehicleType}
-                      onChangeText={setVehicleType}
-                      placeholderTextColor={colors.textSecondary}
-                      style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                    />
-                  </View>
-                </>
-              )}
+              <View style={{ marginBottom: 12 }}>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                  Tel
+                </ThemedText>
+                <TextInput
+                  placeholder="555-555-5555"
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                  placeholderTextColor={colors.textSecondary}
+                  editable={!isSaving}
+                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                />
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
+                  Araç
+                </ThemedText>
+                <TextInput
+                  placeholder="Kamyon, Pickup, vb"
+                  value={vehicleType}
+                  onChangeText={setVehicleType}
+                  placeholderTextColor={colors.textSecondary}
+                  editable={!isSaving}
+                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                />
+              </View>
 
               <View style={{ marginBottom: 12 }}>
                 <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
@@ -332,6 +247,7 @@ export default function AvailabilityScreen() {
                   value={currentLocation}
                   onChangeText={setCurrentLocation}
                   placeholderTextColor={colors.textSecondary}
+                  editable={!isSaving}
                   style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                 />
               </View>
@@ -345,6 +261,7 @@ export default function AvailabilityScreen() {
                   value={destinationLocation}
                   onChangeText={setDestinationLocation}
                   placeholderTextColor={colors.textSecondary}
+                  editable={!isSaving}
                   style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                 />
               </View>
@@ -360,6 +277,7 @@ export default function AvailabilityScreen() {
                   multiline
                   numberOfLines={2}
                   placeholderTextColor={colors.textSecondary}
+                  editable={!isSaving}
                   style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 60 }]}
                 />
               </View>
@@ -367,15 +285,20 @@ export default function AvailabilityScreen() {
               <View style={{ flexDirection: "row", gap: 8, marginBottom: 20 }}>
                 <Pressable
                   onPress={() => setModalVisible(false)}
-                  style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}
+                  disabled={isSaving}
+                  style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1 }]}
                 >
                   <ThemedText type="small" style={{ fontWeight: "600" }}>
                     İptal
                   </ThemedText>
                 </Pressable>
-                <Pressable onPress={handleSave} style={[s.actionBtn, { backgroundColor: theme.link }]}>
+                <Pressable 
+                  onPress={handleSave} 
+                  disabled={isSaving}
+                  style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1 }]}
+                >
                   <ThemedText type="small" style={{ fontWeight: "600", color: "white" }}>
-                    Kaydet
+                    {isSaving ? "Kaydediliyor..." : "Kaydet"}
                   </ThemedText>
                 </Pressable>
               </View>
@@ -397,9 +320,6 @@ const s = StyleSheet.create({
   divider: { height: 1, marginBottom: 6 },
   modalWrapper: { flex: 1 },
   modal: { paddingBottom: 20 },
-  toggleBtn: { flex: 1, paddingVertical: 8, borderRadius: BorderRadius.sm, alignItems: "center" },
-  list: { borderRadius: BorderRadius.sm, borderWidth: 1, borderColor: "rgba(0,0,0,0.05)", maxHeight: 180 },
-  listItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.03)" },
   input: { borderWidth: 1, borderRadius: BorderRadius.sm, borderColor: "rgba(0,0,0,0.05)", paddingHorizontal: 10, paddingVertical: 8, fontSize: 14 },
   actionBtn: { flex: 1, paddingVertical: 10, borderRadius: BorderRadius.sm, alignItems: "center" },
 });
