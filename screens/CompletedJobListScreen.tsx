@@ -610,7 +610,7 @@ export default function CompletedJobListScreen() {
                 >
                   <Feather name="trash-2" size={20} color="#FFFFFF" />
                   <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Sil
+                    Sefer İptal Et
                   </ThemedText>
                 </Pressable>
               </View>
@@ -632,9 +632,9 @@ export default function CompletedJobListScreen() {
               overflow: "hidden",
             }}>
               <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
-                <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>İşi Sil</ThemedText>
+                <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>Seferi İptal Et</ThemedText>
                 <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  "{companies[jobToDelete?.companyId || ""]?.name || "İş"}" - "{jobToDelete?.cargoType}" işini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                  "{companies[jobToDelete?.companyId || ""]?.name || "İş"}" - "{jobToDelete?.cargoType}" seferini iptal etmek istediğinizden emin misiniz? İş planlanan işlere geri dönecektir.
                 </ThemedText>
               </View>
               <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
@@ -681,7 +681,7 @@ export default function CompletedJobListScreen() {
                     },
                   ]}
                 >
-                  <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Sil</ThemedText>
+                  <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>İptal Et</ThemedText>
                 </Pressable>
               </View>
             </View>
