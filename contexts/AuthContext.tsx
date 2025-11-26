@@ -13,7 +13,7 @@ interface AuthContextType {
   isLoading: boolean;
   loginUser: (username: string, password: string) => Promise<boolean>;
   loginAdmin: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,15 +111,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    AsyncStorage.removeItem(AUTH_STORAGE_KEY)
-      .then(() => {
-        setUser(null);
-      })
-      .catch((error) => {
-        console.error("Failed to logout:", error);
-        setUser(null);
-      });
+  const logout = async () => {
+    console.log("🚪 LOGOUT STARTED - Clearing session");
+    try {
+      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      console.log("💾 Storage cleared - removeItem succeeded");
+      
+      const verify = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+      console.log("✅ VERIFICATION - Auth data after logout:", verify === null ? "CLEARED ✓" : "STILL EXISTS ✗");
+      
+      setUser(null);
+      console.log("✅ LOGOUT COMPLETE - User state cleared, should navigate to Login");
+    } catch (error) {
+      console.error("❌ Logout error:", error);
+      setUser(null);
+    }
   };
 
   return (

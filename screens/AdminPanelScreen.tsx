@@ -306,7 +306,10 @@ export default function AdminPanelScreen() {
 
         {/* Çıkış Butonu */}
         <Pressable
-          onPress={logout}
+          onPress={async () => {
+            console.log("👆 LOGOUT BUTTON PRESSED");
+            await logout();
+          }}
           style={({ pressed }) => [
             styles.logoutButton,
             {
