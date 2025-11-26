@@ -5,6 +5,7 @@ export interface AppUser {
   username: string;
   password: string;
   createdAt: number;
+  approvedAt?: number;
   status: "approved" | "pending" | "rejected";
 }
 
@@ -17,7 +18,6 @@ export interface AdminUser {
 const USERS_STORAGE_KEY = "@logistics_users";
 const ADMIN_STORAGE_KEY = "@logistics_admin";
 
-// Admin fonksiyonları
 export const getAdmin = async (): Promise<AdminUser | null> => {
   try {
     const admin = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
@@ -39,7 +39,6 @@ export const createAdmin = async (username: string, password: string): Promise<b
   }
 };
 
-// Kullanıcı yönetimi
 export const getUsers = async (): Promise<AppUser[]> => {
   try {
     const users = await AsyncStorage.getItem(USERS_STORAGE_KEY);
@@ -47,6 +46,22 @@ export const getUsers = async (): Promise<AppUser[]> => {
   } catch (error) {
     console.error("Failed to get users:", error);
     return [];
+  }
+};
+
+export const getAllUsers = async (): Promise<{ pending: AppUser[]; approved: AppUser[]; total: number }> => {
+  try {
+    const users = await getUsers();
+    const pending = users.filter((u) => u.status === "pending");
+    const approved = users.filter((u) => u.status === "approved");
+    return {
+      pending,
+      approved,
+      total: users.length,
+    };
+  } catch (error) {
+    console.error("Failed to get all users:", error);
+    return { pending: [], approved: [], total: 0 };
   }
 };
 
@@ -63,7 +78,7 @@ export const getPendingUsers = async (): Promise<AppUser[]> => {
 export const requestSignup = async (username: string, password: string): Promise<boolean> => {
   try {
     const users = await getUsers();
-    
+
     if (users.some((u) => u.username === username)) {
       return false;
     }
@@ -89,19 +104,21 @@ export const approveUser = async (userId: string): Promise<boolean> => {
   try {
     const users = await getUsers();
     const userIndex = users.findIndex((u) => u.id === userId);
-    
+
     if (userIndex === -1) {
       console.error("User not found:", userId);
       return false;
     }
 
     users[userIndex].status = "approved";
+    users[userIndex].approvedAt = Date.now();
+
     await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-    
+
     const updated = await getUsers();
     const approvedUser = updated.find((u) => u.id === userId);
-    console.log("User approved:", approvedUser);
-    
+    console.log("User approved successfully:", approvedUser?.username);
+
     return true;
   } catch (error) {
     console.error("Failed to approve user:", error);
@@ -114,6 +131,7 @@ export const rejectUser = async (userId: string): Promise<boolean> => {
     const users = await getUsers();
     const filtered = users.filter((u) => u.id !== userId);
     await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(filtered));
+    console.log("User rejected successfully");
     return true;
   } catch (error) {
     console.error("Failed to reject user:", error);
@@ -137,6 +155,9 @@ export const loginUser = async (username: string, password: string): Promise<App
   try {
     const users = await getApprovedUsers();
     const user = users.find((u) => u.username === username && u.password === password);
+    if (user) {
+      console.log("User login successful:", username);
+    }
     return user || null;
   } catch (error) {
     console.error("Failed to login user:", error);
@@ -158,6 +179,7 @@ export const initializeDefaultAdmin = async (): Promise<void> => {
         createdAt: Date.now(),
       };
       await AsyncStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(defaultAdmin));
+      console.log("Default admin initialized");
     }
   } catch (error) {
     console.error("Failed to initialize default admin:", error);
