@@ -9,7 +9,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getIBANs, addIBAN, deleteIBAN, IBAN, getCompanyWallet, getUnpaidCommissions, markCommissionAsPaid, CompanyWallet, CompletedJob } from "@/utils/storage";
+import { getIBANs, addIBAN, deleteIBAN, IBAN } from "@/utils/storage";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
@@ -22,23 +22,16 @@ export default function SettingsScreen() {
   const [ibanInput, setIbanInput] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-  const [wallet, setWallet] = useState<CompanyWallet | null>(null);
-  const [unpaidCommissions, setUnpaidCommissions] = useState<CompletedJob[]>([]);
-  const [isMarkingPaid, setIsMarkingPaid] = useState<string | null>(null);
 
-  const loadData = useCallback(async () => {
-    const ibanData = await getIBANs();
-    setIbans(ibanData);
-    const walletData = await getCompanyWallet();
-    setWallet(walletData);
-    const unpaidData = await getUnpaidCommissions();
-    setUnpaidCommissions(unpaidData);
+  const loadIBANs = useCallback(async () => {
+    const data = await getIBANs();
+    setIbans(data);
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
-    }, [loadData])
+      loadIBANs();
+    }, [loadIBANs])
   );
 
   const handleAddIBAN = async () => {
@@ -57,7 +50,7 @@ export default function SettingsScreen() {
       setIbanInput("");
       setNameInput("");
       setShowAddModal(false);
-      await loadData();
+      await loadIBANs();
     } else {
       Alert.alert("Hata", "IBAN kaydedilemedi");
     }
@@ -72,22 +65,10 @@ export default function SettingsScreen() {
         style: "destructive",
         onPress: async () => {
           await deleteIBAN(id);
-          await loadData();
+          await loadIBANs();
         },
       },
     ]);
-  };
-
-  const handleMarkAsPaid = async (jobId: string) => {
-    setIsMarkingPaid(jobId);
-    const result = await markCommissionAsPaid(jobId);
-    if (result) {
-      await loadData();
-      Alert.alert("Başarılı", "Komisyon ödendi olarak işaretlendi ve cüzdana eklendi");
-    } else {
-      Alert.alert("Hata", "İşlem başarısız oldu");
-    }
-    setIsMarkingPaid(null);
   };
 
   const handleLogout = () => {
@@ -120,88 +101,6 @@ export default function SettingsScreen() {
               </ThemedText>
             </View>
           </View>
-        </View>
-
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <View style={styles.sectionHeader}>
-            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-              Şirket Cüzdanı
-            </ThemedText>
-          </View>
-          {wallet && (
-            <View style={{ gap: Spacing.md, marginBottom: Spacing.lg }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Cüzdan Bakiyesi
-                </ThemedText>
-                <ThemedText type="h3" style={{ color: theme.link, fontWeight: "700" }}>
-                  {wallet.totalBalance.toFixed(2)} ₺
-                </ThemedText>
-              </View>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Toplam Kazanç
-                </ThemedText>
-                <ThemedText type="body" style={{ color: theme.success || "#4CAF50", fontWeight: "600" }}>
-                  {wallet.totalEarned.toFixed(2)} ₺
-                </ThemedText>
-              </View>
-            </View>
-          )}
-        </View>
-
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <View style={styles.sectionHeader}>
-            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-              Ödeme Bekleyen İşler ({unpaidCommissions.length})
-            </ThemedText>
-          </View>
-          {unpaidCommissions.length > 0 ? (
-            <View style={{ gap: Spacing.md }}>
-              {unpaidCommissions.map((job) => (
-                <View
-                  key={job.id}
-                  style={[
-                    styles.ibanCard,
-                    { backgroundColor: isDark ? "rgba(255, 193, 7, 0.1)" : "rgba(255, 193, 7, 0.05)" },
-                  ]}
-                >
-                  <View style={{ flex: 1 }}>
-                    <ThemedText type="small" style={{ fontWeight: "600" }}>
-                      {job.cargoType}
-                    </ThemedText>
-                    <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
-                      {job.loadingLocation} → {job.deliveryLocation}
-                    </ThemedText>
-                    <ThemedText type="h4" style={{ color: theme.link, fontWeight: "700", marginTop: Spacing.sm }}>
-                      {parseFloat(job.commissionCost).toFixed(2)} ₺
-                    </ThemedText>
-                  </View>
-                  <Pressable
-                    onPress={() => handleMarkAsPaid(job.id)}
-                    disabled={isMarkingPaid === job.id}
-                    style={({ pressed }) => [
-                      {
-                        paddingVertical: Spacing.sm,
-                        paddingHorizontal: Spacing.md,
-                        borderRadius: BorderRadius.sm,
-                        backgroundColor: theme.link,
-                        opacity: pressed || isMarkingPaid === job.id ? 0.7 : 1,
-                      },
-                    ]}
-                  >
-                    <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                      {isMarkingPaid === job.id ? "İşleniyor..." : "Ödendi"}
-                    </ThemedText>
-                  </Pressable>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.md }}>
-              Tüm ödemeler tamamlanmıştır
-            </ThemedText>
-          )}
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>

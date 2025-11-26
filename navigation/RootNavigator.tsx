@@ -3,7 +3,7 @@ import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import LoginScreen from "@/screens/LoginScreen";
-import HomeScreen from "@/screens/HomeScreen";
+import BottomTabNavigator from "@/navigation/BottomTabNavigator";
 import CarrierListScreen from "@/screens/CarrierListScreen";
 import CarrierFormScreen from "@/screens/CarrierFormScreen";
 import CompanyListScreen from "@/screens/CompanyListScreen";
@@ -21,7 +21,7 @@ import { Carrier, Company, PlannedJob, CompletedJob } from "@/utils/storage";
 
 export type RootStackParamList = {
   Login: undefined;
-  Home: undefined;
+  MainTabs: undefined;
   CarrierList: undefined;
   CarrierForm: { carrier?: Carrier; mode: "add" | "edit" };
   CompanyList: undefined;
@@ -56,10 +56,10 @@ export default function RootNavigator() {
       {user ? (
         <>
           <Stack.Screen
-            name="Home"
-            component={HomeScreen}
+            name="MainTabs"
+            component={BottomTabNavigator}
             options={{
-              headerTitle: () => <HeaderTitle title="Nakliyeci Kayıt" />,
+              headerShown: false,
             }}
           />
           <Stack.Screen
