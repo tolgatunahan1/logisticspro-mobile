@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -89,6 +90,16 @@ export default function SettingsScreen() {
     if (success) {
       Alert.alert("Başarılı", "Hesap bilgileri güncellendi");
       setShowAccountModal(false);
+      
+      try {
+        await Notifications.presentNotificationAsync({
+          title: "Hesap Bilgileri Güncellendi",
+          body: `Kullanıcı adı: ${editUsername}`,
+          data: { type: "account_update" },
+        });
+      } catch (error) {
+        console.error("Bildirim gönderilemedi:", error);
+      }
     } else {
       Alert.alert("Hata", "Hesap bilgileri güncellenemedi");
     }
