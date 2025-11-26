@@ -17,7 +17,7 @@ import { IBANListModal } from "@/components/IBANListModal";
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user, logout, updateProfile } = useAuth();
+  const { user, updateProfile } = useAuth();
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [ibans, setIbans] = useState<IBAN[]>([]);
@@ -109,22 +109,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Çıkış Yap",
-      "Çıkış yapmak istediğinizden emin misiniz?",
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Çıkış Yap",
-          style: "destructive",
-          onPress: () => {
-            logout();
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -311,22 +295,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Pressable
-          onPress={handleLogout}
-          style={({ pressed }) => [
-            styles.logoutButton,
-            {
-              backgroundColor: colors.destructive,
-              opacity: pressed ? 0.8 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-            },
-          ]}
-        >
-          <Feather name="log-out" size={18} color={colors.buttonText} />
-          <ThemedText type="body" style={[styles.logoutText, { color: colors.buttonText }]}>
-            Çıkış Yap
-          </ThemedText>
-        </Pressable>
       </ScrollView>
 
       <AccountSettingsModal
