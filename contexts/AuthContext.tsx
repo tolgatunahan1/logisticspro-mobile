@@ -1,22 +1,24 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginUser as loginAppUser, getAdmin, AppUser } from "@/utils/userManagement";
 
 interface User {
+  id?: string;
   username: string;
-  password?: string;
+  type: "admin" | "user";
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  loginUser: (username: string, password: string) => Promise<boolean>;
+  loginAdmin: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  updateProfile: (username: string, password: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = "@nakliyeci_auth";
+const AUTH_STORAGE_KEY = "@logistics_current_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -40,46 +42,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const validatePassword = (password: string): boolean => {
-    return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
-  };
-
-  const login = async (username: string, password: string): Promise<boolean> => {
-    if (!username.trim() || !password.trim()) {
-      return false;
-    }
-
-    if (!validatePassword(password)) {
-      return false;
-    }
+  const loginUser = async (username: string, password: string): Promise<boolean> => {
+    if (!username.trim() || !password.trim()) return false;
 
     try {
-      const userData: User = { username: username.trim(), password: password.trim() };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      setUser(userData);
-      return true;
+      const appUser = await loginAppUser(username, password);
+      if (appUser) {
+        const userData: User = { id: appUser.id, username: appUser.username, type: "user" };
+        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+        setUser(userData);
+        return true;
+      }
+      return false;
     } catch (error) {
-      console.error("Failed to save auth:", error);
+      console.error("Failed to login user:", error);
       return false;
     }
   };
 
-  const updateProfile = async (username: string, password: string): Promise<boolean> => {
-    if (!username.trim() || !password.trim()) {
-      return false;
-    }
-
-    if (!validatePassword(password)) {
-      return false;
-    }
+  const loginAdmin = async (username: string, password: string): Promise<boolean> => {
+    if (!username.trim() || !password.trim()) return false;
 
     try {
-      const userData: User = { username: username.trim(), password: password.trim() };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      setUser(userData);
-      return true;
+      const admin = await getAdmin();
+      if (admin && admin.username === username && admin.password === password) {
+        const userData: User = { username: admin.username, type: "admin" };
+        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+        setUser(userData);
+        return true;
+      }
+      return false;
     } catch (error) {
-      console.error("Failed to update profile:", error);
+      console.error("Failed to login admin:", error);
       return false;
     }
   };
@@ -88,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     AsyncStorage.removeItem(AUTH_STORAGE_KEY)
       .then(() => {
         setUser(null);
-        console.log("Logout successful, user cleared");
       })
       .catch((error) => {
         console.error("Failed to logout:", error);
@@ -97,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, loginUser, loginAdmin, logout }}>
       {children}
     </AuthContext.Provider>
   );

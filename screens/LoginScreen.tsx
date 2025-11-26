@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -7,38 +7,105 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { getAdmin, createAdmin, requestSignup, validatePassword } from "@/utils/userManagement";
 
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
+  const { loginUser, loginAdmin } = useAuth();
   
+  const [mode, setMode] = useState<"login" | "register" | "admin" | "setup">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  useEffect(() => {
+    checkAdminExists();
+  }, []);
+
+  const checkAdminExists = async () => {
+    try {
+      const admin = await getAdmin();
+      setMode(admin ? "login" : "setup");
+    } catch (error) {
+      setMode("login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSetupAdmin = async () => {
     setError("");
-    
-    if (!username.trim()) {
-      setError("Kullanıcı adı gerekli");
+    if (!username.trim() || !password.trim()) {
+      setError("Tüm alanlar gerekli");
       return;
     }
-    
-    if (!password.trim()) {
-      setError("Şifre gerekli");
+    if (!validatePassword(password)) {
+      setError("Şifre: 8+ karakter, büyük harf ve rakam gerekli");
       return;
     }
 
     setIsLoading(true);
     try {
-      const success = await login(username, password);
-      if (!success) {
-        setError("Giriş başarısız. Lütfen tekrar deneyin.");
+      const success = await createAdmin(username, password);
+      if (success) {
+        setMode("login");
+        setUsername("");
+        setPassword("");
+        Alert.alert("Başarılı", "Admin hesabı oluşturuldu");
       }
-    } catch (err) {
-      setError("Bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogin = async (isAdmin: boolean) => {
+    setError("");
+    if (!username.trim() || !password.trim()) {
+      setError("Kullanıcı adı ve şifre gerekli");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const success = isAdmin ? await loginAdmin(username, password) : await loginUser(username, password);
+      if (!success) {
+        setError("Giriş başarısız. Bilgileri kontrol edin.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    setError("");
+    if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
+      setError("Tüm alanlar gerekli");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Şifreler eşleşmiyor");
+      return;
+    }
+    if (!validatePassword(password)) {
+      setError("Şifre: 8+ karakter, büyük harf ve rakam gerekli");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const success = await requestSignup(username, password);
+      if (success) {
+        Alert.alert("Başarılı", "Başvurunuz alındı. Admin onayını bekleyin.");
+        setUsername("");
+        setPassword("");
+        setConfirmPassword("");
+        setMode("login");
+      } else {
+        setError("Kullanıcı adı zaten mevcut");
+      }
     } finally {
       setIsLoading(false);
     }
