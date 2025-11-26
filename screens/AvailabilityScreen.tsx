@@ -146,8 +146,13 @@ export default function AvailabilityScreen() {
       {
         text: "Sil",
         onPress: async () => {
-          await deleteCarrierAvailability(id);
-          await loadData();
+          const success = await deleteCarrierAvailability(id);
+          if (success) {
+            await loadData();
+            Alert.alert("Başarılı", "Uygunluk silindi");
+          } else {
+            Alert.alert("Hata", "Silme işlemi başarısız");
+          }
         },
       },
     ]);
