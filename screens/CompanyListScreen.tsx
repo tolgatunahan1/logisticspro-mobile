@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView, Platform } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -111,16 +111,19 @@ export default function CompanyListScreen() {
 
   const handleWhatsAppPress = async (phone: string, name: string) => {
     const phoneNumber = formatPhoneForWhatsApp(phone);
-    const message = encodeURIComponent(`Merhaba ${name}`);
-    const url = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
     
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        const webUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+      if (Platform.OS === "web") {
+        const webUrl = `https://wa.me/${phoneNumber}`;
         await Linking.openURL(webUrl);
+      } else {
+        const url = `https://wa.me/${phoneNumber}`;
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
+        }
       }
     } catch (error) {
       Alert.alert("Hata", "WhatsApp açılamadı. WhatsApp yüklü olduğundan emin olun.");
