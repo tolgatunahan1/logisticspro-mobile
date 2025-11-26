@@ -592,8 +592,8 @@ export default function CompletedJobListScreen() {
                     },
                   ]}
                 >
-                  <Feather name="share-2" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                  <Feather name="share-2" size={16} color="#FFFFFF" />
+                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                     Paylaş
                   </ThemedText>
                 </Pressable>
@@ -608,8 +608,8 @@ export default function CompletedJobListScreen() {
                     },
                   ]}
                 >
-                  <Feather name="trash-2" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                  <Feather name="trash-2" size={16} color="#FFFFFF" />
+                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                     Sefer İptal Et
                   </ThemedText>
                 </Pressable>
@@ -856,10 +856,10 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     flexDirection: "row",
-    gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.sm,
     justifyContent: "center",
     alignItems: "center",
   },
