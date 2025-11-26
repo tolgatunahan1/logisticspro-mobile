@@ -1,33 +1,82 @@
-import { Platform } from "react-native";
+import React from "react";
+import { StyleSheet, Platform } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import * as Notifications from "expo-notifications";
 
-export const isWeb = Platform.OS === "web";
-export const isNative = Platform.OS === "ios" || Platform.OS === "android";
-export const isIOS = Platform.OS === "ios";
-export const isAndroid = Platform.OS === "android";
+import RootNavigator from "@/navigation/RootNavigator";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { logPlatform, isWeb } from "@/utils/platform";
 
-/**
- * Platform.select wrapper with fallback
- * Useful for features that work differently across web/native
- */
-export function selectPlatform<T>(config: {
-  web?: T;
-  native?: T;
-  ios?: T;
-  android?: T;
-  default: T;
-}): T {
-  if (isIOS && config.ios) return config.ios;
-  if (isAndroid && config.android) return config.android;
-  if (isWeb && config.web) return config.web;
-  if (isNative && config.native) return config.native;
-  return config.default;
+// Suppress unnecessary console warnings/logs for Replit performance
+if (typeof console !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    const message = args[0]?.toString?.() || '';
+    // Suppress known harmless warnings
+    if (
+      message.includes('shadow') ||
+      message.includes('pointerEvents') ||
+      message.includes('Non-serializable values') ||
+      message.includes('ViewPropTypes')
+    ) {
+      return;
+    }
+    originalWarn(...args);
+  };
 }
 
-export const supportsNotifications = isNative;
-export const supportsGestures = isNative;
-
-export function logPlatform() {
-  if (__DEV__) {
-    console.log(`✅ Platform: ${Platform.OS}${isWeb ? ' (WEB)' : isNative ? ' (NATIVE)' : ''}`);
-  }
+// Notifications only work on native platforms (iOS/Android)
+if (!isWeb) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
 }
+
+export default function App() {
+  React.useEffect(() => {
+    logPlatform();
+    
+    if (typeof document !== 'undefined') {
+      const preventPinch = (e: any) => {
+        if (e.touches && e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchmove', preventPinch, { passive: false });
+      return () => document.removeEventListener('touchmove', preventPinch);
+    }
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <GestureHandlerRootView style={styles.root}>
+          <KeyboardProvider>
+            <AuthProvider>
+              <NavigationContainer>
+                <RootNavigator />
+              </NavigationContainer>
+            </AuthProvider>
+            <StatusBar style="auto" />
+          </KeyboardProvider>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </ErrorBoundary>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
