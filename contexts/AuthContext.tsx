@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,15 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-      await AsyncStorage.clear();
-      setUser(null);
-    } catch (error) {
-      console.error("Failed to logout:", error);
-      setUser(null);
-    }
+  const logout = () => {
+    AsyncStorage.removeItem(AUTH_STORAGE_KEY)
+      .then(() => {
+        setUser(null);
+        console.log("Logout successful, user cleared");
+      })
+      .catch((error) => {
+        console.error("Failed to logout:", error);
+        setUser(null);
+      });
   };
 
   return (

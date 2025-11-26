@@ -82,7 +82,9 @@ export default function SettingsScreen() {
           text: "Çıkış Yap",
           style: "destructive",
           onPress: () => {
+            console.log("Logout button pressed");
             logout();
+            console.log("Logout called");
           },
         },
       ]
