@@ -40,6 +40,7 @@ export interface CompletedJob {
   id: string;
   companyId: string;
   carrierId: string;
+  plannedJobId: string;
   cargoType: string;
   tonnage: string;
   dimensions: string;
@@ -402,8 +403,35 @@ export const updateCompletedJob = async (id: string, updates: Partial<Omit<Compl
 
 export const deleteCompletedJob = async (id: string): Promise<boolean> => {
   try {
-    const jobs = await getCompletedJobs();
-    const filtered = jobs.filter((j) => j.id !== id);
+    const completedJobs = await getCompletedJobs();
+    const jobToDelete = completedJobs.find((j) => j.id === id);
+    
+    if (jobToDelete && jobToDelete.plannedJobId) {
+      const plannedJobs = await getJobs();
+      const plannedJobExists = plannedJobs.some((j) => j.id === jobToDelete.plannedJobId);
+      
+      if (!plannedJobExists) {
+        const restoredJob: PlannedJob = {
+          id: jobToDelete.plannedJobId,
+          companyId: jobToDelete.companyId,
+          cargoType: jobToDelete.cargoType,
+          tonnage: jobToDelete.tonnage,
+          dimensions: jobToDelete.dimensions,
+          loadingLocation: jobToDelete.loadingLocation,
+          deliveryLocation: jobToDelete.deliveryLocation,
+          loadingDate: jobToDelete.loadingDate,
+          deliveryDate: jobToDelete.deliveryDate,
+          transportationCost: jobToDelete.transportationCost,
+          commissionCost: jobToDelete.commissionCost,
+          createdAt: jobToDelete.createdAt,
+          updatedAt: Date.now(),
+        };
+        plannedJobs.unshift(restoredJob);
+        await saveJobs(plannedJobs);
+      }
+    }
+    
+    const filtered = completedJobs.filter((j) => j.id !== id);
     await saveCompletedJobs(filtered);
     return true;
   } catch (error) {
