@@ -260,7 +260,7 @@ export default function JobFormScreen() {
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{ paddingTop: Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }}
+      contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }}
     >
       <View style={styles.content}>
         {/* Company Selector */}
