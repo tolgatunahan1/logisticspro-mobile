@@ -10,7 +10,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { addCompletedJob, updateCompletedJob, getCompanies, CompletedJob, Company } from "@/utils/storage";
+import { addCompletedJob, updateCompletedJob, getCompanies, getCarriers, CompletedJob, Company, Carrier } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "CompletedJobForm">;
@@ -34,12 +34,15 @@ export default function CompletedJobFormScreen() {
   const [loadingDate, setLoadingDate] = useState(job?.loadingDate || Date.now());
   const [deliveryDate, setDeliveryDate] = useState(job?.deliveryDate || Date.now());
   const [completionDate, setCompletionDate] = useState(job?.completionDate || Date.now());
+  const [carrierId, setCarrierId] = useState(job?.carrierId || "");
   const [transportationCost, setTransportationCost] = useState(job?.transportationCost || "");
   const [commissionCost, setCommissionCost] = useState(job?.commissionCost || "");
   const [notes, setNotes] = useState(job?.notes || "");
 
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [showCompanyPicker, setShowCompanyPicker] = useState(false);
+  const [showCarrierPicker, setShowCarrierPicker] = useState(false);
   const [showLoadingDatePicker, setShowLoadingDatePicker] = useState(false);
   const [showDeliveryDatePicker, setShowDeliveryDatePicker] = useState(false);
   const [showCompletionDatePicker, setShowCompletionDatePicker] = useState(false);
@@ -48,11 +51,13 @@ export default function CompletedJobFormScreen() {
   const colors = isDark ? Colors.dark : Colors.light;
 
   useEffect(() => {
-    const loadCompanies = async () => {
+    const loadData = async () => {
       const allCompanies = await getCompanies();
+      const allCarriers = await getCarriers();
       setCompanies(allCompanies);
+      setCarriers(allCarriers);
     };
-    loadCompanies();
+    loadData();
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -60,6 +65,7 @@ export default function CompletedJobFormScreen() {
     try {
       const data = {
         companyId,
+        carrierId,
         cargoType: cargoType.toString().trim(),
         tonnage: tonnage.toString().trim(),
         dimensions: dimensions.toString().trim(),
@@ -124,6 +130,7 @@ export default function CompletedJobFormScreen() {
   };
 
   const selectedCompany = companies.find((c) => c.id === companyId);
+  const selectedCarrier = carriers.find((c) => c.id === route.params?.job?.carrierId);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -188,6 +195,30 @@ export default function CompletedJobFormScreen() {
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <ThemedText type="body">
                 {selectedCompany?.name || "Firma Seçin"}
+              </ThemedText>
+              <Feather name="chevron-down" size={20} color={colors.textSecondary} />
+            </View>
+          </Pressable>
+        </View>
+
+        {/* Carrier Selector */}
+        <View style={styles.section}>
+          <ThemedText type="h4" style={styles.label}>
+            Nakliyeci *
+          </ThemedText>
+          <Pressable
+            onPress={() => setShowCarrierPicker(true)}
+            style={({ pressed }) => [
+              inputStyle,
+              {
+                backgroundColor: colors.backgroundDefault,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+          >
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <ThemedText type="body">
+                {carriers.find(c => c.id === carrierId)?.name || "Nakliyeci Seçin"}
               </ThemedText>
               <Feather name="chevron-down" size={20} color={colors.textSecondary} />
             </View>
@@ -407,6 +438,57 @@ export default function CompletedJobFormScreen() {
                     </ThemedText>
                   </View>
                   {companyId === company.id && (
+                    <Feather name="check" size={20} color={theme.link} />
+                  )}
+                </Pressable>
+              )}
+              scrollEnabled
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Carrier Picker Modal */}
+      <Modal
+        visible={showCarrierPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowCarrierPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Nakliyeci Seçin</ThemedText>
+              <Pressable onPress={() => setShowCarrierPicker(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+            <FlatList
+              data={carriers}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item: carrier }) => (
+                <Pressable
+                  onPress={() => {
+                    setCarrierId(carrier.id);
+                    setShowCarrierPicker(false);
+                  }}
+                  style={({ pressed }) => [
+                    styles.companyOption,
+                    {
+                      backgroundColor: carrierId === carrier.id ? theme.link + "20" : "transparent",
+                      opacity: pressed ? 0.7 : 1,
+                    },
+                  ]}
+                >
+                  <View>
+                    <ThemedText type="body" style={{ fontWeight: "600" }}>
+                      {carrier.name}
+                    </ThemedText>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      {carrier.phone}
+                    </ThemedText>
+                  </View>
+                  {carrierId === carrier.id && (
                     <Feather name="check" size={20} color={theme.link} />
                   )}
                 </Pressable>

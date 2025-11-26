@@ -39,6 +39,7 @@ export interface PlannedJob {
 export interface CompletedJob {
   id: string;
   companyId: string;
+  carrierId: string;
   cargoType: string;
   tonnage: string;
   dimensions: string;

@@ -9,7 +9,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs, getCarriers, Carrier } from "@/utils/storage";
+import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs, getCarriers, Carrier, addCompletedJob } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -29,6 +29,11 @@ export default function JobListScreen() {
   const [jobToDelete, setJobToDelete] = useState<PlannedJob | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentCarrier, setCurrentCarrier] = useState<Carrier | null>(null);
+  const [showCarrierPicker, setShowCarrierPicker] = useState(false);
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+  const [jobForCarrier, setJobForCarrier] = useState<PlannedJob | null>(null);
+  const [isCreatingTrip, setIsCreatingTrip] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -45,6 +50,7 @@ export default function JobListScreen() {
     setJobs(allJobs);
     setCompanies(companiesMap);
     setFilteredJobs(allJobs);
+    setCarriers(allCarriers);
     setCurrentCarrier(allCarriers[0] || null);
   }, []);
 
@@ -105,6 +111,50 @@ export default function JobListScreen() {
     } catch (error) {
       console.error("Share hatası:", error);
       Alert.alert("Hata", "Paylaşma işlemi başarısız oldu");
+    }
+  };
+
+  const handleCreateTrip = (job: PlannedJob) => {
+    setJobForCarrier(job);
+    setShowCarrierPicker(true);
+  };
+
+  const handleConfirmTrip = async () => {
+    if (!jobForCarrier || !selectedCarrier) {
+      Alert.alert("Hata", "Lütfen nakliyeci seçiniz");
+      return;
+    }
+
+    setIsCreatingTrip(true);
+    try {
+      const completedJobData = {
+        companyId: jobForCarrier.companyId,
+        carrierId: selectedCarrier.id,
+        cargoType: jobForCarrier.cargoType,
+        tonnage: jobForCarrier.tonnage,
+        dimensions: jobForCarrier.dimensions,
+        loadingLocation: jobForCarrier.loadingLocation,
+        deliveryLocation: jobForCarrier.deliveryLocation,
+        loadingDate: jobForCarrier.loadingDate,
+        deliveryDate: jobForCarrier.deliveryDate,
+        transportationCost: jobForCarrier.transportationCost,
+        commissionCost: jobForCarrier.commissionCost,
+        completionDate: Date.now(),
+        notes: "",
+      };
+
+      await addCompletedJob(completedJobData);
+      setShowCarrierPicker(false);
+      setShowDetailModal(false);
+      setSelectedCarrier(null);
+      setJobForCarrier(null);
+      await loadData();
+      Alert.alert("Başarılı", "Sefer başarıyla oluşturuldu");
+    } catch (error) {
+      console.error("Sefer oluşturma hatası:", error);
+      Alert.alert("Hata", "Sefer oluşturulurken hata oluştu");
+    } finally {
+      setIsCreatingTrip(false);
     }
   };
 
@@ -300,39 +350,56 @@ export default function JobListScreen() {
               )}
             </ScrollView>
 
-            {/* Modal Footer - Share and Delete Buttons */}
+            {/* Modal Footer - Share, Create Trip and Delete Buttons */}
             {selectedJob && (
-              <View style={{ flexDirection: "row", gap: Spacing.md }}>
+              <View style={{ gap: Spacing.md }}>
+                <View style={{ flexDirection: "row", gap: Spacing.md }}>
+                  <Pressable
+                    onPress={() => handleShareJob(selectedJob)}
+                    style={({ pressed }) => [
+                      styles.shareButton,
+                      {
+                        backgroundColor: theme.link,
+                        opacity: pressed ? 0.9 : 1,
+                        flex: 1,
+                      },
+                    ]}
+                  >
+                    <Feather name="share-2" size={20} color="#FFFFFF" />
+                    <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                      Paylaş
+                    </ThemedText>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleDeletePress(selectedJob)}
+                    style={({ pressed }) => [
+                      styles.shareButton,
+                      {
+                        backgroundColor: colors.destructive,
+                        opacity: pressed ? 0.9 : 1,
+                        flex: 1,
+                      },
+                    ]}
+                  >
+                    <Feather name="trash-2" size={20} color="#FFFFFF" />
+                    <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                      Sil
+                    </ThemedText>
+                  </Pressable>
+                </View>
                 <Pressable
-                  onPress={() => handleShareJob(selectedJob)}
+                  onPress={() => handleCreateTrip(selectedJob)}
                   style={({ pressed }) => [
                     styles.shareButton,
                     {
-                      backgroundColor: theme.link,
+                      backgroundColor: colors.success,
                       opacity: pressed ? 0.9 : 1,
-                      flex: 1,
                     },
                   ]}
                 >
-                  <Feather name="share-2" size={20} color="#FFFFFF" />
+                  <Feather name="check-circle" size={20} color="#FFFFFF" />
                   <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Paylaş
-                  </ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={() => handleDeletePress(selectedJob)}
-                  style={({ pressed }) => [
-                    styles.shareButton,
-                    {
-                      backgroundColor: colors.destructive,
-                      opacity: pressed ? 0.9 : 1,
-                      flex: 1,
-                    },
-                  ]}
-                >
-                  <Feather name="trash-2" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Sil
+                    Seferi Oluştur
                   </ThemedText>
                 </Pressable>
               </View>
@@ -409,6 +476,89 @@ export default function JobListScreen() {
             </View>
           </View>
         )}
+      </Modal>
+
+      {/* Carrier Picker Modal */}
+      <Modal
+        visible={showCarrierPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowCarrierPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Nakliyeci Seçin</ThemedText>
+              <Pressable onPress={() => setShowCarrierPicker(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+            <FlatList
+              data={carriers}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item: carrier }) => (
+                <Pressable
+                  onPress={() => setSelectedCarrier(carrier)}
+                  style={({ pressed }) => [
+                    styles.carrierOption,
+                    {
+                      backgroundColor: selectedCarrier?.id === carrier.id ? theme.link + "20" : "transparent",
+                      opacity: pressed ? 0.7 : 1,
+                    },
+                  ]}
+                >
+                  <View>
+                    <ThemedText type="body" style={{ fontWeight: "600" }}>
+                      {carrier.name}
+                    </ThemedText>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      {carrier.phone}
+                    </ThemedText>
+                  </View>
+                  {selectedCarrier?.id === carrier.id && (
+                    <Feather name="check" size={20} color={theme.link} />
+                  )}
+                </Pressable>
+              )}
+              scrollEnabled
+              contentContainerStyle={{ paddingBottom: Spacing.xl }}
+            />
+            <View style={{ flexDirection: "row", gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
+              <Pressable
+                onPress={() => setShowCarrierPicker(false)}
+                disabled={isCreatingTrip}
+                style={({ pressed }) => [
+                  {
+                    flex: 1,
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+                    opacity: pressed || isCreatingTrip ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleConfirmTrip}
+                disabled={isCreatingTrip || !selectedCarrier}
+                style={({ pressed }) => [
+                  {
+                    flex: 1,
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    backgroundColor: colors.success,
+                    opacity: pressed || isCreatingTrip || !selectedCarrier ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Onayla</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
       </Modal>
 
       <Pressable
@@ -527,5 +677,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
+  },
+  carrierOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(128, 128, 128, 0.1)",
   },
 });

@@ -9,7 +9,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs } from "@/utils/storage";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -21,6 +21,7 @@ export default function CompletedJobListScreen() {
 
   const [jobs, setJobs] = useState<CompletedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
+  const [carriers, setCarriers] = useState<{ [key: string]: Carrier }>({});
   const [filteredJobs, setFilteredJobs] = useState<CompletedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
@@ -34,14 +35,21 @@ export default function CompletedJobListScreen() {
   const loadData = useCallback(async () => {
     const allJobs = await getCompletedJobs();
     const allCompanies = await getCompanies();
+    const allCarriers = await getCarriers();
     
     const companiesMap = allCompanies.reduce((acc, company) => {
       acc[company.id] = company;
       return acc;
     }, {} as { [key: string]: Company });
 
+    const carriersMap = allCarriers.reduce((acc, carrier) => {
+      acc[carrier.id] = carrier;
+      return acc;
+    }, {} as { [key: string]: Carrier });
+
     setJobs(allJobs);
     setCompanies(companiesMap);
+    setCarriers(carriersMap);
     setFilteredJobs(allJobs);
   }, []);
 
@@ -211,6 +219,15 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                     <ThemedText type="h4">
                       {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Nakliyeci
+                    </ThemedText>
+                    <ThemedText type="h4">
+                      {carriers[selectedJob.carrierId]?.name || "Bilinmeyen Nakliyeci"}
                     </ThemedText>
                   </View>
 
