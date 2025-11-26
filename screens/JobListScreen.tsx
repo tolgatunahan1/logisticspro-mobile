@@ -106,17 +106,13 @@ export default function JobListScreen() {
   };
 
   const handleShareJob = async (job: PlannedJob) => {
-    const company = companies[job.companyId];
     
     let message = "*Yeni Sefer Programı*\n\n";
-    message += `*Firma:* ${company?.name || "-"}\n`;
     message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
     message += `*Teslimat Yeri:* ${job.deliveryLocation || "-"}\n`;
     message += `*Yük Cinsi:* ${job.cargoType || "-"}\n`;
     message += `*Yük Tonajı:* ${job.tonnage ? `${job.tonnage}` : "-"}\n`;
-    message += `*Yük Ebatı:* ${job.dimensions || "-"}\n`;
-    message += `*Nakliye Bedeli:* ${job.transportationCost ? `${job.transportationCost} ₺` : "-"}\n`;
-    message += `*Komisyon Bedeli:* ${job.commissionCost ? `${job.commissionCost} ₺` : "-"}`;
+    message += `*Yük Ebatı:* ${job.dimensions || "-"}`;
     
     try {
       await Share.share({
