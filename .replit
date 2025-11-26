@@ -3,7 +3,6 @@ modules = ["nodejs-22"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["android-tools", "jdk17"]
 
 [[ports]]
 localPort = 8081
@@ -16,10 +15,6 @@ externalPort = 3000
 [[ports]]
 localPort = 38693
 externalPort = 3001
-
-[[ports]]
-localPort = 45127
-externalPort = 3002
 
 [workflows]
 runButton = "Project"
