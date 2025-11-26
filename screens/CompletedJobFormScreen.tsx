@@ -66,6 +66,7 @@ export default function CompletedJobFormScreen() {
       const data = {
         companyId,
         carrierId,
+        plannedJobId: job?.plannedJobId || "",
         cargoType: cargoType.toString().trim(),
         tonnage: tonnage.toString().trim(),
         dimensions: dimensions.toString().trim(),

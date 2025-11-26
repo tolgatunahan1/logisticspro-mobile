@@ -130,6 +130,7 @@ export default function JobListScreen() {
       const completedJobData = {
         companyId: jobForCarrier.companyId,
         carrierId: selectedCarrier.id,
+        plannedJobId: jobForCarrier.id,
         cargoType: jobForCarrier.cargoType,
         tonnage: jobForCarrier.tonnage,
         dimensions: jobForCarrier.dimensions,
@@ -144,6 +145,7 @@ export default function JobListScreen() {
       };
 
       await addCompletedJob(completedJobData);
+      await deleteJob(jobForCarrier.id);
       setShowCarrierPicker(false);
       setShowDetailModal(false);
       setSelectedCarrier(null);
