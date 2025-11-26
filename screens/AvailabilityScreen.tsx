@@ -53,33 +53,15 @@ export default function AvailabilityScreen() {
 
   const handleSave = async () => {
     try {
-      // Validasyon
-      if (!name.trim()) {
-        Alert.alert("Hata", "Adı giriniz");
-        return;
-      }
-      if (!currentLocation.trim()) {
-        Alert.alert("Hata", "Bulunduğu yeri giriniz");
-        return;
-      }
-      if (!destinationLocation.trim()) {
-        Alert.alert("Hata", "Gideceği yeri giriniz");
-        return;
-      }
-      if (!notes.trim()) {
-        Alert.alert("Hata", "Durumu yazınız");
-        return;
-      }
-
       setIsSaving(true);
 
       const expiresAt = Date.now() + 12 * 60 * 60 * 1000;
       const result = await addCarrierAvailability({
-        carrierName: name.trim(),
+        carrierName: name.trim() || "Adı belirtilmedi",
         carrierPhone: phone.trim() || undefined,
-        currentLocation: currentLocation.trim(),
-        destinationLocation: destinationLocation.trim(),
-        notes: notes.trim(),
+        currentLocation: currentLocation.trim() || "Yer belirtilmedi",
+        destinationLocation: destinationLocation.trim() || "Yer belirtilmedi",
+        notes: notes.trim() || "Bilgi yok",
         capacity: "boş",
         loadType: vehicleType.trim() || undefined,
         expiresAt,
