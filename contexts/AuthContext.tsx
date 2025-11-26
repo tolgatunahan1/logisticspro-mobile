@@ -77,55 +77,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const admin = await getAdmin();
-      console.log("Admin data:", admin ? "Found" : "Not found");
 
       if (!admin) {
-        console.error("No admin found in storage");
         return false;
       }
-
-      console.log("Comparing credentials:", {
-        inputUsername: trimmedUsername,
-        storedUsername: admin.username,
-        match: admin.username === trimmedUsername,
-      });
 
       if (admin.username !== trimmedUsername) {
-        console.error("Admin username mismatch");
         return false;
       }
 
-      console.log("Comparing passwords:", {
-        inputLength: trimmedPassword.length,
-        storedLength: admin.password.length,
-        match: admin.password === trimmedPassword,
-      });
-
       if (admin.password !== trimmedPassword) {
-        console.error("Admin password mismatch");
         return false;
       }
 
       const userData: User = { username: admin.username, type: "admin" };
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
       setUser(userData);
-      console.log("✅ Admin login successful");
       return true;
     } catch (error) {
-      console.error("Failed to login admin:", error);
       return false;
     }
   };
 
   const logout = async () => {
-    console.log("🚪 LOGOUT STARTED");
     try {
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-      console.log("💾 Storage cleared");
       setUser(null);
-      console.log("✅ LOGOUT COMPLETE");
     } catch (error) {
-      console.error("❌ Logout error:", error);
       setUser(null);
     }
   };

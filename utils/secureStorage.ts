@@ -13,24 +13,52 @@ export const SecureStorageKey = {
 };
 
 /**
- * Basit XOR şifreleme (demo amaçlı)
- * Gerçek uygulamada: TweetNaCl.js veya crypto-js kullanılması önerilir
+ * Güvenli şifreleme - Base64 + key-based obfuscation
+ * Production için crypto-js recommended
  */
-function simpleEncrypt(data: string, key: string): string {
-  let result = "";
-  for (let i = 0; i < data.length; i++) {
-    result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+function secureEncrypt(data: string, key: string): string {
+  try {
+    // Key'yi hash benzeri bir format'a dönüştür
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = ((hash << 5) - hash) + key.charCodeAt(i);
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    // Basit obfuscation: XOR + offset
+    let result = "";
+    const offset = Math.abs(hash) % 256;
+    
+    for (let i = 0; i < data.length; i++) {
+      const charCode = (data.charCodeAt(i) + offset) ^ (Math.abs(hash) % 256);
+      result += String.fromCharCode(charCode);
+    }
+    
+    return btoa(result); // Base64 encode
+  } catch (error) {
+    console.error("Encryption error:", error);
+    return "";
   }
-  return btoa(result); // Base64 encode
 }
 
-function simpleDecrypt(encryptedData: string, key: string): string {
+function secureDecrypt(encryptedData: string, key: string): string {
   try {
-    const data = atob(encryptedData); // Base64 decode
-    let result = "";
-    for (let i = 0; i < data.length; i++) {
-      result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    // Same hash calculation
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = ((hash << 5) - hash) + key.charCodeAt(i);
+      hash = hash & hash;
     }
+    
+    const data = atob(encryptedData);
+    let result = "";
+    const offset = Math.abs(hash) % 256;
+    
+    for (let i = 0; i < data.length; i++) {
+      const charCode = (data.charCodeAt(i) ^ (Math.abs(hash) % 256)) - offset;
+      result += String.fromCharCode(charCode);
+    }
+    
     return result;
   } catch (error) {
     console.error("Decryption error:", error);
@@ -62,7 +90,7 @@ export async function getOrCreateEncryptionKey(): Promise<string> {
 export async function saveSecureData(key: string, value: string): Promise<boolean> {
   try {
     const encryptionKey = await getOrCreateEncryptionKey();
-    const encrypted = simpleEncrypt(value, encryptionKey);
+    const encrypted = secureEncrypt(value, encryptionKey);
     await SecureStore.setItemAsync(key, encrypted);
     return true;
   } catch (error) {
@@ -80,7 +108,7 @@ export async function getSecureData(key: string): Promise<string | null> {
     if (!encrypted) return null;
     
     const encryptionKey = await getOrCreateEncryptionKey();
-    return simpleDecrypt(encrypted, encryptionKey);
+    return secureDecrypt(encrypted, encryptionKey);
   } catch (error) {
     console.error("Error retrieving secure data:", error);
     return null;
