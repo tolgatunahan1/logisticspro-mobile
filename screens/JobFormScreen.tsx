@@ -10,7 +10,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { addJob, updateJob, deleteJob, getCompanies, PlannedJob, Company } from "@/utils/storage";
+import { addJob, updateJob, getCompanies, PlannedJob, Company } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "JobForm">;
@@ -138,47 +138,6 @@ export default function JobFormScreen() {
     }
   }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, transportationCost, commissionCost, isEdit, job, navigation]);
 
-  const handleDelete = useCallback(async () => {
-    console.log("handleDelete çağrıldı, job:", job);
-    if (!job?.id) {
-      console.log("Job ID yok, return");
-      return;
-    }
-
-    const jobId = job.id;
-    console.log("Silme işlemi başlıyor, jobId:", jobId);
-
-    const confirmed = Platform.OS === "web" 
-      ? window.confirm("Bu iş kaydını silmek istediğinizden emin misiniz?")
-      : await new Promise((resolve) => {
-          Alert.alert(
-            "İşi Sil",
-            "Bu iş kaydını silmek istediğinizden emin misiniz?",
-            [
-              { text: "İptal", style: "cancel", onPress: () => resolve(false) },
-              { text: "Sil", style: "destructive", onPress: () => resolve(true) },
-            ]
-          );
-        });
-
-    if (!confirmed) {
-      console.log("Silme iptal edildi");
-      return;
-    }
-
-    console.log("Sil butonuna basıldı, siliniyor:", jobId);
-    setIsLoading(true);
-    try {
-      const result = await deleteJob(jobId);
-      console.log("Silme başarılı, sonuç:", result);
-      navigation.goBack();
-    } catch (error) {
-      console.error("Silme hatası:", error);
-      Alert.alert("Hata", "İş silinirken bir hata oluştu");
-      setIsLoading(false);
-    }
-  }, [job, navigation]);
-
   const handleCancel = () => {
     navigation.goBack();
   };
@@ -221,33 +180,22 @@ export default function JobFormScreen() {
         </Pressable>
       ),
       headerRight: () => (
-        <View style={styles.headerRightContainer}>
-          {isEdit && (
-            <Pressable
-              onPress={handleDelete}
-              disabled={isLoading}
-              style={({ pressed }) => [styles.headerButton, { opacity: pressed || isLoading ? 0.6 : 1 }]}
-            >
-              <Feather name="trash-2" size={20} color="#EF4444" />
-            </Pressable>
+        <Pressable
+          onPress={handleSave}
+          disabled={isLoading}
+          style={({ pressed }) => [styles.headerButton, { opacity: pressed || isLoading ? 0.6 : 1 }]}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color={theme.link} />
+          ) : (
+            <ThemedText type="body" style={{ color: theme.link }}>
+              Kaydet
+            </ThemedText>
           )}
-          <Pressable
-            onPress={handleSave}
-            disabled={isLoading}
-            style={({ pressed }) => [styles.headerButton, { opacity: pressed || isLoading ? 0.6 : 1 }]}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color={theme.link} />
-            ) : (
-              <ThemedText type="body" style={{ color: theme.link }}>
-                Kaydet
-              </ThemedText>
-            )}
-          </Pressable>
-        </View>
+        </Pressable>
       ),
     });
-  }, [navigation, isLoading, handleSave, handleDelete]);
+  }, [navigation, isLoading, handleSave]);
 
   const inputStyle = [
     styles.input,
