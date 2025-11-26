@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useLayoutEffect } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -34,6 +34,13 @@ export default function CompletedJobListScreen() {
   const [showIBANModal, setShowIBANModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitle: "",
+      headerShown: false,
+    });
+  }, [navigation]);
 
   // Helper function to send carrier info to company via WhatsApp
   const shareCarrierInfoWithCompany = useCallback(async () => {
@@ -797,7 +804,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
+    paddingTop: Spacing["5xl"] + Spacing.xl,
+    paddingBottom: Spacing.lg,
     gap: Spacing.lg,
   },
   jobCard: {
