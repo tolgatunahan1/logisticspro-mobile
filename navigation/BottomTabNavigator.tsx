@@ -10,15 +10,18 @@ import { HeaderTitle } from "@/components/HeaderTitle";
 
 import HomeScreen from "@/screens/HomeScreen";
 import WalletScreen from "@/screens/WalletScreen";
+import AvailabilityScreen from "@/screens/AvailabilityScreen";
 
 export type BottomTabParamList = {
   HomeTab: undefined;
   WalletTab: undefined;
+  AvailabilityTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 const HomeStack = createNativeStackNavigator();
 const WalletStack = createNativeStackNavigator();
+const AvailabilityStack = createNativeStackNavigator();
 
 function HomeStackScreen() {
   const { theme, isDark } = useTheme();
@@ -50,6 +53,21 @@ function WalletStackScreen() {
   );
 }
 
+function AvailabilityStackScreen() {
+  const { theme, isDark } = useTheme();
+  return (
+    <AvailabilityStack.Navigator screenOptions={{ ...getCommonScreenOptions({ theme, isDark }) }}>
+      <AvailabilityStack.Screen
+        name="Availability"
+        component={AvailabilityScreen}
+        options={{
+          headerTitle: "Nakliyeci Bildirimleri",
+        }}
+      />
+    </AvailabilityStack.Navigator>
+  );
+}
+
 export default function BottomTabNavigator() {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
@@ -58,9 +76,11 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color }) => {
-          let iconName: "home" | "shopping-bag" = "home";
+          let iconName: "home" | "shopping-bag" | "bell" = "home";
           if (route.name === "WalletTab") {
             iconName = "shopping-bag";
+          } else if (route.name === "AvailabilityTab") {
+            iconName = "bell";
           }
           return <Feather name={iconName} size={22} color={color} />;
         },
@@ -99,6 +119,13 @@ export default function BottomTabNavigator() {
         component={WalletStackScreen}
         options={{
           tabBarLabel: "Cüzdan",
+        }}
+      />
+      <Tab.Screen
+        name="AvailabilityTab"
+        component={AvailabilityStackScreen}
+        options={{
+          tabBarLabel: "Bildiriler",
         }}
       />
     </Tab.Navigator>

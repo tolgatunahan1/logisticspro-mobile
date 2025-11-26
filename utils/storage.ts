@@ -104,6 +104,7 @@ const JOBS_STORAGE_KEY = "@nakliyeci_jobs";
 const COMPLETED_JOBS_STORAGE_KEY = "@nakliyeci_completed_jobs";
 const IBANS_STORAGE_KEY = "@nakliyeci_ibans";
 const COMPANY_WALLET_STORAGE_KEY = "@nakliyeci_company_wallet";
+const CARRIER_AVAILABILITY_STORAGE_KEY = "@nakliyeci_carrier_availability";
 
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -662,5 +663,90 @@ export const getUnpaidCommissions = async (): Promise<CompletedJob[]> => {
   } catch (error) {
     console.error("Failed to get unpaid commissions:", error);
     return [];
+  }
+};
+
+// Carrier Availability functions
+export const getCarrierAvailabilities = async (): Promise<CarrierAvailability[]> => {
+  try {
+    const stored = await AsyncStorage.getItem(CARRIER_AVAILABILITY_STORAGE_KEY);
+    if (stored) {
+      const availabilities = JSON.parse(stored);
+      // Süresi geçenleri filtrele
+      const now = Date.now();
+      const filtered = availabilities.filter((a: CarrierAvailability) => a.expiresAt > now);
+      // Güncellenmiş listeyi kaydet
+      if (filtered.length !== availabilities.length) {
+        await saveCarrierAvailabilities(filtered);
+      }
+      return filtered;
+    }
+    return [];
+  } catch (error) {
+    console.error("Failed to get carrier availabilities:", error);
+    return [];
+  }
+};
+
+export const saveCarrierAvailabilities = async (availabilities: CarrierAvailability[]): Promise<boolean> => {
+  try {
+    await AsyncStorage.setItem(CARRIER_AVAILABILITY_STORAGE_KEY, JSON.stringify(availabilities));
+    return true;
+  } catch (error) {
+    console.error("Failed to save carrier availabilities:", error);
+    return false;
+  }
+};
+
+export const addCarrierAvailability = async (
+  availability: Omit<CarrierAvailability, "id" | "createdAt">
+): Promise<CarrierAvailability | null> => {
+  try {
+    const availabilities = await getCarrierAvailabilities();
+    const newAvailability: CarrierAvailability = {
+      ...availability,
+      id: generateId(),
+      createdAt: Date.now(),
+    };
+    availabilities.unshift(newAvailability);
+    await saveCarrierAvailabilities(availabilities);
+    return newAvailability;
+  } catch (error) {
+    console.error("Failed to add carrier availability:", error);
+    return null;
+  }
+};
+
+export const deleteCarrierAvailability = async (id: string): Promise<boolean> => {
+  try {
+    const availabilities = await getCarrierAvailabilities();
+    const filtered = availabilities.filter((a) => a.id !== id);
+    await saveCarrierAvailabilities(filtered);
+    return true;
+  } catch (error) {
+    console.error("Failed to delete carrier availability:", error);
+    return false;
+  }
+};
+
+export const updateCarrierAvailability = async (
+  id: string,
+  updates: Partial<Omit<CarrierAvailability, "id" | "createdAt">>
+): Promise<CarrierAvailability | null> => {
+  try {
+    const availabilities = await getCarrierAvailabilities();
+    const index = availabilities.findIndex((a) => a.id === id);
+    if (index === -1) return null;
+
+    const updated: CarrierAvailability = {
+      ...availabilities[index],
+      ...updates,
+    };
+    availabilities[index] = updated;
+    await saveCarrierAvailabilities(availabilities);
+    return updated;
+  } catch (error) {
+    console.error("Failed to update carrier availability:", error);
+    return null;
   }
 };
