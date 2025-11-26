@@ -54,24 +54,23 @@ export default function RootNavigator() {
         ...getCommonScreenOptions({ theme, isDark }),
       }}
     >
-      {user ? (
-        user.type === "admin" ? (
+      {user ? user.type === "admin" ? (
+        <Stack.Screen
+          name="AdminPanel"
+          component={AdminPanelScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+      ) : (
+        <>
           <Stack.Screen
-            name="AdminPanel"
-            component={AdminPanelScreen}
+            name="MainTabs"
+            component={BottomTabNavigator}
             options={{
               headerShown: false,
             }}
           />
-        ) : (
-          <>
-            <Stack.Screen
-              name="MainTabs"
-              component={BottomTabNavigator}
-              options={{
-                headerShown: false,
-              }}
-            />
           <Stack.Screen
             name="CarrierList"
             component={CarrierListScreen}
@@ -142,16 +141,15 @@ export default function RootNavigator() {
               headerBackTitleVisible: false,
             })}
           />
-            <Stack.Screen
-              name="Settings"
-              component={SettingsScreen}
-              options={{
-                headerTitle: "Ayarlar",
-                headerBackTitleVisible: false,
-              }}
-            />
-          </>
-        )
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              headerTitle: "Ayarlar",
+              headerBackTitleVisible: false,
+            }}
+          />
+        </>
       ) : (
         <Stack.Screen
           name="Login"
