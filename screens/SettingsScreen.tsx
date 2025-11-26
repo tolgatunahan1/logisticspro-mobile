@@ -395,8 +395,20 @@ export default function SettingsScreen() {
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
                   İletişim ve Destek
                 </ThemedText>
-                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
                   Herhangi bir sorun, soru veya geri bildiriminiz için iletişime geçin.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, fontWeight: "600" }}>
+                  E-posta:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: theme.link, lineHeight: 20, marginBottom: Spacing.md }}>
+                  tolgatunahan@icloud.com
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, fontWeight: "600" }}>
+                  Telefon:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: theme.link, lineHeight: 20 }}>
+                  +90 542 382 2832
                 </ThemedText>
               </View>
 
