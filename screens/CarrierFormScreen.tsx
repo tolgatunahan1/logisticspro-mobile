@@ -80,7 +80,7 @@ export default function CarrierFormScreen() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!carrier) return;
 
     Alert.alert(
@@ -91,16 +91,17 @@ export default function CarrierFormScreen() {
         {
           text: "Sil",
           style: "destructive",
-          onPress: async () => {
-            try {
-              setIsLoading(true);
-              await deleteCarrier(carrier.id);
-              navigation.goBack();
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
-              setIsLoading(false);
-            }
+          onPress: () => {
+            setIsLoading(true);
+            deleteCarrier(carrier.id)
+              .then(() => {
+                navigation.goBack();
+              })
+              .catch((error) => {
+                console.error("Silme hatası:", error);
+                Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+                setIsLoading(false);
+              });
           },
         },
       ]

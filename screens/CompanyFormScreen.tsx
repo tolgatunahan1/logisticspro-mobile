@@ -76,7 +76,7 @@ export default function CompanyFormScreen() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!company) return;
 
     Alert.alert(
@@ -87,16 +87,17 @@ export default function CompanyFormScreen() {
         {
           text: "Sil",
           style: "destructive",
-          onPress: async () => {
-            try {
-              setIsLoading(true);
-              await deleteCompany(company.id);
-              navigation.goBack();
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              Alert.alert("Hata", "Firma silinirken hata oluştu");
-              setIsLoading(false);
-            }
+          onPress: () => {
+            setIsLoading(true);
+            deleteCompany(company.id)
+              .then(() => {
+                navigation.goBack();
+              })
+              .catch((error) => {
+                console.error("Silme hatası:", error);
+                Alert.alert("Hata", "Firma silinirken hata oluştu");
+                setIsLoading(false);
+              });
           },
         },
       ]
