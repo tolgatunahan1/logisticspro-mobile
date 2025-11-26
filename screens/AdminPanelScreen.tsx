@@ -2,6 +2,8 @@ import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Pressable, ScrollView, Modal, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -10,7 +12,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, AppUser, debugStorage } from "@/utils/userManagement";
 
+type RootStackParamList = {
+  Login: undefined;
+  AdminPanel: undefined;
+};
+
+type AdminPanelNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdminPanel'>;
+
 export default function AdminPanelScreen() {
+  const navigation = useNavigation<AdminPanelNavigationProp>();
   const { theme, isDark } = useTheme();
   const { logout } = useAuth();
   const colors = isDark ? Colors.dark : Colors.light;
@@ -165,6 +175,21 @@ export default function AdminPanelScreen() {
     });
   }, [loadUsers]);
 
+  const handleLogoutPress = async () => {
+    console.log("👆 LOGOUT BUTTON PRESSED - ÇIKIŞ BAŞLATILIYOR");
+    try {
+      await logout();
+      console.log("✅ LOGOUT OK - Navigation reset yapılıyor");
+      (navigation as any).reset({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
+    } catch (error) {
+      console.error("❌ Logout failed:", error);
+      Alert.alert("Hata", "Çıkış sırasında hata oluştu");
+    }
+  };
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString("tr-TR", {
       year: "numeric",
@@ -306,10 +331,7 @@ export default function AdminPanelScreen() {
 
         {/* Çıkış Butonu */}
         <Pressable
-          onPress={async () => {
-            console.log("👆 LOGOUT BUTTON PRESSED");
-            await logout();
-          }}
+          onPress={handleLogoutPress}
           style={({ pressed }) => [
             styles.logoutButton,
             {
