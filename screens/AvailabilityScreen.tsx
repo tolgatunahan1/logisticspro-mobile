@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, Platform, KeyboardAvoidingView } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ThemedText } from "@/components/ThemedText";
 import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { useTheme } from "@/hooks/useTheme";
@@ -18,6 +19,7 @@ import {
 export default function AvailabilityScreen() {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const [availabilities, setAvailabilities] = useState<CarrierAvailability[]>([]);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
@@ -108,6 +110,13 @@ export default function AvailabilityScreen() {
       });
 
       if (result) {
+        const isUnregistered = !isRegistered;
+        const newCarrierData = {
+          carrierName: carrierName.trim(),
+          carrierPhone: carrierPhone.trim(),
+          vehicleType: vehicleType.trim(),
+        };
+        
         setCarrierName("");
         setCarrierPhone("");
         setVehicleType("");
@@ -118,6 +127,20 @@ export default function AvailabilityScreen() {
         setIsRegistered(true);
         setModalVisible(false);
         await loadData();
+        
+        // Kayıtsız kullanıcı kaydedilmişse kayıt sayfasına yönlendir
+        if (isUnregistered) {
+          Alert.alert("Başarılı", "Bildiri kaydedildi. Nakliyeci kayıt sayfasına yönlendiriliyorsunuz.", [
+            {
+              text: "Tamam",
+              onPress: () => {
+                navigation.navigate("CarrierForm", { 
+                  prefilledData: newCarrierData 
+                });
+              },
+            },
+          ]);
+        }
       }
     } catch (e) {
       console.error("Save error:", e);
