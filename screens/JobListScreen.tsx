@@ -149,9 +149,14 @@ export default function JobListScreen() {
               <ThemedText type="h4" numberOfLines={1}>
                 {company?.name || "Bilinmeyen Firma"}
               </ThemedText>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                {job.cargoType}
-              </ThemedText>
+              <View style={styles.detailRow}>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Ürünün Cinsi:
+                </ThemedText>
+                <ThemedText type="body" style={{ fontWeight: "600" }}>
+                  {job.cargoType}
+                </ThemedText>
+              </View>
             </View>
             <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
               <Pressable
