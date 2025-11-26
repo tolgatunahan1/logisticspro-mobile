@@ -115,8 +115,8 @@ export default function JobListScreen() {
     message += `*Yük Cinsi:* ${job.cargoType || "-"}\n`;
     message += `*Yük Tonajı:* ${job.tonnage ? `${job.tonnage}` : "-"}\n`;
     message += `*Yük Ebatı:* ${job.dimensions || "-"}\n`;
-    message += `*Nakliye Bedeli:* ${job.transportationCost || "-"}\n`;
-    message += `*Komisyon Bedeli:* ${job.commissionCost || "-"}`;
+    message += `*Nakliye Bedeli:* ${job.transportationCost ? `${job.transportationCost} ₺` : "-"}\n`;
+    message += `*Komisyon Bedeli:* ${job.commissionCost ? `${job.commissionCost} ₺` : "-"}`;
     
     try {
       await Share.share({
@@ -305,7 +305,7 @@ export default function JobListScreen() {
                       Nakliye Bedeli
                     </ThemedText>
                     <ThemedText type="h4">
-                      {selectedJob.transportationCost || "-"}
+                      {selectedJob.transportationCost ? `${selectedJob.transportationCost} ₺` : "-"}
                     </ThemedText>
                   </View>
 
@@ -314,7 +314,7 @@ export default function JobListScreen() {
                       Komisyon Bedeli
                     </ThemedText>
                     <ThemedText type="h4">
-                      {selectedJob.commissionCost || "-"}
+                      {selectedJob.commissionCost ? `${selectedJob.commissionCost} ₺` : "-"}
                     </ThemedText>
                   </View>
                 </View>
