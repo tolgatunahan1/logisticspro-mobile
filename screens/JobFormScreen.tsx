@@ -207,7 +207,8 @@ export default function JobFormScreen() {
   ];
 
   return (
-    <ScrollView
+    <>
+      <ScrollView
       style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
       contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }}
     >
@@ -543,29 +544,30 @@ export default function JobFormScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Loading Date Picker - Native Only */}
-      {showLoadingDatePicker && Platform.OS !== "web" && (
-        <DateTimePicker
-          value={new Date(loadingDate)}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleLoadingDateChange}
-          onTouchCancel={() => setShowLoadingDatePicker(false)}
-        />
-      )}
-
-      {/* Delivery Date Picker - Native Only */}
-      {showDeliveryDatePicker && Platform.OS !== "web" && (
-        <DateTimePicker
-          value={new Date(deliveryDate)}
-          mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDeliveryDateChange}
-          onTouchCancel={() => setShowDeliveryDatePicker(false)}
-        />
-      )}
     </ScrollView>
+
+    {/* Loading Date Picker - Outside ScrollView for Expo Go */}
+    {showLoadingDatePicker && Platform.OS !== "web" && (
+      <DateTimePicker
+        value={new Date(loadingDate)}
+        mode="date"
+        display={Platform.OS === "ios" ? "spinner" : "default"}
+        onChange={handleLoadingDateChange}
+        onTouchCancel={() => setShowLoadingDatePicker(false)}
+      />
+    )}
+
+    {/* Delivery Date Picker - Outside ScrollView for Expo Go */}
+    {showDeliveryDatePicker && Platform.OS !== "web" && (
+      <DateTimePicker
+        value={new Date(deliveryDate)}
+        mode="date"
+        display={Platform.OS === "ios" ? "spinner" : "default"}
+        onChange={handleDeliveryDateChange}
+        onTouchCancel={() => setShowDeliveryDatePicker(false)}
+      />
+    )}
+    </>
   );
 }
 

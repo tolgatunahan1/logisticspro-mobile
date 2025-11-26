@@ -174,7 +174,8 @@ export default function CompletedJobFormScreen() {
   ];
 
   return (
-    <ScrollView
+    <>
+      <ScrollView
       style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
       contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }}
     >
