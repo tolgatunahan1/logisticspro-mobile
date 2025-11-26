@@ -8,7 +8,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, AppUser } from "@/utils/userManagement";
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, AppUser, debugStorage } from "@/utils/userManagement";
 
 export default function AdminPanelScreen() {
   const { theme, isDark } = useTheme();
@@ -21,48 +21,57 @@ export default function AdminPanelScreen() {
 
   const loadUsers = useCallback(async () => {
     try {
-      console.log("Loading users...");
+      console.log("📥 Loading users from storage...");
+      await debugStorage();
+      
       const pending = await getPendingUsers();
       const approved = await getApprovedUsers();
-      console.log("Users loaded:", { pending: pending.length, approved: approved.length });
+      
+      console.log(`✅ Loaded: ${pending.length} pending, ${approved.length} approved`);
+      
       setPendingUsers(pending);
       setApprovedUsers(approved);
     } catch (error) {
-      console.error("Failed to load users:", error);
+      console.error("❌ Failed to load users:", error);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
+      console.log("🎯 Screen focused - loading users");
       loadUsers();
     }, [loadUsers])
   );
 
   const handleApprove = (user: AppUser) => {
+    console.log("👆 APPROVE BUTTON PRESSED:", user.username);
+    
     Alert.alert(
       "Kullanıcı Onayla",
-      `${user.username} kullanıcısını onaylamak istiyor musunuz?`,
+      `${user.username} kullanıcısını onaylamak istiyor musunuz?\n\nBu kullanıcı onaylandıktan sonra ${user.username}/${user.password} ile giriş yapabilecek.`,
       [
-        { text: "İptal", style: "cancel" },
+        { text: "İptal", style: "cancel", onPress: () => console.log("Approve cancelled") },
         {
-          text: "Onayla",
+          text: "ONAYLA",
+          style: "default",
           onPress: async () => {
+            console.log("✋ APPROVAL CONFIRMED FOR:", user.username);
             setLoading(true);
             try {
-              console.log("Approving user:", user.username);
               const success = await approveUser(user.id);
-              console.log("Approve result:", success);
+              console.log("Result:", success);
+              
               if (success) {
-                Alert.alert("Başarılı", `${user.username} onaylandı ve giriş yapabilir`);
-                // Delay and reload
-                await new Promise(resolve => setTimeout(resolve, 500));
+                Alert.alert("✅ Başarılı", `${user.username} onaylandı!\n\nGiriş: ${user.username}\nŞifre: ${user.password}`);
+                // Force reload after short delay
+                await new Promise(r => setTimeout(r, 1000));
                 await loadUsers();
               } else {
-                Alert.alert("Hata", "Onaylama başarısız oldu");
+                Alert.alert("❌ Hata", "Onaylama başarısız");
               }
-            } catch (error) {
-              console.error("Approve error:", error);
-              Alert.alert("Hata", "Onaylama sırasında hata");
+            } catch (err) {
+              console.error("Approve error:", err);
+              Alert.alert("❌ Hata", String(err));
             } finally {
               setLoading(false);
             }
@@ -73,31 +82,31 @@ export default function AdminPanelScreen() {
   };
 
   const handleReject = (user: AppUser) => {
+    console.log("👆 REJECT BUTTON PRESSED:", user.username);
+    
     Alert.alert(
       "Kullanıcı Reddet",
       `${user.username} kullanıcısını reddetmek istiyor musunuz?`,
       [
         { text: "İptal", style: "cancel" },
         {
-          text: "Reddet",
+          text: "REDDET",
           style: "destructive",
           onPress: async () => {
+            console.log("✋ REJECTION CONFIRMED FOR:", user.username);
             setLoading(true);
             try {
-              console.log("Rejecting user:", user.username);
               const success = await rejectUser(user.id);
-              console.log("Reject result:", success);
               if (success) {
-                Alert.alert("Başarılı", `${user.username} reddedildi`);
-                // Delay and reload
-                await new Promise(resolve => setTimeout(resolve, 500));
+                Alert.alert("✅ Başarılı", `${user.username} reddedildi`);
+                await new Promise(r => setTimeout(r, 1000));
                 await loadUsers();
               } else {
-                Alert.alert("Hata", "Reddetme başarısız");
+                Alert.alert("❌ Hata", "Reddetme başarısız");
               }
-            } catch (error) {
-              console.error("Reject error:", error);
-              Alert.alert("Hata", "Reddetme sırasında hata");
+            } catch (err) {
+              console.error("Reject error:", err);
+              Alert.alert("❌ Hata", String(err));
             } finally {
               setLoading(false);
             }
@@ -122,9 +131,9 @@ export default function AdminPanelScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* İstatistikler */}
         <View style={[styles.header, { backgroundColor: colors.backgroundDefault }]}>
-          <ThemedText type="h3">Admin Paneli</ThemedText>
+          <ThemedText type="h3">👨‍💼 Admin Paneli</ThemedText>
           <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
-            Toplam: {pendingUsers.length + approvedUsers.length} | Bekleyen: {pendingUsers.length} | Onaylanmış: {approvedUsers.length}
+            Toplam: {pendingUsers.length + approvedUsers.length} | ⏳ Bekleyen: {pendingUsers.length} | ✅ Onaylanmış: {approvedUsers.length}
           </ThemedText>
         </View>
 
@@ -150,6 +159,9 @@ export default function AdminPanelScreen() {
                     <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
                       Başvuru: {formatDate(user.createdAt)}
                     </ThemedText>
+                    <ThemedText type="small" style={{ color: colors.success, marginTop: Spacing.xs }}>
+                      Şifre: {user.password}
+                    </ThemedText>
                   </View>
 
                   <View style={styles.userActions}>
@@ -164,9 +176,9 @@ export default function AdminPanelScreen() {
                         },
                       ]}
                     >
-                      <Feather name="check" size={16} color="#FFFFFF" />
-                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        Onayla
+                      <Feather name="check" size={18} color="#FFFFFF" />
+                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "700" }}>
+                        ONAYLA
                       </ThemedText>
                     </Pressable>
 
@@ -181,9 +193,9 @@ export default function AdminPanelScreen() {
                         },
                       ]}
                     >
-                      <Feather name="x" size={16} color="#FFFFFF" />
-                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        Reddet
+                      <Feather name="x" size={18} color="#FFFFFF" />
+                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "700" }}>
+                        REDDET
                       </ThemedText>
                     </Pressable>
                   </View>
@@ -196,12 +208,12 @@ export default function AdminPanelScreen() {
         {/* Onaylanmış Kullanıcılar */}
         <View style={{ marginTop: Spacing["2xl"] }}>
           <ThemedText type="h4" style={{ marginBottom: Spacing.md, color: colors.textSecondary }}>
-            ✓ Onaylanmış ({approvedUsers.length})
+            ✅ Onaylanmış ({approvedUsers.length})
           </ThemedText>
 
           {approvedUsers.length === 0 ? (
             <View style={[styles.emptyCard, { backgroundColor: colors.backgroundDefault }]}>
-              <Feather name="smile" size={32} color={colors.textSecondary} />
+              <Feather name="check-circle" size={32} color={colors.textSecondary} />
               <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
                 Henüz onaylanmış kullanıcı yok
               </ThemedText>
@@ -221,7 +233,7 @@ export default function AdminPanelScreen() {
                       </ThemedText>
                     )}
                   </View>
-                  <Feather name="check-circle" size={20} color={colors.success} />
+                  <Feather name="check-circle" size={24} color={colors.success} />
                 </View>
               ))}
             </View>
@@ -291,7 +303,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.sm,
     gap: Spacing.sm,
   },
