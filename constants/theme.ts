@@ -1,40 +1,44 @@
 import { Platform } from "react-native";
 
-const tintColorLight = "#2563EB";
-const tintColorDark = "#3B82F6";
+const tintColorLight = "#4F46E5";
+const tintColorDark = "#6366F1";
 
 export const Colors = {
   light: {
-    text: "#1F2937",
+    text: "#1A1A1A",
     textSecondary: "#6B7280",
     buttonText: "#FFFFFF",
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
-    link: "#2563EB",
-    backgroundRoot: "#FFFFFF",
-    backgroundDefault: "#F3F4F6",
-    backgroundSecondary: "#E5E7EB",
-    backgroundTertiary: "#D1D5DB",
+    link: "#4F46E5",
+    backgroundRoot: "#F9FAFB",
+    backgroundDefault: "#FFFFFF",
+    backgroundSecondary: "#F3F4F6",
+    backgroundTertiary: "#E5E7EB",
     border: "#E5E7EB",
     success: "#10B981",
     destructive: "#EF4444",
-    inputBackground: "#FFFFFF",
+    inputBackground: "rgba(255, 255, 255, 0.8)",
+    glassOverlay: "rgba(255, 255, 255, 0.12)",
+    glassBorder: "rgba(255, 255, 255, 0.3)",
   },
   dark: {
-    text: "#ECEDEE",
+    text: "#FFFFFF",
     textSecondary: "#9BA1A6",
     buttonText: "#FFFFFF",
     tabIconDefault: "#9BA1A6",
     tabIconSelected: tintColorDark,
-    link: "#3B82F6",
-    backgroundRoot: "#1F2937",
-    backgroundDefault: "#374151",
-    backgroundSecondary: "#4B5563",
-    backgroundTertiary: "#6B7280",
-    border: "#4B5563",
+    link: "#6366F1",
+    backgroundRoot: "#0F172A",
+    backgroundDefault: "#1E293B",
+    backgroundSecondary: "#334155",
+    backgroundTertiary: "#475569",
+    border: "#334155",
     success: "#10B981",
     destructive: "#EF4444",
-    inputBackground: "#374151",
+    inputBackground: "rgba(30, 41, 59, 0.8)",
+    glassOverlay: "rgba(255, 255, 255, 0.08)",
+    glassBorder: "rgba(255, 255, 255, 0.2)",
   },
 };
 
@@ -48,14 +52,14 @@ export const Spacing = {
   "3xl": 32,
   "4xl": 40,
   "5xl": 48,
-  inputHeight: 48,
-  buttonHeight: 48,
-  fabSize: 56,
+  inputHeight: 52,
+  buttonHeight: 52,
+  fabSize: 64,
 };
 
 export const BorderRadius = {
-  xs: 8,
-  sm: 12,
+  xs: 12,
+  sm: 14,
   md: 16,
   lg: 20,
   xl: 24,
@@ -66,7 +70,7 @@ export const BorderRadius = {
 
 export const Typography = {
   h1: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: "700" as const,
   },
   h2: {
@@ -82,7 +86,7 @@ export const Typography = {
     fontWeight: "600" as const,
   },
   body: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "400" as const,
   },
   small: {

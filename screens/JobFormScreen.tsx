@@ -252,7 +252,8 @@ export default function JobFormScreen() {
   const inputStyle = [
     styles.input,
     {
-      borderColor: colors.border,
+      borderColor: (theme as any).glassBorder || colors.border,
+      backgroundColor: (theme as any).inputBackground || colors.inputBackground,
       color: theme.text,
     },
   ];

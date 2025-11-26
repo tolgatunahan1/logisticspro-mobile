@@ -151,8 +151,8 @@ export default function CompanyFormScreen() {
           styles.input,
           options?.multiline && styles.multilineInput,
           {
-            backgroundColor: colors.inputBackground,
-            borderColor: errors[errorKey] ? colors.destructive : colors.border,
+            backgroundColor: (theme as any).inputBackground || colors.inputBackground,
+            borderColor: errors[errorKey] ? colors.destructive : ((theme as any).glassBorder || colors.border),
             color: theme.text,
           },
         ]}
@@ -231,8 +231,8 @@ const styles = StyleSheet.create({
   },
   input: {
     height: Spacing.inputHeight,
-    borderWidth: 1,
-    borderRadius: BorderRadius.xs,
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.md,
     fontSize: 16,
   },

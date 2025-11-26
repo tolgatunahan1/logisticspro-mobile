@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable, Platform } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -53,7 +53,7 @@ export function Card({ elevation, onPress }: CardProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.98, springConfig);
+    scale.value = withSpring(0.97, springConfig);
   };
 
   const handlePressOut = () => {
@@ -69,6 +69,7 @@ export function Card({ elevation, onPress }: CardProps) {
         styles.card,
         {
           backgroundColor: cardBackgroundColor,
+          borderColor: theme.glassOverlay || "rgba(255, 255, 255, 0.1)",
         },
         animatedStyle,
       ]}
@@ -87,6 +88,21 @@ const styles = StyleSheet.create({
   card: {
     padding: Spacing.xl,
     borderRadius: BorderRadius["2xl"],
+    borderWidth: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#4F46E5",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+      web: {
+        boxShadow: "0 4px 12px rgba(79, 70, 229, 0.1)",
+      },
+    }),
   },
   cardTitle: {
     marginBottom: Spacing.sm,
