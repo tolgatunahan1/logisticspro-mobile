@@ -750,3 +750,48 @@ export const updateCarrierAvailability = async (
     return null;
   }
 };
+
+// Data Export and Delete Functions (GDPR Compliance)
+export const exportAllData = async (): Promise<object> => {
+  try {
+    const carriers = await getCarriers();
+    const companies = await getCompanies();
+    const jobs = await getJobs();
+    const completedJobs = await getCompletedJobs();
+    const ibans = await getIBANs();
+    const wallet = await getCompanyWallet();
+    const availabilities = await getCarrierAvailabilities();
+
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      carriers,
+      companies,
+      plannedJobs: jobs,
+      completedJobs,
+      ibans,
+      companyWallet: wallet,
+      carrierAvailabilities: availabilities,
+    };
+
+    return exportData;
+  } catch (error) {
+    console.error("Failed to export data:", error);
+    return {};
+  }
+};
+
+export const deleteAllData = async (): Promise<boolean> => {
+  try {
+    await AsyncStorage.removeItem(CARRIERS_STORAGE_KEY);
+    await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
+    await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
+    await AsyncStorage.removeItem(COMPLETED_JOBS_STORAGE_KEY);
+    await AsyncStorage.removeItem(IBANS_STORAGE_KEY);
+    await AsyncStorage.removeItem(COMPANY_WALLET_STORAGE_KEY);
+    await AsyncStorage.removeItem(CARRIER_AVAILABILITY_STORAGE_KEY);
+    return true;
+  } catch (error) {
+    console.error("Failed to delete all data:", error);
+    return false;
+  }
+};

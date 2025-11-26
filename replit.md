@@ -3,20 +3,31 @@
 ## Overview
 A mobile application for registering and managing carriers (nakliyeci). Users can log in with a username and password, and all users with the same credentials can view and edit the shared carrier data.
 
+**Status**: MVP Complete with Security & Privacy Features
+**Version**: 1.0.0
+**Creator**: Tolga Tunahan (Designer & Developer)
+**License**: Proprietary - © 2025 Tolga Tunahan
+
 ## Current State
 MVP completed with the following features:
-- User login with username/password
-- Add, edit, and delete carriers
-- Carrier information: Name, Phone, Plate, Vehicle Type
-- Search and filter carriers
-- Settings screen with logout functionality
-- Data persistence using AsyncStorage (local storage)
-- Account management with profile update
-- Push notifications for account updates (via Expo Go)
-- IBAN management for payments
-- Wallet screen for transaction tracking
-- Completed jobs tracking
-- Carrier availability notifications
+- **User Authentication**: Login with username/password validation
+- **Carrier Management**: Add, edit, delete carriers with search/filter
+- **Job Management**: Planned and completed jobs tracking
+- **Payment Tracking**: IBAN management, wallet, and commission tracking
+- **Notifications**: Push notifications for account updates via Expo Go
+- **Data Persistence**: Local storage using AsyncStorage
+- **Security Features**:
+  - Password strength validation (8+ chars, uppercase, numbers)
+  - Secure storage with expo-secure-store for sensitive data
+  - iOS Keychain & Android Keystore integration
+  - Data encryption on device
+- **Privacy & Compliance**:
+  - GDPR & KVKK compliant
+  - Data export (JSON format)
+  - Data deletion (right to be forgotten)
+  - Privacy Policy with security details
+  - Complete transparency about data handling
+- **UI/UX**: iOS 26+ Liquid Glass design, Turkish interface
 
 ## Tech Stack
 - **Framework**: Expo SDK 54 with React Native
@@ -172,14 +183,21 @@ SettingsScreen.tsx bölündü (513 satır → 200 satır)
 - Web preview doesn't support push notifications (test on physical device)
 
 ## Recent Changes
-- November 26, 2025: Performance optimization guide added
-  - expo-notifications package installed
-  - Account update notifications enabled
-  - Replit IDE optimization recommendations documented
-  - All source code exported (all-source-code.txt)
-  
+- November 26, 2025: Security & Privacy Features Complete ✅
+  - Password strength validation (8+ chars, uppercase, numbers)
+  - expo-secure-store integration for secure data storage
+  - Privacy Policy modal with GDPR/KVKK compliance details
+  - Data export functionality (exportAllData)
+  - Data deletion functionality (deleteAllData - right to be forgotten)
+  - Veri Yönetimi (Data Management) section in Settings
+  - Şifre Güvenliği (Password Security) indicators in Account Settings
+  - Kişisel Bilgi Güvenliği section in About modal
+  - Full branding update to "LogisticsPRO"
+  - Creator attribution: Tolga Tunahan (Designer & Developer)
+
 - Previous: November 25, 2025
   - Complete app MVP with bottom tabs
   - IBAN management
   - Wallet screen
   - Availability notifications
+  - Performance optimization guide

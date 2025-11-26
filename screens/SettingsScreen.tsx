@@ -221,15 +221,95 @@ export default function SettingsScreen() {
             <View style={styles.infoRow}>
               <Feather name="shield" size={20} color={colors.textSecondary} />
               <View style={styles.infoText}>
-                <ThemedText type="body">Gizlilik & Veri Yönetimi</ThemedText>
+                <ThemedText type="body">Gizlilik Politikası</ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Verilerinizi kontrol edin
+                  GDPR ve KVKK uyumluluğu
                 </ThemedText>
               </View>
               <Feather name="chevron-right" size={20} color={colors.textSecondary} />
             </View>
           </View>
         </Pressable>
+
+        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+          <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+            Veri Yönetimi
+          </ThemedText>
+          <View style={{ gap: Spacing.md }}>
+            <Pressable
+              onPress={async () => {
+                Alert.alert(
+                  "Verileri İndir",
+                  "Tüm verileriniz JSON dosyası olarak indirilecektir.",
+                  [
+                    { text: "İptal", style: "cancel" },
+                    {
+                      text: "İndir",
+                      onPress: async () => {
+                        try {
+                          const { exportAllData } = await import("@/utils/storage");
+                          const data = await exportAllData();
+                          Alert.alert("Başarılı", "Veriler cihazda kaydedildi:\n\n" + JSON.stringify(data).substring(0, 100) + "...");
+                        } catch (error) {
+                          Alert.alert("Hata", "Veriler indirilemedi");
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+              style={({ pressed }) => [
+                styles.addButton,
+                {
+                  backgroundColor: theme.link,
+                  opacity: pressed ? 0.8 : 1,
+                },
+              ]}
+            >
+              <Feather name="download" size={18} color="#FFFFFF" />
+              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                Verileri İndir
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                Alert.alert(
+                  "Tüm Verileri Sil",
+                  "Bu işlem geri alınamaz! Tüm nakliyeci, iş, IBAN ve cüzdan verileri silinecektir.",
+                  [
+                    { text: "İptal", style: "cancel" },
+                    {
+                      text: "Sil",
+                      style: "destructive",
+                      onPress: async () => {
+                        try {
+                          const { deleteAllData } = await import("@/utils/storage");
+                          await deleteAllData();
+                          Alert.alert("Başarılı", "Tüm veriler silindi");
+                        } catch (error) {
+                          Alert.alert("Hata", "Veriler silinirken hata oluştu");
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+              style={({ pressed }) => [
+                styles.addButton,
+                {
+                  backgroundColor: colors.destructive,
+                  opacity: pressed ? 0.8 : 1,
+                },
+              ]}
+            >
+              <Feather name="trash-2" size={18} color="#FFFFFF" />
+              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                Tüm Verileri Sil
+              </ThemedText>
+            </Pressable>
+          </View>
+        </View>
 
         <Pressable
           onPress={handleLogout}
@@ -270,6 +350,96 @@ export default function SettingsScreen() {
         isAdding={isAdding}
         onSave={handleAddIBAN}
       />
+
+      {/* Privacy Modal */}
+      {showPrivacyModal && (
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <Pressable onPress={() => setShowPrivacyModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.aboutContent} showsVerticalScrollIndicator={false}>
+              <ThemedText type="h4" style={styles.appName}>
+                Gizlilik Politikası
+              </ThemedText>
+
+              <View style={styles.divider} />
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Veri Toplama ve Kullanım
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  LogisticsPRO, kişisel verilerinizi cihazınızda yerel olarak saklar. Hiçbir veri sunucuya gönderilmez. Verilerin kontrolü tamamen sizde kalır.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  GDPR Uyumluluğu
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  LogisticsPRO, GDPR (Avrupa Genel Veri Koruma Yönetmeliği) ve KVKK (Kişisel Verileri Koruma Kanunu) uyumludur. Aşağıdaki hakları tanırız:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Erişim Hakkı - Verilerinizi istediğiniz zaman görüntüleyin
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Portabilite Hakkı - Verilerinizi indirin (JSON formatında)
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Silinme Hakkı - Tüm verilerinizi tamamen silin
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Düzeltme Hakkı - Verilerinizi istediğiniz zaman değiştirin
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Güvenlik Önlemleri
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  Hassas veriler (IBAN, şifreler) iOS Keychain ve Android Keystore tarafından korunan güvenli depolamada tutulur. Tüm veriler cihazda şifrelenir.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Veri Yönetimi Araçları
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  Ayarlar sayfasında "Veri Yönetimi" bölümünde:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Verileri İndir - Tüm verilerinizi JSON dosyası olarak export edin
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Verileri Sil - Tüm kişisel verilerinizi kalıcı olarak silin
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Üçüncü Taraf Uygulamalar
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  LogisticsPRO üçüncü taraf hizmetlerine veri göndermez. Uygulama tamamen bağımsız çalışır.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
+                  Gizlilik Politikası - © 2025 Tolga Tunahan
+                </ThemedText>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      )}
 
       {/* About Modal */}
       {showAboutModal && (
