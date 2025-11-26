@@ -30,6 +30,16 @@ export function AccountSettingsModal({
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
 
+  const validatePassword = (password: string) => {
+    const hasMinLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    return { hasMinLength, hasUpperCase, hasNumber };
+  };
+
+  const passwordValidation = validatePassword(editPassword);
+  const isPasswordValid = passwordValidation.hasMinLength && passwordValidation.hasUpperCase && passwordValidation.hasNumber;
+
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
@@ -83,6 +93,17 @@ export function AccountSettingsModal({
                 secureTextEntry
                 editable={!isUpdating}
               />
+              <View style={{ marginTop: Spacing.md, gap: Spacing.xs }}>
+                <ThemedText type="small" style={{ color: passwordValidation.hasMinLength ? colors.success : colors.textSecondary }}>
+                  {passwordValidation.hasMinLength ? "✓" : "○"} En az 8 karakter
+                </ThemedText>
+                <ThemedText type="small" style={{ color: passwordValidation.hasUpperCase ? colors.success : colors.textSecondary }}>
+                  {passwordValidation.hasUpperCase ? "✓" : "○"} En az bir büyük harf (A-Z)
+                </ThemedText>
+                <ThemedText type="small" style={{ color: passwordValidation.hasNumber ? colors.success : colors.textSecondary }}>
+                  {passwordValidation.hasNumber ? "✓" : "○"} En az bir rakam (0-9)
+                </ThemedText>
+              </View>
             </View>
           </View>
 
@@ -100,14 +121,14 @@ export function AccountSettingsModal({
             </Pressable>
             <Pressable
               onPress={onSave}
-              disabled={isUpdating}
+              disabled={isUpdating || !isPasswordValid}
               style={({ pressed }) => [
                 {
                   flex: 1,
                   paddingVertical: Spacing.md,
                   borderRadius: BorderRadius.sm,
-                  backgroundColor: theme.link,
-                  opacity: pressed || isUpdating ? 0.8 : 1,
+                  backgroundColor: isPasswordValid ? theme.link : colors.textSecondary,
+                  opacity: pressed || isUpdating || !isPasswordValid ? 0.6 : 1,
                 },
               ]}
             >

@@ -40,8 +40,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
+  };
+
   const login = async (username: string, password: string): Promise<boolean> => {
     if (!username.trim() || !password.trim()) {
+      return false;
+    }
+
+    if (!validatePassword(password)) {
       return false;
     }
 
@@ -58,6 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (username: string, password: string): Promise<boolean> => {
     if (!username.trim() || !password.trim()) {
+      return false;
+    }
+
+    if (!validatePassword(password)) {
       return false;
     }
 

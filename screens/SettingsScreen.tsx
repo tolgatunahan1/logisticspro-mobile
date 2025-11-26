@@ -30,6 +30,7 @@ export default function SettingsScreen() {
   const [editPassword, setEditPassword] = useState(user?.password || "");
   const [isUpdating, setIsUpdating] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const loadIBANs = useCallback(async () => {
     const data = await getIBANs();
@@ -208,6 +209,21 @@ export default function SettingsScreen() {
                 <ThemedText type="body">Hakkında</ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary }}>
                   LogisticsPRO v1.0.0
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+            </View>
+          </View>
+        </Pressable>
+
+        <Pressable onPress={() => setShowPrivacyModal(true)}>
+          <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.infoRow}>
+              <Feather name="shield" size={20} color={colors.textSecondary} />
+              <View style={styles.infoText}>
+                <ThemedText type="body">Gizlilik & Veri Yönetimi</ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Verilerinizi kontrol edin
                 </ThemedText>
               </View>
               <Feather name="chevron-right" size={20} color={colors.textSecondary} />
