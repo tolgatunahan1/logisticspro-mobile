@@ -298,6 +298,30 @@ export default function SettingsScreen() {
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Kişisel Bilgi Güvenliği
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  Hassas bilgileriniz (IBAN, şifreler, iletişim verileri) aşağıdaki güvenlik teknolojileri ile korunmaktadır:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • iOS Keychain - Apple'ın güvenli depolama sistemi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Android Keystore - Android cihazlarda kriptografik anahtar depolaması
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • expo-secure-store - Expo framework'ün güvenli depolama kütüphanesi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Veri Şifreleme - Hassas veriler cihazda şifrelenip saklanır
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.md, lineHeight: 20 }}>
+                  Tüm veriler cihazda yerel olarak saklanır. Sunucuya hiçbir kişisel bilgi gönderilmez.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
                   Lisanslama
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
