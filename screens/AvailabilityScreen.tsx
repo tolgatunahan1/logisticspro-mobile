@@ -282,7 +282,7 @@ export default function AvailabilityScreen() {
                 />
               </View>
 
-              <View style={{ flexDirection: "row", gap: 8, marginBottom: 20 }}>
+              <View style={{ flexDirection: "row", gap: 12, marginBottom: 20 }}>
                 <Pressable
                   onPress={() => setModalVisible(false)}
                   disabled={isSaving}
@@ -313,13 +313,13 @@ export default function AvailabilityScreen() {
 const s = StyleSheet.create({
   container: { flex: 1 },
   titleBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  addBtn: { width: 36, height: 36, borderRadius: BorderRadius.sm, justifyContent: "center", alignItems: "center" },
-  card: { borderRadius: BorderRadius.sm, padding: 10, borderWidth: 1, borderColor: "rgba(0,0,0,0.03)" },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 },
-  deleteBtn: { padding: 4 },
-  divider: { height: 1, marginBottom: 6 },
+  addBtn: { width: 40, height: 40, borderRadius: BorderRadius.sm, justifyContent: "center", alignItems: "center" },
+  card: { borderRadius: BorderRadius.sm, padding: 12, borderWidth: 1, borderColor: "rgba(0,0,0,0.03)" },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 },
+  deleteBtn: { padding: 6 },
+  divider: { height: 1, marginBottom: 8 },
   modalWrapper: { flex: 1 },
   modal: { paddingBottom: 20 },
-  input: { borderWidth: 1, borderRadius: BorderRadius.sm, borderColor: "rgba(0,0,0,0.05)", paddingHorizontal: 10, paddingVertical: 8, fontSize: 14 },
-  actionBtn: { flex: 1, paddingVertical: 10, borderRadius: BorderRadius.sm, alignItems: "center" },
+  input: { borderWidth: 1, borderRadius: BorderRadius.sm, borderColor: "rgba(0,0,0,0.05)", paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, minHeight: 44 },
+  actionBtn: { flex: 1, paddingVertical: 12, borderRadius: BorderRadius.sm, alignItems: "center", minHeight: 44 },
 });

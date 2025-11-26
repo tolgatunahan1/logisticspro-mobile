@@ -357,17 +357,18 @@ export default function CompletedJobListScreen() {
                           backgroundColor: "#25D366",
                           opacity: pressed ? 0.9 : 1,
                           marginTop: Spacing.md,
-                          paddingVertical: Spacing.sm,
-                          paddingHorizontal: Spacing.md,
+                          paddingVertical: Spacing.md,
+                          paddingHorizontal: Spacing.lg,
                           borderRadius: BorderRadius.sm,
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: Spacing.sm,
+                          gap: Spacing.md,
+                          minHeight: 48,
                         },
                       ]}
                     >
-                      <Feather name="message-circle" size={16} color="#FFFFFF" />
+                      <Feather name="message-circle" size={18} color="#FFFFFF" />
                       <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                         Nakliyeci Bilgilerini Paylaş
                       </ThemedText>
@@ -426,17 +427,18 @@ export default function CompletedJobListScreen() {
                           backgroundColor: "#25D366",
                           opacity: pressed ? 0.9 : 1,
                           marginTop: Spacing.md,
-                          paddingVertical: Spacing.sm,
-                          paddingHorizontal: Spacing.md,
+                          paddingVertical: Spacing.md,
+                          paddingHorizontal: Spacing.lg,
                           borderRadius: BorderRadius.sm,
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: Spacing.sm,
+                          gap: Spacing.md,
+                          minHeight: 48,
                         },
                       ]}
                     >
-                      <Feather name="message-circle" size={16} color="#FFFFFF" />
+                      <Feather name="message-circle" size={18} color="#FFFFFF" />
                       <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                         Firma Bilgilerini Paylaş
                       </ThemedText>
@@ -450,17 +452,18 @@ export default function CompletedJobListScreen() {
                           backgroundColor: theme.link,
                           opacity: pressed ? 0.9 : 1,
                           marginTop: Spacing.md,
-                          paddingVertical: Spacing.sm,
-                          paddingHorizontal: Spacing.md,
+                          paddingVertical: Spacing.md,
+                          paddingHorizontal: Spacing.lg,
                           borderRadius: BorderRadius.sm,
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: Spacing.sm,
+                          gap: Spacing.md,
+                          minHeight: 48,
                         },
                       ]}
                     >
-                      <Feather name="credit-card" size={16} color="#FFFFFF" />
+                      <Feather name="credit-card" size={18} color="#FFFFFF" />
                       <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                         Kayıtlı İBANı Paylaş
                       </ThemedText>
