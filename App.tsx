@@ -11,6 +11,19 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function App() {
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const preventPinch = (e: any) => {
+        if (e.touches && e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchmove', preventPinch, { passive: false });
+      return () => document.removeEventListener('touchmove', preventPinch);
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
