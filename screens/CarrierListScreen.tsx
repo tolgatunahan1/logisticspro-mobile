@@ -340,27 +340,39 @@ export default function CarrierListScreen() {
         animationType="fade"
         onRequestClose={() => setShowDeleteConfirm(false)}
       >
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
           <View style={{
-            backgroundColor: colors.backgroundDefault,
-            borderRadius: BorderRadius.md,
-            padding: Spacing.lg,
-            width: "80%",
-            maxWidth: 300,
+            backgroundColor: isDark ? "rgba(30, 30, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            borderRadius: BorderRadius.lg,
+            padding: Spacing.xl,
+            width: "100%",
+            maxWidth: 340,
+            borderWidth: 1,
+            borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+            overflow: "hidden",
           }}>
-            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>Nakliyeciyi Sil</ThemedText>
-            <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
-              "{carrierToDelete?.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?
-            </ThemedText>
-            <View style={{ flexDirection: "row", gap: Spacing.md, justifyContent: "flex-end" }}>
+            <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
+              <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>Nakliyeciyi Sil</ThemedText>
+              <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                "{carrierToDelete?.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              </ThemedText>
+            </View>
+            <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
               <Pressable
                 onPress={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
                 style={({ pressed }) => [
-                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+                    opacity: pressed || isDeleting ? 0.5 : 1,
+                  },
                 ]}
               >
-                <ThemedText type="body" style={{ color: theme.link }}>İptal</ThemedText>
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
               </Pressable>
               <Pressable
                 onPress={async () => {
@@ -379,10 +391,17 @@ export default function CarrierListScreen() {
                 }}
                 disabled={isDeleting}
                 style={({ pressed }) => [
-                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: colors.destructive,
+                    opacity: pressed || isDeleting ? 0.7 : 1,
+                  },
                 ]}
               >
-                <ThemedText type="body" style={{ color: colors.destructive }}>Sil</ThemedText>
+                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Sil</ThemedText>
               </Pressable>
             </View>
           </View>
