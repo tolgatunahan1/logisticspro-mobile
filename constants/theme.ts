@@ -1,44 +1,77 @@
 import { Platform } from "react-native";
 
-const tintColorLight = "#4F46E5";
-const tintColorDark = "#6366F1";
+// iOS 26 Modern Color System
+const tintColorLight = "#0A84FF";
+const tintColorDark = "#0A84FF";
 
 export const Colors = {
   light: {
-    text: "#1A1A1A",
-    textSecondary: "#6B7280",
+    // Primary Text
+    text: "#1D1D1D",
+    textSecondary: "#8E8E93",
+    textTertiary: "#C7C7CC",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#687076",
+    
+    // Tabs & Navigation
+    tabIconDefault: "#8E8E93",
     tabIconSelected: tintColorLight,
-    link: "#4F46E5",
-    backgroundRoot: "#F9FAFB",
-    backgroundDefault: "#FFFFFF",
-    backgroundSecondary: "#F3F4F6",
-    backgroundTertiary: "#E5E7EB",
-    border: "#E5E7EB",
-    success: "#10B981",
-    destructive: "#EF4444",
+    
+    // Links & Actions
+    link: "#0A84FF",
+    
+    // Backgrounds
+    backgroundRoot: "#FFFFFF",
+    backgroundDefault: "#F5F5F7",
+    backgroundSecondary: "#EFEFEF",
+    backgroundTertiary: "#E5E5EA",
+    
+    // Borders
+    border: "#D1D1D6",
+    
+    // System Colors
+    success: "#34C759",
+    destructive: "#FF3B30",
+    warning: "#FF9500",
+    
+    // Glass Effects
     inputBackground: "rgba(255, 255, 255, 0.8)",
     glassOverlay: "rgba(255, 255, 255, 0.12)",
     glassBorder: "rgba(255, 255, 255, 0.3)",
+    glassBlur: "rgba(0, 0, 0, 0.05)",
   },
   dark: {
+    // Primary Text
     text: "#FFFFFF",
-    textSecondary: "#9BA1A6",
+    textSecondary: "#A1A1A6",
+    textTertiary: "#5A5A5F",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#9BA1A6",
+    
+    // Tabs & Navigation
+    tabIconDefault: "#A1A1A6",
     tabIconSelected: tintColorDark,
-    link: "#6366F1",
-    backgroundRoot: "#0F172A",
-    backgroundDefault: "#1E293B",
-    backgroundSecondary: "#334155",
-    backgroundTertiary: "#475569",
-    border: "#334155",
-    success: "#10B981",
-    destructive: "#EF4444",
-    inputBackground: "rgba(30, 41, 59, 0.8)",
+    
+    // Links & Actions
+    link: "#0A84FF",
+    
+    // Backgrounds
+    backgroundRoot: "#0A0A0A",
+    backgroundDefault: "#1C1C1E",
+    backgroundSecondary: "#2C2C2E",
+    backgroundTertiary: "#3A3A3C",
+    
+    // Borders
+    border: "#424245",
+    
+    // System Colors
+    success: "#34C759",
+    destructive: "#FF3B30",
+    warning: "#FF9500",
+    
+    // Glass Effects
+    inputBackground: "rgba(30, 30, 32, 0.8)",
     glassOverlay: "rgba(255, 255, 255, 0.08)",
     glassBorder: "rgba(255, 255, 255, 0.2)",
+    glassBlur: "rgba(255, 255, 255, 0.05)",
   },
 };
 
@@ -69,13 +102,17 @@ export const BorderRadius = {
 };
 
 export const Typography = {
+  display: {
+    fontSize: 34,
+    fontWeight: "700" as const,
+  },
   h1: {
     fontSize: 34,
     fontWeight: "700" as const,
   },
   h2: {
     fontSize: 28,
-    fontWeight: "700" as const,
+    fontWeight: "600" as const,
   },
   h3: {
     fontSize: 24,
@@ -97,6 +134,10 @@ export const Typography = {
     fontSize: 16,
     fontWeight: "400" as const,
   },
+  caption: {
+    fontSize: 13,
+    fontWeight: "400" as const,
+  },
 };
 
 export const Fonts = Platform.select({
@@ -113,10 +154,41 @@ export const Fonts = Platform.select({
     mono: "monospace",
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
-    rounded:
-      "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+    mono: "'Menlo', 'Monaco', 'Courier New', monospace",
   },
 });
+
+// Shadow Styles for Elevation
+export const Shadows = {
+  xs: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sm: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  md: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  lg: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+};
