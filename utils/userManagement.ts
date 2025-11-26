@@ -105,11 +105,9 @@ export const approveUser = async (userId: string): Promise<boolean> => {
   try {
     console.log("🔄 STARTING APPROVE PROCESS FOR USER ID:", userId);
     
-    // GET ALL USERS
     const users = await getUsers();
     console.log("📋 Current users in storage:", users.length);
 
-    // FIND USER
     const userIndex = users.findIndex((u) => u.id === userId);
     console.log("🔍 User found at index:", userIndex);
 
@@ -118,20 +116,16 @@ export const approveUser = async (userId: string): Promise<boolean> => {
       return false;
     }
 
-    // GET OLD STATE
     const oldUser = { ...users[userIndex] };
     console.log("📌 Old state:", oldUser);
 
-    // MODIFY
     users[userIndex].status = "approved";
     users[userIndex].approvedAt = Date.now();
 
-    // SAVE
     const jsonData = JSON.stringify(users);
     await AsyncStorage.setItem(USERS_STORAGE_KEY, jsonData);
     console.log("💾 Saved to storage, data length:", jsonData.length);
 
-    // VERIFY WRITE
     const verified = await AsyncStorage.getItem(USERS_STORAGE_KEY);
     const verifiedParsed = verified ? JSON.parse(verified) : [];
     const verifiedUser = verifiedParsed.find((u: AppUser) => u.id === userId);
@@ -156,6 +150,52 @@ export const approveUser = async (userId: string): Promise<boolean> => {
   }
 };
 
+export const unapproveUser = async (userId: string): Promise<boolean> => {
+  try {
+    console.log("🔄 STARTING UNAPPROVE PROCESS FOR USER ID:", userId);
+    
+    const users = await getUsers();
+    const userIndex = users.findIndex((u) => u.id === userId);
+
+    if (userIndex === -1) {
+      console.error("❌ User not found:", userId);
+      return false;
+    }
+
+    const oldUser = { ...users[userIndex] };
+    console.log("📌 Old state:", oldUser);
+
+    users[userIndex].status = "pending";
+    users[userIndex].approvedAt = undefined;
+
+    const jsonData = JSON.stringify(users);
+    await AsyncStorage.setItem(USERS_STORAGE_KEY, jsonData);
+    console.log("💾 Saved to storage");
+
+    const verified = await AsyncStorage.getItem(USERS_STORAGE_KEY);
+    const verifiedParsed = verified ? JSON.parse(verified) : [];
+    const verifiedUser = verifiedParsed.find((u: AppUser) => u.id === userId);
+    
+    console.log("✅ VERIFICATION - New state:", {
+      id: verifiedUser?.id,
+      username: verifiedUser?.username,
+      status: verifiedUser?.status,
+      approvedAt: verifiedUser?.approvedAt
+    });
+
+    if (verifiedUser?.status !== "pending") {
+      console.error("❌ VERIFICATION FAILED - Status not reverted!");
+      return false;
+    }
+
+    console.log("🎉 USER APPROVAL REMOVED SUCCESSFULLY:", oldUser.username);
+    return true;
+  } catch (error) {
+    console.error("❌ Failed to unapprove user:", error);
+    return false;
+  }
+};
+
 export const rejectUser = async (userId: string): Promise<boolean> => {
   try {
     console.log("🔄 STARTING REJECT PROCESS FOR USER ID:", userId);
@@ -168,7 +208,6 @@ export const rejectUser = async (userId: string): Promise<boolean> => {
     const filtered = users.filter((u) => u.id !== userId);
     await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(filtered));
     
-    // VERIFY
     const verified = await AsyncStorage.getItem(USERS_STORAGE_KEY);
     const verifiedParsed = verified ? JSON.parse(verified) : [];
     const stillExists = verifiedParsed.find((u: AppUser) => u.id === userId);
@@ -214,7 +253,6 @@ export const loginUser = async (username: string, password: string): Promise<App
       return user;
     } else {
       console.log("❌ LOGIN FAILED for:", username);
-      // Debug why
       const userExists = users.find((u) => u.username === username);
       if (userExists) {
         console.log("   - User found but status is:", userExists.status);

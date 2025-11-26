@@ -8,7 +8,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, AppUser, debugStorage } from "@/utils/userManagement";
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, AppUser, debugStorage } from "@/utils/userManagement";
 
 export default function AdminPanelScreen() {
   const { theme, isDark } = useTheme();
@@ -123,6 +123,42 @@ export default function AdminPanelScreen() {
       visible: true,
       title: "Kullanıcı Reddet",
       message: `${user.username} kullanıcısını reddetmek istiyor musunuz?`,
+      onConfirm: confirmAction,
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+      isLoading: false,
+    });
+  }, [loadUsers]);
+
+  const handleUnapprove = useCallback((user: AppUser) => {
+    console.log("👆 UNAPPROVE BUTTON PRESSED:", user.username);
+    
+    const confirmAction = async () => {
+      console.log("✋ UNAPPROVE CONFIRMED FOR:", user.username);
+      setConfirmDialog(prev => ({ ...prev, isLoading: true }));
+      try {
+        const success = await unapproveUser(user.id);
+        console.log("Unapprove result:", success);
+        
+        if (success) {
+          Alert.alert("✅ Başarılı", `${user.username} onayı kaldırıldı`);
+          await new Promise(r => setTimeout(r, 800));
+          setConfirmDialog(prev => ({ ...prev, visible: false, isLoading: false }));
+          await loadUsers();
+        } else {
+          Alert.alert("❌ Hata", "Onay kaldırma başarısız");
+          setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+        }
+      } catch (err) {
+        console.error("Unapprove error:", err);
+        Alert.alert("❌ Hata", String(err));
+        setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+    
+    setConfirmDialog({
+      visible: true,
+      title: "Onayı Kaldır",
+      message: `${user.username} kullanıcısının onayını kaldırmak istiyor musunuz?\n\nBu kullanıcı tekrar yönetici onayı almak zorunda kalacak.`,
       onConfirm: confirmAction,
       onCancel: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
       isLoading: false,
@@ -246,7 +282,22 @@ export default function AdminPanelScreen() {
                       </ThemedText>
                     )}
                   </View>
-                  <Feather name="check-circle" size={24} color={colors.success} />
+                  <View style={styles.approvedActions}>
+                    <Pressable
+                      onPress={() => handleUnapprove(user)}
+                      disabled={confirmDialog.isLoading}
+                      style={({ pressed }) => [
+                        styles.smallActionButton,
+                        {
+                          backgroundColor: colors.destructive,
+                          opacity: pressed || confirmDialog.isLoading ? 0.6 : 1,
+                        },
+                      ]}
+                    >
+                      <Feather name="slash" size={16} color="#FFFFFF" />
+                    </Pressable>
+                    <Feather name="check-circle" size={24} color={colors.success} />
+                  </View>
                 </View>
               ))}
             </View>
@@ -321,13 +372,13 @@ export default function AdminPanelScreen() {
                 style={({ pressed }) => [
                   styles.dialogButton,
                   {
-                    backgroundColor: confirmDialog.title.includes("Reddet") ? colors.destructive : colors.success,
+                    backgroundColor: confirmDialog.title.includes("Reddet") || confirmDialog.title.includes("Onayı Kaldır") ? colors.destructive : colors.success,
                     opacity: pressed || confirmDialog.isLoading ? 0.6 : 1,
                   },
                 ]}
               >
                 <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "700" }}>
-                  {confirmDialog.isLoading ? "İŞLEMLENİYOR..." : confirmDialog.title.includes("Reddet") ? "REDDET" : "ONAYLA"}
+                  {confirmDialog.isLoading ? "İŞLEMLENİYOR..." : confirmDialog.title.includes("Reddet") ? "REDDET" : confirmDialog.title.includes("Onayı Kaldır") ? "KALDIR" : "ONAYLA"}
                 </ThemedText>
               </Pressable>
             </View>
@@ -368,6 +419,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     borderWidth: 2,
   },
+  approvedActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
   userInfo: {
     gap: Spacing.xs,
   },
@@ -383,6 +439,13 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.sm,
     gap: Spacing.sm,
+  },
+  smallActionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoutButton: {
     flexDirection: "row",
