@@ -51,34 +51,34 @@ export default function WalletScreen() {
       <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg }]}>
         {wallet && (
           <View style={{ gap: Spacing.md }}>
-            {/* Balance Card */}
+            {/* Pending Payments Balance Card */}
             <View
               style={[
                 styles.balanceCard,
                 {
                   backgroundColor: isDark
-                    ? "rgba(99, 102, 241, 0.15)"
-                    : "rgba(99, 102, 241, 0.08)",
+                    ? "rgba(234, 179, 8, 0.15)"
+                    : "rgba(234, 179, 8, 0.08)",
                   borderColor: isDark
-                    ? "rgba(99, 102, 241, 0.3)"
-                    : "rgba(99, 102, 241, 0.2)",
+                    ? "rgba(234, 179, 8, 0.3)"
+                    : "rgba(234, 179, 8, 0.2)",
                 },
               ]}
             >
               <View style={{ flex: 1 }}>
                 <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
-                  Cüzdan Bakiyesi
+                  Bekleyen Ödemeler Bakiyesi
                 </ThemedText>
-                <ThemedText type="h2" style={{ color: theme.link, fontWeight: "700" }}>
-                  {wallet.totalBalance.toFixed(2)} ₺
+                <ThemedText type="h2" style={{ color: "#EAB308", fontWeight: "700" }}>
+                  {unpaidCommissions.reduce((sum, job) => sum + parseFloat(job.commissionCost || "0"), 0).toFixed(2)} ₺
                 </ThemedText>
               </View>
-              <View style={[styles.statsIcon, { backgroundColor: theme.link }]}>
-                <Feather name="credit-card" size={20} color="#FFFFFF" />
+              <View style={[styles.statsIcon, { backgroundColor: "#EAB308" }]}>
+                <Feather name="clock" size={20} color="#FFFFFF" />
               </View>
             </View>
 
-            {/* Total Earned Card */}
+            {/* Paid Balance Card */}
             <View
               style={[
                 styles.balanceCard,
@@ -94,14 +94,14 @@ export default function WalletScreen() {
             >
               <View style={{ flex: 1 }}>
                 <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
-                  Toplam Kazanç
+                  Ödenen Bakiye
                 </ThemedText>
                 <ThemedText type="h3" style={{ color: "#22C55E", fontWeight: "700" }}>
-                  {wallet.totalEarned.toFixed(2)} ₺
+                  {wallet.totalBalance.toFixed(2)} ₺
                 </ThemedText>
               </View>
               <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
-                <Feather name="trending-up" size={20} color="#FFFFFF" />
+                <Feather name="check-circle" size={20} color="#FFFFFF" />
               </View>
             </View>
           </View>
