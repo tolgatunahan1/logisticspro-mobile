@@ -84,6 +84,20 @@ export interface IBAN {
   updatedAt: number;
 }
 
+export interface CarrierAvailability {
+  id: string;
+  carrierId?: string; // Kayıtlı nakliyeci için - isteğe bağlı
+  carrierName: string; // Nakliyeci adı (kayıtlı/kayıtsız)
+  carrierPhone?: string; // Telefon numarası
+  currentLocation: string; // Şu anda bulunduğu yer
+  destinationLocation: string; // Gideceği yer
+  capacity: "dolu" | "kısmiDolu" | "boş"; // Kapasite durumu
+  loadType?: string; // Ne tür yüke uygun (isteğe bağlı)
+  notes: string; // Ek notlar
+  createdAt: number;
+  expiresAt: number; // Ne zaman silinecek (12 saat sonrası vs)
+}
+
 const CARRIERS_STORAGE_KEY = "@nakliyeci_carriers";
 const COMPANIES_STORAGE_KEY = "@nakliyeci_companies";
 const JOBS_STORAGE_KEY = "@nakliyeci_jobs";
