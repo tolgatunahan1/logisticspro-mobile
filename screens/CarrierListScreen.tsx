@@ -287,21 +287,18 @@ export default function CarrierListScreen() {
                   </View>
 
                   {/* Action Buttons */}
-                  <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+                  <View style={{ flexDirection: "row", gap: Spacing.lg, marginTop: Spacing.lg, justifyContent: "center" }}>
                     <Pressable
                       onPress={() => {
                         setShowDetailModal(false);
                         handleCallPress(selectedCarrier.phone);
                       }}
                       style={({ pressed }) => [
-                        styles.actionButtonLarge,
-                        { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1 },
+                        styles.actionButtonRound,
+                        { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
                       ]}
                     >
-                      <Feather name="phone" size={18} color="#FFFFFF" />
-                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        Ara
-                      </ThemedText>
+                      <Feather name="phone" size={24} color="#FFFFFF" />
                     </Pressable>
                     <Pressable
                       onPress={() => {
@@ -309,14 +306,11 @@ export default function CarrierListScreen() {
                         handleWhatsAppPress(selectedCarrier.phone, selectedCarrier.name);
                       }}
                       style={({ pressed }) => [
-                        styles.actionButtonLarge,
-                        { backgroundColor: "#25D366", opacity: pressed ? 0.8 : 1 },
+                        styles.actionButtonRound,
+                        { backgroundColor: "#25D366", opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
                       ]}
                     >
-                      <Feather name="message-circle" size={18} color="#FFFFFF" />
-                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        WhatsApp
-                      </ThemedText>
+                      <Feather name="message-circle" size={24} color="#FFFFFF" />
                     </Pressable>
                   </View>
                 </View>
@@ -446,13 +440,17 @@ const styles = StyleSheet.create({
   detailSection: {
     gap: Spacing.xs,
   },
-  actionButtonLarge: {
-    flexDirection: "row",
+  actionButtonRound: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: "center",
     justifyContent: "center",
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.xs,
-    gap: Spacing.sm,
+    shadowColor: "#4F46E5",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
   },
   editButton: {
     flexDirection: "row",
