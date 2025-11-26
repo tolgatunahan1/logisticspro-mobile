@@ -52,8 +52,28 @@ export interface CompletedJob {
   commissionCost: string;
   completionDate: number;
   notes: string;
+  commissionPaid: boolean;
   createdAt: number;
   updatedAt: number;
+}
+
+export interface CompanyWallet {
+  id: string;
+  totalBalance: number;
+  totalEarned: number;
+  totalPaid: number;
+  transactions: WalletTransaction[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface WalletTransaction {
+  id: string;
+  completedJobId: string;
+  amount: number;
+  type: "income" | "payment";
+  description: string;
+  createdAt: number;
 }
 
 export interface IBAN {
@@ -69,6 +89,7 @@ const COMPANIES_STORAGE_KEY = "@nakliyeci_companies";
 const JOBS_STORAGE_KEY = "@nakliyeci_jobs";
 const COMPLETED_JOBS_STORAGE_KEY = "@nakliyeci_completed_jobs";
 const IBANS_STORAGE_KEY = "@nakliyeci_ibans";
+const COMPANY_WALLET_STORAGE_KEY = "@nakliyeci_company_wallet";
 
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -503,5 +524,96 @@ export const deleteIBAN = async (id: string): Promise<boolean> => {
   } catch (error) {
     console.error("Failed to delete IBAN:", error);
     return false;
+  }
+};
+
+// Company Wallet functions
+export const getCompanyWallet = async (): Promise<CompanyWallet> => {
+  try {
+    const stored = await AsyncStorage.getItem(COMPANY_WALLET_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    const newWallet: CompanyWallet = {
+      id: generateId(),
+      totalBalance: 0,
+      totalEarned: 0,
+      totalPaid: 0,
+      transactions: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    await saveCompanyWallet(newWallet);
+    return newWallet;
+  } catch (error) {
+    console.error("Failed to get company wallet:", error);
+    return {
+      id: generateId(),
+      totalBalance: 0,
+      totalEarned: 0,
+      totalPaid: 0,
+      transactions: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+  }
+};
+
+export const saveCompanyWallet = async (wallet: CompanyWallet): Promise<boolean> => {
+  try {
+    await AsyncStorage.setItem(COMPANY_WALLET_STORAGE_KEY, JSON.stringify(wallet));
+    return true;
+  } catch (error) {
+    console.error("Failed to save company wallet:", error);
+    return false;
+  }
+};
+
+export const markCommissionAsPaid = async (completedJobId: string): Promise<boolean> => {
+  try {
+    // Güncelleştirilmiş işi işaretleyin
+    const jobs = await getCompletedJobs();
+    const jobIndex = jobs.findIndex((j) => j.id === completedJobId);
+    if (jobIndex === -1) return false;
+
+    const job = jobs[jobIndex];
+    const commissionAmount = parseFloat(job.commissionCost) || 0;
+
+    jobs[jobIndex] = {
+      ...job,
+      commissionPaid: true,
+      updatedAt: Date.now(),
+    };
+    await saveCompletedJobs(jobs);
+
+    // Cüzdanı güncelleyin
+    const wallet = await getCompanyWallet();
+    wallet.totalBalance += commissionAmount;
+    wallet.totalEarned += commissionAmount;
+    wallet.transactions.push({
+      id: generateId(),
+      completedJobId,
+      amount: commissionAmount,
+      type: "income",
+      description: `${job.cargoType} seferinden komisyon`,
+      createdAt: Date.now(),
+    });
+    wallet.updatedAt = Date.now();
+    await saveCompanyWallet(wallet);
+
+    return true;
+  } catch (error) {
+    console.error("Failed to mark commission as paid:", error);
+    return false;
+  }
+};
+
+export const getUnpaidCommissions = async (): Promise<CompletedJob[]> => {
+  try {
+    const jobs = await getCompletedJobs();
+    return jobs.filter((j) => !j.commissionPaid);
+  } catch (error) {
+    console.error("Failed to get unpaid commissions:", error);
+    return [];
   }
 };

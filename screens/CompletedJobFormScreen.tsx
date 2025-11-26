@@ -78,6 +78,7 @@ export default function CompletedJobFormScreen() {
         transportationCost: transportationCost.toString().trim(),
         commissionCost: commissionCost.toString().trim(),
         notes: notes.toString().trim(),
+        commissionPaid: job?.commissionPaid || false,
       };
 
       if (isEdit && job) {
