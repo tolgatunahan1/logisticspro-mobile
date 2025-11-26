@@ -30,11 +30,11 @@ export default function AvailabilityScreen() {
   const [currentLocation, setCurrentLocation] = useState("");
   const [destinationLocation, setDestinationLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [deletedItem, setDeletedItem] = useState<CarrierAvailability | null>(null);
 
   const loadData = useCallback(async () => {
     try {
       const data = await getCarrierAvailabilities();
-      console.log("Loaded availabilities:", data?.length || 0);
       setAvailabilities(data || []);
       const list = await getCarriers();
       setCarriers(list || []);
@@ -47,39 +47,28 @@ export default function AvailabilityScreen() {
     loadData();
   }, [loadData]));
 
-  const handleDelete = async (id: string) => {
-    console.log("Deleting availability:", id);
+  const handleDelete = (item: CarrierAvailability) => {
+    const backup = [...availabilities];
     
-    Alert.alert(
-      "Sil",
-      "Emin misiniz?",
-      [
-        {
-          text: "İptal",
-          style: "cancel",
-        },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              console.log("Delete confirmed, calling deleteCarrierAvailability");
-              const result = await deleteCarrierAvailability(id);
-              console.log("Delete result:", result);
-              
-              if (result) {
-                console.log("Delete successful, reloading data");
-                await loadData();
-                console.log("Data reloaded");
-              }
-            } catch (error) {
-              console.error("Delete error:", error);
-            }
-          },
-        },
-      ],
-      { cancelable: false }
-    );
+    // Hemen state'ten sil
+    setAvailabilities(prev => prev.filter(a => a.id !== item.id));
+    setDeletedItem(item);
+    
+    // Storage'dan sil
+    deleteCarrierAvailability(item.id).then(success => {
+      if (!success) {
+        // Hata varsa geri yükle
+        setAvailabilities(backup);
+        setDeletedItem(null);
+        Alert.alert("Hata", "Silinemiyor");
+      }
+    }).catch(error => {
+      // Hata varsa geri yükle
+      console.error("Delete error:", error);
+      setAvailabilities(backup);
+      setDeletedItem(null);
+      Alert.alert("Hata", "Silinemiyor");
+    });
   };
 
   const handleSave = async () => {
@@ -149,10 +138,7 @@ export default function AvailabilityScreen() {
           )}
         </View>
         <Pressable 
-          onPress={() => {
-            console.log("Delete button pressed for:", item.id);
-            handleDelete(item.id);
-          }} 
+          onPress={() => handleDelete(item)}
           style={s.deleteBtn}
         >
           <Feather name="trash-2" size={14} color="#EF4444" />
