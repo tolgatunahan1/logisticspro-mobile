@@ -9,7 +9,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-import { addCompany, updateCompany, deleteCompany } from "@/utils/storage";
+import { addCompany, updateCompany } from "@/utils/storage";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "CompanyForm">;
@@ -74,46 +74,6 @@ export default function CompanyFormScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDelete = () => {
-    if (!company) {
-      Alert.alert("Hata", "Firma verisi bulunamadı");
-      return;
-    }
-
-    const companyId = company.id;
-    const companyName = company.name;
-
-    Alert.alert(
-      "Firmayı Sil",
-      `"${companyName}" adlı firmayı silmek istediğinizden emin misiniz?`,
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            console.log("Silme başladı, ID:", companyId);
-            setIsLoading(true);
-            try {
-              const result = await deleteCompany(companyId);
-              console.log("Silme sonucu:", result);
-              if (result) {
-                navigation.goBack();
-              } else {
-                Alert.alert("Hata", "Firma silinemedi");
-                setIsLoading(false);
-              }
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              Alert.alert("Hata", "Firma silinirken hata oluştu");
-              setIsLoading(false);
-            }
-          },
-        },
-      ]
-    );
   };
 
   const handleCancel = () => {
@@ -212,24 +172,6 @@ export default function CompanyFormScreen() {
         {renderInput("Yetkili Kişi", contactPerson, setContactPerson, "contactPerson", { placeholder: "Yetkili adı", autoCapitalize: "words" })}
         {renderInput("Adres", address, setAddress, "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true })}
 
-        {isEdit ? (
-          <Pressable
-            onPress={handleDelete}
-            disabled={isLoading}
-            style={({ pressed }) => [
-              styles.deleteButton,
-              {
-                backgroundColor: colors.destructive,
-                opacity: pressed || isLoading ? 0.8 : 1,
-              },
-            ]}
-          >
-            <Feather name="trash-2" size={18} color={colors.buttonText} />
-            <ThemedText type="body" style={[styles.deleteButtonText, { color: colors.buttonText }]}>
-              Firmayı Sil
-            </ThemedText>
-          </Pressable>
-        ) : null}
       </ScrollView>
     </ThemedView>
   );
@@ -263,18 +205,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginLeft: Spacing.xs,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.xs,
-    gap: Spacing.sm,
-    marginTop: Spacing["3xl"],
-  },
-  deleteButtonText: {
-    fontWeight: "600",
   },
   headerButton: {
     padding: Spacing.sm,
