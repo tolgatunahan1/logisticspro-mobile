@@ -186,62 +186,6 @@ export default function JobListScreen() {
         scrollEnabled={true}
       />
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={showDeleteConfirm}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowDeleteConfirm(false)}
-      >
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
-          <View style={{
-            backgroundColor: colors.backgroundDefault,
-            borderRadius: BorderRadius.md,
-            padding: Spacing.lg,
-            width: "80%",
-            maxWidth: 300,
-          }}>
-            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>İşi Sil</ThemedText>
-            <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
-              "{companies[jobToDelete?.companyId || ""]?.name || "İş"}" - "{jobToDelete?.cargoType}" işini silmek istediğinizden emin misiniz?
-            </ThemedText>
-            <View style={{ flexDirection: "row", gap: Spacing.md, justifyContent: "flex-end" }}>
-              <Pressable
-                onPress={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-                style={({ pressed }) => [
-                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
-                ]}
-              >
-                <ThemedText type="body" style={{ color: theme.link }}>İptal</ThemedText>
-              </Pressable>
-              <Pressable
-                onPress={async () => {
-                  if (!jobToDelete) return;
-                  setIsDeleting(true);
-                  try {
-                    await deleteJob(jobToDelete.id);
-                    setShowDeleteConfirm(false);
-                    setShowDetailModal(false);
-                    await loadData();
-                  } catch (error) {
-                    console.error("Delete error:", error);
-                  } finally {
-                    setIsDeleting(false);
-                  }
-                }}
-                disabled={isDeleting}
-                style={({ pressed }) => [
-                  { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
-                ]}
-              >
-                <ThemedText type="body" style={{ color: colors.destructive }}>Sil</ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
       {/* Detail Modal */}
       <Modal
         visible={showDetailModal}
@@ -395,6 +339,57 @@ export default function JobListScreen() {
             )}
           </View>
         </View>
+
+        {/* Delete Confirmation Modal (inside Detail Modal) */}
+        {showDeleteConfirm && (
+          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+            <View style={{
+              backgroundColor: colors.backgroundDefault,
+              borderRadius: BorderRadius.md,
+              padding: Spacing.lg,
+              width: "80%",
+              maxWidth: 300,
+            }}>
+              <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>İşi Sil</ThemedText>
+              <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                "{companies[jobToDelete?.companyId || ""]?.name || "İş"}" - "{jobToDelete?.cargoType}" işini silmek istediğinizden emin misiniz?
+              </ThemedText>
+              <View style={{ flexDirection: "row", gap: Spacing.md, justifyContent: "flex-end" }}>
+                <Pressable
+                  onPress={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  style={({ pressed }) => [
+                    { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                  ]}
+                >
+                  <ThemedText type="body" style={{ color: theme.link }}>İptal</ThemedText>
+                </Pressable>
+                <Pressable
+                  onPress={async () => {
+                    if (!jobToDelete) return;
+                    setIsDeleting(true);
+                    try {
+                      await deleteJob(jobToDelete.id);
+                      setShowDeleteConfirm(false);
+                      setShowDetailModal(false);
+                      await loadData();
+                    } catch (error) {
+                      console.error("Delete error:", error);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  style={({ pressed }) => [
+                    { padding: Spacing.md, opacity: pressed || isDeleting ? 0.6 : 1 },
+                  ]}
+                >
+                  <ThemedText type="body" style={{ color: colors.destructive }}>Sil</ThemedText>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        )}
       </Modal>
 
       <Pressable
