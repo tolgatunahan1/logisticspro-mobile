@@ -3,7 +3,6 @@ import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import LoginScreen from "@/screens/LoginScreen";
-import AdminPanelScreen from "@/screens/AdminPanelScreen";
 import BottomTabNavigator from "@/navigation/BottomTabNavigator";
 import CarrierListScreen from "@/screens/CarrierListScreen";
 import CarrierFormScreen from "@/screens/CarrierFormScreen";
@@ -58,14 +57,6 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-      ) : user.type === "admin" ? (
-        <Stack.Screen
-          name="AdminPanel"
-          component={AdminPanelScreen}
           options={{
             headerShown: false,
           }}

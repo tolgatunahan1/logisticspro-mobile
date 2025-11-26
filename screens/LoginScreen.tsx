@@ -14,58 +14,18 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { loginUser, loginAdmin } = useAuth();
   
-  const [mode, setMode] = useState<"login" | "register" | "admin" | "setup">("login");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const init = async () => {
-      await initializeDefaultAdmin();
-      await checkAdminExists();
-    };
-    init();
+    initializeDefaultAdmin();
   }, []);
 
-  const checkAdminExists = async () => {
-    try {
-      const admin = await getAdmin();
-      setMode(admin ? "login" : "setup");
-    } catch (error) {
-      setMode("login");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSetupAdmin = async () => {
-    setError("");
-    if (!username.trim() || !password.trim()) {
-      setError("Tüm alanlar gerekli");
-      return;
-    }
-    if (!validatePassword(password)) {
-      setError("Şifre: 8+ karakter, büyük harf ve rakam gerekli");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const success = await createAdmin(username, password);
-      if (success) {
-        setMode("login");
-        setUsername("");
-        setPassword("");
-        Alert.alert("Başarılı", "Admin hesabı oluşturuldu");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogin = async (isAdmin: boolean) => {
+  const handleLogin = async () => {
     setError("");
     if (!username.trim() || !password.trim()) {
       setError("Kullanıcı adı ve şifre gerekli");
@@ -74,19 +34,12 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      let success = false;
-      if (isAdmin) {
-        console.log("Admin login attempt:", username);
-        success = await loginAdmin(username, password);
-        console.log("Admin login result:", success);
-      } else {
-        console.log("User login attempt:", username);
-        success = await loginUser(username, password);
-        console.log("User login result:", success);
-      }
+      console.log("User login attempt:", username);
+      const success = await loginUser(username, password);
+      console.log("User login result:", success);
       
       if (!success) {
-        setError(isAdmin ? "Admin bilgileri yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
+        setError("Onaylanmamış kullanıcı veya yanlış şifre");
       }
     } catch (error) {
       console.error("Login error:", error);
