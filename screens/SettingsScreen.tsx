@@ -222,25 +222,13 @@ export default function SettingsScreen() {
           <View style={{ gap: Spacing.md }}>
             <Pressable
               onPress={async () => {
-                Alert.alert(
-                  "Verileri İndir",
-                  "Tüm verileriniz JSON dosyası olarak indirilecektir.",
-                  [
-                    { text: "İptal", style: "cancel" },
-                    {
-                      text: "İndir",
-                      onPress: async () => {
-                        try {
-                          const { exportAllData } = await import("@/utils/storage");
-                          const data = await exportAllData();
-                          Alert.alert("Başarılı", "Veriler cihazda kaydedildi:\n\n" + JSON.stringify(data).substring(0, 100) + "...");
-                        } catch (error) {
-                          Alert.alert("Hata", "Veriler indirilemedi");
-                        }
-                      },
-                    },
-                  ]
-                );
+                try {
+                  const { exportAllData } = await import("@/utils/storage");
+                  const data = await exportAllData();
+                  Alert.alert("Başarılı", "Veriler export edildi:\n\n" + JSON.stringify(data).substring(0, 100) + "...");
+                } catch (error) {
+                  Alert.alert("Hata", "Veriler indirilemedi");
+                }
               }}
               style={({ pressed }) => [
                 styles.addButton,
@@ -257,27 +245,14 @@ export default function SettingsScreen() {
             </Pressable>
 
             <Pressable
-              onPress={() => {
-                Alert.alert(
-                  "Tüm Verileri Sil",
-                  "Bu işlem geri alınamaz! Tüm nakliyeci, iş, IBAN ve cüzdan verileri silinecektir.",
-                  [
-                    { text: "İptal", style: "cancel" },
-                    {
-                      text: "Sil",
-                      style: "destructive",
-                      onPress: async () => {
-                        try {
-                          const { deleteAllData } = await import("@/utils/storage");
-                          await deleteAllData();
-                          Alert.alert("Başarılı", "Tüm veriler silindi");
-                        } catch (error) {
-                          Alert.alert("Hata", "Veriler silinirken hata oluştu");
-                        }
-                      },
-                    },
-                  ]
-                );
+              onPress={async () => {
+                try {
+                  const { deleteAllData } = await import("@/utils/storage");
+                  await deleteAllData();
+                  Alert.alert("Başarılı", "Tüm veriler silindi");
+                } catch (error) {
+                  Alert.alert("Hata", "Veriler silinirken hata oluştu");
+                }
               }}
               style={({ pressed }) => [
                 styles.addButton,
