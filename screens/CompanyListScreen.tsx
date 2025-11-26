@@ -39,6 +39,8 @@ export default function CompanyListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -128,51 +130,25 @@ export default function CompanyListScreen() {
   const filteredCompanies = searchCompanies(companies, searchQuery);
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
-    <Pressable
-      onPress={() => handleEditPress(item)}
-      style={({ pressed }) => [
+    <View
+      style={[
         styles.card,
         {
           backgroundColor: colors.backgroundDefault,
-          opacity: pressed ? 0.9 : 1,
         },
       ]}
     >
-      <View style={styles.cardContent}>
-        <View style={styles.cardMain}>
-          <ThemedText type="h4" style={styles.cardName}>
-            {item.name}
-          </ThemedText>
-          <View style={styles.phoneRow}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              {item.phone}
-            </ThemedText>
-            <View style={styles.contactButtons}>
-              <Pressable
-                onPress={() => handleCallPress(item.phone)}
-                style={({ pressed }) => [
-                  styles.contactButton,
-                  { backgroundColor: colors.success, opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <Feather name="phone" size={14} color="#FFFFFF" />
-              </Pressable>
-              <Pressable
-                onPress={() => handleWhatsAppPress(item.phone, item.name)}
-                style={({ pressed }) => [
-                  styles.contactButton,
-                  { backgroundColor: "#25D366", opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <Feather name="message-circle" size={14} color="#FFFFFF" />
-              </Pressable>
-            </View>
-          </View>
-          <View style={styles.cardDetails}>
-            <View style={styles.detailItem}>
-              <Feather name="user" size={14} color={colors.textSecondary} />
-              <ThemedText type="small" style={{ color: colors.textSecondary, marginLeft: Spacing.xs }}>
-                {item.contactPerson}
+      <Pressable
+        onPress={() => {
+          setSelectedCompany(item);
+          setShowDetailModal(true);
+        }}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.cardHeader}>
+          <View style={{ flex: 1 }}>
+            <ThemedText type="h4" numberOfLines={1}>
+              {item.name}
               </ThemedText>
             </View>
           </View>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -39,6 +39,8 @@ export default function CarrierListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -132,82 +134,38 @@ export default function CarrierListScreen() {
   const filteredCarriers = searchCarriers(carriers, searchQuery);
 
   const renderCarrierItem = ({ item }: { item: Carrier }) => (
-    <Pressable
-      onPress={() => handleEditPress(item)}
-      style={({ pressed }) => [
+    <View
+      style={[
         styles.card,
         {
           backgroundColor: colors.backgroundDefault,
-          opacity: pressed ? 0.9 : 1,
         },
       ]}
     >
-      <View style={styles.cardContent}>
-        <View style={styles.cardMain}>
-          <ThemedText type="h4" style={styles.cardName}>
-            {item.name}
-          </ThemedText>
-          <View style={styles.phoneRow}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              {item.phone}
+      <Pressable
+        onPress={() => {
+          setSelectedCarrier(item);
+          setShowDetailModal(true);
+        }}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.cardHeader}>
+          <View style={{ flex: 1 }}>
+            <ThemedText type="h4" numberOfLines={1}>
+              {item.name}
             </ThemedText>
-            <View style={styles.contactButtons}>
-              <Pressable
-                onPress={() => handleCallPress(item.phone)}
-                style={({ pressed }) => [
-                  styles.contactButton,
-                  { backgroundColor: colors.success, opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <Feather name="phone" size={14} color="#FFFFFF" />
-              </Pressable>
-              <Pressable
-                onPress={() => handleWhatsAppPress(item.phone, item.name)}
-                style={({ pressed }) => [
-                  styles.contactButton,
-                  { backgroundColor: "#25D366", opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <Feather name="message-circle" size={14} color="#FFFFFF" />
-              </Pressable>
-            </View>
           </View>
-          <View style={styles.cardDetails}>
-            <View style={styles.detailItem}>
-              <Feather name="truck" size={14} color={colors.textSecondary} />
-              <ThemedText type="small" style={{ color: colors.textSecondary, marginLeft: Spacing.xs }}>
-                {item.plate}
-              </ThemedText>
-            </View>
-            <View style={styles.detailItem}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                {getVehicleTypeLabel(item.vehicleType)}
-              </ThemedText>
-            </View>
+          <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
+            <Pressable
+              onPress={() => handleEditPress(item)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Feather name="edit" size={18} color={theme.link} />
+            </Pressable>
           </View>
         </View>
-        <View style={styles.cardActions}>
-          <Pressable
-            onPress={() => handleEditPress(item)}
-            style={({ pressed }) => [
-              styles.actionButton,
-              { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Feather name="edit-2" size={18} color={theme.link} />
-          </Pressable>
-          <Pressable
-            onPress={() => handleDeletePress(item)}
-            style={({ pressed }) => [
-              styles.actionButton,
-              { backgroundColor: colors.backgroundSecondary, opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Feather name="trash-2" size={18} color={colors.destructive} />
-          </Pressable>
-        </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 
   const renderEmptyState = () => (
@@ -279,6 +237,139 @@ export default function CarrierListScreen() {
         showsVerticalScrollIndicator={false}
       />
 
+      {/* Detail Modal */}
+      <Modal
+        visible={showDetailModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDetailModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Nakliyeci Detayları</ThemedText>
+              <Pressable onPress={() => setShowDetailModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            {/* Modal Body */}
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              {selectedCarrier && (
+                <View style={{ gap: Spacing.lg }}>
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Ad Soyad
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCarrier.name}</ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Telefon
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCarrier.phone}</ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Plaka
+                    </ThemedText>
+                    <ThemedText type="h4">{selectedCarrier.plate}</ThemedText>
+                  </View>
+
+                  <View style={styles.detailSection}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Araç Tipi
+                    </ThemedText>
+                    <ThemedText type="h4">{getVehicleTypeLabel(selectedCarrier.vehicleType)}</ThemedText>
+                  </View>
+
+                  {/* Action Buttons */}
+                  <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+                    <Pressable
+                      onPress={() => {
+                        setShowDetailModal(false);
+                        handleCallPress(selectedCarrier.phone);
+                      }}
+                      style={({ pressed }) => [
+                        styles.actionButtonLarge,
+                        { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1 },
+                      ]}
+                    >
+                      <Feather name="phone" size={18} color="#FFFFFF" />
+                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        Ara
+                      </ThemedText>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setShowDetailModal(false);
+                        handleWhatsAppPress(selectedCarrier.phone, selectedCarrier.name);
+                      }}
+                      style={({ pressed }) => [
+                        styles.actionButtonLarge,
+                        { backgroundColor: "#25D366", opacity: pressed ? 0.8 : 1 },
+                      ]}
+                    >
+                      <Feather name="message-circle" size={18} color="#FFFFFF" />
+                      <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                        WhatsApp
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Modal Footer - Edit and Delete Buttons */}
+            {selectedCarrier && (
+              <View style={{ flexDirection: "row", gap: Spacing.md }}>
+                <Pressable
+                  onPress={() => {
+                    setShowDetailModal(false);
+                    handleEditPress(selectedCarrier);
+                  }}
+                  style={({ pressed }) => [
+                    styles.editButton,
+                    {
+                      backgroundColor: theme.link,
+                      opacity: pressed ? 0.9 : 1,
+                      flex: 1,
+                    },
+                  ]}
+                >
+                  <Feather name="edit" size={20} color="#FFFFFF" />
+                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Düzenle
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setShowDetailModal(false);
+                    handleDeletePress(selectedCarrier);
+                  }}
+                  style={({ pressed }) => [
+                    styles.editButton,
+                    {
+                      backgroundColor: colors.destructive,
+                      opacity: pressed ? 0.9 : 1,
+                      flex: 1,
+                    },
+                  ]}
+                >
+                  <Feather name="trash-2" size={20} color="#FFFFFF" />
+                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Sil
+                  </ThemedText>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <Pressable
         onPress={handleAddPress}
         style={({ pressed }) => [
@@ -325,54 +416,52 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     padding: Spacing.lg,
   },
-  cardContent: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
   },
-  cardMain: {
+  modalOverlay: {
     flex: 1,
-    gap: Spacing.sm,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
-  cardName: {
-    marginBottom: Spacing.xs,
+  modalContent: {
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    paddingBottom: Spacing["3xl"],
+    maxHeight: "80%",
   },
-  phoneRow: {
+  modalHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingRight: Spacing.sm,
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(128, 128, 128, 0.2)",
   },
-  contactButtons: {
+  modalBody: {
+    padding: Spacing.lg,
+  },
+  detailSection: {
+    gap: Spacing.xs,
+  },
+  actionButtonLarge: {
     flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  contactButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-  },
-  cardDetails: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.lg,
-  },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardActions: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  actionButton: {
-    width: 36,
-    height: 36,
+    height: Spacing.buttonHeight,
     borderRadius: BorderRadius.xs,
+    gap: Spacing.sm,
+  },
+  editButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.xs,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
   },
   emptyState: {
     flex: 1,
