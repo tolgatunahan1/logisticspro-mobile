@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/ThemedView";
@@ -113,9 +113,24 @@ export default function LoginScreen() {
 
   const colors = isDark ? Colors.dark : Colors.light;
 
+  if (isLoading) {
+    return (
+      <ThemedView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color={theme.link} />
+      </ThemedView>
+    );
+  }
+
+  const getTitle = () => {
+    if (mode === "setup") return "Admin Hesabı Oluştur";
+    if (mode === "register") return "Kayıt Ol";
+    if (mode === "admin") return "Admin Girişi";
+    return "Giriş Yap";
+  };
+
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }]}>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Image
             source={require("../assets/images/icon.png")}
@@ -126,7 +141,7 @@ export default function LoginScreen() {
             LogisticsPRO
           </ThemedText>
           <ThemedText type="body" style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Devam etmek için giriş yapın
+            {getTitle()}
           </ThemedText>
         </View>
 
@@ -144,13 +159,13 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Kullanıcı adınızı girin"
+              placeholder="Kullanıcı adınız"
               placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
+              editable={!isLoading}
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!isLoading}
             />
           </View>
 
@@ -167,16 +182,42 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Şifrenizi girin"
+              placeholder="Şifre (8+ karakter, büyük harf, rakam)"
               placeholderTextColor={colors.textSecondary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              editable={!isLoading}
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!isLoading}
             />
           </View>
+
+          {(mode === "setup" || mode === "register") && (
+            <View style={styles.inputContainer}>
+              <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+                Şifre (Tekrar)
+              </ThemedText>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.border,
+                    color: theme.text,
+                  },
+                ]}
+                placeholder="Şifre tekrar"
+                placeholderTextColor={colors.textSecondary}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                editable={!isLoading}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+          )}
 
           {error ? (
             <ThemedText type="small" style={[styles.error, { color: colors.destructive }]}>
@@ -185,27 +226,82 @@ export default function LoginScreen() {
           ) : null}
 
           <Pressable
-            onPress={handleLogin}
+            onPress={() => {
+              if (mode === "setup") handleSetupAdmin();
+              else if (mode === "register") handleRegister();
+              else if (mode === "admin") handleLogin(true);
+              else handleLogin(false);
+            }}
             disabled={isLoading}
             style={({ pressed }) => [
               styles.button,
               {
                 backgroundColor: theme.link,
                 opacity: pressed || isLoading ? 0.8 : 1,
-                transform: [{ scale: pressed ? 0.98 : 1 }],
               },
             ]}
           >
             {isLoading ? (
-              <ActivityIndicator color={colors.buttonText} />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <ThemedText type="body" style={[styles.buttonText, { color: colors.buttonText }]}>
-                Giriş Yap
+              <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                {mode === "setup" ? "Admin Oluştur" : mode === "register" ? "Kayıt Ol" : "Giriş Yap"}
               </ThemedText>
             )}
           </Pressable>
+
+          {mode === "login" && (
+            <View style={{ gap: Spacing.md, marginTop: Spacing.lg }}>
+              <Pressable
+                onPress={() => {
+                  setMode("register");
+                  setError("");
+                  setUsername("");
+                  setPassword("");
+                  setConfirmPassword("");
+                }}
+                style={({ pressed }) => [styles.secondaryButton, { opacity: pressed ? 0.6 : 1 }]}
+              >
+                <ThemedText type="body" style={[styles.buttonText, { color: theme.link }]}>
+                  Kayıt Ol
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  setMode("admin");
+                  setError("");
+                  setUsername("");
+                  setPassword("");
+                  setConfirmPassword("");
+                }}
+                style={({ pressed }) => [styles.secondaryButton, { opacity: pressed ? 0.6 : 1 }]}
+              >
+                <ThemedText type="body" style={[styles.buttonText, { color: theme.link }]}>
+                  Admin Girişi
+                </ThemedText>
+              </Pressable>
+            </View>
+          )}
+
+          {mode !== "login" && (
+            <Pressable
+              onPress={() => {
+                setMode("login");
+                setError("");
+                setUsername("");
+                setPassword("");
+                setConfirmPassword("");
+              }}
+              style={{ marginTop: Spacing.lg }}
+            >
+              <ThemedText type="small" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>
+                Giriş Sayfasına Dön
+              </ThemedText>
+            </Pressable>
+          )}
         </View>
-      </View>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -213,10 +309,10 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: Spacing.xl,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
     justifyContent: "center",
   },
   header: {
@@ -260,6 +356,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: Spacing.sm,
+  },
+  secondaryButton: {
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.xs,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "transparent",
   },
   buttonText: {
     fontWeight: "600",
