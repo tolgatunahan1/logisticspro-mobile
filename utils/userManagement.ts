@@ -49,21 +49,6 @@ export const getUsers = async (): Promise<AppUser[]> => {
   }
 };
 
-export const getAllUsers = async (): Promise<{ pending: AppUser[]; approved: AppUser[]; total: number }> => {
-  try {
-    const users = await getUsers();
-    const pending = users.filter((u) => u.status === "pending");
-    const approved = users.filter((u) => u.status === "approved");
-    return {
-      pending,
-      approved,
-      total: users.length,
-    };
-  } catch (error) {
-    console.error("Failed to get all users:", error);
-    return { pending: [], approved: [], total: 0 };
-  }
-};
 
 export const getApprovedUsers = async (): Promise<AppUser[]> => {
   const users = await getUsers();

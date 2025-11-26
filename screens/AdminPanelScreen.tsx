@@ -8,33 +8,25 @@ import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getAllUsers, approveUser, rejectUser, AppUser } from "@/utils/userManagement";
-
-interface UserStats {
-  pending: AppUser[];
-  approved: AppUser[];
-  total: number;
-}
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, AppUser } from "@/utils/userManagement";
 
 export default function AdminPanelScreen() {
   const { theme, isDark } = useTheme();
   const { logout } = useAuth();
   const colors = isDark ? Colors.dark : Colors.light;
 
-  const [stats, setStats] = useState<UserStats>({
-    pending: [],
-    approved: [],
-    total: 0,
-  });
+  const [pendingUsers, setPendingUsers] = useState<AppUser[]>([]);
+  const [approvedUsers, setApprovedUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadUsers = useCallback(async () => {
     try {
-      const data = await getAllUsers();
-      setStats(data);
+      const pending = await getPendingUsers();
+      const approved = await getApprovedUsers();
+      setPendingUsers(pending);
+      setApprovedUsers(approved);
     } catch (error) {
       console.error("Failed to load users:", error);
-      Alert.alert("Hata", "Kullanıcılar yüklenemedi");
     }
   }, []);
 
@@ -60,11 +52,11 @@ export default function AdminPanelScreen() {
                 Alert.alert("Başarılı", `${user.username} onaylandı ve giriş yapabilir`);
                 await loadUsers();
               } else {
-                Alert.alert("Hata", "Onaylama başarısız oldu. Tekrar deneyin");
+                Alert.alert("Hata", "Onaylama başarısız oldu");
               }
             } catch (error) {
               console.error("Approve error:", error);
-              Alert.alert("Hata", "Onaylama sırasında hata: " + String(error).slice(0, 50));
+              Alert.alert("Hata", "Onaylama sırasında hata");
             } finally {
               setLoading(false);
             }
@@ -91,11 +83,11 @@ export default function AdminPanelScreen() {
                 Alert.alert("Başarılı", `${user.username} reddedildi`);
                 await loadUsers();
               } else {
-                Alert.alert("Hata", "Reddetme başarısız oldu");
+                Alert.alert("Hata", "Reddetme başarısız");
               }
             } catch (error) {
               console.error("Reject error:", error);
-              Alert.alert("Hata", "Reddetme sırasında hata oluştu");
+              Alert.alert("Hata", "Reddetme sırasında hata");
             } finally {
               setLoading(false);
             }
@@ -119,66 +111,29 @@ export default function AdminPanelScreen() {
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* İstatistikler */}
-        <View style={[styles.statsContainer, { backgroundColor: colors.backgroundDefault }]}>
-          <ThemedText type="h3" style={{ marginBottom: Spacing.lg }}>
-            Admin Paneli
+        <View style={[styles.header, { backgroundColor: colors.backgroundDefault }]}>
+          <ThemedText type="h3">Admin Paneli</ThemedText>
+          <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
+            Toplam: {pendingUsers.length + approvedUsers.length} | Bekleyen: {pendingUsers.length} | Onaylanmış: {approvedUsers.length}
           </ThemedText>
-
-          <View style={styles.statsGrid}>
-            <View style={[styles.statCard, { backgroundColor: colors.backgroundRoot }]}>
-              <View style={styles.statIcon}>
-                <Feather name="users" size={24} color={theme.link} />
-              </View>
-              <ThemedText type="body" style={{ fontWeight: "bold" }}>
-                {stats.total}
-              </ThemedText>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Toplam Kullanıcı
-              </ThemedText>
-            </View>
-
-            <View style={[styles.statCard, { backgroundColor: colors.backgroundRoot }]}>
-              <View style={styles.statIcon}>
-                <Feather name="clock" size={24} color="#FF9500" />
-              </View>
-              <ThemedText type="body" style={{ fontWeight: "bold" }}>
-                {stats.pending.length}
-              </ThemedText>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Onay Bekleyen
-              </ThemedText>
-            </View>
-
-            <View style={[styles.statCard, { backgroundColor: colors.backgroundRoot }]}>
-              <View style={styles.statIcon}>
-                <Feather name="check-circle" size={24} color={colors.success} />
-              </View>
-              <ThemedText type="body" style={{ fontWeight: "bold" }}>
-                {stats.approved.length}
-              </ThemedText>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Onaylanmış
-              </ThemedText>
-            </View>
-          </View>
         </View>
 
         {/* Onay Bekleyen Kullanıcılar */}
         <View>
-          <ThemedText type="h4" style={{ marginBottom: Spacing.md, marginTop: Spacing.lg }}>
-            ⏳ Onay Bekleyen ({stats.pending.length})
+          <ThemedText type="h4" style={{ marginBottom: Spacing.md, color: colors.textSecondary }}>
+            ⏳ Onay Bekleyen ({pendingUsers.length})
           </ThemedText>
 
-          {stats.pending.length === 0 ? (
+          {pendingUsers.length === 0 ? (
             <View style={[styles.emptyCard, { backgroundColor: colors.backgroundDefault }]}>
               <Feather name="inbox" size={32} color={colors.textSecondary} />
               <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
-                Bekleyen başvuru yok
+                Bekleyen kullanıcı yok
               </ThemedText>
             </View>
           ) : (
             <View style={{ gap: Spacing.md }}>
-              {stats.pending.map((user) => (
+              {pendingUsers.map((user) => (
                 <View key={user.id} style={[styles.userCard, { backgroundColor: colors.backgroundDefault }]}>
                   <View style={styles.userInfo}>
                     <ThemedText type="h4">{user.username}</ThemedText>
@@ -229,12 +184,12 @@ export default function AdminPanelScreen() {
         </View>
 
         {/* Onaylanmış Kullanıcılar */}
-        <View>
-          <ThemedText type="h4" style={{ marginBottom: Spacing.md, marginTop: Spacing.lg }}>
-            ✓ Onaylanmış ({stats.approved.length})
+        <View style={{ marginTop: Spacing["2xl"] }}>
+          <ThemedText type="h4" style={{ marginBottom: Spacing.md, color: colors.textSecondary }}>
+            ✓ Onaylanmış ({approvedUsers.length})
           </ThemedText>
 
-          {stats.approved.length === 0 ? (
+          {approvedUsers.length === 0 ? (
             <View style={[styles.emptyCard, { backgroundColor: colors.backgroundDefault }]}>
               <Feather name="smile" size={32} color={colors.textSecondary} />
               <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
@@ -243,7 +198,7 @@ export default function AdminPanelScreen() {
             </View>
           ) : (
             <View style={{ gap: Spacing.md }}>
-              {stats.approved.map((user) => (
+              {approvedUsers.map((user) => (
                 <View key={user.id} style={[styles.approvedCard, { backgroundColor: colors.backgroundDefault, borderColor: colors.success }]}>
                   <View style={{ flex: 1 }}>
                     <ThemedText type="h4">{user.username}</ThemedText>
@@ -292,24 +247,9 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     gap: Spacing.lg,
   },
-  statsContainer: {
+  header: {
     padding: Spacing.lg,
     borderRadius: BorderRadius.sm,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    justifyContent: "space-between",
-  },
-  statCard: {
-    flex: 1,
-    alignItems: "center",
-    padding: Spacing.md,
-    borderRadius: BorderRadius.sm,
-    gap: Spacing.sm,
-  },
-  statIcon: {
-    marginBottom: Spacing.xs,
   },
   emptyCard: {
     alignItems: "center",
