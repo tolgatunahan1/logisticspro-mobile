@@ -317,32 +317,32 @@ export default function AdminPanelScreen() {
             </View>
           )}
         </View>
-
-        {/* Çıkış Butonu */}
-        <Pressable
-          onPress={async () => {
-            console.log("🔴 LOGOUT CLICKED");
-            await logout();
-            console.log("🟢 LOGOUT DONE");
-            if (typeof window !== 'undefined') {
-              console.log("🟡 RELOADING PAGE");
-              window.location.reload();
-            }
-          }}
-          style={({ pressed }) => [
-            styles.logoutButton,
-            {
-              backgroundColor: colors.destructive,
-              opacity: pressed ? 0.8 : 1,
-            },
-          ]}
-        >
-          <Feather name="log-out" size={18} color="#FFFFFF" />
-          <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-            Çıkış Yap
-          </ThemedText>
-        </Pressable>
       </ScrollView>
+
+      {/* Çıkış Butonu - Outside ScrollView */}
+      <Pressable
+        onPress={async () => {
+          console.log("🔴 LOGOUT CLICKED");
+          await logout();
+          console.log("🟢 LOGOUT DONE");
+          if (typeof window !== 'undefined') {
+            console.log("🟡 RELOADING PAGE");
+            window.location.reload();
+          }
+        }}
+        style={({ pressed }) => [
+          styles.logoutButtonFixed,
+          {
+            backgroundColor: colors.destructive,
+            opacity: pressed ? 0.8 : 1,
+          },
+        ]}
+      >
+        <Feather name="log-out" size={18} color="#FFFFFF" />
+        <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+          Çıkış Yap
+        </ThemedText>
+      </Pressable>
 
       {/* Confirmation Dialog Modal */}
       <Modal
@@ -478,6 +478,16 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     marginTop: Spacing["2xl"],
     marginBottom: Spacing["2xl"],
+  },
+  logoutButtonFixed: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.sm,
+    margin: Spacing.xl,
   },
   modalOverlay: {
     flex: 1,
