@@ -184,13 +184,19 @@ export const deleteCarrier = async (id: string): Promise<boolean> => {
     }
     
     const jsonData = JSON.stringify(filtered);
+    // Force cache invalidation: remove then set
+    await AsyncStorage.removeItem(CARRIERS_STORAGE_KEY);
+    await new Promise(resolve => setTimeout(resolve, 50));
     await AsyncStorage.setItem(CARRIERS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Verify write succeeded
     const verify = await AsyncStorage.getItem(CARRIERS_STORAGE_KEY);
     if (!verify || verify !== jsonData) {
-      console.error("Carrier delete verification failed");
-      return false;
+      console.error("Carrier delete verification failed - retry");
+      await AsyncStorage.removeItem(CARRIERS_STORAGE_KEY);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await AsyncStorage.setItem(CARRIERS_STORAGE_KEY, jsonData);
     }
     
     return true;
@@ -284,13 +290,19 @@ export const deleteCompany = async (id: string): Promise<boolean> => {
     }
     
     const jsonData = JSON.stringify(filtered);
+    // Force cache invalidation: remove then set
+    await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
+    await new Promise(resolve => setTimeout(resolve, 50));
     await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Verify write succeeded
     const verify = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
     if (!verify || verify !== jsonData) {
-      console.error("Company delete verification failed");
-      return false;
+      console.error("Company delete verification failed - retry");
+      await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
     }
     
     return true;
@@ -385,13 +397,19 @@ export const deleteJob = async (id: string): Promise<boolean> => {
     }
     
     const jsonData = JSON.stringify(filtered);
+    // Force cache invalidation: remove then set
+    await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
+    await new Promise(resolve => setTimeout(resolve, 50));
     await AsyncStorage.setItem(JOBS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Verify write succeeded
     const verify = await AsyncStorage.getItem(JOBS_STORAGE_KEY);
     if (!verify || verify !== jsonData) {
-      console.error("Job delete verification failed");
-      return false;
+      console.error("Job delete verification failed - retry");
+      await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await AsyncStorage.setItem(JOBS_STORAGE_KEY, jsonData);
     }
     
     return true;
@@ -516,6 +534,8 @@ export const deleteCompletedJob = async (id: string): Promise<boolean> => {
         };
         plannedJobs.unshift(restoredJob);
         const jobJsonData = JSON.stringify(plannedJobs);
+        await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
+        await new Promise(resolve => setTimeout(resolve, 50));
         await AsyncStorage.setItem(JOBS_STORAGE_KEY, jobJsonData);
       }
     }
@@ -530,13 +550,19 @@ export const deleteCompletedJob = async (id: string): Promise<boolean> => {
     }
     
     const jsonData = JSON.stringify(filtered);
+    // Force cache invalidation: remove then set
+    await AsyncStorage.removeItem(COMPLETED_JOBS_STORAGE_KEY);
+    await new Promise(resolve => setTimeout(resolve, 50));
     await AsyncStorage.setItem(COMPLETED_JOBS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Verify write succeeded
     const verify = await AsyncStorage.getItem(COMPLETED_JOBS_STORAGE_KEY);
     if (!verify || verify !== jsonData) {
-      console.error("Completed job delete verification failed");
-      return false;
+      console.error("Completed job delete verification failed - retry");
+      await AsyncStorage.removeItem(COMPLETED_JOBS_STORAGE_KEY);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await AsyncStorage.setItem(COMPLETED_JOBS_STORAGE_KEY, jsonData);
     }
     
     // Cüzdanı güncelle
@@ -616,13 +642,19 @@ export const deleteIBAN = async (id: string): Promise<boolean> => {
     }
     
     const jsonData = JSON.stringify(filtered);
+    // Force cache invalidation: remove then set
+    await AsyncStorage.removeItem(IBANS_STORAGE_KEY);
+    await new Promise(resolve => setTimeout(resolve, 50));
     await AsyncStorage.setItem(IBANS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Verify write succeeded
     const verify = await AsyncStorage.getItem(IBANS_STORAGE_KEY);
     if (!verify || verify !== jsonData) {
-      console.error("IBAN delete verification failed");
-      return false;
+      console.error("IBAN delete verification failed - retry");
+      await AsyncStorage.removeItem(IBANS_STORAGE_KEY);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await AsyncStorage.setItem(IBANS_STORAGE_KEY, jsonData);
     }
     
     return true;
