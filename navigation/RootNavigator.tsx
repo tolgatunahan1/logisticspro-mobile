@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import BottomTabNavigator from "./BottomTabNavigator";
 import LoginScreen from "../screens/LoginScreen";
+import SignupScreen from "../screens/SignupScreen";
+import AdminDashboard from "../screens/AdminDashboard";
 import CarrierListScreen from "../screens/CarrierListScreen";
 import CarrierFormScreen from "../screens/CarrierFormScreen";
 import CompanyListScreen from "../screens/CompanyListScreen";
@@ -21,6 +23,8 @@ import { Carrier, Company, PlannedJob, CompletedJob } from "../utils/storage";
 
 export type RootStackParamList = {
   Login: undefined;
+  Signup: undefined;
+  AdminDashboard: undefined;
   MainTabs: undefined;
   CarrierList: undefined;
   CarrierForm: { carrier?: Carrier; mode: "add" | "edit"; initialData?: { name?: string; phone?: string; vehicleType?: string } };
@@ -54,13 +58,32 @@ export default function RootNavigator() {
       }}
     >
       {!user ? (
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
+        <>
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="Signup"
+            component={SignupScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </>
+      ) : user.type === "admin" ? (
+        <>
+          <Stack.Screen
+            name="AdminDashboard"
+            component={AdminDashboard}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </>
       ) : (
         <>
           <Stack.Screen

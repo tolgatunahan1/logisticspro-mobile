@@ -9,10 +9,17 @@ import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { initializeDefaultAdmin } from "../utils/userManagement";
 
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/RootNavigator";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
+
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { loginUser } = useAuth();
+  const navigation = useNavigation<NavigationProp>();
   
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -47,6 +54,11 @@ export default function LoginScreen() {
 
   const colors = isDark ? Colors.dark : Colors.light;
 
+  const handleSignup = () => {
+    // Navigate to Signup screen
+    const navigation = require("@react-navigation/native").useNavigation();
+    navigation.navigate("Signup");
+  };
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }]}>
@@ -138,6 +150,17 @@ export default function LoginScreen() {
               </ThemedText>
             )}
           </Pressable>
+
+          <View style={styles.signupLink}>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Hesabın yok mu?{" "}
+            </ThemedText>
+            <Pressable onPress={() => navigation.navigate("Signup")}>
+              <ThemedText type="small" style={{ color: theme.link, fontWeight: "600" }}>
+                Kayıt Ol
+              </ThemedText>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </ThemedView>
@@ -197,5 +220,12 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: "600",
+  },
+  signupLink: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.xs,
+    marginTop: Spacing.lg,
   },
 });
