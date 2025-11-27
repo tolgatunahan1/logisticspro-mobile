@@ -464,27 +464,35 @@ export default function JobListScreen() {
                   onPress={async () => {
                     if (!jobToDelete) return;
                     setIsDeleting(true);
-                    setJobs([]);
+                    // STEP 1: Immediately remove from UI
+                    const beforeDelete = jobs.filter(j => j.id !== jobToDelete.id);
+                    setJobs(beforeDelete);
+                    setShowDeleteConfirm(false);
+                    setShowDetailModal(false);
+                    
                     try {
-                      const result = await deleteJob(jobToDelete.id);
-                      if (!result) {
-                        setIsDeleting(false);
-                        await loadData();
-                        Alert.alert("Hata", "İş silinirken hata oluştu. Lütfen tekrar deneyin.");
-                        return;
+                      // STEP 2: Delete from storage
+                      const delResult = await deleteJob(jobToDelete.id);
+                      
+                      // STEP 3: Multi-attempt fresh read
+                      let finalData = beforeDelete;
+                      for (let attempt = 0; attempt < 3; attempt++) {
+                        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+                        const fresh = await getJobs();
+                        const stillExists = fresh.some(j => j.id === jobToDelete.id);
+                        if (!stillExists) {
+                          finalData = fresh;
+                          break;
+                        }
                       }
-                      await new Promise(resolve => setTimeout(resolve, 150));
-                      setShowDeleteConfirm(false);
-                      const freshJobs = await getJobs();
-                      setJobs(freshJobs);
-                      await new Promise(resolve => setTimeout(resolve, 50));
-                      setShowDetailModal(false);
-                      setIsDeleting(false);
+                      
+                      setJobs(finalData);
                     } catch (error) {
                       console.error("Delete error:", error);
-                      setIsDeleting(false);
                       await loadData();
                       Alert.alert("Hata", "İş silinirken hata oluştu");
+                    } finally {
+                      setIsDeleting(false);
                     }
                   }}
                   disabled={isDeleting}

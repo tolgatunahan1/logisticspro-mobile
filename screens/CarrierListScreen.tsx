@@ -88,28 +88,36 @@ export default function CarrierListScreen() {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
+            setIsDeleting(true);
+            // STEP 1: Immediately remove from UI
+            const beforeDelete = carriers.filter(c => c.id !== carrier.id);
+            setCarriers(beforeDelete);
+            setShowDetailModal(false);
+            setSelectedCarrier(null);
+            
             try {
-              setIsDeleting(true);
-              setCarriers([]);
-              const result = await deleteCarrier(carrier.id);
-              if (!result) {
-                setIsDeleting(false);
-                await loadCarriers();
-                Alert.alert("Hata", "Nakliyeci silinirken hata oluştu. Lütfen tekrar deneyin.");
-                return;
+              // STEP 2: Delete from storage
+              const delResult = await deleteCarrier(carrier.id);
+              
+              // STEP 3: Multi-attempt fresh read
+              let finalData = beforeDelete;
+              for (let attempt = 0; attempt < 3; attempt++) {
+                await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+                const fresh = await getCarriers();
+                const stillExists = fresh.some(c => c.id === carrier.id);
+                if (!stillExists) {
+                  finalData = fresh;
+                  break;
+                }
               }
-              await new Promise(resolve => setTimeout(resolve, 150));
-              const fresh = await getCarriers();
-              setCarriers(fresh);
-              await new Promise(resolve => setTimeout(resolve, 50));
-              setShowDetailModal(false);
-              setSelectedCarrier(null);
-              setIsDeleting(false);
+              
+              setCarriers(finalData);
             } catch (error) {
               console.error("Silme hatası:", error);
-              setIsDeleting(false);
               await loadCarriers();
               Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
+            } finally {
+              setIsDeleting(false);
             }
           },
         },

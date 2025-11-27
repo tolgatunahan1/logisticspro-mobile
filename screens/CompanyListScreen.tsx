@@ -88,28 +88,36 @@ export default function CompanyListScreen() {
           text: "Sil",
           style: "destructive",
           onPress: async () => {
+            setIsDeleting(true);
+            // STEP 1: Immediately remove from UI
+            const beforeDelete = companies.filter(c => c.id !== company.id);
+            setCompanies(beforeDelete);
+            setShowDetailModal(false);
+            setSelectedCompany(null);
+            
             try {
-              setIsDeleting(true);
-              setCompanies([]);
-              const result = await deleteCompany(company.id);
-              if (!result) {
-                setIsDeleting(false);
-                await loadCompanies();
-                Alert.alert("Hata", "Firma silinirken hata oluştu. Lütfen tekrar deneyin.");
-                return;
+              // STEP 2: Delete from storage
+              const delResult = await deleteCompany(company.id);
+              
+              // STEP 3: Multi-attempt fresh read
+              let finalData = beforeDelete;
+              for (let attempt = 0; attempt < 3; attempt++) {
+                await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+                const fresh = await getCompanies();
+                const stillExists = fresh.some(c => c.id === company.id);
+                if (!stillExists) {
+                  finalData = fresh;
+                  break;
+                }
               }
-              await new Promise(resolve => setTimeout(resolve, 150));
-              const fresh = await getCompanies();
-              setCompanies(fresh);
-              await new Promise(resolve => setTimeout(resolve, 50));
-              setShowDetailModal(false);
-              setSelectedCompany(null);
-              setIsDeleting(false);
+              
+              setCompanies(finalData);
             } catch (error) {
               console.error("Silme hatası:", error);
-              setIsDeleting(false);
               await loadCompanies();
               Alert.alert("Hata", "Firma silinirken hata oluştu");
+            } finally {
+              setIsDeleting(false);
             }
           },
         },

@@ -76,17 +76,27 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteIBAN = async (id: string) => {
+    // STEP 1: Immediately remove from UI
+    const beforeDelete = ibans.filter(i => i.id !== id);
+    setIbans(beforeDelete);
+    
     try {
-      setIbans([]);
-      const result = await deleteIBAN(id);
-      if (!result) {
-        await loadIBANs();
-        Alert.alert("Hata", "IBAN silinirken hata oluştu");
-        return;
+      // STEP 2: Delete from storage
+      const delResult = await deleteIBAN(id);
+      
+      // STEP 3: Multi-attempt fresh read
+      let finalData = beforeDelete;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+        const fresh = await getIBANs();
+        const stillExists = fresh.some(i => i.id === id);
+        if (!stillExists) {
+          finalData = fresh;
+          break;
+        }
       }
-      await new Promise(resolve => setTimeout(resolve, 150));
-      const fresh = await getIBANs();
-      setIbans(fresh);
+      
+      setIbans(finalData);
     } catch (error) {
       console.error("Delete IBAN error:", error);
       await loadIBANs();
