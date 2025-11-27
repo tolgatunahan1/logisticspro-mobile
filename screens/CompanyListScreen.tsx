@@ -90,20 +90,25 @@ export default function CompanyListScreen() {
           onPress: async () => {
             try {
               setIsDeleting(true);
+              setCompanies([]);
               const result = await deleteCompany(company.id);
               if (!result) {
                 setIsDeleting(false);
+                await loadCompanies();
                 Alert.alert("Hata", "Firma silinirken hata oluştu. Lütfen tekrar deneyin.");
                 return;
               }
-              await new Promise(resolve => setTimeout(resolve, 100));
-              await loadCompanies();
-              await new Promise(resolve => setTimeout(resolve, 100));
+              await new Promise(resolve => setTimeout(resolve, 150));
+              const fresh = await getCompanies();
+              setCompanies(fresh);
+              await new Promise(resolve => setTimeout(resolve, 50));
               setShowDetailModal(false);
+              setSelectedCompany(null);
               setIsDeleting(false);
             } catch (error) {
               console.error("Silme hatası:", error);
               setIsDeleting(false);
+              await loadCompanies();
               Alert.alert("Hata", "Firma silinirken hata oluştu");
             }
           },

@@ -77,14 +77,19 @@ export default function SettingsScreen() {
 
   const handleDeleteIBAN = async (id: string) => {
     try {
+      setIbans([]);
       const result = await deleteIBAN(id);
       if (!result) {
+        await loadIBANs();
         Alert.alert("Hata", "IBAN silinirken hata oluştu");
         return;
       }
-      await loadIBANs();
+      await new Promise(resolve => setTimeout(resolve, 150));
+      const fresh = await getIBANs();
+      setIbans(fresh);
     } catch (error) {
       console.error("Delete IBAN error:", error);
+      await loadIBANs();
       Alert.alert("Hata", "IBAN silinirken hata oluştu");
     }
   };

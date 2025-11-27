@@ -90,20 +90,25 @@ export default function CarrierListScreen() {
           onPress: async () => {
             try {
               setIsDeleting(true);
+              setCarriers([]);
               const result = await deleteCarrier(carrier.id);
               if (!result) {
                 setIsDeleting(false);
+                await loadCarriers();
                 Alert.alert("Hata", "Nakliyeci silinirken hata oluştu. Lütfen tekrar deneyin.");
                 return;
               }
-              await new Promise(resolve => setTimeout(resolve, 100));
-              await loadCarriers();
-              await new Promise(resolve => setTimeout(resolve, 100));
+              await new Promise(resolve => setTimeout(resolve, 150));
+              const fresh = await getCarriers();
+              setCarriers(fresh);
+              await new Promise(resolve => setTimeout(resolve, 50));
               setShowDetailModal(false);
+              setSelectedCarrier(null);
               setIsDeleting(false);
             } catch (error) {
               console.error("Silme hatası:", error);
               setIsDeleting(false);
+              await loadCarriers();
               Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
             }
           },

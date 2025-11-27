@@ -464,22 +464,26 @@ export default function JobListScreen() {
                   onPress={async () => {
                     if (!jobToDelete) return;
                     setIsDeleting(true);
+                    setJobs([]);
                     try {
                       const result = await deleteJob(jobToDelete.id);
                       if (!result) {
                         setIsDeleting(false);
+                        await loadData();
                         Alert.alert("Hata", "İş silinirken hata oluştu. Lütfen tekrar deneyin.");
                         return;
                       }
-                      await new Promise(resolve => setTimeout(resolve, 100));
+                      await new Promise(resolve => setTimeout(resolve, 150));
                       setShowDeleteConfirm(false);
-                      await new Promise(resolve => setTimeout(resolve, 100));
-                      await loadData();
+                      const freshJobs = await getJobs();
+                      setJobs(freshJobs);
+                      await new Promise(resolve => setTimeout(resolve, 50));
                       setShowDetailModal(false);
                       setIsDeleting(false);
                     } catch (error) {
                       console.error("Delete error:", error);
                       setIsDeleting(false);
+                      await loadData();
                       Alert.alert("Hata", "İş silinirken hata oluştu");
                     }
                   }}
