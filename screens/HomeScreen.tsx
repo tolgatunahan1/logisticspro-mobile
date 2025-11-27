@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Modal, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Modal, ScrollView, Dimensions } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -66,7 +66,7 @@ export default function HomeScreen() {
             { opacity: pressed ? 0.6 : 1 },
           ]}
         >
-          <Feather name="menu" size={22} color={theme.text} />
+          <Feather name="menu" size={24} color={theme.text} />
         </Pressable>
       ),
       headerRight: () => (
@@ -77,7 +77,7 @@ export default function HomeScreen() {
             { opacity: pressed ? 0.6 : 1 },
           ]}
         >
-          <Feather name="settings" size={22} color={theme.text} />
+          <Feather name="settings" size={24} color={theme.text} />
         </Pressable>
       ),
     });
@@ -88,236 +88,280 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: headerHeight + Spacing.xl, paddingBottom: Spacing.xl },
+          { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.xl + 100 },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Animated Map Hero */}
+        {/* Hero Section */}
         <View style={styles.heroSection}>
-          <AnimatedMap />
-          <ThemedText type="h2" style={styles.heroTitle}>
-            Nakliye Yönetimine Hoşgeldiniz
-          </ThemedText>
-          <ThemedText
-            type="body"
-            style={[styles.heroSubtitle, { color: colors.textSecondary }]}
-          >
-            Tüm sevkiyatlarınızı ve taşıyıcılarınızı kolayca yönetin
-          </ThemedText>
-        </View>
-
-        {/* Stats Cards - Row 1 */}
-        <View style={styles.statsContainer}>
-          <View
-            style={[
-              styles.statCard,
-              {
-                backgroundColor: colors.backgroundDefault,
-                borderLeftColor: theme.link,
-              },
-            ]}
-          >
-            <Feather name="truck" size={24} color={theme.link} />
-            <View style={styles.statContent}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Taşıyıcı
-              </ThemedText>
-              <ThemedText type="h3">{carrierCount}</ThemedText>
-            </View>
-          </View>
-
-          <View
-            style={[
-              styles.statCard,
-              {
-                backgroundColor: colors.backgroundDefault,
-                borderLeftColor: colors.success,
-              },
-            ]}
-          >
-            <Feather name="briefcase" size={24} color={colors.success} />
-            <View style={styles.statContent}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Firma
-              </ThemedText>
-              <ThemedText type="h3">{companyCount}</ThemedText>
-            </View>
+          <View style={[styles.heroBg, { backgroundColor: theme.link + "15" }]}>
+            <AnimatedMap />
+            <ThemedText type="h2" style={styles.heroTitle}>
+              Nakliye Yönetimine Hoşgeldiniz
+            </ThemedText>
+            <ThemedText
+              type="body"
+              style={[styles.heroSubtitle, { color: colors.textSecondary }]}
+            >
+              Tüm sevkiyatlarınızı ve taşıyıcılarınızı kolayca yönetin
+            </ThemedText>
           </View>
         </View>
 
-        {/* Stats Cards - Row 2 */}
-        <View style={styles.statsContainer}>
+        {/* Stats Grid - 2x2 Modern Design */}
+        <View style={styles.statsGrid}>
+          {/* Taşıyıcılar */}
           <View
             style={[
               styles.statCard,
               {
-                backgroundColor: colors.backgroundDefault,
-                borderLeftColor: colors.warning,
+                backgroundColor: theme.link + "10",
+                borderColor: theme.link,
               },
             ]}
           >
-            <Feather name="calendar" size={24} color={colors.warning} />
-            <View style={styles.statContent}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Planlanan
-              </ThemedText>
-              <ThemedText type="h3">{jobCount}</ThemedText>
+            <View
+              style={[
+                styles.statIconContainer,
+                { backgroundColor: theme.link + "20" },
+              ]}
+            >
+              <Feather name="truck" size={28} color={theme.link} />
             </View>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Taşıyıcı
+            </ThemedText>
+            <ThemedText type="h2" style={{ fontWeight: "700" }}>
+              {carrierCount}
+            </ThemedText>
           </View>
 
+          {/* Firmalar */}
           <View
             style={[
               styles.statCard,
               {
-                backgroundColor: colors.backgroundDefault,
-                borderLeftColor: colors.success,
+                backgroundColor: colors.success + "10",
+                borderColor: colors.success,
               },
             ]}
           >
-            <Feather name="check-circle" size={24} color={colors.success} />
-            <View style={styles.statContent}>
-              <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Tamamlanan
-              </ThemedText>
-              <ThemedText type="h3">{completedJobCount}</ThemedText>
+            <View
+              style={[
+                styles.statIconContainer,
+                { backgroundColor: colors.success + "20" },
+              ]}
+            >
+              <Feather name="briefcase" size={28} color={colors.success} />
             </View>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Firma
+            </ThemedText>
+            <ThemedText type="h2" style={{ fontWeight: "700" }}>
+              {companyCount}
+            </ThemedText>
+          </View>
+
+          {/* Sefer Programı */}
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: colors.warning + "10",
+                borderColor: colors.warning,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.statIconContainer,
+                { backgroundColor: colors.warning + "20" },
+              ]}
+            >
+              <Feather name="calendar" size={28} color={colors.warning} />
+            </View>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Sefer Programı
+            </ThemedText>
+            <ThemedText type="h2" style={{ fontWeight: "700" }}>
+              {jobCount}
+            </ThemedText>
+          </View>
+
+          {/* Tamamlanan Seferler */}
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: colors.success + "10",
+                borderColor: colors.success,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.statIconContainer,
+                { backgroundColor: colors.success + "20" },
+              ]}
+            >
+              <Feather name="check-circle" size={28} color={colors.success} />
+            </View>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Tamamlanan
+            </ThemedText>
+            <ThemedText type="h2" style={{ fontWeight: "700" }}>
+              {completedJobCount}
+            </ThemedText>
           </View>
         </View>
 
-        {/* Menu Cards */}
-        <ThemedText type="h4" style={[styles.sectionHeader, { color: colors.textSecondary }]}>
+        {/* Quick Access Section */}
+        <ThemedText
+          type="h4"
+          style={[styles.sectionHeader, { color: colors.text, marginTop: Spacing.xl }]}
+        >
           Hızlı Erişim
         </ThemedText>
 
-        <Pressable
-          onPress={() => navigation.navigate("CarrierList")}
-          style={({ pressed }) => [
-            styles.menuCard,
-            {
-              backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: theme.link, borderRadius: 16 },
+        {/* Menu Cards - Modern Stack */}
+        <View style={styles.menuStack}>
+          <Pressable
+            onPress={() => navigation.navigate("CarrierList")}
+            style={({ pressed }) => [
+              styles.modernMenuCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+                borderTopColor: theme.link,
+              },
             ]}
           >
-            <Feather name="truck" size={32} color="#FFFFFF" />
-          </View>
-          <View style={styles.menuCardContent}>
-            <ThemedText type="h3">Nakliyeciler</ThemedText>
-            <ThemedText type="body" style={{ color: colors.textSecondary }}>
-              {carrierCount} kayıt
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+            <View style={styles.menuCardRow}>
+              <View
+                style={[
+                  styles.modernIconContainer,
+                  { backgroundColor: theme.link + "15" },
+                ]}
+              >
+                <Feather name="truck" size={24} color={theme.link} />
+              </View>
+              <View style={styles.modernMenuContent}>
+                <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                  Nakliyeciler
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  {carrierCount} kayıt
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+            </View>
+          </Pressable>
 
-        <Pressable
-          onPress={() => navigation.navigate("CompanyList")}
-          style={({ pressed }) => [
-            styles.menuCard,
-            {
-              backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-              borderRadius: 0,
-              marginTop: 0,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: colors.success, borderRadius: 16 },
+          <Pressable
+            onPress={() => navigation.navigate("CompanyList")}
+            style={({ pressed }) => [
+              styles.modernMenuCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+                borderTopColor: colors.success,
+              },
             ]}
           >
-            <Feather name="briefcase" size={32} color="#FFFFFF" />
-          </View>
-          <View style={styles.menuCardContent}>
-            <ThemedText type="h3">Firmalar</ThemedText>
-            <ThemedText type="body" style={{ color: colors.textSecondary }}>
-              {companyCount} kayıt
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+            <View style={styles.menuCardRow}>
+              <View
+                style={[
+                  styles.modernIconContainer,
+                  { backgroundColor: colors.success + "15" },
+                ]}
+              >
+                <Feather name="briefcase" size={24} color={colors.success} />
+              </View>
+              <View style={styles.modernMenuContent}>
+                <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                  Firmalar
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  {companyCount} kayıt
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+            </View>
+          </Pressable>
 
-        <Pressable
-          onPress={() => navigation.navigate("JobList")}
-          style={({ pressed }) => [
-            styles.menuCard,
-            {
-              backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-              borderRadius: 0,
-              marginTop: 0,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: colors.warning, borderRadius: 16 },
+          <Pressable
+            onPress={() => navigation.navigate("JobList")}
+            style={({ pressed }) => [
+              styles.modernMenuCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+                borderTopColor: colors.warning,
+              },
             ]}
           >
-            <Feather name="calendar" size={32} color="#FFFFFF" />
-          </View>
-          <View style={styles.menuCardContent}>
-            <ThemedText type="h3">Yeni Sefer Programı</ThemedText>
-            <ThemedText type="body" style={{ color: colors.textSecondary }}>
-              {jobCount} sefer
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+            <View style={styles.menuCardRow}>
+              <View
+                style={[
+                  styles.modernIconContainer,
+                  { backgroundColor: colors.warning + "15" },
+                ]}
+              >
+                <Feather name="calendar" size={24} color={colors.warning} />
+              </View>
+              <View style={styles.modernMenuContent}>
+                <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                  Yeni Sefer Programı
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  {jobCount} sefer
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+            </View>
+          </Pressable>
 
-        <Pressable
-          onPress={() => navigation.navigate("CompletedJobList")}
-          style={({ pressed }) => [
-            styles.menuCard,
-            {
-              backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-              borderRadius: 0,
-              marginTop: 0,
-              borderBottomLeftRadius: 20,
-              borderBottomRightRadius: 20,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.iconContainer,
-              { backgroundColor: colors.success, borderRadius: 16 },
+          <Pressable
+            onPress={() => navigation.navigate("CompletedJobList")}
+            style={({ pressed }) => [
+              styles.modernMenuCard,
+              {
+                backgroundColor: colors.backgroundDefault,
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+                borderTopColor: colors.success,
+                borderBottomLeftRadius: BorderRadius.xl,
+                borderBottomRightRadius: BorderRadius.xl,
+              },
             ]}
           >
-            <Feather name="check-circle" size={32} color="#FFFFFF" />
-          </View>
-          <View style={styles.menuCardContent}>
-            <ThemedText type="h3">Gerçekleşen Seferler</ThemedText>
-            <ThemedText type="body" style={{ color: colors.textSecondary }}>
-              {completedJobCount} sefer
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+            <View style={styles.menuCardRow}>
+              <View
+                style={[
+                  styles.modernIconContainer,
+                  { backgroundColor: colors.success + "15" },
+                ]}
+              >
+                <Feather name="check-circle" size={24} color={colors.success} />
+              </View>
+              <View style={styles.modernMenuContent}>
+                <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                  Gerçekleşen Seferler
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  {completedJobCount} sefer
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+            </View>
+          </Pressable>
+        </View>
       </ScrollView>
 
+      {/* Drawer Menu */}
       <Modal
         visible={drawerVisible}
         animationType="slide"
@@ -386,11 +430,11 @@ export default function HomeScreen() {
                   { opacity: pressed ? 0.7 : 1 },
                 ]}
               >
-                <Feather name="calendar" size={20} color={Colors.light.warning} />
+                <Feather name="calendar" size={20} color={colors.warning} />
                 <View style={{ flex: 1 }}>
-                  <ThemedText type="body">Planlanan İşler</ThemedText>
+                  <ThemedText type="body">Yeni Sefer Programı</ThemedText>
                   <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                    {jobCount} iş
+                    {jobCount} sefer
                   </ThemedText>
                 </View>
               </Pressable>
@@ -407,9 +451,9 @@ export default function HomeScreen() {
               >
                 <Feather name="check-circle" size={20} color={colors.success} />
                 <View style={{ flex: 1 }}>
-                  <ThemedText type="body">Gerçekleşen İşler</ThemedText>
+                  <ThemedText type="body">Gerçekleşen Seferler</ThemedText>
                   <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                    {completedJobCount} iş
+                    {completedJobCount} sefer
                   </ThemedText>
                 </View>
               </Pressable>
@@ -430,54 +474,76 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   heroSection: {
-    alignItems: "center",
     marginBottom: Spacing.lg,
+    gap: Spacing.md,
+  },
+  heroBg: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    alignItems: "center",
     gap: Spacing.md,
   },
   heroTitle: {
     textAlign: "center",
+    fontSize: 28,
+    fontWeight: "700",
   },
   heroSubtitle: {
     textAlign: "center",
     marginHorizontal: Spacing.lg,
+    fontSize: 14,
   },
-  statsContainer: {
+  statsGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: Spacing.md,
     marginBottom: Spacing.lg,
   },
   statCard: {
-    flex: 1,
-    flexDirection: "row",
+    width: "48%",
     alignItems: "center",
     padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderLeftWidth: 4,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
     gap: Spacing.md,
+    justifyContent: "center",
   },
-  statContent: {
-    flex: 1,
-    gap: Spacing.xs,
-  },
-  sectionHeader: {
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.md,
-  },
-  menuCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.lg,
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: BorderRadius.sm,
+  statIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
   },
-  menuCardContent: {
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: Spacing.md,
+  },
+  menuStack: {
+    gap: 0,
+    borderRadius: BorderRadius.xl,
+    overflow: "hidden",
+  },
+  modernMenuCard: {
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    borderTopWidth: 3,
+    borderRadius: 0,
+  },
+  menuCardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.lg,
+  },
+  modernIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modernMenuContent: {
     flex: 1,
     gap: Spacing.xs,
   },
