@@ -174,34 +174,56 @@ export const updateCarrier = async (id: string, updates: Partial<Omit<Carrier, "
 
 export const deleteCarrier = async (id: string): Promise<boolean> => {
   try {
+    console.log("🗑️ CARRIER DELETE START", { id });
     const carriers = await getCarriers();
+    console.log("📦 Current carriers count:", carriers.length);
+    
     const beforeCount = carriers.length;
-    const filtered = carriers.filter((c) => c.id !== id);
+    const filtered = carriers.filter((c) => {
+      const match = String(c.id) === String(id);
+      if (match) console.log("✂️ MATCHED AND FILTERED:", c.id);
+      return !match;
+    });
+    
+    console.log("📉 After filter count:", filtered.length, "Deleted:", beforeCount - filtered.length);
     
     if (filtered.length === beforeCount) {
-      console.warn("Carrier not found with id:", id);
+      console.error("❌ CARRIER NOT FOUND:", id);
       return false;
     }
     
     const jsonData = JSON.stringify(filtered);
-    // Force cache invalidation: remove then set
-    await AsyncStorage.removeItem(CARRIERS_STORAGE_KEY);
-    await new Promise(resolve => setTimeout(resolve, 50));
-    await AsyncStorage.setItem(CARRIERS_STORAGE_KEY, jsonData);
-    await new Promise(resolve => setTimeout(resolve, 50));
+    console.log("💾 JSON size:", jsonData.length, "bytes");
     
-    // Verify write succeeded
-    const verify = await AsyncStorage.getItem(CARRIERS_STORAGE_KEY);
-    if (!verify || verify !== jsonData) {
-      console.error("Carrier delete verification failed - retry");
+    // Atomic delete + write
+    console.log("🔴 REMOVING OLD DATA");
+    await AsyncStorage.removeItem(CARRIERS_STORAGE_KEY);
+    
+    console.log("✅ WRITING NEW DATA");
+    await AsyncStorage.setItem(CARRIERS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Multi-verify
+    const verify1 = await AsyncStorage.getItem(CARRIERS_STORAGE_KEY);
+    console.log("🔍 VERIFY 1:", verify1?.length, "bytes, Match:", verify1 === jsonData);
+    
+    if (!verify1 || verify1 !== jsonData) {
+      console.error("⚠️ VERIFY FAILED - RETRY");
       await AsyncStorage.removeItem(CARRIERS_STORAGE_KEY);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
       await AsyncStorage.setItem(CARRIERS_STORAGE_KEY, jsonData);
+      const verify2 = await AsyncStorage.getItem(CARRIERS_STORAGE_KEY);
+      console.log("🔍 VERIFY 2:", verify2?.length, "bytes, Match:", verify2 === jsonData);
     }
+    
+    // Final confirmation
+    const final = await getCarriers();
+    const stillExists = final.some(c => String(c.id) === String(id));
+    console.log("✔️ CARRIER DELETE COMPLETE - Still exists:", stillExists);
     
     return true;
   } catch (error) {
-    console.error("Failed to delete carrier:", error);
+    console.error("❌ CARRIER DELETE ERROR:", error);
     return false;
   }
 };
@@ -280,34 +302,56 @@ export const updateCompany = async (id: string, updates: Partial<Omit<Company, "
 
 export const deleteCompany = async (id: string): Promise<boolean> => {
   try {
+    console.log("🗑️ COMPANY DELETE START", { id });
     const companies = await getCompanies();
+    console.log("📦 Current companies count:", companies.length);
+    
     const beforeCount = companies.length;
-    const filtered = companies.filter((c) => c.id !== id);
+    const filtered = companies.filter((c) => {
+      const match = String(c.id) === String(id);
+      if (match) console.log("✂️ MATCHED AND FILTERED:", c.id);
+      return !match;
+    });
+    
+    console.log("📉 After filter count:", filtered.length, "Deleted:", beforeCount - filtered.length);
     
     if (filtered.length === beforeCount) {
-      console.warn("Company not found with id:", id);
+      console.error("❌ COMPANY NOT FOUND:", id);
       return false;
     }
     
     const jsonData = JSON.stringify(filtered);
-    // Force cache invalidation: remove then set
-    await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
-    await new Promise(resolve => setTimeout(resolve, 50));
-    await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
-    await new Promise(resolve => setTimeout(resolve, 50));
+    console.log("💾 JSON size:", jsonData.length, "bytes");
     
-    // Verify write succeeded
-    const verify = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
-    if (!verify || verify !== jsonData) {
-      console.error("Company delete verification failed - retry");
+    // Atomic delete + write
+    console.log("🔴 REMOVING OLD DATA");
+    await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
+    
+    console.log("✅ WRITING NEW DATA");
+    await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Multi-verify
+    const verify1 = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
+    console.log("🔍 VERIFY 1:", verify1?.length, "bytes, Match:", verify1 === jsonData);
+    
+    if (!verify1 || verify1 !== jsonData) {
+      console.error("⚠️ VERIFY FAILED - RETRY");
       await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
       await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
+      const verify2 = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
+      console.log("🔍 VERIFY 2:", verify2?.length, "bytes, Match:", verify2 === jsonData);
     }
+    
+    // Final confirmation
+    const final = await getCompanies();
+    const stillExists = final.some(c => String(c.id) === String(id));
+    console.log("✔️ COMPANY DELETE COMPLETE - Still exists:", stillExists);
     
     return true;
   } catch (error) {
-    console.error("Failed to delete company:", error);
+    console.error("❌ COMPANY DELETE ERROR:", error);
     return false;
   }
 };
@@ -387,34 +431,56 @@ export const updateJob = async (id: string, updates: Partial<Omit<PlannedJob, "i
 
 export const deleteJob = async (id: string): Promise<boolean> => {
   try {
+    console.log("🗑️ JOB DELETE START", { id });
     const jobs = await getJobs();
+    console.log("📦 Current jobs count:", jobs.length);
+    
     const beforeCount = jobs.length;
-    const filtered = jobs.filter((j) => j.id !== id);
+    const filtered = jobs.filter((j) => {
+      const match = String(j.id) === String(id);
+      if (match) console.log("✂️ MATCHED AND FILTERED:", j.id);
+      return !match;
+    });
+    
+    console.log("📉 After filter count:", filtered.length, "Deleted:", beforeCount - filtered.length);
     
     if (filtered.length === beforeCount) {
-      console.warn("Job not found with id:", id);
+      console.error("❌ JOB NOT FOUND:", id);
       return false;
     }
     
     const jsonData = JSON.stringify(filtered);
-    // Force cache invalidation: remove then set
-    await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
-    await new Promise(resolve => setTimeout(resolve, 50));
-    await AsyncStorage.setItem(JOBS_STORAGE_KEY, jsonData);
-    await new Promise(resolve => setTimeout(resolve, 50));
+    console.log("💾 JSON size:", jsonData.length, "bytes");
     
-    // Verify write succeeded
-    const verify = await AsyncStorage.getItem(JOBS_STORAGE_KEY);
-    if (!verify || verify !== jsonData) {
-      console.error("Job delete verification failed - retry");
+    // Atomic delete + write
+    console.log("🔴 REMOVING OLD DATA");
+    await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
+    
+    console.log("✅ WRITING NEW DATA");
+    await AsyncStorage.setItem(JOBS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Multi-verify
+    const verify1 = await AsyncStorage.getItem(JOBS_STORAGE_KEY);
+    console.log("🔍 VERIFY 1:", verify1?.length, "bytes, Match:", verify1 === jsonData);
+    
+    if (!verify1 || verify1 !== jsonData) {
+      console.error("⚠️ VERIFY FAILED - RETRY");
       await AsyncStorage.removeItem(JOBS_STORAGE_KEY);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
       await AsyncStorage.setItem(JOBS_STORAGE_KEY, jsonData);
+      const verify2 = await AsyncStorage.getItem(JOBS_STORAGE_KEY);
+      console.log("🔍 VERIFY 2:", verify2?.length, "bytes, Match:", verify2 === jsonData);
     }
+    
+    // Final confirmation
+    const final = await getJobs();
+    const stillExists = final.some(j => String(j.id) === String(id));
+    console.log("✔️ JOB DELETE COMPLETE - Still exists:", stillExists);
     
     return true;
   } catch (error) {
-    console.error("Failed to delete job:", error);
+    console.error("❌ JOB DELETE ERROR:", error);
     return false;
   }
 };
@@ -632,34 +698,56 @@ export const addIBAN = async (iban: Omit<IBAN, "id" | "createdAt" | "updatedAt">
 
 export const deleteIBAN = async (id: string): Promise<boolean> => {
   try {
+    console.log("🗑️ IBAN DELETE START", { id });
     const ibans = await getIBANs();
+    console.log("📦 Current IBANs count:", ibans.length);
+    
     const beforeCount = ibans.length;
-    const filtered = ibans.filter((i) => i.id !== id);
+    const filtered = ibans.filter((i) => {
+      const match = String(i.id) === String(id);
+      if (match) console.log("✂️ MATCHED AND FILTERED:", i.id);
+      return !match;
+    });
+    
+    console.log("📉 After filter count:", filtered.length, "Deleted:", beforeCount - filtered.length);
     
     if (filtered.length === beforeCount) {
-      console.warn("IBAN not found with id:", id);
+      console.error("❌ IBAN NOT FOUND:", id);
       return false;
     }
     
     const jsonData = JSON.stringify(filtered);
-    // Force cache invalidation: remove then set
-    await AsyncStorage.removeItem(IBANS_STORAGE_KEY);
-    await new Promise(resolve => setTimeout(resolve, 50));
-    await AsyncStorage.setItem(IBANS_STORAGE_KEY, jsonData);
-    await new Promise(resolve => setTimeout(resolve, 50));
+    console.log("💾 JSON size:", jsonData.length, "bytes");
     
-    // Verify write succeeded
-    const verify = await AsyncStorage.getItem(IBANS_STORAGE_KEY);
-    if (!verify || verify !== jsonData) {
-      console.error("IBAN delete verification failed - retry");
+    // Atomic delete + write
+    console.log("🔴 REMOVING OLD DATA");
+    await AsyncStorage.removeItem(IBANS_STORAGE_KEY);
+    
+    console.log("✅ WRITING NEW DATA");
+    await AsyncStorage.setItem(IBANS_STORAGE_KEY, jsonData);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Multi-verify
+    const verify1 = await AsyncStorage.getItem(IBANS_STORAGE_KEY);
+    console.log("🔍 VERIFY 1:", verify1?.length, "bytes, Match:", verify1 === jsonData);
+    
+    if (!verify1 || verify1 !== jsonData) {
+      console.error("⚠️ VERIFY FAILED - RETRY");
       await AsyncStorage.removeItem(IBANS_STORAGE_KEY);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 150));
       await AsyncStorage.setItem(IBANS_STORAGE_KEY, jsonData);
+      const verify2 = await AsyncStorage.getItem(IBANS_STORAGE_KEY);
+      console.log("🔍 VERIFY 2:", verify2?.length, "bytes, Match:", verify2 === jsonData);
     }
+    
+    // Final confirmation
+    const final = await getIBANs();
+    const stillExists = final.some(i => String(i.id) === String(id));
+    console.log("✔️ IBAN DELETE COMPLETE - Still exists:", stillExists);
     
     return true;
   } catch (error) {
-    console.error("Failed to delete IBAN:", error);
+    console.error("❌ IBAN DELETE ERROR:", error);
     return false;
   }
 };
