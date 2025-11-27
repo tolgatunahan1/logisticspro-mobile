@@ -9,6 +9,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Carrier, getCarriers, searchCarriers, deleteCarrier, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -34,6 +35,7 @@ export default function CarrierListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<Carrier>("Carrier");
   
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,9 +43,6 @@ export default function CarrierListScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [carrierToDelete, setCarrierToDelete] = useState<Carrier | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -79,9 +78,7 @@ export default function CarrierListScreen() {
   };
 
   const handleDeletePress = (carrier: Carrier) => {
-    console.log("🗑️ handleDeletePress called for:", carrier.id);
-    setCarrierToDelete(carrier);
-    setShowDeleteConfirm(true);
+    openDeleteConfirm(carrier);
   };
 
   const handleSettingsPress = () => {
@@ -298,8 +295,7 @@ export default function CarrierListScreen() {
                     </Pressable>
                     <Pressable
                       onPress={() => {
-                        setCarrierToDelete(selectedCarrier);
-                        setShowDeleteConfirm(true);
+                        if (selectedCarrier) openDeleteConfirm(selectedCarrier);
                       }}
                       style={({ pressed }) => [
                         styles.actionButtonRound,
@@ -317,10 +313,10 @@ export default function CarrierListScreen() {
       </Modal>
 
       <Modal
-        visible={showDeleteConfirm}
+        visible={deleteState.isOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowDeleteConfirm(false)}
+        onRequestClose={closeDeleteConfirm}
       >
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
           <View style={{
@@ -336,13 +332,13 @@ export default function CarrierListScreen() {
             <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
               <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>Nakliyeciyi Sil</ThemedText>
               <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                "{carrierToDelete?.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                "{deleteState.item?.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
               </ThemedText>
             </View>
             <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
               <Pressable
-                onPress={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
+                onPress={closeDeleteConfirm}
+                disabled={deleteState.isDeleting}
                 style={({ pressed }) => [
                   { 
                     flex: 1, 
@@ -350,7 +346,7 @@ export default function CarrierListScreen() {
                     paddingHorizontal: Spacing.lg,
                     borderRadius: BorderRadius.sm,
                     backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                    opacity: pressed || isDeleting ? 0.5 : 1,
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
                   },
                 ]}
               >
@@ -358,32 +354,29 @@ export default function CarrierListScreen() {
               </Pressable>
               <Pressable
                 onPress={async () => {
-                  if (!carrierToDelete) return;
-                  console.log("🔥 DELETE CONFIRMED FOR:", carrierToDelete.id);
-                  setIsDeleting(true);
-                  const beforeDelete = carriers.filter(c => c.id !== carrierToDelete.id);
-                  setCarriers(beforeDelete);
-                  try {
-                    await deleteCarrier(carrierToDelete.id);
-                    console.log("✅ deleteCarrier completed");
-                    for (let i = 0; i < 3; i++) {
-                      await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
-                      const fresh = await getCarriers();
-                      if (!fresh.some(c => c.id === carrierToDelete.id)) {
-                        setCarriers(fresh);
-                        break;
+                  const success = await confirmDelete(async (item) => {
+                    const beforeDelete = carriers.filter(c => c.id !== item.id);
+                    setCarriers(beforeDelete);
+                    try {
+                      await deleteCarrier(item.id);
+                      for (let i = 0; i < 3; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
+                        const fresh = await getCarriers();
+                        if (!fresh.some(c => c.id === item.id)) {
+                          setCarriers(fresh);
+                          break;
+                        }
                       }
+                      setShowDetailModal(false);
+                      return true;
+                    } catch (error) {
+                      console.error("❌ Delete error:", error);
+                      await loadCarriers();
+                      return false;
                     }
-                    setShowDeleteConfirm(false);
-                    setShowDetailModal(false);
-                  } catch (error) {
-                    console.error("❌ Delete error:", error);
-                    await loadCarriers();
-                  } finally {
-                    setIsDeleting(false);
-                  }
+                  });
                 }}
-                disabled={isDeleting}
+                disabled={deleteState.isDeleting}
                 style={({ pressed }) => [
                   { 
                     flex: 1, 
@@ -391,7 +384,7 @@ export default function CarrierListScreen() {
                     paddingHorizontal: Spacing.lg,
                     borderRadius: BorderRadius.sm,
                     backgroundColor: colors.destructive,
-                    opacity: pressed || isDeleting ? 0.7 : 1,
+                    opacity: pressed || deleteState.isDeleting ? 0.7 : 1,
                   },
                 ]}
               >

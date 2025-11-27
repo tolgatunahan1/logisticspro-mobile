@@ -8,6 +8,7 @@ import * as Notifications from "expo-notifications";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN } from "../utils/storage";
@@ -18,6 +19,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { logout } = useAuth();
+  const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<IBAN>("IBAN");
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [ibans, setIbans] = useState<IBAN[]>([]);
@@ -27,9 +29,6 @@ export default function SettingsScreen() {
   const [isAdding, setIsAdding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [ibanToDelete, setIbanToDelete] = useState<IBAN | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert("Çıkış", "Hesaptan çıkış yapmak istiyor musunuz?", [
@@ -79,9 +78,7 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteIBAN = (iban: IBAN) => {
-    console.log("🗑️ handleDeleteIBAN called for:", iban.id);
-    setIbanToDelete(iban);
-    setShowDeleteConfirm(true);
+    openDeleteConfirm(iban);
   };
 
 
@@ -177,47 +174,44 @@ export default function SettingsScreen() {
       </ScrollView>
 
       {/* Delete IBAN Modal */}
-      <Modal visible={showDeleteConfirm} animationType="fade" transparent onRequestClose={() => setShowDeleteConfirm(false)}>
+      <Modal visible={deleteState.isOpen} animationType="fade" transparent onRequestClose={closeDeleteConfirm}>
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
           <View style={{ backgroundColor: theme.backgroundRoot, borderRadius: BorderRadius.lg, padding: Spacing.xl, width: "100%", maxWidth: 300 }}>
             <ThemedText type="h4" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>IBAN Sil</ThemedText>
             <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
-              "{ibanToDelete?.nameSurname}" adlı IBAN kaydını silmek istediğinizden emin misiniz?
+              "{deleteState.item?.nameSurname}" adlı IBAN kaydını silmek istediğinizden emin misiniz?
             </ThemedText>
             <View style={{ flexDirection: "row", gap: Spacing.md }}>
               <Pressable
-                onPress={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
+                onPress={closeDeleteConfirm}
+                disabled={deleteState.isDeleting}
                 style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}
               >
                 <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
               </Pressable>
               <Pressable
                 onPress={async () => {
-                  if (!ibanToDelete) return;
-                  console.log("🔥 DELETE CONFIRMED FOR IBAN:", ibanToDelete.id);
-                  setIsDeleting(true);
-                  const beforeDelete = ibans.filter(i => i.id !== ibanToDelete.id);
-                  setIbans(beforeDelete);
-                  try {
-                    await deleteIBAN(ibanToDelete.id);
-                    console.log("✅ deleteIBAN completed");
-                    for (let i = 0; i < 3; i++) {
-                      await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
-                      const fresh = await getIBANs();
-                      if (!fresh.some(ib => ib.id === ibanToDelete.id)) {
-                        setIbans(fresh);
-                        break;
+                  await confirmDelete(async (item) => {
+                    const beforeDelete = ibans.filter(i => i.id !== item.id);
+                    setIbans(beforeDelete);
+                    try {
+                      await deleteIBAN(item.id);
+                      for (let i = 0; i < 3; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
+                        const fresh = await getIBANs();
+                        if (!fresh.some(ib => ib.id === item.id)) {
+                          setIbans(fresh);
+                          break;
+                        }
                       }
+                      return true;
+                    } catch (error) {
+                      console.error("❌ Delete error:", error);
+                      return false;
                     }
-                    setShowDeleteConfirm(false);
-                  } catch (error) {
-                    console.error("❌ Delete error:", error);
-                  } finally {
-                    setIsDeleting(false);
-                  }
+                  });
                 }}
-                disabled={isDeleting}
+                disabled={deleteState.isDeleting}
                 style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: colors.destructive }}
               >
                 <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Sil</ThemedText>

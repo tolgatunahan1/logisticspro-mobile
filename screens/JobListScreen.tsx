@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs, getCarriers, Carrier, addCompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -18,6 +19,7 @@ export default function JobListScreen() {
   const { theme, isDark } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+  const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<PlannedJob>("Job");
 
   const [jobs, setJobs] = useState<PlannedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
@@ -25,9 +27,6 @@ export default function JobListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [jobToDelete, setJobToDelete] = useState<PlannedJob | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [currentCarrier, setCurrentCarrier] = useState<Carrier | null>(null);
   const [showCarrierPicker, setShowCarrierPicker] = useState(false);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
@@ -76,8 +75,7 @@ export default function JobListScreen() {
   }, [jobs]);
 
   const handleDeletePress = (job: PlannedJob) => {
-    setJobToDelete(job);
-    setShowDeleteConfirm(true);
+    openDeleteConfirm(job);
   };
 
   const formatDate = (timestamp: number) => {

@@ -9,6 +9,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Company, getCompanies, searchCompanies, deleteCompany } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -34,6 +35,7 @@ export default function CompanyListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<Company>("Company");
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,9 +43,6 @@ export default function CompanyListScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -79,9 +78,7 @@ export default function CompanyListScreen() {
   };
 
   const handleDeletePress = (company: Company) => {
-    console.log("🗑️ handleDeletePress called for:", company.id);
-    setCompanyToDelete(company);
-    setShowDeleteConfirm(true);
+    openDeleteConfirm(company);
   };
 
   const handleCallPress = async (phone: string) => {
@@ -278,8 +275,7 @@ export default function CompanyListScreen() {
                     </Pressable>
                     <Pressable
                       onPress={() => {
-                        setCompanyToDelete(selectedCompany);
-                        setShowDeleteConfirm(true);
+                        if (selectedCompany) openDeleteConfirm(selectedCompany);
                       }}
                       style={({ pressed }) => [
                         styles.actionButtonRound,
@@ -297,10 +293,10 @@ export default function CompanyListScreen() {
       </Modal>
 
       <Modal
-        visible={showDeleteConfirm}
+        visible={deleteState.isOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowDeleteConfirm(false)}
+        onRequestClose={closeDeleteConfirm}
       >
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
           <View style={{
@@ -316,13 +312,13 @@ export default function CompanyListScreen() {
             <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
               <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>Firmayı Sil</ThemedText>
               <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                "{companyToDelete?.name}" adlı firmayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                "{deleteState.item?.name}" adlı firmayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
               </ThemedText>
             </View>
             <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
               <Pressable
-                onPress={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
+                onPress={closeDeleteConfirm}
+                disabled={deleteState.isDeleting}
                 style={({ pressed }) => [
                   { 
                     flex: 1, 
@@ -330,7 +326,7 @@ export default function CompanyListScreen() {
                     paddingHorizontal: Spacing.lg,
                     borderRadius: BorderRadius.sm,
                     backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                    opacity: pressed || isDeleting ? 0.5 : 1,
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
                   },
                 ]}
               >
@@ -338,20 +334,19 @@ export default function CompanyListScreen() {
               </Pressable>
               <Pressable
                 onPress={async () => {
-                  if (!companyToDelete) return;
-                  setIsDeleting(true);
-                  try {
-                    await deleteCompany(companyToDelete.id);
-                    setShowDeleteConfirm(false);
-                    setShowDetailModal(false);
-                    await loadCompanies();
-                  } catch (error) {
-                    console.error("Delete error:", error);
-                  } finally {
-                    setIsDeleting(false);
-                  }
+                  await confirmDelete(async (item) => {
+                    try {
+                      await deleteCompany(item.id);
+                      setShowDetailModal(false);
+                      await loadCompanies();
+                      return true;
+                    } catch (error) {
+                      console.error("Delete error:", error);
+                      return false;
+                    }
+                  });
                 }}
-                disabled={isDeleting}
+                disabled={deleteState.isDeleting}
                 style={({ pressed }) => [
                   { 
                     flex: 1, 
@@ -359,7 +354,7 @@ export default function CompanyListScreen() {
                     paddingHorizontal: Spacing.lg,
                     borderRadius: BorderRadius.sm,
                     backgroundColor: colors.destructive,
-                    opacity: pressed || isDeleting ? 0.7 : 1,
+                    opacity: pressed || deleteState.isDeleting ? 0.7 : 1,
                   },
                 ]}
               >
