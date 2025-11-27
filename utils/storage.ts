@@ -302,54 +302,58 @@ export const updateCompany = async (id: string, updates: Partial<Omit<Company, "
 
 export const deleteCompany = async (id: string): Promise<boolean> => {
   try {
-    console.log("🗑️ COMPANY DELETE START", { id });
-    const companies = await getCompanies();
-    console.log("📦 Current companies count:", companies.length);
+    console.log("\n🎯 === COMPANY DELETE DEBUG START ===");
+    console.log("Silinecek ID:", id, `(type: ${typeof id})`);
     
+    const companies = await getCompanies();
     const beforeCount = companies.length;
+    console.log(`\n📦 Yüklendi: ${beforeCount} firma`);
+    console.log("Firma listesi:", companies.map((c, i) => `[${i}] "${c.id}"`).join(" | "));
+    
+    // ID matching analysis
+    console.log(`\n🔍 ID eşleşme analizi:`);
+    companies.forEach((c, idx) => {
+      const match = String(c.id) === String(id);
+      console.log(`   [${idx}] "${c.id}" === "${id}" ? ${match ? "✅ MATCH" : "❌"}`);
+    });
+    
+    // Filter
     const filtered = companies.filter((c) => {
       const match = String(c.id) === String(id);
-      if (match) console.log("✂️ MATCHED AND FILTERED:", c.id);
       return !match;
     });
     
-    console.log("📉 After filter count:", filtered.length, "Deleted:", beforeCount - filtered.length);
+    const afterCount = filtered.length;
+    const deletedCount = beforeCount - afterCount;
     
-    if (filtered.length === beforeCount) {
-      console.error("❌ COMPANY NOT FOUND:", id);
+    console.log(`\n❌ FILTER İŞLEMİ: ${beforeCount} → ${afterCount} (${deletedCount} silindi)`);
+    
+    if (afterCount === beforeCount) {
+      console.error("⚠️ HATA: Hiçbir firma silinmedi!");
       return false;
     }
     
+    if (deletedCount !== 1) {
+      console.warn(`⚠️ UYARI: ${deletedCount} firma silindi (beklenen: 1)`);
+    }
+    
+    // Write
     const jsonData = JSON.stringify(filtered);
-    console.log("💾 JSON size:", jsonData.length, "bytes");
+    console.log(`\n💾 AsyncStorage'a yaz (${jsonData.length} bytes)`);
     
-    // Atomic delete + write
-    console.log("🔴 REMOVING OLD DATA");
     await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
-    
-    console.log("✅ WRITING NEW DATA");
     await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    // Multi-verify
-    const verify1 = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
-    console.log("🔍 VERIFY 1:", verify1?.length, "bytes, Match:", verify1 === jsonData);
+    // Verify
+    const verify = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
+    const verifyItems = verify ? JSON.parse(verify) : [];
+    const stillExists = verifyItems.some(c => String(c.id) === String(id));
     
-    if (!verify1 || verify1 !== jsonData) {
-      console.error("⚠️ VERIFY FAILED - RETRY");
-      await AsyncStorage.removeItem(COMPANIES_STORAGE_KEY);
-      await new Promise(resolve => setTimeout(resolve, 150));
-      await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
-      const verify2 = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
-      console.log("🔍 VERIFY 2:", verify2?.length, "bytes, Match:", verify2 === jsonData);
-    }
+    console.log(`\n✔️ DOĞRULAMA: ${verifyItems.length} firma, Silinen hâlâ mevcut? ${stillExists ? "❌ HATA!" : "✅ Tamam"}`);
+    console.log("=== COMPANY DELETE TAMAMLANDI ===\n");
     
-    // Final confirmation
-    const final = await getCompanies();
-    const stillExists = final.some(c => String(c.id) === String(id));
-    console.log("✔️ COMPANY DELETE COMPLETE - Still exists:", stillExists);
-    
-    return true;
+    return !stillExists;
   } catch (error) {
     console.error("❌ COMPANY DELETE ERROR:", error);
     return false;

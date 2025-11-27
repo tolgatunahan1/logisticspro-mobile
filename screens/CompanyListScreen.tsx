@@ -81,6 +81,16 @@ export default function CompanyListScreen() {
     openDeleteConfirm(company);
   };
 
+  const handleTestDebugDelete = async () => {
+    if (companies.length === 0) {
+      console.log("❌ Test yapabilmek için en az 1 firma gerekli");
+      return;
+    }
+    const testItem = companies[0];
+    console.log(`🧪 TEST: "${testItem.name}" (ID: ${testItem.id}) silinecek`);
+    openDeleteConfirm(testItem);
+  };
+
   const handleCallPress = async (phone: string) => {
     const phoneNumber = formatPhoneForCall(phone);
     const url = `tel:${phoneNumber}`;
@@ -175,7 +185,11 @@ export default function CompanyListScreen() {
             <Pressable onPress={() => setSearchQuery("")}>
               <Feather name="x" size={18} color={colors.textSecondary} />
             </Pressable>
-          ) : null}
+          ) : (
+            <Pressable onPress={handleTestDebugDelete} style={{ opacity: 0.5 }}>
+              <Feather name="trash-2" size={16} color={colors.destructive} />
+            </Pressable>
+          )}
         </View>
       </View>
 
