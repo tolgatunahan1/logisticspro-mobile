@@ -496,6 +496,78 @@ export default function JobListScreen() {
         </View>
       </Modal>
 
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={deleteState.isOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={closeDeleteConfirm}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
+          <View style={{
+            backgroundColor: isDark ? "rgba(30, 30, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            borderRadius: BorderRadius.lg,
+            padding: Spacing.xl,
+            width: "100%",
+            maxWidth: 340,
+            borderWidth: 1,
+            borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+            overflow: "hidden",
+          }}>
+            <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
+              <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>İşi Sil</ThemedText>
+              <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                Bu işi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              </ThemedText>
+            </View>
+            <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+              <Pressable
+                onPress={closeDeleteConfirm}
+                disabled={deleteState.isDeleting}
+                style={({ pressed }) => [
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  await confirmDelete(async (job) => {
+                    const success = await deleteJob(job.id);
+                    if (success) {
+                      await loadData();
+                    }
+                    return success;
+                  });
+                }}
+                disabled={deleteState.isDeleting}
+                style={({ pressed }) => [
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: colors.destructive,
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>
+                  {deleteState.isDeleting ? "Siliniyor..." : "Sil"}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <Pressable
         onPress={handleAddPress}
         style={({ pressed }) => [
