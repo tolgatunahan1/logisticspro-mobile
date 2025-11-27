@@ -159,7 +159,7 @@ export default function HomeScreen() {
             <Feather name="calendar" size={24} color={colors.warning} />
             <View style={styles.statContent}>
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Planlanan
+                Sefer
               </ThemedText>
               <ThemedText type="h3">{jobCount}</ThemedText>
             </View>
