@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser as loginAppUser, getAdmin, AppUser } from "../utils/userManagement";
 import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
 import { firebaseAuthService } from "../utils/firebaseAuth";
+import { createHybridAdapter, setStorageAdapter } from "../utils/firebaseStorage";
 
 interface User {
   id?: string;
@@ -112,6 +113,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fbUser = await firebaseAuthService.login(email, password);
       if (fbUser) {
         setFirebaseUser(fbUser);
+        // Set hybrid storage adapter with Firebase + local fallback
+        const hybridAdapter = createHybridAdapter(fbUser.uid);
+        setStorageAdapter(hybridAdapter);
+        console.log("✅ Firebase user logged in:", fbUser.email, "- Cloud sync enabled");
         return true;
       }
       return false;
@@ -126,6 +131,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fbUser = await firebaseAuthService.register(email, password);
       if (fbUser) {
         setFirebaseUser(fbUser);
+        // Set hybrid storage adapter with Firebase + local fallback
+        const hybridAdapter = createHybridAdapter(fbUser.uid);
+        setStorageAdapter(hybridAdapter);
+        console.log("✅ Firebase user registered:", fbUser.email, "- Cloud sync enabled");
         return true;
       }
       return false;
@@ -141,6 +150,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await firebaseAuthService.logout();
       setUser(null);
       setFirebaseUser(null);
+      // Reset to local-only storage
+      const hybridAdapter = createHybridAdapter(null);
+      setStorageAdapter(hybridAdapter);
     } catch (error) {
       setUser(null);
       setFirebaseUser(null);
