@@ -18,7 +18,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { loginUser } = useAuth();
+  const { loginUser, loginAdmin } = useAuth();
   const navigation = useNavigation<NavigationProp>();
   
   const [username, setUsername] = useState("");
@@ -39,7 +39,13 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      const success = await loginUser(username, password);
+      // Try admin login first
+      let success = await loginAdmin(username, password);
+      
+      // If not admin, try regular user login
+      if (!success) {
+        success = await loginUser(username, password);
+      }
       
       if (!success) {
         setError("Onaylanmamış kullanıcı veya yanlış şifre");
