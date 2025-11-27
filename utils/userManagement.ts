@@ -16,7 +16,7 @@ export interface AdminUser {
 }
 
 const USERS_STORAGE_KEY = "@logistics_users";
-const ADMIN_STORAGE_KEY = "@logistics_admin";
+const ADMIN_STORAGE_KEY = "@logistics_admin_user";
 
 // DEBUG FUNCTION
 export const debugStorage = async (): Promise<void> => {
@@ -36,8 +36,9 @@ export const debugStorage = async (): Promise<void> => {
 
 export const getAdmin = async (): Promise<AdminUser | null> => {
   try {
+    console.log("🔍 getAdmin - fetching from key:", ADMIN_STORAGE_KEY);
     const admin = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
-    console.log("📦 getAdmin result:", admin ? "Found" : "Not found");
+    console.log("📦 getAdmin result:", admin ? "✅ Found" : "❌ Not found", admin ? JSON.parse(admin).username : "");
     return admin ? JSON.parse(admin) : null;
   } catch (error) {
     console.error("❌ Failed to get admin:", error);

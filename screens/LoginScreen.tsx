@@ -25,6 +25,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isAdminMode, setIsAdminMode] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -46,20 +47,21 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      console.log("🔑 Login attempt - username:", username);
+      console.log("🔑 Login attempt - mode:", isAdminMode ? "ADMIN" : "USER", "username:", username);
       
-      // Try admin login first
-      let success = await loginAdmin(username, password);
-      console.log("👨‍💼 Admin login result:", success);
-      
-      // If not admin, try regular user login
-      if (!success) {
+      let success = false;
+      if (isAdminMode) {
+        // Admin mode - only try admin login
+        success = await loginAdmin(username, password);
+        console.log("👨‍💼 Admin login result:", success);
+      } else {
+        // User mode - only try user login
         success = await loginUser(username, password);
         console.log("👤 User login result:", success);
       }
       
       if (!success) {
-        setError("Onaylanmamış kullanıcı veya yanlış şifre");
+        setError(isAdminMode ? "Admin şifresi yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -84,8 +86,39 @@ export default function LoginScreen() {
             LogisticsPRO
           </ThemedText>
           <ThemedText type="body" style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Giriş Yap
+            {isAdminMode ? "Admin Giriş" : "Giriş Yap"}
           </ThemedText>
+        </View>
+
+        <View style={[styles.modeToggle, { borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => setIsAdminMode(false)}
+            disabled={isLoading}
+            style={[
+              styles.modeButton,
+              {
+                backgroundColor: !isAdminMode ? theme.link : colors.inputBackground,
+              },
+            ]}
+          >
+            <ThemedText style={[styles.modeButtonText, { color: !isAdminMode ? "#FFF" : colors.textSecondary }]}>
+              Kullanıcı
+            </ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={() => setIsAdminMode(true)}
+            disabled={isLoading}
+            style={[
+              styles.modeButton,
+              {
+                backgroundColor: isAdminMode ? theme.link : colors.inputBackground,
+              },
+            ]}
+          >
+            <ThemedText style={[styles.modeButtonText, { color: isAdminMode ? "#FFF" : colors.textSecondary }]}>
+              Admin
+            </ThemedText>
+          </Pressable>
         </View>
 
         <View style={styles.form}>
@@ -238,5 +271,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.xs,
     marginTop: Spacing.lg,
+  },
+  modeToggle: {
+    flexDirection: "row",
+    gap: Spacing.xs,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderRadius: BorderRadius.xs,
+    padding: Spacing.xs,
+  },
+  modeButton: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.xs,
+    alignItems: "center",
+  },
+  modeButtonText: {
+    fontWeight: "600",
+    fontSize: 14,
   },
 });
