@@ -47,17 +47,13 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      console.log("🔑 Login attempt - mode:", isAdminMode ? "ADMIN" : "USER", "username:", username);
-      
       let success = false;
       if (isAdminMode) {
         // Admin mode - only try admin login
         success = await loginAdmin(username, password);
-        console.log("👨‍💼 Admin login result:", success);
       } else {
         // User mode - only try user login
         success = await loginUser(username, password);
-        console.log("👤 User login result:", success);
       }
       
       if (!success) {
