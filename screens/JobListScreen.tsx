@@ -463,34 +463,27 @@ export default function JobListScreen() {
                 <Pressable
                   onPress={async () => {
                     if (!jobToDelete) return;
+                    console.log("🔥 DELETE CONFIRMED FOR JOB:", jobToDelete.id);
                     setIsDeleting(true);
-                    // STEP 1: Immediately remove from UI
                     const beforeDelete = jobs.filter(j => j.id !== jobToDelete.id);
                     setJobs(beforeDelete);
                     setShowDeleteConfirm(false);
                     setShowDetailModal(false);
                     
                     try {
-                      // STEP 2: Delete from storage
                       const delResult = await deleteJob(jobToDelete.id);
-                      
-                      // STEP 3: Multi-attempt fresh read
-                      let finalData = beforeDelete;
-                      for (let attempt = 0; attempt < 3; attempt++) {
-                        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+                      console.log("✅ deleteJob completed");
+                      for (let i = 0; i < 3; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
                         const fresh = await getJobs();
-                        const stillExists = fresh.some(j => j.id === jobToDelete.id);
-                        if (!stillExists) {
-                          finalData = fresh;
+                        if (!fresh.some(j => j.id === jobToDelete.id)) {
+                          setJobs(fresh);
                           break;
                         }
                       }
-                      
-                      setJobs(finalData);
                     } catch (error) {
-                      console.error("Delete error:", error);
+                      console.error("❌ Delete error:", error);
                       await loadData();
-                      Alert.alert("Hata", "İş silinirken hata oluştu");
                     } finally {
                       setIsDeleting(false);
                     }

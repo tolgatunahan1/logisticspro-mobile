@@ -79,50 +79,9 @@ export default function CarrierListScreen() {
   };
 
   const handleDeletePress = (carrier: Carrier) => {
-    Alert.alert(
-      "Nakliyeciyi Sil",
-      `"${carrier.name}" adlı nakliyeciyi silmek istediğinizden emin misiniz?`,
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            setIsDeleting(true);
-            // STEP 1: Immediately remove from UI
-            const beforeDelete = carriers.filter(c => c.id !== carrier.id);
-            setCarriers(beforeDelete);
-            setShowDetailModal(false);
-            setSelectedCarrier(null);
-            
-            try {
-              // STEP 2: Delete from storage
-              const delResult = await deleteCarrier(carrier.id);
-              
-              // STEP 3: Multi-attempt fresh read
-              let finalData = beforeDelete;
-              for (let attempt = 0; attempt < 3; attempt++) {
-                await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
-                const fresh = await getCarriers();
-                const stillExists = fresh.some(c => c.id === carrier.id);
-                if (!stillExists) {
-                  finalData = fresh;
-                  break;
-                }
-              }
-              
-              setCarriers(finalData);
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              await loadCarriers();
-              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
-            } finally {
-              setIsDeleting(false);
-            }
-          },
-        },
-      ]
-    );
+    console.log("🗑️ handleDeletePress called for:", carrier.id);
+    setCarrierToDelete(carrier);
+    setShowDeleteConfirm(true);
   };
 
   const handleSettingsPress = () => {
@@ -400,14 +359,26 @@ export default function CarrierListScreen() {
               <Pressable
                 onPress={async () => {
                   if (!carrierToDelete) return;
+                  console.log("🔥 DELETE CONFIRMED FOR:", carrierToDelete.id);
                   setIsDeleting(true);
+                  const beforeDelete = carriers.filter(c => c.id !== carrierToDelete.id);
+                  setCarriers(beforeDelete);
                   try {
                     await deleteCarrier(carrierToDelete.id);
+                    console.log("✅ deleteCarrier completed");
+                    for (let i = 0; i < 3; i++) {
+                      await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
+                      const fresh = await getCarriers();
+                      if (!fresh.some(c => c.id === carrierToDelete.id)) {
+                        setCarriers(fresh);
+                        break;
+                      }
+                    }
                     setShowDeleteConfirm(false);
                     setShowDetailModal(false);
-                    await loadCarriers();
                   } catch (error) {
-                    console.error("Delete error:", error);
+                    console.error("❌ Delete error:", error);
+                    await loadCarriers();
                   } finally {
                     setIsDeleting(false);
                   }

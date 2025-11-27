@@ -79,50 +79,9 @@ export default function CompanyListScreen() {
   };
 
   const handleDeletePress = (company: Company) => {
-    Alert.alert(
-      "Firmayı Sil",
-      `"${company.name}" adlı firmayı silmek istediğinizden emin misiniz?`,
-      [
-        { text: "İptal", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            setIsDeleting(true);
-            // STEP 1: Immediately remove from UI
-            const beforeDelete = companies.filter(c => c.id !== company.id);
-            setCompanies(beforeDelete);
-            setShowDetailModal(false);
-            setSelectedCompany(null);
-            
-            try {
-              // STEP 2: Delete from storage
-              const delResult = await deleteCompany(company.id);
-              
-              // STEP 3: Multi-attempt fresh read
-              let finalData = beforeDelete;
-              for (let attempt = 0; attempt < 3; attempt++) {
-                await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
-                const fresh = await getCompanies();
-                const stillExists = fresh.some(c => c.id === company.id);
-                if (!stillExists) {
-                  finalData = fresh;
-                  break;
-                }
-              }
-              
-              setCompanies(finalData);
-            } catch (error) {
-              console.error("Silme hatası:", error);
-              await loadCompanies();
-              Alert.alert("Hata", "Firma silinirken hata oluştu");
-            } finally {
-              setIsDeleting(false);
-            }
-          },
-        },
-      ]
-    );
+    console.log("🗑️ handleDeletePress called for:", company.id);
+    setCompanyToDelete(company);
+    setShowDeleteConfirm(true);
   };
 
   const handleCallPress = async (phone: string) => {

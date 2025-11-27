@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Alert, ScrollView, Modal } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -27,6 +27,9 @@ export default function SettingsScreen() {
   const [isAdding, setIsAdding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [ibanToDelete, setIbanToDelete] = useState<IBAN | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert("Çıkış", "Hesaptan çıkış yapmak istiyor musunuz?", [
@@ -75,33 +78,10 @@ export default function SettingsScreen() {
     setIsAdding(false);
   };
 
-  const handleDeleteIBAN = async (id: string) => {
-    // STEP 1: Immediately remove from UI
-    const beforeDelete = ibans.filter(i => i.id !== id);
-    setIbans(beforeDelete);
-    
-    try {
-      // STEP 2: Delete from storage
-      const delResult = await deleteIBAN(id);
-      
-      // STEP 3: Multi-attempt fresh read
-      let finalData = beforeDelete;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
-        const fresh = await getIBANs();
-        const stillExists = fresh.some(i => i.id === id);
-        if (!stillExists) {
-          finalData = fresh;
-          break;
-        }
-      }
-      
-      setIbans(finalData);
-    } catch (error) {
-      console.error("Delete IBAN error:", error);
-      await loadIBANs();
-      Alert.alert("Hata", "IBAN silinirken hata oluştu");
-    }
+  const handleDeleteIBAN = (iban: IBAN) => {
+    console.log("🗑️ handleDeleteIBAN called for:", iban.id);
+    setIbanToDelete(iban);
+    setShowDeleteConfirm(true);
   };
 
 
@@ -133,7 +113,7 @@ export default function SettingsScreen() {
                       {iban.ibanNumber}
                     </ThemedText>
                   </View>
-                  <Pressable onPress={() => handleDeleteIBAN(iban.id)} hitSlop={8}>
+                  <Pressable onPress={() => handleDeleteIBAN(iban)} hitSlop={8}>
                     <Feather name="trash-2" size={18} color={colors.destructive} />
                   </Pressable>
                 </View>
@@ -195,6 +175,57 @@ export default function SettingsScreen() {
 
 
       </ScrollView>
+
+      {/* Delete IBAN Modal */}
+      <Modal visible={showDeleteConfirm} animationType="fade" transparent onRequestClose={() => setShowDeleteConfirm(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
+          <View style={{ backgroundColor: theme.backgroundRoot, borderRadius: BorderRadius.lg, padding: Spacing.xl, width: "100%", maxWidth: 300 }}>
+            <ThemedText type="h4" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>IBAN Sil</ThemedText>
+            <ThemedText type="body" style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+              "{ibanToDelete?.nameSurname}" adlı IBAN kaydını silmek istediğinizden emin misiniz?
+            </ThemedText>
+            <View style={{ flexDirection: "row", gap: Spacing.md }}>
+              <Pressable
+                onPress={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}
+              >
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  if (!ibanToDelete) return;
+                  console.log("🔥 DELETE CONFIRMED FOR IBAN:", ibanToDelete.id);
+                  setIsDeleting(true);
+                  const beforeDelete = ibans.filter(i => i.id !== ibanToDelete.id);
+                  setIbans(beforeDelete);
+                  try {
+                    await deleteIBAN(ibanToDelete.id);
+                    console.log("✅ deleteIBAN completed");
+                    for (let i = 0; i < 3; i++) {
+                      await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
+                      const fresh = await getIBANs();
+                      if (!fresh.some(ib => ib.id === ibanToDelete.id)) {
+                        setIbans(fresh);
+                        break;
+                      }
+                    }
+                    setShowDeleteConfirm(false);
+                  } catch (error) {
+                    console.error("❌ Delete error:", error);
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+                style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: colors.destructive }}
+              >
+                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Sil</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <IBANListModal
         visible={showAddModal}
