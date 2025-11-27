@@ -198,6 +198,12 @@ export default function JobListScreen() {
               >
                 <Feather name="edit" size={18} color={theme.link} />
               </Pressable>
+              <Pressable
+                onPress={() => handleDeletePress(job)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Feather name="trash-2" size={18} color={colors.destructive} />
+              </Pressable>
             </View>
           </View>
         </Pressable>
@@ -399,21 +405,6 @@ export default function JobListScreen() {
                   <Feather name="check-circle" size={20} color="#FFFFFF" />
                   <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                     Seferi Oluştur
-                  </ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={() => selectedJob && handleDeletePress(selectedJob)}
-                  style={({ pressed }) => [
-                    styles.shareButton,
-                    {
-                      backgroundColor: colors.destructive,
-                      opacity: pressed ? 0.9 : 1,
-                    },
-                  ]}
-                >
-                  <Feather name="trash-2" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Sil
                   </ThemedText>
                 </Pressable>
               </View>

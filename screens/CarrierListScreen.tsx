@@ -143,6 +143,12 @@ export default function CarrierListScreen() {
             >
               <Feather name="edit" size={18} color={theme.link} />
             </Pressable>
+            <Pressable
+              onPress={() => handleDeletePress(item)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Feather name="trash-2" size={18} color={colors.destructive} />
+            </Pressable>
           </View>
         </View>
       </Pressable>
@@ -292,15 +298,6 @@ export default function CarrierListScreen() {
                       ]}
                     >
                       <Feather name="message-circle" size={24} color="#FFFFFF" />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => selectedCarrier && handleDeletePress(selectedCarrier)}
-                      style={({ pressed }) => [
-                        styles.actionButtonRound,
-                        { backgroundColor: colors.destructive, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
-                      ]}
-                    >
-                      <Feather name="trash-2" size={24} color="#FFFFFF" />
                     </Pressable>
                   </View>
                 </View>

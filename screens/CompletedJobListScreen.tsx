@@ -232,6 +232,22 @@ export default function CompletedJobListScreen() {
               >
                 <Feather name="edit" size={18} color={theme.link} />
               </Pressable>
+              <Pressable
+                onPress={async () => {
+                  const beforeDelete = jobs.filter(j => j.id !== job.id);
+                  setJobs(beforeDelete);
+                  try {
+                    await deleteCompletedJob(job.id);
+                    await loadData();
+                  } catch (error) {
+                    console.error("Delete error:", error);
+                    await loadData();
+                  }
+                }}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Feather name="trash-2" size={18} color={colors.destructive} />
+              </Pressable>
             </View>
           </View>
         </Pressable>
@@ -471,43 +487,6 @@ export default function CompletedJobListScreen() {
                     </Pressable>
                   </View>
 
-                  {/* Delete Button */}
-                  {selectedJob && (
-                    <Pressable
-                      onPress={async () => {
-                        const beforeDelete = jobs.filter(j => j.id !== selectedJob.id);
-                        setJobs(beforeDelete);
-                        setShowDetailModal(false);
-                        try {
-                          await deleteCompletedJob(selectedJob.id);
-                          await loadData();
-                        } catch (error) {
-                          console.error("Delete error:", error);
-                          await loadData();
-                        }
-                      }}
-                      style={({ pressed }) => [
-                        {
-                          backgroundColor: Colors.dark.destructive,
-                          opacity: pressed ? 0.9 : 1,
-                          marginTop: Spacing.md,
-                          paddingVertical: Spacing.md,
-                          paddingHorizontal: Spacing.lg,
-                          borderRadius: BorderRadius.sm,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: Spacing.md,
-                          minHeight: 48,
-                        },
-                      ]}
-                    >
-                      <Feather name="trash-2" size={18} color="#FFFFFF" />
-                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        Seferi Sil
-                      </ThemedText>
-                    </Pressable>
-                  )}
 
                   {/* Cargo Information Section */}
                   <View style={{
