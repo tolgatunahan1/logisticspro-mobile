@@ -43,9 +43,6 @@
         }
       ],
       "expo-web-browser"
-    ],
-    "experiments": {
-      "reactCompiler": true
-    }
+    ]
   }
 }
