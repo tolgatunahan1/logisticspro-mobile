@@ -54,12 +54,6 @@ export default function LoginScreen() {
 
   const colors = isDark ? Colors.dark : Colors.light;
 
-  const handleSignup = () => {
-    // Navigate to Signup screen
-    const navigation = require("@react-navigation/native").useNavigation();
-    navigation.navigate("Signup");
-  };
-
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }]}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">

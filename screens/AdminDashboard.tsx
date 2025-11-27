@@ -121,7 +121,7 @@ export default function AdminDashboard() {
               <View style={styles.actions}>
                 <Pressable
                   onPress={() => handleApprove(item.id)}
-                  style={[styles.button, { backgroundColor: Colors.light.success }]}
+                  style={[styles.button, { backgroundColor: "#10b981" }]}
                 >
                   <Feather name="check" size={20} color="white" />
                 </Pressable>
