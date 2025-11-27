@@ -1,18 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser as loginAppUser, getAdmin, AppUser } from "../utils/userManagement";
+import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
+import { firebaseAuthService } from "../utils/firebaseAuth";
 
 interface User {
   id?: string;
   username: string;
   type: "admin" | "user";
+  firebaseUid?: string;
+  email?: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  firebaseUser: FirebaseUser | null;
   isLoading: boolean;
   loginUser: (username: string, password: string) => Promise<boolean>;
   loginAdmin: (username: string, password: string) => Promise<boolean>;
+  loginWithFirebase: (email: string, password: string) => Promise<boolean>;
+  registerWithFirebase: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -22,10 +29,18 @@ const AUTH_STORAGE_KEY = "@logistics_current_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadStoredAuth();
+    const unsubscribe = onAuthStateChanged(firebaseAuthService.getAuth(), (authUser) => {
+      setFirebaseUser(authUser);
+      if (!authUser) {
+        loadStoredAuth();
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   const loadStoredAuth = async () => {
@@ -92,17 +107,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loginWithFirebase = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const fbUser = await firebaseAuthService.login(email, password);
+      if (fbUser) {
+        setFirebaseUser(fbUser);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Firebase login error:", error);
+      return false;
+    }
+  };
+
+  const registerWithFirebase = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const fbUser = await firebaseAuthService.register(email, password);
+      if (fbUser) {
+        setFirebaseUser(fbUser);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Firebase register error:", error);
+      return false;
+    }
+  };
+
   const logout = async () => {
     try {
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      await firebaseAuthService.logout();
       setUser(null);
+      setFirebaseUser(null);
     } catch (error) {
       setUser(null);
+      setFirebaseUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, loginUser, loginAdmin, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        firebaseUser,
+        isLoading,
+        loginUser,
+        loginAdmin,
+        loginWithFirebase,
+        registerWithFirebase,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
