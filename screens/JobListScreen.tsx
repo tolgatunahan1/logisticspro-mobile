@@ -104,7 +104,9 @@ export default function JobListScreen() {
     
     let message = "*Yeni Sefer Programı*\n\n";
     message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
+    message += `*Yükleme Tarihi:* ${formatDate(job.loadingDate)}\n`;
     message += `*Teslimat Yeri:* ${job.deliveryLocation || "-"}\n`;
+    message += `*Teslimat Tarihi:* ${formatDate(job.deliveryDate)}\n`;
     message += `*Yük Cinsi:* ${job.cargoType || "-"}\n`;
     message += `*Yük Tonajı:* ${job.tonnage ? `${job.tonnage}` : "-"}\n`;
     message += `*Yük Ebatı:* ${job.dimensions || "-"}`;
