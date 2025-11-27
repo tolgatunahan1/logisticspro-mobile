@@ -68,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const trimmedPassword = password.trim();
 
     if (!trimmedUsername || !trimmedPassword) {
-      console.error("Admin login: Empty username or password");
       return false;
     }
 
@@ -79,11 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      if (admin.username !== trimmedUsername) {
-        return false;
-      }
-
-      if (admin.password !== trimmedPassword) {
+      if (admin.username !== trimmedUsername || admin.password !== trimmedPassword) {
         return false;
       }
 
@@ -92,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       return true;
     } catch (error) {
+      console.error("Admin login error:", error);
       return false;
     }
   };

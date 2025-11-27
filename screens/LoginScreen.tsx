@@ -27,7 +27,14 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    initializeDefaultAdmin();
+    const init = async () => {
+      try {
+        await initializeDefaultAdmin();
+      } catch (error) {
+        console.error("Admin init error:", error);
+      }
+    };
+    init();
   }, []);
 
   const handleLogin = async () => {
