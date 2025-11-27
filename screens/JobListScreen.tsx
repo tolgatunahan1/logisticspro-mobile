@@ -467,18 +467,20 @@ export default function JobListScreen() {
                     try {
                       const result = await deleteJob(jobToDelete.id);
                       if (!result) {
-                        Alert.alert("Hata", "İş silinirken hata oluştu. Lütfen tekrar deneyin.");
                         setIsDeleting(false);
+                        Alert.alert("Hata", "İş silinirken hata oluştu. Lütfen tekrar deneyin.");
                         return;
                       }
+                      await new Promise(resolve => setTimeout(resolve, 100));
                       setShowDeleteConfirm(false);
-                      setShowDetailModal(false);
+                      await new Promise(resolve => setTimeout(resolve, 100));
                       await loadData();
+                      setShowDetailModal(false);
+                      setIsDeleting(false);
                     } catch (error) {
                       console.error("Delete error:", error);
-                      Alert.alert("Hata", "İş silinirken hata oluştu");
-                    } finally {
                       setIsDeleting(false);
+                      Alert.alert("Hata", "İş silinirken hata oluştu");
                     }
                   }}
                   disabled={isDeleting}

@@ -92,17 +92,19 @@ export default function CarrierListScreen() {
               setIsDeleting(true);
               const result = await deleteCarrier(carrier.id);
               if (!result) {
-                Alert.alert("Hata", "Nakliyeci silinirken hata oluştu. Lütfen tekrar deneyin.");
                 setIsDeleting(false);
+                Alert.alert("Hata", "Nakliyeci silinirken hata oluştu. Lütfen tekrar deneyin.");
                 return;
               }
+              await new Promise(resolve => setTimeout(resolve, 100));
               await loadCarriers();
+              await new Promise(resolve => setTimeout(resolve, 100));
               setShowDetailModal(false);
               setIsDeleting(false);
             } catch (error) {
               console.error("Silme hatası:", error);
-              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
               setIsDeleting(false);
+              Alert.alert("Hata", "Nakliyeci silinirken hata oluştu");
             }
           },
         },
