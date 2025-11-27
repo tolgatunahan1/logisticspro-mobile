@@ -3,13 +3,15 @@
     "name": "LogisticsPRO",
     "slug": "logisticspro",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "logisticspro",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.logisticspro"
+      "bundleIdentifier": "com.logisticspro",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +22,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.logisticspro"
+      "package": "com.logisticspro",
+      "versionCode": 1
     },
     "web": {
       "output": "single",
@@ -41,8 +44,7 @@
             "backgroundColor": "#1F2937"
           }
         }
-      ],
-      "expo-web-browser"
+      ]
     ]
   }
 }
