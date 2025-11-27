@@ -32,9 +32,7 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      console.log("User login attempt:", username);
       const success = await loginUser(username, password);
-      console.log("User login result:", success);
       
       if (!success) {
         setError("Onaylanmamış kullanıcı veya yanlış şifre");
