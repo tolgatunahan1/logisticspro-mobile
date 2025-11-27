@@ -110,9 +110,6 @@ export default function SettingsScreen() {
                       {iban.ibanNumber}
                     </ThemedText>
                   </View>
-                  <Pressable onPress={() => handleDeleteIBAN(iban)} hitSlop={8}>
-                    <Feather name="trash-2" size={18} color={colors.destructive} />
-                  </Pressable>
                 </View>
               ))}
             </View>

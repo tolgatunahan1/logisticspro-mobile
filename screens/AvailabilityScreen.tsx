@@ -101,13 +101,6 @@ export default function AvailabilityScreen() {
             </ThemedText>
           )}
         </View>
-        <Pressable 
-          onPress={() => handleDelete(item)}
-          style={s.deleteBtn}
-          hitSlop={8}
-        >
-          <Feather name="trash-2" size={14} color="#EF4444" />
-        </Pressable>
       </View>
       <View style={[s.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]} />
       <View style={{ gap: 4 }}>

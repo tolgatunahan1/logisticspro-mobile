@@ -609,22 +609,6 @@ export default function CompletedJobListScreen() {
                     Paylaş
                   </ThemedText>
                 </Pressable>
-                <Pressable
-                  onPress={() => handleDeletePress(selectedJob)}
-                  style={({ pressed }) => [
-                    styles.shareButton,
-                    {
-                      backgroundColor: colors.destructive,
-                      opacity: pressed ? 0.9 : 1,
-                      flex: 1,
-                    },
-                  ]}
-                >
-                  <Feather name="trash-2" size={16} color="#FFFFFF" />
-                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Sefer İptal Et
-                  </ThemedText>
-                </Pressable>
               </View>
             )}
           </View>

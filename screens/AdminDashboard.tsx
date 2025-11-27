@@ -215,12 +215,6 @@ export default function AdminDashboard() {
                     Onaylandı: {formatDate(item.approvedAt)}
                   </ThemedText>
                 </View>
-                <Pressable
-                  onPress={() => handleRevoke(item.id, item.username)}
-                  style={[styles.button, { backgroundColor: colors.destructive }]}
-                >
-                  <Feather name="trash-2" size={20} color="white" />
-                </Pressable>
               </View>
             ))}
           </View>

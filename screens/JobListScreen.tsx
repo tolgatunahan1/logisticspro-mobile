@@ -385,22 +385,6 @@ export default function JobListScreen() {
                       Paylaş
                     </ThemedText>
                   </Pressable>
-                  <Pressable
-                    onPress={() => handleDeletePress(selectedJob)}
-                    style={({ pressed }) => [
-                      styles.shareButton,
-                      {
-                        backgroundColor: colors.destructive,
-                        opacity: pressed ? 0.9 : 1,
-                        flex: 1,
-                      },
-                    ]}
-                  >
-                    <Feather name="trash-2" size={20} color="#FFFFFF" />
-                    <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                      Sil
-                    </ThemedText>
-                  </Pressable>
                 </View>
                 <Pressable
                   onPress={() => handleCreateTrip(selectedJob)}
