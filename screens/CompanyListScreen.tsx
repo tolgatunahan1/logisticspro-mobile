@@ -89,12 +89,20 @@ export default function CompanyListScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteCompany(company.id);
+              setIsDeleting(true);
+              const result = await deleteCompany(company.id);
+              if (!result) {
+                Alert.alert("Hata", "Firma silinirken hata oluştu. Lütfen tekrar deneyin.");
+                setIsDeleting(false);
+                return;
+              }
               await loadCompanies();
               setShowDetailModal(false);
+              setIsDeleting(false);
             } catch (error) {
               console.error("Silme hatası:", error);
               Alert.alert("Hata", "Firma silinirken hata oluştu");
+              setIsDeleting(false);
             }
           },
         },
