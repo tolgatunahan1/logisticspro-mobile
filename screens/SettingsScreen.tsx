@@ -2,12 +2,13 @@ import React, { useState, useCallback } from "react";
 import { StyleSheet, View, Pressable, Alert, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN } from "../utils/storage";
 import { IBANListModal } from "../components/IBANListModal";
@@ -15,6 +16,8 @@ import { IBANListModal } from "../components/IBANListModal";
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const { logout } = useAuth();
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [ibans, setIbans] = useState<IBAN[]>([]);
@@ -24,6 +27,19 @@ export default function SettingsScreen() {
   const [isAdding, setIsAdding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+
+  const handleLogout = async () => {
+    Alert.alert("Çıkış", "Hesaptan çıkış yapmak istiyor musunuz?", [
+      { text: "İptal", onPress: () => {} },
+      {
+        text: "Çıkış Yap",
+        onPress: async () => {
+          await logout();
+        },
+        style: "destructive",
+      },
+    ]);
+  };
 
   const loadIBANs = useCallback(async () => {
     const data = await getIBANs();
@@ -424,6 +440,24 @@ export default function SettingsScreen() {
           </View>
         </View>
       )}
+
+        <Pressable
+          onPress={handleLogout}
+          style={({ pressed }) => [
+            styles.logoutButton,
+            {
+              backgroundColor: colors.destructive,
+              opacity: pressed ? 0.8 : 1,
+              marginHorizontal: Spacing.xl,
+              marginBottom: insets.bottom + Spacing.xl,
+            },
+          ]}
+        >
+          <Feather name="log-out" size={20} color="white" />
+          <ThemedText type="body" style={[styles.logoutText, { color: "white" }]}>
+            Çıkış Yap
+          </ThemedText>
+        </Pressable>
     </ThemedView>
   );
 }
