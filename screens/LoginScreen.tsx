@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { useAuth } from "@/contexts/AuthContext";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { initializeDefaultAdmin } from "@/utils/userManagement";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { initializeDefaultAdmin } from "../utils/userManagement";
 
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();

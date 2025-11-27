@@ -2,16 +2,16 @@ import React, { useState, useCallback } from "react";
 import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { ThemedText } from "@/components/ThemedText";
-import { ScreenScrollView } from "@/components/ScreenScrollView";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { ThemedText } from "../components/ThemedText";
+import { ScreenScrollView } from "../components/ScreenScrollView";
+import { useTheme } from "../hooks/useTheme";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import {
   getCarrierAvailabilities,
   addCarrierAvailability,
   deleteCarrierAvailability,
   CarrierAvailability,
-} from "@/utils/storage";
+} from "../utils/storage";
 
 export default function AvailabilityScreen() {
   const { theme, isDark } = useTheme();

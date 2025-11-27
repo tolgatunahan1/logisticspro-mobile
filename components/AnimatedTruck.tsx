@@ -8,7 +8,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "../hooks/useTheme";
 
 export function AnimatedTruck() {
   const { theme, isDark } = useTheme();

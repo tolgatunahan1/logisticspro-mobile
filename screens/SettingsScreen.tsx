@@ -5,12 +5,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getIBANs, addIBAN, deleteIBAN, IBAN } from "@/utils/storage";
-import { IBANListModal } from "@/components/IBANListModal";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { getIBANs, addIBAN, deleteIBAN, IBAN } from "../utils/storage";
+import { IBANListModal } from "../components/IBANListModal";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();

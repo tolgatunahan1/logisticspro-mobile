@@ -9,8 +9,8 @@ import Animated, {
   interpolate,
   Extrapolate,
 } from "react-native-reanimated";
-import { useTheme } from "@/hooks/useTheme";
-import { ThemedText } from "@/components/ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { ThemedText } from "./ThemedText";
 
 export function AnimatedMap() {
   const { theme, isDark } = useTheme();

@@ -4,9 +4,9 @@ import {
   KeyboardAwareScrollViewProps,
 } from "react-native-keyboard-controller";
 
-import { useTheme } from "@/hooks/useTheme";
-import { useScreenInsets } from "@/hooks/useScreenInsets";
-import { Spacing } from "@/constants/theme";
+import { useTheme } from "../hooks/useTheme";
+import { useScreenInsets } from "../hooks/useScreenInsets";
+import { Spacing } from "../constants/theme";
 import { ScreenScrollView } from "./ScreenScrollView";
 
 export function ScreenKeyboardAwareScrollView({

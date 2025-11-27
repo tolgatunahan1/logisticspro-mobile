@@ -3,14 +3,14 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
-import { Colors, Spacing } from "@/constants/theme";
-import { getCommonScreenOptions } from "@/navigation/screenOptions";
-import { HeaderTitle } from "@/components/HeaderTitle";
+import { useTheme } from "../hooks/useTheme";
+import { Colors, Spacing } from "../constants/theme";
+import { getCommonScreenOptions } from "./screenOptions";
+import { HeaderTitle } from "../components/HeaderTitle";
 
-import HomeScreen from "@/screens/HomeScreen";
-import WalletScreen from "@/screens/WalletScreen";
-import AvailabilityScreen from "@/screens/AvailabilityScreen";
+import HomeScreen from "../screens/HomeScreen";
+import WalletScreen from "../screens/WalletScreen";
+import AvailabilityScreen from "../screens/AvailabilityScreen";
 
 export type BottomTabParamList = {
   HomeTab: undefined;

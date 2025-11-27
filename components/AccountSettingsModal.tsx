@@ -2,9 +2,9 @@ import React from "react";
 import { Modal, View, Pressable, TextInput, StyleSheet, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { ThemedText } from "./ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
 
 interface AccountSettingsModalProps {
   visible: boolean;

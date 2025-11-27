@@ -4,12 +4,12 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 
-import { ScreenScrollView } from "@/components/ScreenScrollView";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { getCompanyWallet, getUnpaidCommissions, markCommissionAsPaid, CompanyWallet, CompletedJob } from "@/utils/storage";
+import { ScreenScrollView } from "../components/ScreenScrollView";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { getCompanyWallet, getUnpaidCommissions, markCommissionAsPaid, CompanyWallet, CompletedJob } from "../utils/storage";
 
 export default function WalletScreen() {
   const { theme, isDark } = useTheme();

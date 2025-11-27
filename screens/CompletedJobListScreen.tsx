@@ -6,12 +6,12 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Linking from "expo-linking";
 
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN } from "@/utils/storage";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { RootStackParamList } from "../navigation/RootNavigator";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN } from "../utils/storage";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

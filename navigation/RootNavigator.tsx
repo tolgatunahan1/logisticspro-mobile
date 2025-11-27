@@ -2,21 +2,21 @@ import React from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import BottomTabNavigator from "@/navigation/BottomTabNavigator";
-import CarrierListScreen from "@/screens/CarrierListScreen";
-import CarrierFormScreen from "@/screens/CarrierFormScreen";
-import CompanyListScreen from "@/screens/CompanyListScreen";
-import CompanyFormScreen from "@/screens/CompanyFormScreen";
-import JobListScreen from "@/screens/JobListScreen";
-import JobFormScreen from "@/screens/JobFormScreen";
-import CompletedJobListScreen from "@/screens/CompletedJobListScreen";
-import CompletedJobFormScreen from "@/screens/CompletedJobFormScreen";
-import SettingsScreen from "@/screens/SettingsScreen";
-import { HeaderTitle } from "@/components/HeaderTitle";
-import { useTheme } from "@/hooks/useTheme";
-import { useAuth } from "@/contexts/AuthContext";
-import { getCommonScreenOptions } from "@/navigation/screenOptions";
-import { Carrier, Company, PlannedJob, CompletedJob } from "@/utils/storage";
+import BottomTabNavigator from "./BottomTabNavigator";
+import CarrierListScreen from "../screens/CarrierListScreen";
+import CarrierFormScreen from "../screens/CarrierFormScreen";
+import CompanyListScreen from "../screens/CompanyListScreen";
+import CompanyFormScreen from "../screens/CompanyFormScreen";
+import JobListScreen from "../screens/JobListScreen";
+import JobFormScreen from "../screens/JobFormScreen";
+import CompletedJobListScreen from "../screens/CompletedJobListScreen";
+import CompletedJobFormScreen from "../screens/CompletedJobFormScreen";
+import SettingsScreen from "../screens/SettingsScreen";
+import { HeaderTitle } from "../components/HeaderTitle";
+import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
+import { getCommonScreenOptions } from "./screenOptions";
+import { Carrier, Company, PlannedJob, CompletedJob } from "../utils/storage";
 
 export type RootStackParamList = {
   Login: undefined;

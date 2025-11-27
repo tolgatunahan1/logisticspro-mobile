@@ -6,13 +6,13 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { RootStackParamList } from "@/navigation/RootNavigator";
-import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "@/utils/storage";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
-import { AnimatedMap } from "@/components/AnimatedMap";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import { useTheme } from "../hooks/useTheme";
+import { RootStackParamList } from "../navigation/RootNavigator";
+import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "../utils/storage";
+import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { AnimatedMap } from "../components/AnimatedMap";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

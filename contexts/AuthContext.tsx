@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { loginUser as loginAppUser, getAdmin, AppUser } from "@/utils/userManagement";
+import { loginUser as loginAppUser, getAdmin, AppUser } from "../utils/userManagement";
 
 interface User {
   id?: string;

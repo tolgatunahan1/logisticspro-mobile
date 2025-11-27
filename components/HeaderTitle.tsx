@@ -1,8 +1,8 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
 
-import { ThemedText } from "@/components/ThemedText";
-import { Spacing } from "@/constants/theme";
+import { ThemedText } from "./ThemedText";
+import { Spacing } from "../constants/theme";
 
 interface HeaderTitleProps {
   title: string;

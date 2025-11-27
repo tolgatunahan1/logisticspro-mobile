@@ -7,10 +7,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as Notifications from "expo-notifications";
 
-import RootNavigator from "@/navigation/RootNavigator";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { logPlatform, isWeb } from "@/utils/platform";
+import RootNavigator from "./navigation/RootNavigator";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { AuthProvider } from "./contexts/AuthContext";
+import { logPlatform, isWeb } from "./utils/platform";
 
 // Suppress unnecessary console warnings/logs for Replit performance
 if (typeof console !== 'undefined') {
