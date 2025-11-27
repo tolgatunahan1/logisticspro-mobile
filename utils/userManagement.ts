@@ -37,9 +37,10 @@ export const debugStorage = async (): Promise<void> => {
 export const getAdmin = async (): Promise<AdminUser | null> => {
   try {
     const admin = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
+    console.log("📦 getAdmin result:", admin ? "Found" : "Not found");
     return admin ? JSON.parse(admin) : null;
   } catch (error) {
-    console.error("Failed to get admin:", error);
+    console.error("❌ Failed to get admin:", error);
     return null;
   }
 };
@@ -48,9 +49,10 @@ export const createAdmin = async (username: string, password: string): Promise<b
   try {
     const admin: AdminUser = { username, password, createdAt: Date.now() };
     await AsyncStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(admin));
+    console.log("✅ Admin created:", username);
     return true;
   } catch (error) {
-    console.error("Failed to create admin:", error);
+    console.error("❌ Failed to create admin:", error);
     return false;
   }
 };
@@ -216,6 +218,7 @@ export const validatePassword = (password: string): boolean => {
 
 export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
+    console.log("🔧 Initializing default admin...");
     const admin = await getAdmin();
     if (!admin) {
       const defaultAdmin: AdminUser = {
@@ -224,9 +227,11 @@ export const initializeDefaultAdmin = async (): Promise<void> => {
         createdAt: Date.now(),
       };
       await AsyncStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(defaultAdmin));
-      console.log("✅ Default admin initialized");
+      console.log("✅ Default admin initialized - tolgatunahan");
+    } else {
+      console.log("✅ Admin already exists:", admin.username);
     }
   } catch (error) {
-    console.error("Failed to initialize default admin:", error);
+    console.error("❌ Failed to initialize default admin:", error);
   }
 };
