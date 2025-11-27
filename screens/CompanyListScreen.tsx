@@ -327,6 +327,32 @@ export default function CompanyListScreen() {
               >
                 <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
               </Pressable>
+              <Pressable
+                onPress={async () => {
+                  await confirmDelete(async (company) => {
+                    const success = await deleteCompany(company.id);
+                    if (success) {
+                      await loadCompanies();
+                    }
+                    return success;
+                  });
+                }}
+                disabled={deleteState.isDeleting}
+                style={({ pressed }) => [
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: colors.destructive,
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>
+                  {deleteState.isDeleting ? "Siliniyor..." : "Sil"}
+                </ThemedText>
+              </Pressable>
             </View>
           </View>
         </View>

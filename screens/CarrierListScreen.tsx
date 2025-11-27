@@ -349,26 +349,12 @@ export default function CarrierListScreen() {
               </Pressable>
               <Pressable
                 onPress={async () => {
-                  const success = await confirmDelete(async (item) => {
-                    const beforeDelete = carriers.filter(c => c.id !== item.id);
-                    setCarriers(beforeDelete);
-                    try {
-                      await deleteCarrier(item.id);
-                      for (let i = 0; i < 3; i++) {
-                        await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
-                        const fresh = await getCarriers();
-                        if (!fresh.some(c => c.id === item.id)) {
-                          setCarriers(fresh);
-                          break;
-                        }
-                      }
-                      setShowDetailModal(false);
-                      return true;
-                    } catch (error) {
-                      console.error("❌ Delete error:", error);
+                  await confirmDelete(async (carrier) => {
+                    const success = await deleteCarrier(carrier.id);
+                    if (success) {
                       await loadCarriers();
-                      return false;
                     }
+                    return success;
                   });
                 }}
                 disabled={deleteState.isDeleting}
