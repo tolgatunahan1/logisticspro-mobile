@@ -220,16 +220,43 @@ export const validatePassword = (password: string): boolean => {
 export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
     console.log("🔧 Initializing default admin...");
-    const admin = await getAdmin();
-    if (!admin) {
+    
+    // Check current key
+    let adminData = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
+    console.log("📌 Current key check:", ADMIN_STORAGE_KEY, "->", adminData ? "✅ Found" : "❌ Not found");
+    
+    // If not found, check old key and migrate
+    if (!adminData) {
+      const oldKey = "@logistics_admin";
+      console.log("📌 Checking old key:", oldKey);
+      const oldAdminData = await AsyncStorage.getItem(oldKey);
+      if (oldAdminData) {
+        console.log("🔄 Migrating admin from old key...");
+        await AsyncStorage.setItem(ADMIN_STORAGE_KEY, oldAdminData);
+        await AsyncStorage.removeItem(oldKey);
+        adminData = oldAdminData;
+        console.log("✅ Admin migrated successfully");
+      }
+    }
+    
+    // If still no admin, create default
+    if (!adminData) {
       const defaultAdmin: AdminUser = {
         username: "tolgatunahan",
         password: "1Liraversene",
         createdAt: Date.now(),
       };
-      await AsyncStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(defaultAdmin));
-      console.log("✅ Default admin initialized - tolgatunahan");
+      const adminJson = JSON.stringify(defaultAdmin);
+      await AsyncStorage.setItem(ADMIN_STORAGE_KEY, adminJson);
+      // Verify it was saved
+      const verify = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
+      if (verify) {
+        console.log("✅ Default admin created and verified - tolgatunahan");
+      } else {
+        console.error("❌ Admin created but verification failed!");
+      }
     } else {
+      const admin = JSON.parse(adminData);
       console.log("✅ Admin already exists:", admin.username);
     }
   } catch (error) {
