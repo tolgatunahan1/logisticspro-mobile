@@ -46,7 +46,7 @@ function WalletStackScreen() {
         name="Wallet"
         component={WalletScreen}
         options={{
-          headerTitle: "Şirket Cüzdanı",
+          headerTitle: "Ödeme Takip",
         }}
       />
     </WalletStack.Navigator>
@@ -118,7 +118,7 @@ export default function BottomTabNavigator() {
         name="WalletTab"
         component={WalletStackScreen}
         options={{
-          tabBarLabel: "Cüzdan",
+          tabBarLabel: "Ödeme Takip",
         }}
       />
       <Tab.Screen
