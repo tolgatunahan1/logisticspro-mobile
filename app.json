@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "logisticspro",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.logisticspro"
