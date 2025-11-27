@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, ActivityIndicator, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -9,7 +9,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getPendingUsers, approveUser, rejectUser } from "../utils/userManagement";
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser } from "../utils/userManagement";
 
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
@@ -17,15 +17,18 @@ export default function AdminDashboard() {
   const navigation = useNavigation();
   const { logout } = useAuth();
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
+  const [approvedUsers, setApprovedUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
-  const loadPendingUsers = useCallback(async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const users = await getPendingUsers();
-      setPendingUsers(users);
+      const pending = await getPendingUsers();
+      const approved = await getApprovedUsers();
+      setPendingUsers(pending);
+      setApprovedUsers(approved);
     } finally {
       setLoading(false);
     }
@@ -33,8 +36,8 @@ export default function AdminDashboard() {
 
   useFocusEffect(
     useCallback(() => {
-      loadPendingUsers();
-    }, [loadPendingUsers])
+      loadUsers();
+    }, [loadUsers])
   );
 
   const handleApprove = async (userId: string) => {
@@ -44,7 +47,7 @@ export default function AdminDashboard() {
         text: "Onayla",
         onPress: async () => {
           await approveUser(userId);
-          await loadPendingUsers();
+          await loadUsers();
         },
       },
     ]);
@@ -57,11 +60,34 @@ export default function AdminDashboard() {
         text: "Reddet",
         onPress: async () => {
           await rejectUser(userId);
-          await loadPendingUsers();
+          await loadUsers();
         },
         style: "destructive",
       },
     ]);
+  };
+
+  const handleRevoke = async (userId: string, username: string) => {
+    Alert.alert("Onayı Kaldır", `${username} kullanıcısının onayını kaldırmak istiyor musunuz?`, [
+      { text: "İptal" },
+      {
+        text: "Kaldır",
+        onPress: async () => {
+          await unapproveUser(userId);
+          await loadUsers();
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
+  const formatDate = (timestamp?: number): string => {
+    if (!timestamp) return "-";
+    return new Date(timestamp).toLocaleDateString("tr-TR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
   };
 
   return (
@@ -87,57 +113,119 @@ export default function AdminDashboard() {
         </Pressable>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText type="h4" style={{ paddingHorizontal: Spacing.xl }}>
-          Beklemede Kullanıcılar ({pendingUsers.length})
-        </ThemedText>
-      </View>
-
-      {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={theme.link} />
-        </View>
-      ) : pendingUsers.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <ThemedText type="body" style={{ color: colors.textSecondary }}>
-            Beklemede kullanıcı yok
+      <View style={[styles.statsContainer, { paddingHorizontal: Spacing.xl }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
+          <ThemedText type="small" style={{ color: colors.textSecondary }}>
+            Aktif Kullanıcılar
+          </ThemedText>
+          <ThemedText type="h3" style={{ fontWeight: "700", color: theme.link }}>
+            {approvedUsers.length}
           </ThemedText>
         </View>
-      ) : (
-        <FlatList
-          data={pendingUsers}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: Spacing.xl, gap: Spacing.md }}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
-              ]}
-            >
-              <View style={styles.userInfo}>
-                <ThemedText type="body" style={{ fontWeight: "600" }}>
-                  {item.username}
-                </ThemedText>
+        <View style={[styles.statCard, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
+          <ThemedText type="small" style={{ color: colors.textSecondary }}>
+            Beklemede
+          </ThemedText>
+          <ThemedText type="h3" style={{ fontWeight: "700", color: "#f59e0b" }}>
+            {pendingUsers.length}
+          </ThemedText>
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/* Beklemede Kullanıcılar */}
+        <View style={styles.section}>
+          <ThemedText type="h4" style={{ paddingHorizontal: Spacing.xl }}>
+            Beklemede Kullanıcılar ({pendingUsers.length})
+          </ThemedText>
+        </View>
+
+        {loading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.link} />
+          </View>
+        ) : pendingUsers.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <ThemedText type="body" style={{ color: colors.textSecondary }}>
+              Beklemede kullanıcı yok
+            </ThemedText>
+          </View>
+        ) : (
+          <View style={{ paddingHorizontal: Spacing.xl, gap: Spacing.md, paddingBottom: Spacing.lg }}>
+            {pendingUsers.map((item) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.card,
+                  { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
+                ]}
+              >
+                <View style={styles.userInfo}>
+                  <ThemedText type="body" style={{ fontWeight: "600" }}>
+                    {item.username}
+                  </ThemedText>
+                </View>
+                <View style={styles.actions}>
+                  <Pressable
+                    onPress={() => handleApprove(item.id)}
+                    style={[styles.button, { backgroundColor: "#10b981" }]}
+                  >
+                    <Feather name="check" size={20} color="white" />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleReject(item.id)}
+                    style={[styles.button, { backgroundColor: colors.destructive }]}
+                  >
+                    <Feather name="x" size={20} color="white" />
+                  </Pressable>
+                </View>
               </View>
-              <View style={styles.actions}>
+            ))}
+          </View>
+        )}
+
+        {/* Onaylanmış Kullanıcılar */}
+        <View style={styles.section}>
+          <ThemedText type="h4" style={{ paddingHorizontal: Spacing.xl }}>
+            Onaylanmış Kullanıcılar ({approvedUsers.length})
+          </ThemedText>
+        </View>
+
+        {approvedUsers.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <ThemedText type="body" style={{ color: colors.textSecondary }}>
+              Onaylanmış kullanıcı yok
+            </ThemedText>
+          </View>
+        ) : (
+          <View style={{ paddingHorizontal: Spacing.xl, gap: Spacing.md, paddingBottom: Spacing.lg }}>
+            {approvedUsers.map((item) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.card,
+                  { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
+                ]}
+              >
+                <View style={styles.userInfo}>
+                  <ThemedText type="body" style={{ fontWeight: "600" }}>
+                    {item.username}
+                  </ThemedText>
+                  <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
+                    Onaylandı: {formatDate(item.approvedAt)}
+                  </ThemedText>
+                </View>
                 <Pressable
-                  onPress={() => handleApprove(item.id)}
-                  style={[styles.button, { backgroundColor: "#10b981" }]}
-                >
-                  <Feather name="check" size={20} color="white" />
-                </Pressable>
-                <Pressable
-                  onPress={() => handleReject(item.id)}
+                  onPress={() => handleRevoke(item.id, item.username)}
                   style={[styles.button, { backgroundColor: colors.destructive }]}
                 >
-                  <Feather name="x" size={20} color="white" />
+                  <Feather name="trash-2" size={20} color="white" />
                 </Pressable>
               </View>
-            </View>
-          )}
-        />
-      )}
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -151,12 +239,30 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  statsContainer: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    paddingVertical: Spacing.lg,
+  },
+  statCard: {
+    flex: 1,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    alignItems: "center",
+  },
   section: {
     paddingVertical: Spacing.lg,
+    paddingTop: Spacing.xl,
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
     alignItems: "center",
   },
   card: {
@@ -182,3 +288,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
