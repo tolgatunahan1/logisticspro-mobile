@@ -18,7 +18,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { loginUser, loginAdmin } = useAuth();
+  const { loginUser, loginAdmin, loginWithFirebase } = useAuth();
   const navigation = useNavigation<NavigationProp>();
   
   const [username, setUsername] = useState("");
@@ -26,6 +26,7 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isFirebaseMode, setIsFirebaseMode] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -41,14 +42,17 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setError("");
     if (!username.trim() || !password.trim()) {
-      setError("Kullanıcı adı ve şifre gerekli");
+      setError("Email/Kullanıcı adı ve şifre gerekli");
       return;
     }
 
     setIsLoading(true);
     try {
       let success = false;
-      if (isAdminMode) {
+      if (isFirebaseMode) {
+        // Firebase login with email
+        success = await loginWithFirebase(username, password);
+      } else if (isAdminMode) {
         // Admin mode - only try admin login
         success = await loginAdmin(username, password);
       } else {
@@ -57,7 +61,11 @@ export default function LoginScreen() {
       }
       
       if (!success) {
-        setError(isAdminMode ? "Admin şifresi yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
+        if (isFirebaseMode) {
+          setError("Email veya şifre yanlış");
+        } else {
+          setError(isAdminMode ? "Admin şifresi yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -88,21 +96,35 @@ export default function LoginScreen() {
 
         <View style={[styles.modeToggle, { borderColor: colors.border }]}>
           <Pressable
-            onPress={() => setIsAdminMode(false)}
+            onPress={() => { setIsAdminMode(false); setIsFirebaseMode(false); }}
             disabled={isLoading}
             style={[
               styles.modeButton,
               {
-                backgroundColor: !isAdminMode ? theme.link : colors.inputBackground,
+                backgroundColor: !isAdminMode && !isFirebaseMode ? theme.link : colors.inputBackground,
               },
             ]}
           >
-            <ThemedText style={[styles.modeButtonText, { color: !isAdminMode ? "#FFF" : colors.textSecondary }]}>
+            <ThemedText style={[styles.modeButtonText, { color: !isAdminMode && !isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
               Kullanıcı
             </ThemedText>
           </Pressable>
           <Pressable
-            onPress={() => setIsAdminMode(true)}
+            onPress={() => { setIsAdminMode(false); setIsFirebaseMode(true); }}
+            disabled={isLoading}
+            style={[
+              styles.modeButton,
+              {
+                backgroundColor: isFirebaseMode ? theme.link : colors.inputBackground,
+              },
+            ]}
+          >
+            <ThemedText style={[styles.modeButtonText, { color: isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
+              Firebase
+            </ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={() => { setIsAdminMode(true); setIsFirebaseMode(false); }}
             disabled={isLoading}
             style={[
               styles.modeButton,
@@ -120,7 +142,7 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              Kullanıcı Adı
+              {isFirebaseMode ? "Email" : "Kullanıcı Adı"}
             </ThemedText>
             <TextInput
               style={[
@@ -131,7 +153,7 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Kullanıcı adınız"
+              placeholder={isFirebaseMode ? "Email adresiniz" : "Kullanıcı adınız"}
               placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
