@@ -69,6 +69,17 @@ export default function HomeScreen() {
           <Feather name="menu" size={22} color={theme.text} />
         </Pressable>
       ),
+      headerRight: () => (
+        <Pressable
+          onPress={handleSettingsPress}
+          style={({ pressed }) => [
+            styles.headerButton,
+            { opacity: pressed ? 0.6 : 1 },
+          ]}
+        >
+          <Feather name="settings" size={22} color={theme.text} />
+        </Pressable>
+      ),
     });
   }, [navigation, theme]);
 
@@ -402,24 +413,6 @@ export default function HomeScreen() {
                   </ThemedText>
                 </View>
               </Pressable>
-
-              <View style={{ borderTopWidth: 1, borderTopColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)", marginTop: Spacing.lg, paddingTop: Spacing.lg }}>
-                <Pressable
-                  onPress={() => {
-                    setDrawerVisible(false);
-                    handleSettingsPress();
-                  }}
-                  style={({ pressed }) => [
-                    styles.drawerItem,
-                    { opacity: pressed ? 0.7 : 1 },
-                  ]}
-                >
-                  <Feather name="settings" size={20} color={colors.textSecondary} />
-                  <View style={{ flex: 1 }}>
-                    <ThemedText type="body">Ayarlar</ThemedText>
-                  </View>
-                </Pressable>
-              </View>
             </View>
           </View>
         </Pressable>
