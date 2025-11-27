@@ -175,8 +175,24 @@ export const updateCarrier = async (id: string, updates: Partial<Omit<Carrier, "
 export const deleteCarrier = async (id: string): Promise<boolean> => {
   try {
     const carriers = await getCarriers();
+    const beforeCount = carriers.length;
     const filtered = carriers.filter((c) => c.id !== id);
-    await saveCarriers(filtered);
+    
+    if (filtered.length === beforeCount) {
+      console.warn("Carrier not found with id:", id);
+      return false;
+    }
+    
+    const jsonData = JSON.stringify(filtered);
+    await AsyncStorage.setItem(CARRIERS_STORAGE_KEY, jsonData);
+    
+    // Verify write succeeded
+    const verify = await AsyncStorage.getItem(CARRIERS_STORAGE_KEY);
+    if (!verify || verify !== jsonData) {
+      console.error("Carrier delete verification failed");
+      return false;
+    }
+    
     return true;
   } catch (error) {
     console.error("Failed to delete carrier:", error);
@@ -259,8 +275,24 @@ export const updateCompany = async (id: string, updates: Partial<Omit<Company, "
 export const deleteCompany = async (id: string): Promise<boolean> => {
   try {
     const companies = await getCompanies();
+    const beforeCount = companies.length;
     const filtered = companies.filter((c) => c.id !== id);
-    await saveCompanies(filtered);
+    
+    if (filtered.length === beforeCount) {
+      console.warn("Company not found with id:", id);
+      return false;
+    }
+    
+    const jsonData = JSON.stringify(filtered);
+    await AsyncStorage.setItem(COMPANIES_STORAGE_KEY, jsonData);
+    
+    // Verify write succeeded
+    const verify = await AsyncStorage.getItem(COMPANIES_STORAGE_KEY);
+    if (!verify || verify !== jsonData) {
+      console.error("Company delete verification failed");
+      return false;
+    }
+    
     return true;
   } catch (error) {
     console.error("Failed to delete company:", error);
@@ -344,8 +376,24 @@ export const updateJob = async (id: string, updates: Partial<Omit<PlannedJob, "i
 export const deleteJob = async (id: string): Promise<boolean> => {
   try {
     const jobs = await getJobs();
+    const beforeCount = jobs.length;
     const filtered = jobs.filter((j) => j.id !== id);
-    await saveJobs(filtered);
+    
+    if (filtered.length === beforeCount) {
+      console.warn("Job not found with id:", id);
+      return false;
+    }
+    
+    const jsonData = JSON.stringify(filtered);
+    await AsyncStorage.setItem(JOBS_STORAGE_KEY, jsonData);
+    
+    // Verify write succeeded
+    const verify = await AsyncStorage.getItem(JOBS_STORAGE_KEY);
+    if (!verify || verify !== jsonData) {
+      console.error("Job delete verification failed");
+      return false;
+    }
+    
     return true;
   } catch (error) {
     console.error("Failed to delete job:", error);
@@ -467,15 +515,31 @@ export const deleteCompletedJob = async (id: string): Promise<boolean> => {
           updatedAt: Date.now(),
         };
         plannedJobs.unshift(restoredJob);
-        await saveJobs(plannedJobs);
+        const jobJsonData = JSON.stringify(plannedJobs);
+        await AsyncStorage.setItem(JOBS_STORAGE_KEY, jobJsonData);
       }
     }
     
-    // Sefer sil - cüzdan otomatik hesaplanır
+    // Sefer sil
+    const beforeCount = completedJobs.length;
     const filtered = completedJobs.filter((j) => j.id !== id);
-    await saveCompletedJobs(filtered);
     
-    // Cüzdanı güncelle (otomatik olarak yeni hesaplanan değerlerle)
+    if (filtered.length === beforeCount) {
+      console.warn("Completed job not found with id:", id);
+      return false;
+    }
+    
+    const jsonData = JSON.stringify(filtered);
+    await AsyncStorage.setItem(COMPLETED_JOBS_STORAGE_KEY, jsonData);
+    
+    // Verify write succeeded
+    const verify = await AsyncStorage.getItem(COMPLETED_JOBS_STORAGE_KEY);
+    if (!verify || verify !== jsonData) {
+      console.error("Completed job delete verification failed");
+      return false;
+    }
+    
+    // Cüzdanı güncelle
     const wallet = await getCompanyWallet();
     await saveCompanyWallet(wallet);
     
@@ -543,8 +607,24 @@ export const addIBAN = async (iban: Omit<IBAN, "id" | "createdAt" | "updatedAt">
 export const deleteIBAN = async (id: string): Promise<boolean> => {
   try {
     const ibans = await getIBANs();
+    const beforeCount = ibans.length;
     const filtered = ibans.filter((i) => i.id !== id);
-    await saveIBANs(filtered);
+    
+    if (filtered.length === beforeCount) {
+      console.warn("IBAN not found with id:", id);
+      return false;
+    }
+    
+    const jsonData = JSON.stringify(filtered);
+    await AsyncStorage.setItem(IBANS_STORAGE_KEY, jsonData);
+    
+    // Verify write succeeded
+    const verify = await AsyncStorage.getItem(IBANS_STORAGE_KEY);
+    if (!verify || verify !== jsonData) {
+      console.error("IBAN delete verification failed");
+      return false;
+    }
+    
     return true;
   } catch (error) {
     console.error("Failed to delete IBAN:", error);
