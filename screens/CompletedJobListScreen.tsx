@@ -27,9 +27,6 @@ export default function CompletedJobListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [jobToDelete, setJobToDelete] = useState<CompletedJob | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [ibans, setIbans] = useState<IBAN[]>([]);
   const [showIBANModal, setShowIBANModal] = useState(false);
 
@@ -165,11 +162,6 @@ export default function CompletedJobListScreen() {
       setFilteredJobs(searchCompletedJobs(jobs, query));
     }
   }, [jobs]);
-
-  const handleDeletePress = (job: CompletedJob) => {
-    setJobToDelete(job);
-    setShowDeleteConfirm(true);
-  };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -613,76 +605,6 @@ export default function CompletedJobListScreen() {
             )}
           </View>
         </View>
-
-        {/* Delete Confirmation Modal (inside Detail Modal) */}
-        {showDeleteConfirm && (
-          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center", zIndex: 1000, paddingHorizontal: Spacing.lg }}>
-            <View style={{
-              backgroundColor: isDark ? "rgba(30, 30, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
-              borderRadius: BorderRadius.lg,
-              padding: Spacing.xl,
-              width: "100%",
-              maxWidth: 340,
-              borderWidth: 1,
-              borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-              overflow: "hidden",
-            }}>
-              <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
-                <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>Seferi İptal Et</ThemedText>
-                <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  "{companies[jobToDelete?.companyId || ""]?.name || "İş"}" - "{jobToDelete?.cargoType}" seferini iptal etmek istediğinizden emin misiniz? İş planlanan işlere geri dönecektir.
-                </ThemedText>
-              </View>
-              <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
-                <Pressable
-                  onPress={() => setShowDeleteConfirm(false)}
-                  disabled={isDeleting}
-                  style={({ pressed }) => [
-                    { 
-                      flex: 1, 
-                      paddingVertical: Spacing.md,
-                      paddingHorizontal: Spacing.lg,
-                      borderRadius: BorderRadius.sm,
-                      backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                      opacity: pressed || isDeleting ? 0.5 : 1,
-                    },
-                  ]}
-                >
-                  <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={async () => {
-                    if (!jobToDelete) return;
-                    setIsDeleting(true);
-                    try {
-                      await deleteCompletedJob(jobToDelete.id);
-                      setShowDeleteConfirm(false);
-                      setShowDetailModal(false);
-                      await loadData();
-                    } catch (error) {
-                      console.error("Delete error:", error);
-                    } finally {
-                      setIsDeleting(false);
-                    }
-                  }}
-                  disabled={isDeleting}
-                  style={({ pressed }) => [
-                    { 
-                      flex: 1, 
-                      paddingVertical: Spacing.md,
-                      paddingHorizontal: Spacing.lg,
-                      borderRadius: BorderRadius.sm,
-                      backgroundColor: colors.destructive,
-                      opacity: pressed || isDeleting ? 0.7 : 1,
-                    },
-                  ]}
-                >
-                  <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>İptal Et</ThemedText>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        )}
       </Modal>
 
       {/* IBAN Selection Modal */}
