@@ -177,7 +177,7 @@ export default function HomeScreen() {
             <Feather name="check-circle" size={24} color={colors.success} />
             <View style={styles.statContent}>
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                Gerçekleşen
+                Tamamlanan
               </ThemedText>
               <ThemedText type="h3">{completedJobCount}</ThemedText>
             </View>
@@ -309,9 +309,9 @@ export default function HomeScreen() {
             <Feather name="check-circle" size={32} color="#FFFFFF" />
           </View>
           <View style={styles.menuCardContent}>
-            <ThemedText type="h3">Gerçekleşen İşler</ThemedText>
+            <ThemedText type="h3">Gerçekleşen Seferler</ThemedText>
             <ThemedText type="body" style={{ color: colors.textSecondary }}>
-              {completedJobCount} iş
+              {completedJobCount} sefer
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />

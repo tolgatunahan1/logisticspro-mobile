@@ -116,7 +116,7 @@ export default function RootNavigator() {
             name="CompletedJobList"
             component={CompletedJobListScreen}
             options={{
-              headerTitle: "Gerçekleşen İşler",
+              headerTitle: "Gerçekleşen Seferler",
               headerBackTitleVisible: false,
               headerBackTitle: "",
             }}
