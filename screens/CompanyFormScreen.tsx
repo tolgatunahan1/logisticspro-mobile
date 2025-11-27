@@ -58,15 +58,22 @@ export default function CompanyFormScreen() {
         address: address.trim(),
       };
 
+      let success = false;
       if (isEdit && company) {
-        await updateCompany(company.id, data);
+        success = await updateCompany(company.id, data);
       } else {
-        await addCompany(data);
+        const result = await addCompany(data);
+        success = !!result;
+      }
+      
+      if (!success) {
+        Alert.alert("Hata", "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+        setIsLoading(false);
+        return;
       }
       navigation.goBack();
     } catch (error) {
       Alert.alert("Hata", "Kayıt sırasında bir hata oluştu");
-    } finally {
       setIsLoading(false);
     }
   };

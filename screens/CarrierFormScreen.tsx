@@ -68,15 +68,22 @@ export default function CarrierFormScreen() {
         vehicleType,
       };
 
+      let success = false;
       if (isEdit && carrier) {
-        await updateCarrier(carrier.id, data);
+        success = await updateCarrier(carrier.id, data);
       } else {
-        await addCarrier(data);
+        const result = await addCarrier(data);
+        success = !!result;
+      }
+      
+      if (!success) {
+        Alert.alert("Hata", "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+        setIsLoading(false);
+        return;
       }
       navigation.goBack();
     } catch (error) {
       Alert.alert("Hata", "Kayıt sırasında bir hata oluştu");
-    } finally {
       setIsLoading(false);
     }
   };
