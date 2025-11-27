@@ -74,7 +74,9 @@ export default function AdminDashboard() {
               { text: "İptal" },
               {
                 text: "Çıkış",
-                onPress: logout,
+                onPress: async () => {
+                  await logout();
+                },
                 style: "destructive",
               },
             ]);

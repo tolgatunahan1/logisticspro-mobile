@@ -46,12 +46,16 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
+      console.log("🔑 Login attempt - username:", username);
+      
       // Try admin login first
       let success = await loginAdmin(username, password);
+      console.log("👨‍💼 Admin login result:", success);
       
       // If not admin, try regular user login
       if (!success) {
         success = await loginUser(username, password);
+        console.log("👤 User login result:", success);
       }
       
       if (!success) {
