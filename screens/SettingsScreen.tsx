@@ -110,6 +110,9 @@ export default function SettingsScreen() {
                       {iban.ibanNumber}
                     </ThemedText>
                   </View>
+                  <Pressable onPress={() => handleDeleteIBAN(iban)} style={styles.deleteBtn}>
+                    <Feather name="trash-2" size={16} color={colors.destructive} />
+                  </Pressable>
                 </View>
               ))}
             </View>
@@ -557,6 +560,9 @@ const styles = StyleSheet.create({
   },
   ibanInfo: {
     flex: 1,
+  },
+  deleteBtn: {
+    padding: Spacing.xs,
   },
   addButton: {
     flexDirection: "row",
