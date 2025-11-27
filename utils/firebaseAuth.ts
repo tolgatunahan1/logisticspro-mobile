@@ -9,16 +9,37 @@ import {
 import { auth, database } from "@/constants/firebase";
 import { ref, set, get } from "firebase/database";
 
+const FIREBASE_CONFIG_ERROR = "Firebase yapılandırılmamış. Lütfen Firebase credentials'ı constants/firebase.ts dosyasına ekleyin.";
+
 export interface UserProfile {
   uid: string;
   email: string;
   createdAt: number;
 }
 
+const isFirebaseConfigured = (): boolean => {
+  const apiKey = auth.app.options.apiKey;
+  return !apiKey?.includes("AIzaSy") || !apiKey?.includes("X");
+};
+
 export const firebaseAuthService = {
+  // Check if Firebase is properly configured
+  isConfigured: (): boolean => {
+    try {
+      const apiKey = auth.app.options.apiKey || "";
+      // Test keys have placeholder values
+      return !apiKey.includes("X") && apiKey.length > 20;
+    } catch {
+      return false;
+    }
+  },
+
   // Register
   register: async (email: string, password: string): Promise<User | null> => {
     try {
+      if (!firebaseAuthService.isConfigured()) {
+        throw new Error(FIREBASE_CONFIG_ERROR);
+      }
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -35,8 +56,11 @@ export const firebaseAuthService = {
 
       await set(ref(database, `users/${user.uid}/profile`), userProfile);
       return user;
-    } catch (error) {
-      console.error("Register error:", error);
+    } catch (error: any) {
+      console.error("Firebase register error:", error?.message);
+      if (error?.message?.includes("api-key-not-valid")) {
+        throw new Error(FIREBASE_CONFIG_ERROR);
+      }
       throw error;
     }
   },
@@ -44,10 +68,16 @@ export const firebaseAuthService = {
   // Login
   login: async (email: string, password: string): Promise<User | null> => {
     try {
+      if (!firebaseAuthService.isConfigured()) {
+        throw new Error(FIREBASE_CONFIG_ERROR);
+      }
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return userCredential.user;
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (error: any) {
+      console.error("Firebase login error:", error?.message);
+      if (error?.message?.includes("api-key-not-valid")) {
+        throw new Error(FIREBASE_CONFIG_ERROR);
+      }
       throw error;
     }
   },

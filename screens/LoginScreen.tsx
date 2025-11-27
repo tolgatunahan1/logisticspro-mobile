@@ -67,9 +67,16 @@ export default function LoginScreen() {
           setError(isAdminMode ? "Admin şifresi yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      setError("Giriş sırasında hata oluştu");
+      const errorMsg = error?.message || "Giriş sırasında hata oluştu";
+      if (errorMsg.includes("Firebase yapılandırılmamış")) {
+        setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
+      } else if (isFirebaseMode) {
+        setError("Firebase bağlantı hatası. Başka bir modla deneyin.");
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }
