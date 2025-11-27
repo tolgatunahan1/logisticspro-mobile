@@ -277,9 +277,9 @@ export default function HomeScreen() {
             <Feather name="calendar" size={32} color="#FFFFFF" />
           </View>
           <View style={styles.menuCardContent}>
-            <ThemedText type="h3">Planlanan İşler</ThemedText>
+            <ThemedText type="h3">Yeni Sefer Programı</ThemedText>
             <ThemedText type="body" style={{ color: colors.textSecondary }}>
-              {jobCount} iş
+              {jobCount} sefer
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />

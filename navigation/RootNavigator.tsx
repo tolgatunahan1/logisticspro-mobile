@@ -98,7 +98,7 @@ export default function RootNavigator() {
             name="JobList"
             component={JobListScreen}
             options={{
-              headerTitle: "Planlanan İşler",
+              headerTitle: "Yeni Sefer Programı",
               headerBackTitleVisible: false,
               headerBackTitle: "",
             }}
