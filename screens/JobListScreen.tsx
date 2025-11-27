@@ -111,6 +111,10 @@ export default function JobListScreen() {
     message += `*Yük Tonajı:* ${job.tonnage ? `${job.tonnage}` : "-"}\n`;
     message += `*Yük Ebatı:* ${job.dimensions || "-"}`;
     
+    if (job.notes && job.notes.trim() !== "") {
+      message += `\n*Notlar:* ${job.notes}`;
+    }
+    
     try {
       await Share.share({
         message,
