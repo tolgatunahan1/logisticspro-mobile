@@ -32,6 +32,7 @@ export default function SettingsScreen() {
   const [isAdding, setIsAdding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
   
   // Account settings states
@@ -325,6 +326,20 @@ export default function SettingsScreen() {
           </View>
         </Pressable>
 
+        <Pressable onPress={() => setShowTermsModal(true)}>
+          <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.infoRow}>
+              <Feather name="file-text" size={20} color={colors.textSecondary} />
+              <View style={styles.infoText}>
+                <ThemedText type="body">Kullanım Şartları</ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Hizmet şartları ve sorumluluklar
+                </ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+            </View>
+          </View>
+        </Pressable>
 
       </ScrollView>
 
@@ -823,6 +838,141 @@ export default function SettingsScreen() {
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20, marginTop: Spacing.md }}>
                   Güncelleme: 28 Kasım 2025
+                </ThemedText>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      )}
+
+      {/* Terms of Service Modal */}
+      {showTermsModal && (
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <Pressable onPress={() => setShowTermsModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.aboutContent} showsVerticalScrollIndicator={false}>
+              <ThemedText type="h4" style={styles.appName}>
+                Kullanım Şartları
+              </ThemedText>
+
+              <View style={styles.divider} />
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Genel Hükümler
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  LogisticsPRO, profesyonel nakliye ve lojistik yönetimi için tasarlanmış bir uygulamadır. Bu hizmet, "olduğu gibi" sağlanır ve sahibi Tolga Tunahan tarafından yönetilmektedir.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  Uygulamayı kullanarak, bu şartları kabul etmiş sayılırsınız. Herhangi bir zamanda şartları güncelleyebilir ve değişiklikler, uygulamada yayınlandığı anda yürürlüğe girer.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Uygunluk Gereklilikleri
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  Uygulamayı kullanmak için:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • En az 18 yaş olmalısınız
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Geçerli bir email adresine sahip olmalısınız
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Yasal olarak bağlayıcı sözleşme yapabilmelisiniz
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Geçerli bir hesap açılması ve yönetici tarafından onaylanması gerekir
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Kullanıcı Sorumluluğu
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  Hesap güvenliğinden sorumlusunuz. Şifrenizi kimseyle paylaşmayınız.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Hesabınızda yapılan tüm faaliyetlerden siz sorumlusunuz
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Şüpheli aktiviteyi derhal bildirmelisiniz
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Kullanıcı adı ve şifrenizi gizli tutmalısınız
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Kabul Edilmeyen Kullanım
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.sm }}>
+                  Aşağıdaki faaliyetler kesinlikle yasaklanmıştır:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Yasa dışı veya zararlı amaçlar için kullanım
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Başkasının hesabına yetkisiz erişim
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Uygulamaya saldırı veya bozma girişimi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Sahte veya yanıltıcı bilgi girişi
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Sorumluluk Sınırlaması
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  LogisticsPRO "olduğu gibi" sağlanır. Sahibi, uygulamanın kullanılması veya kullanılamayışından kaynaklanan herhangi bir hasardan sorumlu değildir.
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  Uygulamada meydana gelen kesintiler, hatalar veya veri kaybından sahibi sorumlu tutulamaz.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Lisanslama
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  LogisticsPRO, Tolga Tunahan'ın tescilli yazılımıdır. Tüm hakları saklıdır. © 2025 Tolga Tunahan.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  İletişim
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.sm }}>
+                  Bu şartlar hakkında sorularınız varsa:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, fontWeight: "600" }}>
+                  E-posta: tolgatunahan@icloud.com
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, fontWeight: "600" }}>
+                  Telefon: +90 542 382 2832
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
+                  Son Güncelleme: 28 Kasım 2025
                 </ThemedText>
               </View>
             </ScrollView>
