@@ -24,6 +24,8 @@ export default function AdminDashboard() {
   const colors = isDark ? Colors.dark : Colors.light;
 
   const loadUsers = useCallback(async () => {
+    setPendingUsers([]);
+    setApprovedUsers([]);
     setLoading(true);
     try {
       // Get both local and Firebase users
