@@ -129,6 +129,37 @@ export default function AdminDashboard() {
     ]);
   };
 
+  const handleEmergencyCleanup = async () => {
+    Alert.alert(
+      "🚨 ACİL TEMIZLIK",
+      "Tüm verileri kalıcı olarak sil? Admin hariç TÜM KULLANICILAR ve tüm veriler SILINECEK. Geri ALINAMAZ!",
+      [
+        { text: "İptal" },
+        {
+          text: "Evet, Sil",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              const cleaned = await firebaseAuthService.cleanupDatabase();
+              if (cleaned) {
+                Alert.alert("✅ Temizlik Tamamlandı", "Tüm veriler silindi.");
+                setPendingUsers([]);
+                setApprovedUsers([]);
+              } else {
+                Alert.alert("Hata", "Temizlik başarısız.");
+              }
+            } catch (error: any) {
+              Alert.alert("Hata", error?.message || "Temizlik sırasında hata oluştu");
+            } finally {
+              setLoading(false);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
   const formatDate = (timestamp?: number): string => {
     if (!timestamp) return "-";
     return new Date(timestamp).toLocaleDateString("tr-TR", {
@@ -142,23 +173,31 @@ export default function AdminDashboard() {
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <View style={[styles.header, { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg }]}>
         <ThemedText type="h2">Admin Panel</ThemedText>
-        <Pressable
-          onPress={() => {
-            Alert.alert("Çıkış", "Çıkış yapmak istiyor musunuz?", [
-              { text: "İptal" },
-              {
-                text: "Çıkış",
-                onPress: async () => {
-                  await logout();
+        <View style={{ flexDirection: "row", gap: Spacing.md }}>
+          <Pressable
+            onPress={handleEmergencyCleanup}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Feather name="trash" size={24} color="#ef4444" />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              Alert.alert("Çıkış", "Çıkış yapmak istiyor musunuz?", [
+                { text: "İptal" },
+                {
+                  text: "Çıkış",
+                  onPress: async () => {
+                    await logout();
+                  },
+                  style: "destructive",
                 },
-                style: "destructive",
-              },
-            ]);
-          }}
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-        >
-          <Feather name="log-out" size={24} color={theme.text} />
-        </Pressable>
+              ]);
+            }}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Feather name="log-out" size={24} color={theme.text} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={[styles.statsContainer, { paddingHorizontal: Spacing.xl }]}>
