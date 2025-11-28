@@ -8,8 +8,26 @@ import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
-import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { firebaseAuthService } from "../utils/firebaseAuth";
+
+// Alert Helper for Admin Actions
+const showConfirmAlert = (
+  title: string,
+  message: string,
+  actionText: string,
+  onConfirm: () => void,
+  isDestructive = false
+) => {
+  Alert.alert(title, message, [
+    { text: APP_CONSTANTS.ALERT_MESSAGES.CANCEL_TEXT },
+    {
+      text: actionText,
+      onPress: onConfirm,
+      style: isDestructive ? "destructive" : "default",
+    },
+  ]);
+};
 
 interface PendingUser {
   uid: string;
@@ -53,78 +71,89 @@ export default function AdminDashboard() {
     }, [loadUsers])
   );
 
-  const handleApprove = async (uid: string, email: string) => {
-    Alert.alert("Onayla", `${email} kullanıcısını onaylamak istiyor musunuz?`, [
-      { text: "İptal" },
-      {
-        text: "Onayla",
-        onPress: async () => {
+  const handleApprove = useCallback(
+    (uid: string, email: string) => {
+      showConfirmAlert(
+        APP_CONSTANTS.ALERT_MESSAGES.APPROVE_TITLE,
+        `${email} ${APP_CONSTANTS.ALERT_MESSAGES.APPROVE_TITLE.toLowerCase()} kullanıcısını onaylamak istiyor musunuz?`,
+        APP_CONSTANTS.ALERT_MESSAGES.APPROVE_TEXT,
+        async () => {
           setLoading(true);
           try {
             await firebaseAuthService.approveUser(uid);
             await loadUsers();
-            Alert.alert("Başarılı", "Kullanıcı onaylandı.");
+            Alert.alert(
+              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED,
+              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED_MSG
+            );
           } catch (error: any) {
-            Alert.alert("Hata", error?.message || "Onaylama başarısız");
+            Alert.alert(APP_CONSTANTS.ALERT_MESSAGES.ERROR_TITLE, error?.message || APP_CONSTANTS.ALERT_MESSAGES.ERROR_APPROVE_MSG);
           } finally {
             setLoading(false);
           }
-        },
-      },
-    ]);
-  };
+        }
+      );
+    },
+    [loadUsers]
+  );
 
-  const handleReject = async (uid: string, email: string) => {
-    Alert.alert("Reddet", `${email} kullanıcısını reddetmek istiyor musunuz?`, [
-      { text: "İptal" },
-      {
-        text: "Reddet",
-        onPress: async () => {
+  const handleReject = useCallback(
+    (uid: string, email: string) => {
+      showConfirmAlert(
+        APP_CONSTANTS.ALERT_MESSAGES.REJECT_TITLE,
+        `${email} kullanıcısını reddetmek istiyor musunuz?`,
+        APP_CONSTANTS.ALERT_MESSAGES.REJECT_TEXT,
+        async () => {
           setLoading(true);
           try {
             await firebaseAuthService.rejectUser(uid);
             await loadUsers();
-            Alert.alert("Başarılı", "Kullanıcı reddedildi.");
+            Alert.alert(
+              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED,
+              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_REJECTED_MSG
+            );
           } catch (error: any) {
-            Alert.alert("Hata", error?.message || "Reddetme başarısız");
+            Alert.alert(APP_CONSTANTS.ALERT_MESSAGES.ERROR_TITLE, error?.message || APP_CONSTANTS.ALERT_MESSAGES.ERROR_REJECT_MSG);
           } finally {
             setLoading(false);
           }
         },
-        style: "destructive",
-      },
-    ]);
-  };
+        true
+      );
+    },
+    [loadUsers]
+  );
 
-  const handleRevoke = async (uid: string, email: string) => {
-    Alert.alert("Onayı Kaldır", `${email} kullanıcısının onayını kaldırmak istiyor musunuz?`, [
-      { text: "İptal" },
-      {
-        text: "Kaldır",
-        onPress: async () => {
+  const handleRevoke = useCallback(
+    (uid: string, email: string) => {
+      showConfirmAlert(
+        APP_CONSTANTS.ALERT_MESSAGES.REVOKE_TITLE,
+        `${email} kullanıcısının onayını kaldırmak istiyor musunuz?`,
+        APP_CONSTANTS.ALERT_MESSAGES.REVOKE_TEXT,
+        async () => {
           setLoading(true);
           try {
             await firebaseAuthService.unapproveUser(uid);
             await loadUsers();
-            Alert.alert("Başarılı", "Kullanıcı onayı kaldırıldı.");
+            Alert.alert(
+              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED,
+              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_REVOKED_MSG
+            );
           } catch (error: any) {
-            Alert.alert("Hata", error?.message || "Onay kaldırma başarısız");
+            Alert.alert(APP_CONSTANTS.ALERT_MESSAGES.ERROR_TITLE, error?.message || APP_CONSTANTS.ALERT_MESSAGES.ERROR_REVOKE_MSG);
           } finally {
             setLoading(false);
           }
         },
-        style: "destructive",
-      },
-    ]);
-  };
+        true
+      );
+    },
+    [loadUsers]
+  );
 
 
   const formatDate = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleDateString("tr-TR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    return new Date(timestamp).toLocaleDateString(APP_CONSTANTS.LOCALE, APP_CONSTANTS.DATE_FORMAT_OPTIONS);
   };
 
   return (
@@ -134,14 +163,13 @@ export default function AdminDashboard() {
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
             onPress={() => {
-              Alert.alert("Çıkış", "Çıkış yapmak istiyor musunuz?", [
-                { text: "İptal" },
-                {
-                  text: "Çıkış",
-                  onPress: logout,
-                  style: "destructive",
-                },
-              ]);
+              showConfirmAlert(
+                APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TITLE,
+                APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_CONFIRM_MSG,
+                APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TEXT,
+                logout,
+                true
+              );
             }}
             disabled={loading}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
@@ -164,7 +192,7 @@ export default function AdminDashboard() {
           <ThemedText type="small" style={{ color: colors.textSecondary }}>
             Beklemede
           </ThemedText>
-          <ThemedText type="h3" style={{ fontWeight: "700", color: "#f59e0b" }}>
+          <ThemedText type="h3" style={{ fontWeight: "700", color: APP_CONSTANTS.STATUS_PENDING_COLOR }}>
             {pendingUsers.length}
           </ThemedText>
         </View>

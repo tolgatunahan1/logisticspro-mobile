@@ -12,7 +12,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addJob, updateJob, getCompanies, PlannedJob, Company } from "../utils/storage";
-import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "JobForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "JobForm">;
@@ -38,12 +38,6 @@ export default function JobFormScreen() {
   const [transportationCost, setTransportationCost] = useState(job?.transportationCost || "");
   const [commissionCost, setCommissionCost] = useState(job?.commissionCost || "");
   const [notes, setNotes] = useState(job?.notes || "");
-
-  // Log state values for debugging
-  useEffect(() => {
-    console.log("JobFormScreen - Current State Values:");
-    console.log({ companyId, cargoType, tonnage, loadingLocation, deliveryLocation });
-  }, [companyId, cargoType, tonnage, loadingLocation, deliveryLocation]);
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [showCompanyPicker, setShowCompanyPicker] = useState(false);
@@ -109,11 +103,6 @@ export default function JobFormScreen() {
         }
       }
 
-      console.log("=== SAVE BAŞLADI ===");
-      console.log("Firma:", finalCompanyId);
-      console.log("Yükün Cinsi:", finalCargoType);
-      console.log("Tonaj:", finalTonnage);
-
       const data = {
         companyId: finalCompanyId,
         cargoType: finalCargoType.toString().trim().toUpperCase(),
@@ -128,19 +117,14 @@ export default function JobFormScreen() {
         notes: finalNotes.toString().trim().toUpperCase(),
       };
 
-      console.log("İş verileri kaydediliyor:", data);
-
       if (!firebaseUser?.uid) return;
       if (isEdit && job) {
-        const result = await updateJob(firebaseUser.uid, job.id, data);
-        console.log("İş güncelleme sonucu:", result);
+        await updateJob(firebaseUser.uid, job.id, data);
       } else {
-        const result = await addJob(firebaseUser.uid, data);
-        console.log("İş ekleme sonucu:", result);
+        await addJob(firebaseUser.uid, data);
       }
       navigation.goBack();
     } catch (error) {
-      console.error("Save hatası:", error);
       Alert.alert("Hata", "İş kaydı sırasında bir hata oluştu");
     } finally {
       setIsLoading(false);
@@ -153,7 +137,7 @@ export default function JobFormScreen() {
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString("tr-TR");
+    return date.toLocaleDateString(APP_CONSTANTS.LOCALE, APP_CONSTANTS.DATE_FORMAT_OPTIONS);
   };
 
   const handleLoadingDateChange = (event: any, selectedDate?: Date) => {

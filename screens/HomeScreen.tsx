@@ -12,7 +12,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "../utils/storage";
-import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -70,7 +70,7 @@ export default function HomeScreen() {
             { opacity: pressed ? 0.6 : 1 },
           ]}
         >
-          <Feather name="menu" size={22} color={theme.text} />
+          <Feather name="menu" size={APP_CONSTANTS.ICON_SIZE_MEDIUM} color={theme.text} />
         </Pressable>
       ),
       headerRight: () => (
@@ -81,7 +81,7 @@ export default function HomeScreen() {
             { opacity: pressed ? 0.6 : 1 },
           ]}
         >
-          <Feather name="settings" size={22} color={theme.text} />
+          <Feather name="settings" size={APP_CONSTANTS.ICON_SIZE_MEDIUM} color={theme.text} />
         </Pressable>
       ),
     });
@@ -100,7 +100,7 @@ export default function HomeScreen() {
         <View style={{ justifyContent: "center", alignItems: "center", marginBottom: Spacing.lg }}>
           <Image
             source={require("../assets/images/IMG_6804.png")}
-            style={{ width: 180, height: 180 }}
+            style={{ width: APP_CONSTANTS.LOGO_SIZE, height: APP_CONSTANTS.LOGO_SIZE }}
           />
         </View>
 

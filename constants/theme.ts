@@ -170,6 +170,52 @@ export const Fonts = Platform.select({
   },
 });
 
+// App Constants - Magic Strings
+export const APP_CONSTANTS = {
+  // Localization
+  LOCALE: "tr-TR",
+  
+  // Date Formatting
+  DATE_FORMAT_OPTIONS: {
+    year: "numeric" as const,
+    month: "2-digit" as const,
+    day: "2-digit" as const,
+  },
+  
+  // Common Sizes
+  LOGO_SIZE: 180,
+  ICON_SIZE_SMALL: 20,
+  ICON_SIZE_MEDIUM: 22,
+  ICON_SIZE_LARGE: 24,
+  
+  // Status Colors
+  STATUS_PENDING_COLOR: "#f59e0b",
+  STATUS_APPROVED_COLOR: "#10B981",
+  
+  // Alert Messages - Turkish
+  ALERT_MESSAGES: {
+    APPROVE_TITLE: "Onayla",
+    REJECT_TITLE: "Reddet",
+    REVOKE_TITLE: "Onayı Kaldır",
+    LOGOUT_TITLE: "Çıkış",
+    CANCEL_TEXT: "İptal",
+    APPROVE_TEXT: "Onayla",
+    REJECT_TEXT: "Reddet",
+    REVOKE_TEXT: "Kaldır",
+    LOGOUT_TEXT: "Çıkış",
+    SUCCESS_APPROVED: "Başarılı",
+    SUCCESS_APPROVED_MSG: "Kullanıcı onaylandı.",
+    SUCCESS_REJECTED_MSG: "Kullanıcı reddedildi.",
+    SUCCESS_REVOKED_MSG: "Kullanıcı onayı kaldırıldı.",
+    ERROR_TITLE: "Hata",
+    ERROR_LOAD_MSG: "Verileri yüklemede hata: ",
+    ERROR_APPROVE_MSG: "Onaylama başarısız",
+    ERROR_REJECT_MSG: "Reddetme başarısız",
+    ERROR_REVOKE_MSG: "Onay kaldırma başarısız",
+    LOGOUT_CONFIRM_MSG: "Çıkış yapmak istiyor musunuz?",
+  },
+};
+
 // Shadow Styles for Elevation
 export const Shadows = {
   xs: {

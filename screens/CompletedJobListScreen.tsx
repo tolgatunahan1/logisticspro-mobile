@@ -14,7 +14,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid } from "../utils/storage";
-import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -155,27 +155,19 @@ export default function CompletedJobListScreen() {
   // Helper function to share IBAN with carrier via WhatsApp
   const shareIBANWithCarrier = useCallback(
     async (selectedIBAN: IBAN) => {
-      console.log("=== IBAN SHARING START ===");
-      console.log("SelectedJob:", selectedJob?.id);
-      console.log("SelectedIBAN:", selectedIBAN);
-
       if (!selectedJob || !selectedJob.carrierId) {
-        console.log("Error: No job or carrier ID");
         Alert.alert("Hata", "İş veya nakliyeci bilgileri eksik");
         return;
       }
 
       const carrier = carriers[selectedJob.carrierId];
-      console.log("Carrier:", carrier);
 
       if (!carrier || !carrier.phone || !carrier.phone.trim()) {
-        console.log("Error: No carrier phone");
         Alert.alert("Hata", "Nakliyeci telefon numarası eksik");
         return;
       }
 
       if (!selectedIBAN || !selectedIBAN.nameSurname || !selectedIBAN.ibanNumber) {
-        console.log("Error: IBAN data missing");
         Alert.alert("Hata", "IBAN bilgileri eksik");
         return;
       }
@@ -189,15 +181,10 @@ export default function CompletedJobListScreen() {
         phoneNumber = "90" + phoneNumber;
       }
 
-      console.log("Phone Number:", phoneNumber);
-      console.log("Message:", message);
-
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-      console.log("WhatsApp URL:", whatsappUrl);
 
       try {
         const canOpen = await Linking.canOpenURL(whatsappUrl);
-        console.log("Can open URL:", canOpen);
         
         if (!canOpen) {
           Alert.alert("Hata", "WhatsApp uygulaması yüklü değil veya bağlantı açılamıyor");
@@ -205,12 +192,9 @@ export default function CompletedJobListScreen() {
         }
 
         await Linking.openURL(whatsappUrl);
-        console.log("WhatsApp opened successfully");
       } catch (error) {
-        console.error("Error opening WhatsApp:", error);
         Alert.alert("Hata", `WhatsApp açılamadı: ${error instanceof Error ? error.message : String(error)}`);
       }
-      console.log("=== IBAN SHARING END ===");
     },
     [selectedJob, carriers]
   );
@@ -243,16 +227,12 @@ export default function CompletedJobListScreen() {
         [
           ...allIbans.map((iban, index) => ({
             text: iban.nameSurname + " - " + iban.ibanNumber.substring(iban.ibanNumber.length - 4),
-            onPress: () => {
-              console.log("Selected IBAN:", iban);
-              shareIBANWithCarrier(iban);
-            },
+            onPress: () => shareIBANWithCarrier(iban),
           })),
           { text: "İptal", onPress: () => {}, style: "cancel" },
         ]
       );
     } catch (error) {
-      console.error("Error loading IBANs:", error);
       Alert.alert("Hata", "IBAN'lar yüklenirken bir hata oluştu");
     }
   }, [firebaseUser?.uid, selectedJob, carriers, shareIBANWithCarrier]);
@@ -268,7 +248,7 @@ export default function CompletedJobListScreen() {
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString("tr-TR");
+    return date.toLocaleDateString(APP_CONSTANTS.LOCALE, APP_CONSTANTS.DATE_FORMAT_OPTIONS);
   };
 
   const formatDateLong = (timestamp: number) => {

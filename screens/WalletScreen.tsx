@@ -10,7 +10,7 @@ import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
-import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob, getCompanies, Company } from "../utils/storage";
 
 type TabType = "all" | "paid" | "unpaid";
@@ -36,13 +36,8 @@ export default function WalletScreen() {
   }, [allJobs, activeTab]);
 
   const loadData = useCallback(async () => {
-    if (!firebaseUser?.uid) {
-      console.log("❌ No firebaseUser.uid in WalletScreen");
-      return;
-    }
+    if (!firebaseUser?.uid) return;
 
-    console.log("📊 Loading wallet data for:", firebaseUser.uid);
-    
     try {
       const jobs = await getCompletedJobs(firebaseUser.uid);
       const companiesList = await getCompanies(firebaseUser.uid);
@@ -51,9 +46,6 @@ export default function WalletScreen() {
         return acc;
       }, {} as { [key: string]: Company });
 
-      console.log("📦 Got jobs:", jobs.length);
-
-      // Calculate paid and unpaid totals
       const paid = jobs.reduce((sum, job) => {
         if (job.commissionPaid && job.commissionCost) {
           return sum + parseFloat(job.commissionCost as string);
@@ -68,14 +60,12 @@ export default function WalletScreen() {
         return sum;
       }, 0);
 
-      console.log("✅ Paid:", paid, "Unpaid:", unpaid, "Total jobs:", jobs.length);
-      
       setPaidTotal(paid);
       setUnpaidTotal(unpaid);
       setAllJobs(jobs);
       setCompanies(companiesMap);
     } catch (error) {
-      console.error("❌ Error loading wallet data:", error);
+      // Silent fail
     }
   }, [firebaseUser?.uid]);
 
