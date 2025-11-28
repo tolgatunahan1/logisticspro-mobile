@@ -376,16 +376,6 @@ export default function LoginScreen() {
                   </ThemedText>
                 )}
               </Pressable>
-              {isAdminMode && (
-                <Pressable
-                  onPress={() => setShowCreateAdmin(true)}
-                  style={[styles.button, { backgroundColor: colors.inputBackground }]}
-                >
-                  <ThemedText type="body" style={{ color: theme.link, fontWeight: "600" }}>
-                    Yeni Admin Oluştur
-                  </ThemedText>
-                </Pressable>
-              )}
             </>
           )}
 
