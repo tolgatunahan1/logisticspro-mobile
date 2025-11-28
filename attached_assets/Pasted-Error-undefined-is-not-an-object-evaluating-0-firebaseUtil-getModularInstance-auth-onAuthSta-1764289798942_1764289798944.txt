@@ -1,0 +1,23 @@
+Error: undefined is not an object (evaluating '(0, _firebaseUtil.getModularInstance)(auth).onAuthStateChanged')
+
+Stack Trace:
+onAuthStateChanged@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:177719:55
+@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:169121:64
+react-stack-bottom-frame@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:17903:26
+runWithFiberInDEV@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:5822:135
+commitHookEffectListMount@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:10812:637
+commitHookPassiveMountEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:10849:83
+commitPassiveMountOnFiber@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11751:56
+recursivelyTraversePassiveMountEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11742:131
+commitPassiveMountOnFiber@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11754:49
+recursivelyTraversePassiveMountEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11742:131
+commitPassiveMountOnFiber@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11750:49
+recursivelyTraversePassiveMountEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11742:131
+commitPassiveMountOnFiber@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11750:49
+recursivelyTraversePassiveMountEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11742:131
+commitPassiveMountOnFiber@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11750:49
+recursivelyTraversePassiveMountEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11742:131
+commitPassiveMountOnFiber@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:11758:49
+flushPassiveEffects@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:12754:34
+@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:12527:30
+performWorkUntilDeadline@https://634d3302-cba4-4b67-8d03-01ae56535883-00-1xz8vrnodgzlc.picard.replit.dev/index.bundle:18647:56

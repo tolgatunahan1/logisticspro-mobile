@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser as loginAppUser, getAdmin, AppUser } from "../utils/userManagement";
 import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
+import { firebaseAuth } from "../constants/firebase";
 import { firebaseAuthService } from "../utils/firebaseAuth";
 import { createHybridAdapter, setStorageAdapter } from "../utils/firebaseStorage";
 
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuthService.getAuth(), (authUser) => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (authUser) => {
       setFirebaseUser(authUser);
       if (!authUser) {
         loadStoredAuth();
