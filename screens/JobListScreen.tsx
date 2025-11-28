@@ -56,7 +56,6 @@ export default function JobListScreen() {
     setCompanies(companiesMap);
     setFilteredJobs(allJobs);
     setCarriers(allCarriers);
-    setCurrentCarrier(allCarriers[0] || null);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
