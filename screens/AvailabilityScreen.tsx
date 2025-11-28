@@ -155,9 +155,9 @@ export default function AvailabilityScreen() {
       </View>
 
       <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={[s.modalWrapper, { backgroundColor: colors.backgroundDefault }]}>
-          <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={[s.modal, { paddingHorizontal: 12, paddingTop: 12, paddingBottom: 20 }]}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, backgroundColor: colors.backgroundDefault }}>
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled">
+            <View style={[s.modal, { paddingHorizontal: 12, paddingTop: 12, paddingBottom: 100 }]}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <ThemedText type="h3">Yeni Bildiri</ThemedText>
                 <Pressable onPress={() => setModalVisible(false)}>
@@ -289,7 +289,7 @@ const s = StyleSheet.create({
   deleteBtn: { padding: 6 },
   divider: { height: 1, marginBottom: 8 },
   modalWrapper: { flex: 1 },
-  modal: { paddingBottom: 20 },
+  modal: { paddingBottom: 100 },
   input: { borderWidth: 1, borderRadius: BorderRadius.sm, borderColor: "rgba(0,0,0,0.05)", paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, minHeight: 44 },
   actionBtn: { flex: 1, paddingVertical: 12, borderRadius: BorderRadius.sm, alignItems: "center", minHeight: 44 },
 });
