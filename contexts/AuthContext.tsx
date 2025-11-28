@@ -5,6 +5,7 @@ import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "../constants/firebase";
 import { firebaseAuthService } from "../utils/firebaseAuth";
 import { createHybridAdapter, setStorageAdapter } from "../utils/firebaseStorage";
+import { get, ref } from "firebase/database";
 
 interface User {
   id?: string;
@@ -99,12 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Admin also uses Firebase now
+      // Admin uses Firebase
       const fbUser = await firebaseAuthService.login(trimmedEmail, trimmedPassword);
       if (fbUser) {
-        // Check if this user is an admin (stored in Firebase)
-        const adminProfile = await firebaseAuthService.getUserProfile(fbUser.uid);
-        if (adminProfile?.isAdmin) {
+        // Check if this user is an admin in admins table (NOT users)
+        const snapshot = await get(ref(firebaseAuthService.getDatabase(), `admins/${fbUser.uid}`));
+        if (snapshot.exists() && snapshot.val()?.isAdmin) {
           setFirebaseUser(fbUser);
           const userData: User = { username: fbUser.email || "Admin", type: "admin", firebaseUid: fbUser.uid };
           await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
@@ -112,10 +113,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Set hybrid storage adapter
           const hybridAdapter = createHybridAdapter(fbUser.uid);
           setStorageAdapter(hybridAdapter);
-          console.log("✅ Admin logged in via Firebase:", fbUser.email);
+          console.log("✅ Admin logged in:", fbUser.email);
           return true;
         } else {
-          console.log("❌ User is not admin");
+          console.log("❌ Not an admin");
+          await firebaseAuthService.logout();
         }
       }
       return false;

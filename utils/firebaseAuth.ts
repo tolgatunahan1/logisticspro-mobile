@@ -36,6 +36,9 @@ const isFirebaseConfigured = (): boolean => {
 };
 
 export const firebaseAuthService = {
+  // Get database reference
+  getDatabase: () => firebaseDatabase,
+
   // Check if Firebase is properly configured
   isConfigured: (): boolean => {
     try {
@@ -159,27 +162,17 @@ export const firebaseAuthService = {
     return firebaseAuth.onAuthStateChanged(callback);
   },
 
-  // Delete user by email from database
-  deleteUserByEmail: async (email: string): Promise<boolean> => {
+  // Delete user completely from system
+  deleteUserByUid: async (uid: string): Promise<boolean> => {
     try {
-      const snapshot = await get(ref(firebaseDatabase, "users"));
-      if (!snapshot.exists()) {
-        console.log("No users in database");
-        return false;
-      }
-      
-      const users = snapshot.val();
-      for (const uid in users) {
-        if (users[uid].profile?.email === email) {
-          await remove(ref(firebaseDatabase, `users/${uid}`));
-          console.log("✅ User deleted from database:", email);
-          return true;
-        }
-      }
-      console.log("User not found:", email);
-      return false;
+      // Delete from users table
+      await remove(ref(firebaseDatabase, `users/${uid}`));
+      // Delete any associated data
+      await remove(ref(firebaseDatabase, `data/${uid}`));
+      console.log("✅ User completely deleted from database:", uid);
+      return true;
     } catch (error) {
-      console.error("Delete user by email error:", error);
+      console.error("Delete user error:", error);
       return false;
     }
   },
@@ -197,7 +190,7 @@ export const firebaseAuthService = {
     }
   },
 
-  // Initialize admin user (Firebase)
+  // Initialize admin user (Firebase) - ADMIN ONLY
   initializeAdmin: async (email: string, password: string): Promise<boolean> => {
     try {
       // Try to login with the email - this will either succeed or throw
@@ -206,9 +199,11 @@ export const firebaseAuthService = {
         const user = userCredential.user;
         
         // Mark existing user as admin
-        await update(ref(firebaseDatabase, `users/${user.uid}/profile`), {
+        await set(ref(firebaseDatabase, `admins/${user.uid}`), {
+          uid: user.uid,
+          email: email,
           isAdmin: true,
-          status: "approved",
+          createdAt: Date.now(),
         });
         console.log("✅ User marked as admin:", email);
         await signOut(firebaseAuth); // Sign out after setup
@@ -221,21 +216,19 @@ export const firebaseAuthService = {
           );
           throw error;
         }
-        // If user doesn't exist, create as admin
+        // If user doesn't exist, create NEW ADMIN ONLY
         if (signInError?.message?.includes("user-not-found") || signInError?.message?.includes("invalid-credential")) {
           const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
           const newAdmin = userCredential.user;
 
-          const adminProfile: UserProfile = {
+          // Create ONLY admin profile - NO user profile
+          await set(ref(firebaseDatabase, `admins/${newAdmin.uid}`), {
             uid: newAdmin.uid,
             email: newAdmin.email || "",
-            createdAt: Date.now(),
-            status: "approved",
             isAdmin: true,
-          };
-
-          await set(ref(firebaseDatabase, `users/${newAdmin.uid}/profile`), adminProfile);
-          console.log("✅ New admin created:", email);
+            createdAt: Date.now(),
+          });
+          console.log("✅ New admin created (ADMIN ONLY):", email);
           await signOut(firebaseAuth); // Sign out after setup
           return true;
         }

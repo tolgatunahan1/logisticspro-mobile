@@ -100,17 +100,26 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (userId: string, username: string) => {
-    Alert.alert("Kullanıcıyı Sil", `${username} kullanıcısını tamamen sistemden silmek istiyor musunuz? Bu işlem geri alınamaz.`, [
+    Alert.alert("Kullanıcıyı Tamamen Sil", `${username} kullanıcısı sistemden TAMAMen silinecek. Tüm verileri sıfırlanacak. Geri alınamaz!`, [
       { text: "İptal" },
       {
         text: "Sil",
         onPress: async () => {
-          // Try Firebase first, then local
-          let deleted = await deleteFirebaseUser(userId);
-          if (!deleted) {
-            deleted = await deleteLocalUser(userId);
+          setLoading(true);
+          try {
+            // Delete from Firebase completely
+            const deleted = await firebaseAuthService.deleteUserByUid(userId);
+            if (deleted) {
+              Alert.alert("Başarılı", "Kullanıcı tamamen silindi.");
+              await loadUsers();
+            } else {
+              Alert.alert("Hata", "Silme işlemi başarısız.");
+            }
+          } catch (error: any) {
+            Alert.alert("Hata", error?.message || "Silme sırasında hata oluştu");
+          } finally {
+            setLoading(false);
           }
-          await loadUsers();
         },
         style: "destructive",
       },
