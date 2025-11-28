@@ -312,7 +312,7 @@ export const VEHICLE_TYPES = [
 
 export const getVehicleTypeLabel = (value: string): string => {
   const found = VEHICLE_TYPES.find((v) => v.value === value);
-  return found ? found.label : value;
+  return found ? found.label : (value && value.trim() ? value : "-");
 };
 
 // Completed Job functions - Firebase based with uid

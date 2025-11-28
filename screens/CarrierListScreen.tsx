@@ -282,12 +282,14 @@ export default function CarrierListScreen() {
                     <ThemedText type="h4">{selectedCarrier.phone}</ThemedText>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      TC Kimlik Numarası
-                    </ThemedText>
-                    <ThemedText type="h4">{selectedCarrier?.nationalId || "-"}</ThemedText>
-                  </View>
+                  {selectedCarrier?.nationalId && selectedCarrier.nationalId.trim() ? (
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        TC Kimlik Numarası
+                      </ThemedText>
+                      <ThemedText type="h4">{selectedCarrier.nationalId}</ThemedText>
+                    </View>
+                  ) : null}
 
                   <View style={styles.detailSection}>
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
