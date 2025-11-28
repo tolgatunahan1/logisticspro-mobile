@@ -32,8 +32,11 @@ export default function LoginScreen() {
   useEffect(() => {
     const init = async () => {
       try {
-        // Setup Firebase admin if not already done
-        await firebaseAuthService.initializeAdmin("tolgatunahan@icloud.com", "1Liraversene");
+        // Setup Firebase admin if not already done (check first to avoid quota issues)
+        const adminProfile = await firebaseAuthService.getUserProfile("admin_check");
+        if (!adminProfile?.isAdmin) {
+          await firebaseAuthService.initializeAdmin("tolgatunahan@icloud.com", "1Liraversene");
+        }
         // Also setup local admin for backwards compatibility
         await initializeDefaultAdmin();
       } catch (error) {

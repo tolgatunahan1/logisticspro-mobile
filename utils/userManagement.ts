@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebaseDatabase } from "@/constants/firebase";
-import { ref, get, set, update } from "firebase/database";
+import { ref, get, set, update, remove } from "firebase/database";
 
 export interface AppUser {
   id: string;
@@ -292,6 +292,30 @@ export const unapproveFirebaseUser = async (userId: string): Promise<boolean> =>
     return true;
   } catch (error) {
     console.error("Unapprove Firebase user error:", error);
+    return false;
+  }
+};
+
+export const deleteFirebaseUser = async (userId: string): Promise<boolean> => {
+  try {
+    // Remove user profile from database
+    await remove(ref(firebaseDatabase, `users/${userId}`));
+    console.log("✅ User deleted:", userId);
+    return true;
+  } catch (error) {
+    console.error("Delete Firebase user error:", error);
+    return false;
+  }
+};
+
+export const deleteUser = async (userId: string): Promise<boolean> => {
+  try {
+    const users = await getUsers();
+    const filtered = users.filter((u) => u.id !== userId);
+    await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(filtered));
+    return true;
+  } catch (error) {
+    console.error("Delete user error:", error);
     return false;
   }
 };

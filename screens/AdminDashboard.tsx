@@ -9,7 +9,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser } from "../utils/userManagement";
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser, deleteFirebaseUser, deleteUser } from "../utils/userManagement";
 
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
@@ -91,6 +91,24 @@ export default function AdminDashboard() {
           let revoked = await unapproveFirebaseUser(userId);
           if (!revoked) {
             revoked = await unapproveUser(userId);
+          }
+          await loadUsers();
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
+  const handleDelete = async (userId: string, username: string) => {
+    Alert.alert("Kullanıcıyı Sil", `${username} kullanıcısını tamamen sistemden silmek istiyor musunuz? Bu işlem geri alınamaz.`, [
+      { text: "İptal" },
+      {
+        text: "Sil",
+        onPress: async () => {
+          // Try Firebase first, then local
+          let deleted = await deleteFirebaseUser(userId);
+          if (!deleted) {
+            deleted = await deleteUser(userId);
           }
           await loadUsers();
         },
@@ -232,6 +250,20 @@ export default function AdminDashboard() {
                   <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
                     Onaylandı: {formatDate(item.approvedAt)}
                   </ThemedText>
+                </View>
+                <View style={styles.actions}>
+                  <Pressable
+                    onPress={() => handleRevoke(item.id, item.username || item.email)}
+                    style={[styles.button, { backgroundColor: "#f59e0b" }]}
+                  >
+                    <Feather name="slash" size={20} color="white" />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleDelete(item.id, item.username || item.email)}
+                    style={[styles.button, { backgroundColor: "#ef4444" }]}
+                  >
+                    <Feather name="trash-2" size={20} color="white" />
+                  </Pressable>
                 </View>
               </View>
             ))}
