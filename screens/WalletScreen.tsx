@@ -8,24 +8,59 @@ import { ScreenScrollView } from "../components/ScreenScrollView";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getCompanyWallet, getUnpaidCommissions, markCommissionAsPaid, CompanyWallet, CompletedJob } from "../utils/storage";
+import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob } from "../utils/storage";
 
 export default function WalletScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const colors = isDark ? Colors.dark : Colors.light;
+  const { firebaseUser } = useAuth();
 
-  const [wallet, setWallet] = useState<CompanyWallet | null>(null);
+  const [paidTotal, setPaidTotal] = useState<number>(0);
+  const [unpaidTotal, setUnpaidTotal] = useState<number>(0);
   const [unpaidCommissions, setUnpaidCommissions] = useState<CompletedJob[]>([]);
   const [isMarkingPaid, setIsMarkingPaid] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
-    const walletData = await getCompanyWallet();
-    setWallet(walletData);
-    const unpaidData = await getUnpaidCommissions();
-    setUnpaidCommissions(unpaidData);
-  }, []);
+    if (!firebaseUser?.uid) {
+      console.log("❌ No firebaseUser.uid in WalletScreen");
+      return;
+    }
+
+    console.log("📊 Loading wallet data for:", firebaseUser.uid);
+    
+    try {
+      const allJobs = await getCompletedJobs(firebaseUser.uid);
+      console.log("📦 Got jobs:", allJobs.length);
+
+      // Calculate paid and unpaid totals
+      const paid = allJobs.reduce((sum, job) => {
+        if (job.commissionPaid && job.commissionCost) {
+          return sum + parseFloat(job.commissionCost as string);
+        }
+        return sum;
+      }, 0);
+
+      const unpaid = allJobs.reduce((sum, job) => {
+        if (!job.commissionPaid && job.commissionCost) {
+          return sum + parseFloat(job.commissionCost as string);
+        }
+        return sum;
+      }, 0);
+
+      const unpaidJobs = allJobs.filter(job => !job.commissionPaid);
+
+      console.log("✅ Paid:", paid, "Unpaid:", unpaid, "Unpaid jobs:", unpaidJobs.length);
+      
+      setPaidTotal(paid);
+      setUnpaidTotal(unpaid);
+      setUnpaidCommissions(unpaidJobs);
+    } catch (error) {
+      console.error("❌ Error loading wallet data:", error);
+    }
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,8 +69,9 @@ export default function WalletScreen() {
   );
 
   const handleMarkAsPaid = async (jobId: string) => {
+    if (!firebaseUser?.uid) return;
     setIsMarkingPaid(jobId);
-    const result = await markCommissionAsPaid(jobId);
+    const result = await markCommissionAsPaid(firebaseUser.uid, jobId);
     if (result) {
       await loadData();
       Alert.alert("Başarılı", "Komisyon ödendi olarak işaretlendi ve cüzdana eklendi");
@@ -49,63 +85,61 @@ export default function WalletScreen() {
     <ScreenScrollView>
       {/* Header Stats */}
       <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg }]}>
-        {wallet && (
-          <View style={{ gap: Spacing.md }}>
-            {/* Pending Payments Balance Card */}
-            <View
-              style={[
-                styles.balanceCard,
-                {
-                  backgroundColor: isDark
-                    ? "rgba(234, 179, 8, 0.15)"
-                    : "rgba(234, 179, 8, 0.08)",
-                  borderColor: isDark
-                    ? "rgba(234, 179, 8, 0.3)"
-                    : "rgba(234, 179, 8, 0.2)",
-                },
-              ]}
-            >
-              <View style={{ flex: 1 }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
-                  Bekleyen Ödemeler Bakiyesi
-                </ThemedText>
-                <ThemedText type="h2" style={{ color: "#EAB308", fontWeight: "700" }}>
-                  {unpaidCommissions.reduce((sum, job) => sum + parseFloat(job.commissionCost || "0"), 0).toFixed(2)} ₺
-                </ThemedText>
-              </View>
-              <View style={[styles.statsIcon, { backgroundColor: "#EAB308" }]}>
-                <Feather name="clock" size={20} color="#FFFFFF" />
-              </View>
+        <View style={{ gap: Spacing.md }}>
+          {/* Bekleyen Ödemeler Bakiyesi Card */}
+          <View
+            style={[
+              styles.balanceCard,
+              {
+                backgroundColor: isDark
+                  ? "rgba(234, 179, 8, 0.15)"
+                  : "rgba(234, 179, 8, 0.08)",
+                borderColor: isDark
+                  ? "rgba(234, 179, 8, 0.3)"
+                  : "rgba(234, 179, 8, 0.2)",
+              },
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Bekleyen Ödemeler Bakiyesi
+              </ThemedText>
+              <ThemedText type="h2" style={{ color: "#EAB308", fontWeight: "700" }}>
+                {unpaidTotal.toFixed(2)} ₺
+              </ThemedText>
             </View>
-
-            {/* Paid Balance Card */}
-            <View
-              style={[
-                styles.balanceCard,
-                {
-                  backgroundColor: isDark
-                    ? "rgba(34, 197, 94, 0.15)"
-                    : "rgba(34, 197, 94, 0.08)",
-                  borderColor: isDark
-                    ? "rgba(34, 197, 94, 0.3)"
-                    : "rgba(34, 197, 94, 0.2)",
-                },
-              ]}
-            >
-              <View style={{ flex: 1 }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
-                  Ödenen Bakiye
-                </ThemedText>
-                <ThemedText type="h3" style={{ color: "#22C55E", fontWeight: "700" }}>
-                  {wallet.totalBalance.toFixed(2)} ₺
-                </ThemedText>
-              </View>
-              <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
-                <Feather name="check-circle" size={20} color="#FFFFFF" />
-              </View>
+            <View style={[styles.statsIcon, { backgroundColor: "#EAB308" }]}>
+              <Feather name="clock" size={20} color="#FFFFFF" />
             </View>
           </View>
-        )}
+
+          {/* Ödenen Bakiye Card */}
+          <View
+            style={[
+              styles.balanceCard,
+              {
+                backgroundColor: isDark
+                  ? "rgba(34, 197, 94, 0.15)"
+                  : "rgba(34, 197, 94, 0.08)",
+                borderColor: isDark
+                  ? "rgba(34, 197, 94, 0.3)"
+                  : "rgba(34, 197, 94, 0.2)",
+              },
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Ödenen Bakiye
+              </ThemedText>
+              <ThemedText type="h3" style={{ color: "#22C55E", fontWeight: "700" }}>
+                {paidTotal.toFixed(2)} ₺
+              </ThemedText>
+            </View>
+            <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
+              <Feather name="check-circle" size={20} color="#FFFFFF" />
+            </View>
+          </View>
+        </View>
       </View>
 
       {/* Pending Payments Section */}
@@ -235,45 +269,6 @@ export default function WalletScreen() {
         )}
       </View>
 
-      {/* Transaction History */}
-      {wallet && wallet.transactions.length > 0 && (
-        <View style={[styles.section, { marginTop: Spacing.lg }]}>
-          <View style={{ paddingHorizontal: Spacing.lg }}>
-            <ThemedText type="h4" style={{ fontWeight: "700", marginBottom: Spacing.md }}>
-              Son İşlemler
-            </ThemedText>
-          </View>
-
-          <View style={[styles.transactionList, { marginHorizontal: Spacing.lg }]}>
-            {wallet.transactions.slice(0, 5).map((transaction, index) => (
-              <View
-                key={transaction.id}
-                style={[
-                  styles.transactionRow,
-                  {
-                    borderBottomWidth: index < Math.min(wallet.transactions.length - 1, 4) ? 1 : 0,
-                    borderBottomColor: isDark
-                      ? "rgba(255, 255, 255, 0.05)"
-                      : "rgba(0, 0, 0, 0.05)",
-                  },
-                ]}
-              >
-                <View style={{ flex: 1 }}>
-                  <ThemedText type="small" style={{ fontWeight: "600" }}>
-                    {transaction.description}
-                  </ThemedText>
-                  <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs, fontSize: 11 }}>
-                    {new Date(transaction.createdAt).toLocaleDateString("tr-TR")}
-                  </ThemedText>
-                </View>
-                <ThemedText type="body" style={{ color: theme.link, fontWeight: "700" }}>
-                  +{transaction.amount.toFixed(2)} ₺
-                </ThemedText>
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
 
       <View style={{ height: Spacing.xl }} />
     </ScreenScrollView>
