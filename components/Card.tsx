@@ -89,18 +89,20 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     borderRadius: BorderRadius["2xl"],
     borderWidth: 1,
+    borderColor: "rgba(59, 130, 246, 0.2)",
+    backdropFilter: "blur(12px)",
     ...Platform.select({
       ios: {
         shadowColor: "#4F46E5",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
       },
       android: {
-        elevation: 4,
+        elevation: 8,
       },
       web: {
-        boxShadow: "0 4px 12px rgba(79, 70, 229, 0.1)",
+        boxShadow: "0 8px 16px rgba(79, 70, 229, 0.15)",
       },
     }),
   },

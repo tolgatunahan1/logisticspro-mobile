@@ -272,8 +272,8 @@ export default function CarrierListScreen() {
         transparent
         onRequestClose={() => setShowDetailModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)" }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, borderTopLeftRadius: 28, borderTopRightRadius: 28, backdropFilter: "blur(12px)" }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <ThemedText type="h3">Nakliyeci Detayları</ThemedText>

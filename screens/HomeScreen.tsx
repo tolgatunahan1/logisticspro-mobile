@@ -638,7 +638,8 @@ const styles = StyleSheet.create({
   },
   drawerOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backdropFilter: "blur(6px)",
   },
   drawerContent: {
     position: "absolute",
@@ -647,6 +648,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "75%",
     maxWidth: 300,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
   },
   drawerHeader: {
     alignItems: "flex-start",
@@ -673,6 +675,9 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: "rgba(59, 130, 246, 0.1)",
+    backdropFilter: "blur(10px)",
   },
   commissionCard: {
     flexDirection: "row",
@@ -681,5 +686,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     borderLeftWidth: 4,
     gap: Spacing.md,
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.2)",
+    borderRightColor: "rgba(255, 255, 255, 0.2)",
+    borderBottomColor: "rgba(255, 255, 255, 0.2)",
   },
 });
