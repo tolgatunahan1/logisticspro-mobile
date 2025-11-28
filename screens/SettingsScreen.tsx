@@ -210,10 +210,10 @@ export default function SettingsScreen() {
                     const beforeDelete = ibans.filter(i => i.id !== item.id);
                     setIbans(beforeDelete);
                     try {
-                      await deleteIBAN(item.id);
+                      await deleteIBAN(firebaseUser!.uid, item.id);
                       for (let i = 0; i < 3; i++) {
                         await new Promise(resolve => setTimeout(resolve, 100 * (i + 1)));
-                        const fresh = await getIBANs();
+                        const fresh = await getIBANs(firebaseUser!.uid);
                         if (!fresh.some(ib => ib.id === item.id)) {
                           setIbans(fresh);
                           break;

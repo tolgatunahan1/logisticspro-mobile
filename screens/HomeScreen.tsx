@@ -9,6 +9,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -27,19 +28,21 @@ export default function HomeScreen() {
   const [jobCount, setJobCount] = useState(0);
   const [completedJobCount, setCompletedJobCount] = useState(0);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const { firebaseUser } = useAuth();
 
   const colors = isDark ? Colors.dark : Colors.light;
 
   const loadCounts = useCallback(async () => {
-    const carriers = await getCarriers();
-    const companies = await getCompanies();
-    const jobs = await getJobs();
-    const completedJobs = await getCompletedJobs();
+    if (!firebaseUser?.uid) return;
+    const carriers = await getCarriers(firebaseUser.uid);
+    const companies = await getCompanies(firebaseUser.uid);
+    const jobs = await getJobs(firebaseUser.uid);
+    const completedJobs = await getCompletedJobs(firebaseUser.uid);
     setCarrierCount(carriers.length);
     setCompanyCount(companies.length);
     setJobCount(jobs.length);
     setCompletedJobCount(completedJobs.length);
-  }, []);
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {
