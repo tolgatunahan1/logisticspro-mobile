@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Platform, Modal } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, Platform, Modal } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
+import { ScreenKeyboardAwareScrollView } from "../components/ScreenKeyboardAwareScrollView";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
@@ -244,7 +245,7 @@ export default function CarrierFormScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView
+      <ScreenKeyboardAwareScrollView
         contentContainerStyle={[styles.content, { paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -280,7 +281,7 @@ export default function CarrierFormScreen() {
           ) : null}
         </View>
 
-      </ScrollView>
+      </ScreenKeyboardAwareScrollView>
 
       <Modal
         visible={showVehiclePicker}
