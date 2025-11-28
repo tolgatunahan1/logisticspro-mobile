@@ -226,9 +226,18 @@ export default function CompletedJobListScreen() {
         >
           <View style={styles.jobCardHeader}>
             <View style={{ flex: 1 }}>
-              <ThemedText type="h4" numberOfLines={1}>
-                {company?.name || "Bilinmeyen Firma"}
-              </ThemedText>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+                <ThemedText type="h4" numberOfLines={1} style={{ flex: 1 }}>
+                  {company?.name || "Bilinmeyen Firma"}
+                </ThemedText>
+                {job.commissionPaid && (
+                  <View style={{ backgroundColor: colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
+                    <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
+                      Ödendi
+                    </ThemedText>
+                  </View>
+                )}
+              </View>
             </View>
             <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
               <Pressable
@@ -592,31 +601,73 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                   </View>
 
-                  {/* Commission Payment Status */}
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: colors.backgroundDefault, borderRadius: BorderRadius.md }}>
-                    <Checkbox
-                      value={selectedJob.commissionPaid || false}
-                      onValueChange={async (newValue) => {
-                        if (selectedJob && firebaseUser) {
-                          const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, newValue);
-                          if (success) {
-                            const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newValue } : j);
-                            setJobs(updatedJobs);
-                            setSelectedJob({ ...selectedJob, commissionPaid: newValue });
-                          } else {
-                            Alert.alert("Hata", "Komisyon durumu güncellenemedi");
+                  {/* Commission Payment Status - Toggle Button */}
+                  <View style={{ gap: Spacing.sm }}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                      Komisyon Ödeme Durumu
+                    </ThemedText>
+                    <View style={{ flexDirection: "row", gap: Spacing.md }}>
+                      <Pressable
+                        onPress={async () => {
+                          if (selectedJob && firebaseUser && !selectedJob.commissionPaid) {
+                            const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, true);
+                            if (success) {
+                              const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: true } : j);
+                              setJobs(updatedJobs);
+                              setSelectedJob({ ...selectedJob, commissionPaid: true });
+                            }
                           }
-                        }
-                      }}
-                      color={theme.link}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                        Komisyon Ödendi
-                      </ThemedText>
-                      <ThemedText type="body" style={{ marginTop: Spacing.xs }}>
-                        {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
-                      </ThemedText>
+                        }}
+                        style={({ pressed }) => [
+                          {
+                            flex: 1,
+                            paddingVertical: Spacing.md,
+                            paddingHorizontal: Spacing.lg,
+                            borderRadius: BorderRadius.md,
+                            backgroundColor: selectedJob.commissionPaid ? colors.success : colors.border,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            opacity: pressed ? 0.8 : 1,
+                          },
+                        ]}
+                      >
+                        <ThemedText
+                          type="small"
+                          style={{
+                            color: selectedJob.commissionPaid ? "#FFFFFF" : colors.textSecondary,
+                            fontWeight: "600",
+                          }}
+                        >
+                          {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
+                        </ThemedText>
+                      </Pressable>
+                      {selectedJob.commissionPaid && (
+                        <Pressable
+                          onPress={async () => {
+                            if (selectedJob && firebaseUser) {
+                              const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, false);
+                              if (success) {
+                                const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: false } : j);
+                                setJobs(updatedJobs);
+                                setSelectedJob({ ...selectedJob, commissionPaid: false });
+                              }
+                            }
+                          }}
+                          style={({ pressed }) => [
+                            {
+                              paddingVertical: Spacing.md,
+                              paddingHorizontal: Spacing.lg,
+                              borderRadius: BorderRadius.md,
+                              backgroundColor: colors.border,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              opacity: pressed ? 0.8 : 1,
+                            },
+                          ]}
+                        >
+                          <Feather name="x" size={18} color={colors.textSecondary} />
+                        </Pressable>
+                      )}
                     </View>
                   </View>
 
