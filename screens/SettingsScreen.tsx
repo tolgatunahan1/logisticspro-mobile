@@ -31,8 +31,6 @@ export default function SettingsScreen() {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
-  const [paidCommissionsTotal, setPaidCommissionsTotal] = useState(0);
-  const [unpaidCommissionsTotal, setUnpaidCommissionsTotal] = useState(0);
   
   // Account settings states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -64,78 +62,6 @@ export default function SettingsScreen() {
     setIbans(data);
   }, [firebaseUser?.uid]);
 
-  const loadCommissionStats = useCallback(async () => {
-    if (!firebaseUser?.uid) return;
-    try {
-      const jobs = await getCompletedJobs(firebaseUser.uid);
-      setCompletedJobs(jobs);
-      
-      const paid = jobs.reduce((sum, job) => {
-        if (job.commissionPaid && job.commissionCost) {
-          return sum + parseFloat(job.commissionCost as string);
-        }
-        return sum;
-      }, 0);
-      
-      const unpaid = jobs.reduce((sum, job) => {
-        if (!job.commissionPaid && job.commissionCost) {
-          return sum + parseFloat(job.commissionCost as string);
-        }
-        return sum;
-      }, 0);
-      
-      setPaidCommissionsTotal(paid);
-      setUnpaidCommissionsTotal(unpaid);
-    } catch (error) {
-      console.error("Commission stats load error:", error);
-    }
-  }, [firebaseUser?.uid]);
-
-  React.useEffect(() => {
-    const loadData = async () => {
-      if (!firebaseUser?.uid) {
-        console.log("❌ No firebaseUser.uid in SettingsScreen");
-        return;
-      }
-      
-      console.log("📊 Loading commission stats for:", firebaseUser.uid);
-      
-      try {
-        // Load IBANs
-        const ibanData = await getIBANs(firebaseUser.uid);
-        setIbans(ibanData);
-        
-        // Load Commission Stats
-        const jobs = await getCompletedJobs(firebaseUser.uid);
-        console.log("📦 Got jobs:", jobs.length);
-        setCompletedJobs(jobs);
-        
-        const paid = jobs.reduce((sum, job) => {
-          if (job.commissionPaid && job.commissionCost) {
-            const cost = parseFloat(job.commissionCost as string);
-            return sum + cost;
-          }
-          return sum;
-        }, 0);
-        
-        const unpaid = jobs.reduce((sum, job) => {
-          if (!job.commissionPaid && job.commissionCost) {
-            const cost = parseFloat(job.commissionCost as string);
-            return sum + cost;
-          }
-          return sum;
-        }, 0);
-        
-        console.log("✅ Paid:", paid, "Unpaid:", unpaid);
-        setPaidCommissionsTotal(paid);
-        setUnpaidCommissionsTotal(unpaid);
-      } catch (error) {
-        console.error("❌ Commission stats load error:", error);
-      }
-    };
-    
-    loadData();
-  }, [firebaseUser?.uid]);
 
   const handleAddIBAN = async () => {
     if (!ibanInput.trim() || !nameInput.trim()) {
@@ -307,75 +233,6 @@ export default function SettingsScreen() {
             </View>
             <Feather name="chevron-right" size={20} color={colors.textSecondary} />
           </Pressable>
-        </View>
-
-        {/* Ödeme Takip Section */}
-        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
-          <View style={styles.sectionHeader}>
-            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-              Ödeme Takip
-            </ThemedText>
-          </View>
-
-          {/* Main Summary Cards - Row 1 */}
-          <View style={{ flexDirection: "row", gap: Spacing.md, marginBottom: Spacing.md }}>
-            {/* Ödenen Bakiye */}
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: colors.success,
-                padding: Spacing.lg,
-                borderRadius: BorderRadius.lg,
-                justifyContent: "center",
-              }}
-            >
-              <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)", marginBottom: Spacing.sm }}>
-                Ödenen Toplam
-              </ThemedText>
-              <ThemedText type="h3" style={{ color: "#FFFFFF", fontSize: 24, fontWeight: "700" }}>
-                {paidCommissionsTotal.toFixed(2)} ₺
-              </ThemedText>
-            </View>
-
-            {/* Bekleyen Bakiye */}
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: colors.warning,
-                padding: Spacing.lg,
-                borderRadius: BorderRadius.lg,
-                justifyContent: "center",
-              }}
-            >
-              <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)", marginBottom: Spacing.sm }}>
-                Bekleyen Toplam
-              </ThemedText>
-              <ThemedText type="h3" style={{ color: "#FFFFFF", fontSize: 24, fontWeight: "700" }}>
-                {unpaidCommissionsTotal.toFixed(2)} ₺
-              </ThemedText>
-            </View>
-          </View>
-
-          {/* Toplam Komisyon Card */}
-          <View
-            style={{
-              backgroundColor: isDark ? "rgba(100, 150, 255, 0.1)" : "rgba(100, 150, 255, 0.15)",
-              borderLeftWidth: 4,
-              borderLeftColor: theme.link,
-              padding: Spacing.lg,
-              borderRadius: BorderRadius.lg,
-            }}
-          >
-            <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
-              Toplam Komisyon
-            </ThemedText>
-            <ThemedText type="h3" style={{ color: theme.link, fontSize: 28, fontWeight: "700" }}>
-              {(paidCommissionsTotal + unpaidCommissionsTotal).toFixed(2)} ₺
-            </ThemedText>
-            <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm, fontStyle: "italic" }}>
-              Ödenen: {paidCommissionsTotal.toFixed(2)} ₺ + Bekleyen: {unpaidCommissionsTotal.toFixed(2)} ₺
-            </ThemedText>
-          </View>
         </View>
 
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
