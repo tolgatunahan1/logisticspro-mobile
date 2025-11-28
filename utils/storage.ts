@@ -7,6 +7,7 @@ export interface Carrier {
   phone: string;
   nationalId: string;
   plate: string;
+  dorsePlate?: string;
   vehicleType: string;
   createdAt: number;
   updatedAt: number;

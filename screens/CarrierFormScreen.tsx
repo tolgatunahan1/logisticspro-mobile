@@ -32,6 +32,7 @@ export default function CarrierFormScreen() {
   const [phone, setPhone] = useState(carrier?.phone || initialData?.phone || "");
   const [nationalId, setNationalId] = useState(carrier?.nationalId || "");
   const [plate, setPlate] = useState(carrier?.plate || "");
+  const [dorsePlate, setDorsePlate] = useState(carrier?.dorsePlate || "");
   const [vehicleType, setVehicleType] = useState(carrier?.vehicleType || initialData?.vehicleType || "kamyon");
   const [isLoading, setIsLoading] = useState(false);
   const [showVehiclePicker, setShowVehiclePicker] = useState(false);
@@ -113,6 +114,7 @@ export default function CarrierFormScreen() {
         nationalId: nationalId.trim(),
         plate: plate.trim().toUpperCase(),
         vehicleType,
+        ...(dorsePlate.trim() && { dorsePlate: dorsePlate.trim() }),
       };
 
       let success = false;
@@ -167,7 +169,7 @@ export default function CarrierFormScreen() {
         </Pressable>
       ),
     });
-  }, [navigation, theme, isLoading, name, phone, nationalId, plate, vehicleType]);
+  }, [navigation, theme, isLoading, name, phone, nationalId, plate, dorsePlate, vehicleType]);
 
   const renderInput = (
     label: string,
@@ -225,6 +227,7 @@ export default function CarrierFormScreen() {
         {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
         {renderInput("TC Kimlik Numarası", nationalId, setNationalId, "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
         {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
+        {renderInput("Dorse Plakası (İsteğe Bağlı)", dorsePlate, (text) => setDorsePlate(formatLicensePlate(text)), "dorsePlate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
         
         <View style={styles.inputContainer}>
           <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
