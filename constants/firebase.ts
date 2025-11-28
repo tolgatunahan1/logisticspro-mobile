@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDV7X8j9PuhYw1A1CXdGTRp08NFm0F9ajg",
   authDomain: "logisticspro-62f16.firebaseapp.com",
@@ -12,6 +13,7 @@ const firebaseConfig = {
   databaseURL: "https://logisticspro-62f16-default-rtdb.firebaseio.com",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const firebaseAuth = getAuth(app);
 export const firebaseDatabase = getDatabase(app);
