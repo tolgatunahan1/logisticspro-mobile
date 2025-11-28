@@ -26,7 +26,7 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isFirebaseMode, setIsFirebaseMode] = useState(false);
+  const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Default: Firebase (normal users)
 
   useEffect(() => {
     const init = async () => {
@@ -97,37 +97,24 @@ export default function LoginScreen() {
             LogisticsPRO
           </ThemedText>
           <ThemedText type="body" style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {isAdminMode ? "Admin Giriş" : "Giriş Yap"}
+            {isAdminMode ? "Admin Paneli" : "Kullanıcı Girişi"}
           </ThemedText>
         </View>
 
         <View style={[styles.modeToggle, { borderColor: colors.border }]}>
-          <Pressable
-            onPress={() => { setIsAdminMode(false); setIsFirebaseMode(false); }}
-            disabled={isLoading}
-            style={[
-              styles.modeButton,
-              {
-                backgroundColor: !isAdminMode && !isFirebaseMode ? theme.link : colors.inputBackground,
-              },
-            ]}
-          >
-            <ThemedText style={[styles.modeButtonText, { color: !isAdminMode && !isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
-              Kullanıcı
-            </ThemedText>
-          </Pressable>
           <Pressable
             onPress={() => { setIsAdminMode(false); setIsFirebaseMode(true); }}
             disabled={isLoading}
             style={[
               styles.modeButton,
               {
-                backgroundColor: isFirebaseMode ? theme.link : colors.inputBackground,
+                backgroundColor: !isAdminMode ? theme.link : colors.inputBackground,
+                flex: 1,
               },
             ]}
           >
-            <ThemedText style={[styles.modeButtonText, { color: isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
-              Firebase
+            <ThemedText style={[styles.modeButtonText, { color: !isAdminMode ? "#FFF" : colors.textSecondary }]}>
+              Kullanıcı
             </ThemedText>
           </Pressable>
           <Pressable
@@ -137,6 +124,7 @@ export default function LoginScreen() {
               styles.modeButton,
               {
                 backgroundColor: isAdminMode ? theme.link : colors.inputBackground,
+                flex: 1,
               },
             ]}
           >
@@ -149,7 +137,7 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              {isFirebaseMode ? "Email" : "Kullanıcı Adı"}
+              {isAdminMode ? "Admin Adı" : "Email"}
             </ThemedText>
             <TextInput
               style={[
@@ -160,7 +148,7 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder={isFirebaseMode ? "Email adresiniz" : "Kullanıcı adınız"}
+              placeholder={isAdminMode ? "Admin adınız" : "Email adresiniz"}
               placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
