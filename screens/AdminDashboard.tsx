@@ -38,12 +38,10 @@ export default function AdminDashboard() {
     try {
       const pending = await firebaseAuthService.getPendingUsers();
       const approved = await firebaseAuthService.getApprovedUsers();
-      console.log("🔍 DEBUG - Pending Users:", pending.length, pending);
-      console.log("🔍 DEBUG - Approved Users:", approved.length, approved);
       setPendingUsers(pending);
       setApprovedUsers(approved);
     } catch (error) {
-      console.log("🔍 DEBUG - Error loading users:", error);
+      // Silent fail - returns empty arrays
     } finally {
       setLoading(false);
     }
