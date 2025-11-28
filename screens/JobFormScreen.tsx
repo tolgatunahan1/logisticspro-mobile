@@ -116,16 +116,16 @@ export default function JobFormScreen() {
 
       const data = {
         companyId: finalCompanyId,
-        cargoType: finalCargoType.toString().trim(),
-        tonnage: finalTonnage.toString().trim(),
-        dimensions: finalDimensions.toString().trim(),
-        loadingLocation: finalLoadingLocation.toString().trim(),
-        deliveryLocation: finalDeliveryLocation.toString().trim(),
+        cargoType: finalCargoType.toString().trim().toUpperCase(),
+        tonnage: finalTonnage.toString().trim().toUpperCase(),
+        dimensions: finalDimensions.toString().trim().toUpperCase(),
+        loadingLocation: finalLoadingLocation.toString().trim().toUpperCase(),
+        deliveryLocation: finalDeliveryLocation.toString().trim().toUpperCase(),
         loadingDate: finalLoadingDate,
         deliveryDate: finalDeliveryDate,
         transportationCost: finalTransportationCost.toString().trim(),
         commissionCost: finalCommissionCost.toString().trim(),
-        notes: finalNotes.toString().trim(),
+        notes: finalNotes.toString().trim().toUpperCase(),
       };
 
       console.log("İş verileri kaydediliyor:", data);
@@ -281,7 +281,7 @@ export default function JobFormScreen() {
               style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
               placeholder="Örn: Beton, Gıda, İnşaat Malzemesi"
               value={cargoType}
-              onChangeText={setCargoType}
+              onChangeText={(text) => setCargoType(text.toUpperCase())}
             />
           )}
         </View>
@@ -305,7 +305,7 @@ export default function JobFormScreen() {
               placeholder="Örn: 20 ton, 5000 kg"
               keyboardType="default"
               value={tonnage}
-              onChangeText={setTonnage}
+              onChangeText={(text) => setTonnage(text.toUpperCase())}
             />
           )}
         </View>
@@ -328,7 +328,7 @@ export default function JobFormScreen() {
               style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
               placeholder="Örn: 3m x 2m x 1.5m"
               value={dimensions}
-              onChangeText={setDimensions}
+              onChangeText={(text) => setDimensions(text.toUpperCase())}
             />
           )}
         </View>
@@ -351,7 +351,7 @@ export default function JobFormScreen() {
               style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
               placeholder="Şehir veya Adres"
               value={loadingLocation}
-              onChangeText={setLoadingLocation}
+              onChangeText={(text) => setLoadingLocation(text.toUpperCase())}
             />
           )}
         </View>
@@ -374,7 +374,7 @@ export default function JobFormScreen() {
               style={[inputStyle, { backgroundColor: colors.backgroundDefault }]}
               placeholder="Şehir veya Adres"
               value={deliveryLocation}
-              onChangeText={setDeliveryLocation}
+              onChangeText={(text) => setDeliveryLocation(text.toUpperCase())}
             />
           )}
         </View>
@@ -522,7 +522,7 @@ export default function JobFormScreen() {
               multiline
               numberOfLines={4}
               value={notes}
-              onChangeText={setNotes}
+              onChangeText={(text) => setNotes(text.toUpperCase())}
             />
           )}
         </View>
