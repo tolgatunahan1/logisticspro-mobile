@@ -10,6 +10,7 @@ import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Company, getCompanies, searchCompanies, deleteCompany } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -36,6 +37,7 @@ export default function CompanyListScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<Company>("Company");
+  const { firebaseUser } = useAuth();
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,8 +49,9 @@ export default function CompanyListScreen() {
   const colors = isDark ? Colors.dark : Colors.light;
 
   const loadCompanies = useCallback(async () => {
+    if (!firebaseUser?.uid) return;
     try {
-      const data = await getCompanies();
+      const data = await getCompanies(firebaseUser.uid);
       setCompanies(data);
     } catch (error) {
       console.error("Failed to load companies:", error);
@@ -56,7 +59,7 @@ export default function CompanyListScreen() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {

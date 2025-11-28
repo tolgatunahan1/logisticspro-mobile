@@ -10,6 +10,7 @@ import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Carrier, getCarriers, searchCarriers, deleteCarrier, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -36,6 +37,7 @@ export default function CarrierListScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<Carrier>("Carrier");
+  const { firebaseUser } = useAuth();
   
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,8 +49,9 @@ export default function CarrierListScreen() {
   const colors = isDark ? Colors.dark : Colors.light;
 
   const loadCarriers = useCallback(async () => {
+    if (!firebaseUser?.uid) return;
     try {
-      const data = await getCarriers();
+      const data = await getCarriers(firebaseUser.uid);
       setCarriers(data);
     } catch (error) {
       console.error("Failed to load carriers:", error);
@@ -56,7 +59,7 @@ export default function CarrierListScreen() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,6 +82,17 @@ export default function CarrierListScreen() {
 
   const handleDeletePress = (carrier: Carrier) => {
     openDeleteConfirm(carrier);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!firebaseUser?.uid) return;
+    if (deleteState.toDelete) {
+      const success = await deleteCarrier(firebaseUser.uid, deleteState.toDelete.id);
+      if (success) {
+        closeDeleteConfirm();
+        loadCarriers();
+      }
+    }
   };
 
   const handleSettingsPress = () => {

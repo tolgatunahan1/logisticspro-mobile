@@ -9,6 +9,7 @@ import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs, getCarriers, Carrier, addCompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -20,6 +21,7 @@ export default function JobListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<PlannedJob>("Job");
+  const { firebaseUser } = useAuth();
 
   const [jobs, setJobs] = useState<PlannedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
@@ -43,9 +45,10 @@ export default function JobListScreen() {
   }, [navigation]);
 
   const loadData = useCallback(async () => {
-    const allJobs = await getJobs();
-    const allCompanies = await getCompanies();
-    const allCarriers = await getCarriers();
+    if (!firebaseUser?.uid) return;
+    const allJobs = await getJobs(firebaseUser.uid);
+    const allCompanies = await getCompanies(firebaseUser.uid);
+    const allCarriers = await getCarriers(firebaseUser.uid);
     
     const companiesMap = allCompanies.reduce((acc, company) => {
       acc[company.id] = company;
@@ -57,7 +60,7 @@ export default function JobListScreen() {
     setFilteredJobs(allJobs);
     setCarriers(allCarriers);
     setCurrentCarrier(allCarriers[0] || null);
-  }, []);
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {
