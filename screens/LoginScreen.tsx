@@ -170,9 +170,15 @@ export default function LoginScreen() {
         setError("Email veya şifre yanlış");
       }
     } catch (error: any) {
-      console.error("Login error:", error);
       const errorMsg = error?.message || "Giriş sırasında hata oluştu";
-      setError(errorMsg);
+      // Check if user is not registered
+      if (errorMsg.includes("invalid-credential") || errorMsg.includes("henüz onaylanmamıştır")) {
+        setError("Lütfen Kayıt Olunuz");
+      } else if (errorMsg.includes("Admin onayı bekleniyor")) {
+        setError("Admin onayı bekleniyor. Lütfen kısa bir süre sonra tekrar deneyin.");
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }
