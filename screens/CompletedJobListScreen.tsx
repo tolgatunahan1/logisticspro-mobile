@@ -613,7 +613,7 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                   </View>
 
-                  {/* Commission Payment Status - Modern Toggle Switch */}
+                  {/* Commission Payment Status - Modern One-Tap Toggle */}
                   <View style={{ gap: Spacing.sm }}>
                     <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                       Komisyon Ödeme Durumu
@@ -624,11 +624,18 @@ export default function CompletedJobListScreen() {
                           const newState = !selectedJob.commissionPaid;
                           const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, newState);
                           if (success) {
+                            // Update state immediately
                             const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newState } : j);
                             const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newState } : j);
                             setJobs(updatedJobs);
                             setFilteredJobs(updatedFiltered);
                             setSelectedJob({ ...selectedJob, commissionPaid: newState });
+                            
+                            // Close modal and refresh list immediately
+                            setTimeout(() => {
+                              setShowDetailModal(false);
+                              loadData();
+                            }, 300);
                           }
                         }
                       }}
@@ -636,45 +643,49 @@ export default function CompletedJobListScreen() {
                         {
                           flexDirection: "row",
                           alignItems: "center",
+                          justifyContent: "space-between",
                           gap: Spacing.md,
-                          paddingVertical: Spacing.md,
+                          paddingVertical: Spacing.lg,
                           paddingHorizontal: Spacing.lg,
                           borderRadius: BorderRadius.lg,
                           backgroundColor: selectedJob.commissionPaid ? colors.success + "20" : isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
-                          borderWidth: 1,
+                          borderWidth: 2,
                           borderColor: selectedJob.commissionPaid ? colors.success : colors.border,
-                          opacity: pressed ? 0.8 : 1,
+                          opacity: pressed ? 0.85 : 1,
+                          transform: [{ scale: pressed ? 0.98 : 1 }],
                         },
                       ]}
                     >
+                      <View style={{ flex: 1 }}>
+                        <ThemedText type="small" style={{ fontWeight: "600", color: selectedJob.commissionPaid ? colors.success : colors.textSecondary, fontSize: 16 }}>
+                          {selectedJob.commissionPaid ? "✓ Ödendi" : "○ Ödenmedi"}
+                        </ThemedText>
+                      </View>
                       <View
                         style={{
-                          width: 48,
-                          height: 28,
-                          borderRadius: 14,
+                          width: 52,
+                          height: 32,
+                          borderRadius: 16,
                           backgroundColor: selectedJob.commissionPaid ? colors.success : colors.textSecondary + "40",
                           justifyContent: "center",
                           alignItems: selectedJob.commissionPaid ? "flex-end" : "flex-start",
-                          paddingHorizontal: 2,
+                          paddingHorizontal: 3,
                         }}
                       >
                         <View
                           style={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: 12,
+                            width: 26,
+                            height: 26,
+                            borderRadius: 13,
                             backgroundColor: "#FFFFFF",
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 3.84,
+                            elevation: 5,
                           }}
                         />
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <ThemedText type="small" style={{ fontWeight: "600", color: selectedJob.commissionPaid ? colors.success : colors.textSecondary }}>
-                          {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
-                        </ThemedText>
-                      </View>
-                      {selectedJob.commissionPaid && (
-                        <Feather name="check" size={18} color={colors.success} />
-                      )}
                     </Pressable>
                   </View>
 
