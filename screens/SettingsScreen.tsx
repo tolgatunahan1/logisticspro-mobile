@@ -3,6 +3,7 @@ import { StyleSheet, View, Pressable, Alert, ScrollView, Modal, TextInput, Activ
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useHeaderHeight } from "@react-navigation/elements";
 import * as Notifications from "expo-notifications";
 
 import { ThemedView } from "../components/ThemedView";
@@ -18,6 +19,7 @@ import { firebaseAuthService } from "../utils/firebaseAuth";
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
   const navigation = useNavigation();
   const { logout, firebaseUser } = useAuth();
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<IBAN>("IBAN");
@@ -158,7 +160,7 @@ export default function SettingsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: headerHeight + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }}>
         {/* Hesap Ayarları Section */}
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.sectionHeader}>
