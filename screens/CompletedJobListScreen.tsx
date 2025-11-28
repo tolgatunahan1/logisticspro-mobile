@@ -288,7 +288,7 @@ export default function CompletedJobListScreen() {
                   {job.loadingLocation || "-"} → {job.deliveryLocation || "-"}
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  {job.cargoType || "-"} • {job.tonnage ? `${job.tonnage} Ton` : "-"}
+                  {job.cargoType || "-"} • {job.tonnage ? job.tonnage : "-"}
                 </ThemedText>
               </View>
             </View>
