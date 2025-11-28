@@ -155,16 +155,16 @@ export default function AvailabilityScreen() {
       </View>
 
       <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, backgroundColor: colors.backgroundDefault }}>
-          <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled">
-            <View style={[s.modal, { paddingHorizontal: 12, paddingTop: 12, paddingBottom: 100 }]}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <ThemedText type="h3">Yeni Bildiri</ThemedText>
-                <Pressable onPress={() => setModalVisible(false)}>
-                  <Feather name="x" size={24} color={colors.text} />
-                </Pressable>
-              </View>
+        <View style={{ flex: 1, backgroundColor: colors.backgroundDefault, paddingTop: 12 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12, marginBottom: 12 }}>
+            <ThemedText type="h3">Yeni Bildiri</ThemedText>
+            <Pressable onPress={() => setModalVisible(false)}>
+              <Feather name="x" size={24} color={colors.text} />
+            </Pressable>
+          </View>
 
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+            <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 100 }}>
               <View style={{ marginBottom: 12 }}>
                 <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
                   Ad
@@ -272,9 +272,9 @@ export default function AvailabilityScreen() {
                   </ThemedText>
                 </Pressable>
               </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
       </Modal>
     </ScreenScrollView>
   );
