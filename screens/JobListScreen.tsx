@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
+import { StaggeredListItem } from "../components/StaggeredListItem";
 import { useTheme } from "../hooks/useTheme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { useAuth } from "../contexts/AuthContext";
@@ -181,17 +182,18 @@ export default function JobListScreen() {
   };
 
 
-  const renderJobItem = ({ item: job }: { item: PlannedJob }) => {
+  const renderJobItem = ({ item: job, index }: { item: PlannedJob; index?: number }) => {
     const company = companies[job.companyId];
     return (
-      <View
-        style={[
-          styles.jobCard,
-          {
-            backgroundColor: colors.backgroundDefault,
-          },
-        ]}
-      >
+      <StaggeredListItem index={index || 0}>
+        <View
+          style={[
+            styles.jobCard,
+            {
+              backgroundColor: colors.backgroundDefault,
+            },
+          ]}
+        >
         <Pressable
           onPress={() => handleJobPress(job)}
           style={{ flex: 1 }}
@@ -218,7 +220,8 @@ export default function JobListScreen() {
             </View>
           </View>
         </Pressable>
-      </View>
+        </View>
+      </StaggeredListItem>
     );
   };
 

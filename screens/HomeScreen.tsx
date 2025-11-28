@@ -8,6 +8,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
+import { AnimatedCounter } from "../components/AnimatedCounter";
+import { LiftPressable } from "../components/LiftPressable";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
@@ -164,7 +166,7 @@ export default function HomeScreen() {
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
                 Taşıyıcı
               </ThemedText>
-              <ThemedText type="h3">{carrierCount}</ThemedText>
+              <AnimatedCounter value={carrierCount} type="h3" />
             </View>
           </View>
 
@@ -182,7 +184,7 @@ export default function HomeScreen() {
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
                 Firma
               </ThemedText>
-              <ThemedText type="h3">{companyCount}</ThemedText>
+              <AnimatedCounter value={companyCount} type="h3" />
             </View>
           </View>
         </View>
@@ -203,7 +205,7 @@ export default function HomeScreen() {
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
                 Sefer
               </ThemedText>
-              <ThemedText type="h3">{jobCount}</ThemedText>
+              <AnimatedCounter value={jobCount} type="h3" />
             </View>
           </View>
 
@@ -221,7 +223,7 @@ export default function HomeScreen() {
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
                 Tamamlanan
               </ThemedText>
-              <ThemedText type="h3">{completedJobCount}</ThemedText>
+              <AnimatedCounter value={completedJobCount} type="h3" />
             </View>
           </View>
         </View>
@@ -341,14 +343,12 @@ export default function HomeScreen() {
           Hızlı Erişim
         </ThemedText>
 
-        <Pressable
+        <LiftPressable
           onPress={() => navigation.navigate("CarrierList")}
-          style={({ pressed }) => [
+          style={[
             styles.menuCard,
             {
               backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               borderBottomLeftRadius: 0,
@@ -371,16 +371,14 @@ export default function HomeScreen() {
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+        </LiftPressable>
 
-        <Pressable
+        <LiftPressable
           onPress={() => navigation.navigate("CompanyList")}
-          style={({ pressed }) => [
+          style={[
             styles.menuCard,
             {
               backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
               borderRadius: 0,
               marginTop: 0,
               borderBottomLeftRadius: 0,
@@ -403,16 +401,14 @@ export default function HomeScreen() {
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+        </LiftPressable>
 
-        <Pressable
+        <LiftPressable
           onPress={() => navigation.navigate("JobList")}
-          style={({ pressed }) => [
+          style={[
             styles.menuCard,
             {
               backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
               borderRadius: 0,
               marginTop: 0,
               borderBottomLeftRadius: 0,
@@ -467,7 +463,7 @@ export default function HomeScreen() {
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+        </LiftPressable>
       </ScrollView>
 
       <Modal
