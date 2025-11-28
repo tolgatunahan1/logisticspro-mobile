@@ -156,19 +156,27 @@ export default function CompletedJobListScreen() {
   // Helper function to share IBAN with carrier via WhatsApp
   const shareIBANWithCarrier = useCallback(
     async (selectedIBAN: IBAN) => {
+      console.log("=== IBAN SHARING START ===");
+      console.log("SelectedJob:", selectedJob?.id);
+      console.log("SelectedIBAN:", selectedIBAN);
+
       if (!selectedJob || !selectedJob.carrierId) {
+        console.log("Error: No job or carrier ID");
         Alert.alert("Hata", "İş veya nakliyeci bilgileri eksik");
         return;
       }
 
       const carrier = carriers[selectedJob.carrierId];
+      console.log("Carrier:", carrier);
 
       if (!carrier || !carrier.phone || !carrier.phone.trim()) {
+        console.log("Error: No carrier phone");
         Alert.alert("Hata", "Nakliyeci telefon numarası eksik");
         return;
       }
 
       if (!selectedIBAN || !selectedIBAN.nameSurname || !selectedIBAN.ibanNumber) {
+        console.log("Error: IBAN data missing");
         Alert.alert("Hata", "IBAN bilgileri eksik");
         return;
       }
@@ -182,14 +190,29 @@ export default function CompletedJobListScreen() {
         phoneNumber = "90" + phoneNumber;
       }
 
+      console.log("Phone Number:", phoneNumber);
+      console.log("Message:", message);
+
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      console.log("WhatsApp URL:", whatsappUrl);
 
       try {
+        const canOpen = await Linking.canOpenURL(whatsappUrl);
+        console.log("Can open URL:", canOpen);
+        
+        if (!canOpen) {
+          Alert.alert("Hata", "WhatsApp uygulaması yüklü değil veya bağlantı açılamıyor");
+          return;
+        }
+
         await Linking.openURL(whatsappUrl);
+        console.log("WhatsApp opened successfully");
         setShowIBANModal(false);
       } catch (error) {
-        Alert.alert("Hata", "WhatsApp açılamadı. Lütfen WhatsApp uygulamasının yüklü olduğundan emin olun.");
+        console.error("Error opening WhatsApp:", error);
+        Alert.alert("Hata", `WhatsApp açılamadı: ${error instanceof Error ? error.message : String(error)}`);
       }
+      console.log("=== IBAN SHARING END ===");
     },
     [selectedJob, carriers]
   );
@@ -724,27 +747,36 @@ export default function CompletedJobListScreen() {
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              {ibans.map((iban) => (
-                <Pressable
-                  key={iban.id}
-                  onPress={() => shareIBANWithCarrier(iban)}
-                  style={({ pressed }) => [
-                    styles.ibanItem,
-                    {
-                      backgroundColor: colors.backgroundDefault,
-                      opacity: pressed ? 0.7 : 1,
-                    },
-                  ]}
-                >
-                  <View>
-                    <ThemedText type="h4">{iban.nameSurname}</ThemedText>
-                    <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
-                      {iban.ibanNumber}
-                    </ThemedText>
-                  </View>
-                  <Feather name="arrow-right" size={20} color={theme.link} />
-                </Pressable>
-              ))}
+              {ibans && ibans.length > 0 ? (
+                ibans.map((iban) => (
+                  <Pressable
+                    key={iban.id}
+                    onPress={() => {
+                      console.log("IBAN item pressed:", iban);
+                      shareIBANWithCarrier(iban);
+                    }}
+                    style={({ pressed }) => [
+                      styles.ibanItem,
+                      {
+                        backgroundColor: colors.backgroundDefault,
+                        opacity: pressed ? 0.7 : 1,
+                      },
+                    ]}
+                  >
+                    <View>
+                      <ThemedText type="h4">{iban.nameSurname}</ThemedText>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
+                        {iban.ibanNumber}
+                      </ThemedText>
+                    </View>
+                    <Feather name="arrow-right" size={20} color={theme.link} />
+                  </Pressable>
+                ))
+              ) : (
+                <ThemedText type="body" style={{ color: colors.textSecondary, textAlign: "center", marginTop: Spacing.lg }}>
+                  Kayıtlı IBAN bulunamadı
+                </ThemedText>
+              )}
             </ScrollView>
           </View>
         </View>
