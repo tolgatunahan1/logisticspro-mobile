@@ -6,7 +6,7 @@ import {
   Auth,
 } from "firebase/auth";
 import { firebaseAuth, firebaseDatabase } from "@/constants/firebase";
-import { ref, set, get } from "firebase/database";
+import { ref, set, get, update } from "firebase/database";
 
 const FIREBASE_CONFIG_ERROR = "Firebase yapılandırılmamış. Lütfen Firebase credentials'ı constants/firebase.ts dosyasına ekleyin.";
 
@@ -133,6 +133,17 @@ export const firebaseAuthService = {
     }
   },
 
+  // Update user profile
+  updateUserProfile: async (uid: string, updates: Partial<UserProfile>): Promise<boolean> => {
+    try {
+      await update(ref(firebaseDatabase, `users/${uid}/profile`), updates);
+      return true;
+    } catch (error) {
+      console.error("Update user profile error:", error);
+      return false;
+    }
+  },
+
   // Get current user
   getCurrentUser: () => {
     return firebaseAuth.currentUser;
@@ -151,38 +162,39 @@ export const firebaseAuthService = {
   // Initialize admin user (Firebase)
   initializeAdmin: async (email: string, password: string): Promise<boolean> => {
     try {
-      const existingAdmin = await firebaseAuthService.getUserProfile(
-        email.replace("@", "_").replace(".", "_")
-      );
-      if (existingAdmin?.isAdmin) {
-        console.log("✅ Admin already exists");
-        return true;
-      }
-
-      // Try to create admin user
+      // Try to login with the email - this will either succeed or throw
       try {
-        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        const admin = userCredential.user;
-
-        // Mark as admin in profile
-        const adminProfile: UserProfile = {
-          uid: admin.uid,
-          email: admin.email || "",
-          createdAt: Date.now(),
-          status: "approved",
+        const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+        const user = userCredential.user;
+        
+        // Mark existing user as admin
+        await update(ref(firebaseDatabase, `users/${user.uid}/profile`), {
           isAdmin: true,
-        };
-
-        await set(ref(firebaseDatabase, `users/${admin.uid}/profile`), adminProfile);
-        console.log("✅ Admin user created:", email);
+          status: "approved",
+        });
+        console.log("✅ User marked as admin:", email);
+        await signOut(firebaseAuth); // Sign out after setup
         return true;
-      } catch (createError: any) {
-        if (createError?.message?.includes("email-already-in-use")) {
-          // Admin might exist, try checking by email pattern
-          console.log("📌 Admin email already exists, checking status...");
+      } catch (signInError: any) {
+        // If user doesn't exist, create as admin
+        if (signInError?.message?.includes("user-not-found") || signInError?.message?.includes("invalid-credential")) {
+          const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+          const newAdmin = userCredential.user;
+
+          const adminProfile: UserProfile = {
+            uid: newAdmin.uid,
+            email: newAdmin.email || "",
+            createdAt: Date.now(),
+            status: "approved",
+            isAdmin: true,
+          };
+
+          await set(ref(firebaseDatabase, `users/${newAdmin.uid}/profile`), adminProfile);
+          console.log("✅ New admin created:", email);
+          await signOut(firebaseAuth); // Sign out after setup
           return true;
         }
-        throw createError;
+        throw signInError;
       }
     } catch (error) {
       console.error("Admin initialization error:", error);

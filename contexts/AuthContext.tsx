@@ -114,6 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setStorageAdapter(hybridAdapter);
           console.log("✅ Admin logged in via Firebase:", fbUser.email);
           return true;
+        } else {
+          console.log("❌ User is not admin");
         }
       }
       return false;
