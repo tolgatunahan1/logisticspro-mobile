@@ -62,6 +62,11 @@ export default function SettingsScreen() {
     setIbans(data);
   }, [firebaseUser?.uid]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadIBANs();
+    }, [loadIBANs])
+  );
 
   const handleAddIBAN = async () => {
     if (!ibanInput.trim() || !nameInput.trim()) {
