@@ -276,10 +276,10 @@ export default function JobListScreen() {
           setCarrierSearchQuery("");
         }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+        <View style={[styles.modalOverlay, { justifyContent: "flex-end" }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flex: 1, maxHeight: "95%" }]}>
             {/* Modal Header */}
-            <View style={styles.modalHeader}>
+            <View style={[styles.modalHeader, { paddingHorizontal: Spacing.lg }]}>
               <ThemedText type="h3">İş Detayları</ThemedText>
               <Pressable onPress={() => {
                 setShowDetailModal(false);
@@ -289,8 +289,8 @@ export default function JobListScreen() {
               </Pressable>
             </View>
 
-            {/* Modal Body */}
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            {/* Modal Body - Scrollable Job Details */}
+            <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false}>
               {selectedJob && (
                 <View style={{ gap: Spacing.lg }}>
                   <View style={styles.detailSection}>
@@ -386,125 +386,132 @@ export default function JobListScreen() {
               )}
             </ScrollView>
 
-            {/* Nakliyeci Seçim Bölümü */}
+
+            {/* Fixed Nakliyeci Seçim Bölümü - Bottom Section */}
             {selectedJob && (
-              <View style={{ gap: Spacing.md, marginBottom: Spacing.lg, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
-                <View style={{ gap: Spacing.sm }}>
-                  <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                    Nakliyeci Seçin
-                  </ThemedText>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      paddingHorizontal: Spacing.md,
-                      borderRadius: BorderRadius.md,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      backgroundColor: colors.backgroundDefault,
-                    }}
-                  >
-                    <Feather name="search" size={16} color={colors.textSecondary} />
-                    <TextInput
+              <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: theme.backgroundRoot }}>
+                <View style={{ gap: Spacing.md }}>
+                  <View style={{ gap: Spacing.sm }}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                      Nakliyeci Seçin
+                    </ThemedText>
+                    <View
                       style={{
-                        flex: 1,
-                        paddingVertical: Spacing.sm,
+                        flexDirection: "row",
+                        alignItems: "center",
                         paddingHorizontal: Spacing.md,
-                        color: theme.text,
-                        fontSize: 14,
+                        borderRadius: BorderRadius.md,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        backgroundColor: colors.backgroundDefault,
+                        height: 40,
                       }}
-                      placeholder="Nakliyeci adı veya telefon..."
-                      placeholderTextColor={colors.textSecondary}
-                      value={carrierSearchQuery}
-                      onChangeText={setCarrierSearchQuery}
-                    />
-                    {carrierSearchQuery.length > 0 && (
-                      <Pressable onPress={() => setCarrierSearchQuery("")}>
-                        <Feather name="x" size={16} color={colors.textSecondary} />
-                      </Pressable>
-                    )}
+                    >
+                      <Feather name="search" size={16} color={colors.textSecondary} />
+                      <TextInput
+                        style={{
+                          flex: 1,
+                          paddingHorizontal: Spacing.md,
+                          color: theme.text,
+                          fontSize: 14,
+                        }}
+                        placeholder="Ara..."
+                        placeholderTextColor={colors.textSecondary}
+                        value={carrierSearchQuery}
+                        onChangeText={setCarrierSearchQuery}
+                      />
+                      {carrierSearchQuery.length > 0 && (
+                        <Pressable onPress={() => setCarrierSearchQuery("")}>
+                          <Feather name="x" size={16} color={colors.textSecondary} />
+                        </Pressable>
+                      )}
+                    </View>
                   </View>
+
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: Spacing.md, paddingRight: Spacing.lg }}
+                    style={{ maxHeight: 90 }}
+                  >
+                    {getFilteredCarriers().length > 0 ? (
+                      getFilteredCarriers().map((carrier) => (
+                        <Pressable
+                          key={carrier.id}
+                          onPress={() => setSelectedCarrier(carrier)}
+                          style={({ pressed }) => [
+                            {
+                              paddingHorizontal: Spacing.md,
+                              paddingVertical: Spacing.sm,
+                              borderRadius: BorderRadius.md,
+                              borderWidth: 2,
+                              borderColor: selectedCarrier?.id === carrier.id ? theme.link : colors.border,
+                              backgroundColor: selectedCarrier?.id === carrier.id ? theme.link + "15" : colors.backgroundDefault,
+                              opacity: pressed ? 0.7 : 1,
+                              minWidth: 130,
+                              justifyContent: "center",
+                            },
+                          ]}
+                        >
+                          <ThemedText type="small" style={{ fontWeight: "600", textAlign: "center" }}>
+                            {carrier.name}
+                          </ThemedText>
+                          <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", fontSize: 12 }}>
+                            {carrier.phone}
+                          </ThemedText>
+                        </Pressable>
+                      ))
+                    ) : (
+                      <View style={{ justifyContent: "center" }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                          {carrierSearchQuery.trim() ? "Bulunamadı" : "Yükleniyor..."}
+                        </ThemedText>
+                      </View>
+                    )}
+                  </ScrollView>
                 </View>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: Spacing.md, paddingRight: Spacing.lg }}
-                >
-                  {getFilteredCarriers().length > 0 ? (
-                    getFilteredCarriers().map((carrier) => (
+
+                {/* Modal Footer Buttons */}
+                {selectedJob && (
+                  <View style={{ gap: Spacing.md, paddingVertical: Spacing.lg }}>
+                    <View style={{ flexDirection: "row", gap: Spacing.md }}>
                       <Pressable
-                        key={carrier.id}
-                        onPress={() => setSelectedCarrier(carrier)}
+                        onPress={() => handleShareJob(selectedJob)}
                         style={({ pressed }) => [
+                          styles.shareButton,
                           {
-                            paddingHorizontal: Spacing.lg,
-                            paddingVertical: Spacing.md,
-                            borderRadius: BorderRadius.md,
-                            borderWidth: 2,
-                            borderColor: selectedCarrier?.id === carrier.id ? theme.link : colors.border,
-                            backgroundColor: selectedCarrier?.id === carrier.id ? theme.link + "15" : colors.backgroundDefault,
-                            opacity: pressed ? 0.7 : 1,
-                            minWidth: 140,
+                            backgroundColor: theme.link,
+                            opacity: pressed || isCreatingTrip ? 0.9 : 1,
+                            flex: 1,
+                          },
+                        ]}
+                        disabled={isCreatingTrip}
+                      >
+                        <Feather name="share-2" size={16} color="#FFFFFF" />
+                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                          Paylaş
+                        </ThemedText>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => handleCreateTrip(selectedJob)}
+                        disabled={isCreatingTrip || !selectedCarrier}
+                        style={({ pressed }) => [
+                          styles.shareButton,
+                          {
+                            backgroundColor: colors.success,
+                            opacity: pressed || isCreatingTrip || !selectedCarrier ? 0.7 : 1,
+                            flex: 1,
                           },
                         ]}
                       >
-                        <ThemedText type="small" style={{ fontWeight: "600" }}>
-                          {carrier.name}
-                        </ThemedText>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
-                          {carrier.phone}
+                        <Feather name="check-circle" size={16} color="#FFFFFF" />
+                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                          {isCreatingTrip ? "Oluşturuluyor..." : "Sefer Oluştur"}
                         </ThemedText>
                       </Pressable>
-                    ))
-                  ) : (
-                    <View style={{ paddingHorizontal: Spacing.lg }}>
-                      <ThemedText type="body" style={{ color: colors.textSecondary }}>
-                        {carrierSearchQuery.trim() ? "Eşleşen nakliyeci bulunamadı" : "Nakliyeci bulunamadı"}
-                      </ThemedText>
                     </View>
-                  )}
-                </ScrollView>
-              </View>
-            )}
-
-            {/* Modal Footer - Share, Create Trip and Delete Buttons */}
-            {selectedJob && (
-              <View style={{ gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
-                <View style={{ flexDirection: "row", gap: Spacing.md }}>
-                  <Pressable
-                    onPress={() => handleShareJob(selectedJob)}
-                    style={({ pressed }) => [
-                      styles.shareButton,
-                      {
-                        backgroundColor: theme.link,
-                        opacity: pressed || isCreatingTrip ? 0.9 : 1,
-                        flex: 1,
-                      },
-                    ]}
-                    disabled={isCreatingTrip}
-                  >
-                    <Feather name="share-2" size={20} color="#FFFFFF" />
-                    <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                      Paylaş
-                    </ThemedText>
-                  </Pressable>
-                </View>
-                <Pressable
-                  onPress={() => handleCreateTrip(selectedJob)}
-                  disabled={isCreatingTrip || !selectedCarrier}
-                  style={({ pressed }) => [
-                    styles.shareButton,
-                    {
-                      backgroundColor: colors.success,
-                      opacity: pressed || isCreatingTrip || !selectedCarrier ? 0.7 : 1,
-                    },
-                  ]}
-                >
-                  <Feather name="check-circle" size={20} color="#FFFFFF" />
-                  <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    {isCreatingTrip ? "Oluşturuluyor..." : "Seferi Oluştur"}
-                  </ThemedText>
-                </Pressable>
+                  </View>
+                )}
               </View>
             )}
           </View>
