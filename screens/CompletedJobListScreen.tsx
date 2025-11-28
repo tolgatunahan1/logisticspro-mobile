@@ -39,7 +39,6 @@ export default function CompletedJobListScreen() {
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [ibans, setIbans] = useState<IBAN[]>([]);
-  const [showIBANList, setShowIBANList] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -207,7 +206,6 @@ export default function CompletedJobListScreen() {
 
         await Linking.openURL(whatsappUrl);
         console.log("WhatsApp opened successfully");
-        setShowIBANModal(false);
       } catch (error) {
         console.error("Error opening WhatsApp:", error);
         Alert.alert("Hata", `WhatsApp açılamadı: ${error instanceof Error ? error.message : String(error)}`);
@@ -218,14 +216,46 @@ export default function CompletedJobListScreen() {
   );
 
   const handleOpenIBANList = useCallback(async () => {
-    if (!firebaseUser?.uid) return;
-    console.log("=== SHARE IBAN BUTTON PRESSED ===");
-    console.log("Loading IBANs for user:", firebaseUser.uid);
-    const allIbans = await getIBANs(firebaseUser.uid);
-    console.log("IBANs loaded:", allIbans);
-    setIbans(allIbans);
-    setShowIBANList(true);
-  }, [firebaseUser?.uid]);
+    if (!firebaseUser?.uid) {
+      Alert.alert("Hata", "Kullanıcı bilgisi eksik");
+      return;
+    }
+
+    if (!selectedJob || !carriers[selectedJob.carrierId]) {
+      Alert.alert("Hata", "Nakliyeci bilgileri eksik");
+      return;
+    }
+
+    try {
+      const allIbans = await getIBANs(firebaseUser.uid);
+      
+      if (!allIbans || allIbans.length === 0) {
+        Alert.alert("Bilgi", "Kayıtlı IBAN bulunamadı. Lütfen Ayarlardan IBAN ekleyin.");
+        return;
+      }
+
+      // Create options for ActionSheetIOS-style selection
+      const ibanOptions = allIbans.map(iban => iban.nameSurname + " - " + iban.ibanNumber);
+      
+      Alert.alert(
+        "IBAN Seç",
+        "Hangi IBAN'ı nakliyeciye göndermek istiyorsunuz?",
+        [
+          ...allIbans.map((iban, index) => ({
+            text: iban.nameSurname + " - " + iban.ibanNumber.substring(iban.ibanNumber.length - 4),
+            onPress: () => {
+              console.log("Selected IBAN:", iban);
+              shareIBANWithCarrier(iban);
+            },
+          })),
+          { text: "İptal", onPress: () => {}, style: "cancel" },
+        ]
+      );
+    } catch (error) {
+      console.error("Error loading IBANs:", error);
+      Alert.alert("Hata", "IBAN'lar yüklenirken bir hata oluştu");
+    }
+  }, [firebaseUser?.uid, selectedJob, carriers, shareIBANWithCarrier]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
@@ -726,70 +756,6 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                   </View>
 
-                  {showIBANList && (
-                    <View style={{
-                      marginTop: Spacing.md,
-                      paddingTop: Spacing.md,
-                      borderTopWidth: 1,
-                      borderTopColor: colors.border,
-                    }}>
-                      <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                        IBAN Seç
-                      </ThemedText>
-                      {ibans && ibans.length > 0 ? (
-                        <View style={{ gap: Spacing.sm }}>
-                          {ibans.map((iban) => (
-                            <Pressable
-                              key={iban.id}
-                              onPress={() => {
-                                console.log("IBAN item pressed:", iban);
-                                shareIBANWithCarrier(iban);
-                                setShowIBANList(false);
-                              }}
-                              style={({ pressed }) => [
-                                {
-                                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
-                                  paddingVertical: Spacing.md,
-                                  paddingHorizontal: Spacing.lg,
-                                  borderRadius: BorderRadius.sm,
-                                  opacity: pressed ? 0.7 : 1,
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                },
-                              ]}
-                            >
-                              <View style={{ flex: 1 }}>
-                                <ThemedText type="small" style={{ fontWeight: "600" }}>
-                                  {iban.nameSurname}
-                                </ThemedText>
-                                <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
-                                  {iban.ibanNumber}
-                                </ThemedText>
-                              </View>
-                              <Feather name="send" size={18} color={theme.link} />
-                            </Pressable>
-                          ))}
-                        </View>
-                      ) : (
-                        <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                          Kayıtlı IBAN bulunamadı
-                        </ThemedText>
-                      )}
-                      <Pressable
-                        onPress={() => setShowIBANList(false)}
-                        style={{
-                          marginTop: Spacing.md,
-                          paddingVertical: Spacing.sm,
-                          alignItems: "center",
-                        }}
-                      >
-                        <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                          Kapat
-                        </ThemedText>
-                      </Pressable>
-                    </View>
-                  )}
 
                   <View style={{ marginBottom: Spacing.xl }} />
                 </View>
