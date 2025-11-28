@@ -12,6 +12,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob, getCompanies, Company } from "../utils/storage";
+import { formatCurrency } from "../utils/validation";
 
 type TabType = "all" | "paid" | "unpaid";
 
@@ -124,7 +125,7 @@ export default function WalletScreen() {
         {/* Commission Amount */}
         <View style={{ flex: 1, alignItems: "flex-end" }}>
           <ThemedText type="body" style={{ color: theme.link, fontWeight: "700" }}>
-            {parseFloat(job.commissionCost).toFixed(2)} ₺
+            {formatCurrency(parseFloat(job.commissionCost))} ₺
           </ThemedText>
           <View
             style={{
@@ -194,7 +195,7 @@ export default function WalletScreen() {
                       Bekleyen Ödemeler Bakiyesi
                     </ThemedText>
                     <ThemedText type="h2" style={{ color: "#EAB308", fontWeight: "700" }}>
-                      {unpaidTotal.toFixed(2)} ₺
+                      {formatCurrency(unpaidTotal)} ₺
                     </ThemedText>
                   </View>
                   <View style={[styles.statsIcon, { backgroundColor: "#EAB308" }]}>
@@ -221,7 +222,7 @@ export default function WalletScreen() {
                       Ödenen Bakiye
                     </ThemedText>
                     <ThemedText type="h3" style={{ color: "#22C55E", fontWeight: "700" }}>
-                      {paidTotal.toFixed(2)} ₺
+                      {formatCurrency(paidTotal)} ₺
                     </ThemedText>
                   </View>
                   <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>

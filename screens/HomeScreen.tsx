@@ -15,6 +15,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
+import { formatCurrency } from "../utils/validation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -245,7 +246,7 @@ export default function HomeScreen() {
                 Toplam Kazanç
               </ThemedText>
               <ThemedText type="h2" style={{ fontWeight: "700" }}>
-                ₺{totalRevenue.toFixed(2)}
+                ₺{formatCurrency(totalRevenue)}
               </ThemedText>
             </View>
             <View style={{ backgroundColor: theme.link + "20", padding: Spacing.md, borderRadius: BorderRadius.md }}>
@@ -257,11 +258,11 @@ export default function HomeScreen() {
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <View>
                 <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Hafta</ThemedText>
-                <ThemedText type="h4">₺{weeklyRevenue.toFixed(2)}</ThemedText>
+                <ThemedText type="h4">₺{formatCurrency(weeklyRevenue)}</ThemedText>
               </View>
               <View>
                 <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Ay</ThemedText>
-                <ThemedText type="h4">₺{monthlyRevenue.toFixed(2)}</ThemedText>
+                <ThemedText type="h4">₺{formatCurrency(monthlyRevenue)}</ThemedText>
               </View>
             </View>
           </View>
@@ -283,7 +284,7 @@ export default function HomeScreen() {
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
                 Ödenen Komisyon
               </ThemedText>
-              <ThemedText type="h3">₺{paidCommissions.toFixed(2)}</ThemedText>
+              <ThemedText type="h3">₺{formatCurrency(paidCommissions)}</ThemedText>
             </View>
             <View style={{ backgroundColor: colors.success + "30", padding: Spacing.md, borderRadius: BorderRadius.md }}>
               <Feather name="check-circle" size={24} color={colors.success} />
@@ -300,7 +301,7 @@ export default function HomeScreen() {
               <ThemedText type="small" style={{ color: colors.textSecondary }}>
                 Beklemede
               </ThemedText>
-              <ThemedText type="h3">₺{pendingCommissions.toFixed(2)}</ThemedText>
+              <ThemedText type="h3">₺{formatCurrency(pendingCommissions)}</ThemedText>
             </View>
             <View style={{ backgroundColor: colors.warning + "30", padding: Spacing.md, borderRadius: BorderRadius.md }}>
               <Feather name="clock" size={24} color={colors.warning} />

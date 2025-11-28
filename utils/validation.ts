@@ -281,3 +281,14 @@ export function validatePositiveNumber(
 
   return { isValid: true };
 }
+
+/**
+ * Para Formatı - Türkçe Locale
+ * 10000 -> 10.000
+ */
+export function formatCurrency(amount: number): string {
+  return amount.toLocaleString('tr-TR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
