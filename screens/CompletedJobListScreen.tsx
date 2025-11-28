@@ -587,7 +587,13 @@ export default function CompletedJobListScreen() {
 
                     {/* Share IBAN Button */}
                     <Pressable
-                      onPress={() => setShowIBANModal(true)}
+                      onPress={async () => {
+                        if (firebaseUser?.uid) {
+                          const allIbans = await getIBANs(firebaseUser.uid);
+                          setIbans(allIbans);
+                        }
+                        setShowIBANModal(true);
+                      }}
                       style={({ pressed }) => [
                         {
                           backgroundColor: theme.link,
