@@ -209,30 +209,33 @@ export default function CarrierListScreen() {
     </View>
   );
 
+  const renderSearchBar = () => (
+    <View style={[styles.searchContainer, { paddingTop: Spacing.md, paddingBottom: Spacing.md }]}>
+      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
+        <Feather name="search" size={18} color={colors.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: theme.text }]}
+          placeholder="Nakliyeci Ara"
+          placeholderTextColor={colors.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery ? (
+          <Pressable onPress={() => setSearchQuery("")}>
+            <Feather name="x" size={18} color={colors.textSecondary} />
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.searchContainer, { paddingTop: Spacing.lg }]}>
-        <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
-          <Feather name="search" size={18} color={colors.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="Nakliyeci Ara"
-            placeholderTextColor={colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery ? (
-            <Pressable onPress={() => setSearchQuery("")}>
-              <Feather name="x" size={18} color={colors.textSecondary} />
-            </Pressable>
-          ) : null}
-        </View>
-      </View>
-
       <FlatList
         data={filteredCarriers}
         keyExtractor={(item) => item.id}
         renderItem={renderCarrierItem}
+        ListHeaderComponent={renderSearchBar}
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
