@@ -14,6 +14,9 @@ export interface UserProfile {
   uid: string;
   email: string;
   createdAt: number;
+  status: "pending" | "approved" | "rejected";
+  approvedAt?: number;
+  isAdmin?: boolean;
 }
 
 const isFirebaseConfigured = (): boolean => {
@@ -62,11 +65,12 @@ export const firebaseAuthService = {
       );
       const user = userCredential.user;
 
-      // Create user profile in database
+      // Create user profile in database with pending status
       const userProfile: UserProfile = {
         uid: user.uid,
         email: user.email || "",
         createdAt: Date.now(),
+        status: "pending", // All users start as pending, need admin approval
       };
 
       await set(ref(firebaseDatabase, `users/${user.uid}/profile`), userProfile);
@@ -115,6 +119,17 @@ export const firebaseAuthService = {
     } catch (error) {
       console.error("Get user profile error:", error);
       return null;
+    }
+  },
+
+  // Check if user is approved
+  isUserApproved: async (uid: string): Promise<boolean> => {
+    try {
+      const profile = await firebaseAuthService.getUserProfile(uid);
+      return profile?.status === "approved";
+    } catch (error) {
+      console.error("User approval check error:", error);
+      return false;
     }
   },
 

@@ -73,7 +73,11 @@ export default function LoginScreen() {
       if (errorMsg.includes("Firebase yapılandırılmamış")) {
         setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
       } else if (isFirebaseMode) {
-        setError("Firebase bağlantı hatası. Başka bir modla deneyin.");
+        if (errorMsg.includes("onaylanmamıştır")) {
+          setError("Admin onayı bekleniyor. Lütfen daha sonra tekrar deneyin.");
+        } else {
+          setError(errorMsg);
+        }
       } else {
         setError(errorMsg);
       }

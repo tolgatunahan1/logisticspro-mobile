@@ -9,7 +9,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser } from "../utils/userManagement";
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser } from "../utils/userManagement";
 
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
@@ -25,10 +25,16 @@ export default function AdminDashboard() {
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const pending = await getPendingUsers();
-      const approved = await getApprovedUsers();
-      setPendingUsers(pending);
-      setApprovedUsers(approved);
+      // Get both local and Firebase users
+      const [localPending, localApproved, fbPending, fbApproved] = await Promise.all([
+        getPendingUsers(),
+        getApprovedUsers(),
+        getPendingFirebaseUsers(),
+        getApprovedFirebaseUsers(),
+      ]);
+      // Merge all pending and approved users
+      setPendingUsers([...localPending, ...fbPending]);
+      setApprovedUsers([...localApproved, ...fbApproved]);
     } finally {
       setLoading(false);
     }
@@ -46,7 +52,11 @@ export default function AdminDashboard() {
       {
         text: "Onayla",
         onPress: async () => {
-          await approveUser(userId);
+          // Try Firebase first, then local
+          let approved = await approveFirebaseUser(userId);
+          if (!approved) {
+            approved = await approveUser(userId);
+          }
           await loadUsers();
         },
       },
@@ -59,7 +69,11 @@ export default function AdminDashboard() {
       {
         text: "Reddet",
         onPress: async () => {
-          await rejectUser(userId);
+          // Try Firebase first, then local
+          let rejected = await rejectFirebaseUser(userId);
+          if (!rejected) {
+            rejected = await rejectUser(userId);
+          }
           await loadUsers();
         },
         style: "destructive",
@@ -73,7 +87,11 @@ export default function AdminDashboard() {
       {
         text: "Kaldır",
         onPress: async () => {
-          await unapproveUser(userId);
+          // Try Firebase first, then local
+          let revoked = await unapproveFirebaseUser(userId);
+          if (!revoked) {
+            revoked = await unapproveUser(userId);
+          }
           await loadUsers();
         },
         style: "destructive",
@@ -162,7 +180,7 @@ export default function AdminDashboard() {
               >
                 <View style={styles.userInfo}>
                   <ThemedText type="body" style={{ fontWeight: "600" }}>
-                    {item.username}
+                    {item.username || item.email}
                   </ThemedText>
                 </View>
                 <View style={styles.actions}>
@@ -209,7 +227,7 @@ export default function AdminDashboard() {
               >
                 <View style={styles.userInfo}>
                   <ThemedText type="body" style={{ fontWeight: "600" }}>
-                    {item.username}
+                    {item.username || item.email}
                   </ThemedText>
                   <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
                     Onaylandı: {formatDate(item.approvedAt)}

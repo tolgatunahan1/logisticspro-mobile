@@ -75,7 +75,7 @@ export default function SignupScreen() {
       if (success) {
         Alert.alert(
           "Başarılı",
-          "Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.",
+          "Hesabınız oluşturuldu! Admin onayı bekleniyor. Onaylandıktan sonra giriş yapabilirsiniz.",
           [{ 
             text: "Giriş Yap", 
             onPress: () => {

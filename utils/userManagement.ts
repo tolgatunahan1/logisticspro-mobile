@@ -1,4 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { firebaseDatabase } from "@/constants/firebase";
+import { ref, get, set, update } from "firebase/database";
 
 export interface AppUser {
   id: string;
@@ -217,48 +219,88 @@ export const validatePassword = (password: string): boolean => {
   return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
 };
 
+// Firebase-based Firebase users functions
+export const getPendingFirebaseUsers = async (): Promise<any[]> => {
+  try {
+    const snapshot = await get(ref(firebaseDatabase, "users"));
+    if (!snapshot.exists()) return [];
+    const users = snapshot.val();
+    return Object.entries(users)
+      .filter(([_, user]: any) => user.profile?.status === "pending")
+      .map(([uid, user]: any) => ({
+        id: uid,
+        email: user.profile?.email || "",
+        createdAt: user.profile?.createdAt || 0,
+        status: "pending",
+      }));
+  } catch (error) {
+    console.error("Get pending Firebase users error:", error);
+    return [];
+  }
+};
+
+export const getApprovedFirebaseUsers = async (): Promise<any[]> => {
+  try {
+    const snapshot = await get(ref(firebaseDatabase, "users"));
+    if (!snapshot.exists()) return [];
+    const users = snapshot.val();
+    return Object.entries(users)
+      .filter(([_, user]: any) => user.profile?.status === "approved")
+      .map(([uid, user]: any) => ({
+        id: uid,
+        email: user.profile?.email || "",
+        approvedAt: user.profile?.approvedAt || 0,
+        status: "approved",
+      }));
+  } catch (error) {
+    console.error("Get approved Firebase users error:", error);
+    return [];
+  }
+};
+
+export const approveFirebaseUser = async (userId: string): Promise<boolean> => {
+  try {
+    await update(ref(firebaseDatabase, `users/${userId}/profile`), {
+      status: "approved",
+      approvedAt: Date.now(),
+    });
+    return true;
+  } catch (error) {
+    console.error("Approve Firebase user error:", error);
+    return false;
+  }
+};
+
+export const rejectFirebaseUser = async (userId: string): Promise<boolean> => {
+  try {
+    await update(ref(firebaseDatabase, `users/${userId}/profile`), {
+      status: "rejected",
+    });
+    return true;
+  } catch (error) {
+    console.error("Reject Firebase user error:", error);
+    return false;
+  }
+};
+
+export const unapproveFirebaseUser = async (userId: string): Promise<boolean> => {
+  try {
+    await update(ref(firebaseDatabase, `users/${userId}/profile`), {
+      status: "pending",
+      approvedAt: undefined,
+    });
+    return true;
+  } catch (error) {
+    console.error("Unapprove Firebase user error:", error);
+    return false;
+  }
+};
+
 export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
     console.log("🔧 Initializing default admin...");
-    
-    // Check current key
-    let adminData = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
-    console.log("📌 Current key check:", ADMIN_STORAGE_KEY, "->", adminData ? "✅ Found" : "❌ Not found");
-    
-    // If not found, check old key and migrate
-    if (!adminData) {
-      const oldKey = "@logistics_admin";
-      console.log("📌 Checking old key:", oldKey);
-      const oldAdminData = await AsyncStorage.getItem(oldKey);
-      if (oldAdminData) {
-        console.log("🔄 Migrating admin from old key...");
-        await AsyncStorage.setItem(ADMIN_STORAGE_KEY, oldAdminData);
-        await AsyncStorage.removeItem(oldKey);
-        adminData = oldAdminData;
-        console.log("✅ Admin migrated successfully");
-      }
-    }
-    
-    // If still no admin, create default
-    if (!adminData) {
-      const defaultAdmin: AdminUser = {
-        username: "tolgatunahan",
-        password: "1Liraversene",
-        createdAt: Date.now(),
-      };
-      const adminJson = JSON.stringify(defaultAdmin);
-      await AsyncStorage.setItem(ADMIN_STORAGE_KEY, adminJson);
-      // Verify it was saved
-      const verify = await AsyncStorage.getItem(ADMIN_STORAGE_KEY);
-      if (verify) {
-        console.log("✅ Default admin created and verified - tolgatunahan");
-      } else {
-        console.error("❌ Admin created but verification failed!");
-      }
-    } else {
-      const admin = JSON.parse(adminData);
-      console.log("✅ Admin already exists:", admin.username);
-    }
+    // Admin now uses Firebase, no need for local initialization
+    console.log("✅ Admin system using Firebase");
   } catch (error) {
     console.error("❌ Failed to initialize default admin:", error);
   }

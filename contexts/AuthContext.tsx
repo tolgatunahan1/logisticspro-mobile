@@ -90,29 +90,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginAdmin = async (username: string, password: string): Promise<boolean> => {
-    const trimmedUsername = username.trim();
+  const loginAdmin = async (email: string, password: string): Promise<boolean> => {
+    const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
-    if (!trimmedUsername || !trimmedPassword) {
+    if (!trimmedEmail || !trimmedPassword) {
       return false;
     }
 
     try {
-      const admin = await getAdmin();
-
-      if (!admin) {
-        return false;
+      // Admin also uses Firebase now
+      const fbUser = await firebaseAuthService.login(trimmedEmail, trimmedPassword);
+      if (fbUser) {
+        // Check if this user is an admin (stored in Firebase)
+        const adminProfile = await firebaseAuthService.getUserProfile(fbUser.uid);
+        if (adminProfile?.isAdmin) {
+          setFirebaseUser(fbUser);
+          const userData: User = { username: fbUser.email || "Admin", type: "admin", firebaseUid: fbUser.uid };
+          await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+          setUser(userData);
+          // Set hybrid storage adapter
+          const hybridAdapter = createHybridAdapter(fbUser.uid);
+          setStorageAdapter(hybridAdapter);
+          console.log("✅ Admin logged in via Firebase:", fbUser.email);
+          return true;
+        }
       }
-
-      if (admin.username !== trimmedUsername || admin.password !== trimmedPassword) {
-        return false;
-      }
-
-      const userData: User = { username: admin.username, type: "admin" };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      setUser(userData);
-      return true;
+      return false;
     } catch (error) {
       console.error("Admin login error:", error);
       return false;
@@ -123,6 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const fbUser = await firebaseAuthService.login(email, password);
       if (fbUser) {
+        // Check if user is approved
+        const isApproved = await firebaseAuthService.isUserApproved(fbUser.uid);
+        if (!isApproved) {
+          console.log("❌ User not approved yet. Waiting for admin approval.");
+          // Logout user if not approved
+          await firebaseAuthService.logout();
+          throw new Error("Kullanıcı henüz onaylanmamıştır. Admin onayı bekleniyor.");
+        }
+
         setFirebaseUser(fbUser);
         // Set hybrid storage adapter with Firebase + local fallback
         const hybridAdapter = createHybridAdapter(fbUser.uid);
@@ -133,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     } catch (error) {
       console.error("Firebase login error:", error);
-      return false;
+      throw error;
     }
   };
 
@@ -141,11 +154,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const fbUser = await firebaseAuthService.register(email, password);
       if (fbUser) {
-        setFirebaseUser(fbUser);
-        // Set hybrid storage adapter with Firebase + local fallback
-        const hybridAdapter = createHybridAdapter(fbUser.uid);
-        setStorageAdapter(hybridAdapter);
-        console.log("✅ Firebase user registered:", fbUser.email, "- Cloud sync enabled");
+        // User is registered with pending status - don't auto-login
+        console.log("✅ Firebase user registered:", fbUser.email, "- Pending admin approval");
+        // Logout immediately since user needs approval
+        await firebaseAuthService.logout();
         return true;
       }
       return false;
