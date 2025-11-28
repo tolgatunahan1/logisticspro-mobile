@@ -11,7 +11,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getIBANs, addIBAN, deleteIBAN, IBAN } from "../utils/storage";
+import { getIBANs, addIBAN, deleteIBAN, IBAN, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { IBANListModal } from "../components/IBANListModal";
 
 export default function SettingsScreen() {
@@ -29,6 +29,9 @@ export default function SettingsScreen() {
   const [isAdding, setIsAdding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
+  const [paidCommissionsTotal, setPaidCommissionsTotal] = useState(0);
+  const [unpaidCommissionsTotal, setUnpaidCommissionsTotal] = useState(0);
 
   const handleLogout = async () => {
     Alert.alert("Çıkış", "Hesaptan çıkış yapmak istiyor musunuz?", [
@@ -51,10 +54,34 @@ export default function SettingsScreen() {
     setIbans(data);
   }, [firebaseUser?.uid]);
 
+  const loadCommissionStats = useCallback(async () => {
+    if (!firebaseUser?.uid) return;
+    const jobs = await getCompletedJobs(firebaseUser.uid);
+    setCompletedJobs(jobs);
+    
+    const paid = jobs.reduce((sum, job) => {
+      if (job.commissionPaid && job.commissionCost) {
+        return sum + parseFloat(job.commissionCost as string);
+      }
+      return sum;
+    }, 0);
+    
+    const unpaid = jobs.reduce((sum, job) => {
+      if (!job.commissionPaid && job.commissionCost) {
+        return sum + parseFloat(job.commissionCost as string);
+      }
+      return sum;
+    }, 0);
+    
+    setPaidCommissionsTotal(paid);
+    setUnpaidCommissionsTotal(unpaid);
+  }, [firebaseUser?.uid]);
+
   useFocusEffect(
     useCallback(() => {
       loadIBANs();
-    }, [loadIBANs])
+      loadCommissionStats();
+    }, [loadIBANs, loadCommissionStats])
   );
 
   const handleAddIBAN = async () => {
@@ -100,6 +127,81 @@ export default function SettingsScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl * 2, paddingBottom: insets.bottom + Spacing.xl }}>
+        {/* Ödeme Takip Section */}
+        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+              Ödeme Takip
+            </ThemedText>
+          </View>
+
+          {/* Paid Commissions Card */}
+          <View
+            style={{
+              backgroundColor: colors.success,
+              padding: Spacing.lg,
+              borderRadius: BorderRadius.md,
+              marginBottom: Spacing.md,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Feather name="check-circle" size={24} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
+                  Ödenen Komisyon
+                </ThemedText>
+                <ThemedText type="h3" style={{ color: "#FFFFFF", marginTop: Spacing.xs }}>
+                  {paidCommissionsTotal.toFixed(2)} ₺
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+
+          {/* Unpaid Commissions Card */}
+          <View
+            style={{
+              backgroundColor: colors.warning,
+              padding: Spacing.lg,
+              borderRadius: BorderRadius.md,
+              marginBottom: Spacing.lg,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Feather name="clock" size={24} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
+                  Ödenmesi Gereken Komisyon
+                </ThemedText>
+                <ThemedText type="h3" style={{ color: "#FFFFFF", marginTop: Spacing.xs }}>
+                  {unpaidCommissionsTotal.toFixed(2)} ₺
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+        </View>
+
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.sectionHeader}>
             <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>

@@ -226,14 +226,20 @@ export default function CompletedJobListScreen() {
         >
           <View style={styles.jobCardHeader}>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md, flexWrap: "wrap" }}>
                 <ThemedText type="h4" numberOfLines={1} style={{ flex: 1 }}>
                   {company?.name || "Bilinmeyen Firma"}
                 </ThemedText>
-                {job.commissionPaid && (
+                {job.commissionPaid ? (
                   <View style={{ backgroundColor: colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
                     <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
                       Ödendi
+                    </ThemedText>
+                  </View>
+                ) : (
+                  <View style={{ backgroundColor: colors.warning, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
+                    <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
+                      Ödenmedi
                     </ThemedText>
                   </View>
                 )}
