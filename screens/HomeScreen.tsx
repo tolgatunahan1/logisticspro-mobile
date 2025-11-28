@@ -73,14 +73,11 @@ export default function HomeScreen() {
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+        <View style={{ justifyContent: "center", alignItems: "center", marginTop: 8 }}>
           <Image
             source={require("../assets/images/IMG_6804.png")}
             style={{ width: 80, height: 80 }}
           />
-          <ThemedText type="h3" style={{ fontSize: 22, fontWeight: "700" }}>
-            LogisticsPRO
-          </ThemedText>
         </View>
       ),
       headerLeft: () => (
