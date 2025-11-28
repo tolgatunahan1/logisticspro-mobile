@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "GOOGLE_API_KEY",
+  apiKey: "AIzaSyDV7X8j9PuhYw1A1CXdGTRp08NFm0F9ajg",
   authDomain: "logisticspro-62f16.firebaseapp.com",
   projectId: "logisticspro-62f16",
   storageBucket: "logisticspro-62f16.firebasestorage.app",
