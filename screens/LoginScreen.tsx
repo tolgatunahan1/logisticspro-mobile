@@ -30,21 +30,23 @@ export default function LoginScreen() {
   const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Default: Firebase (normal users)
 
   useEffect(() => {
+    let isMounted = true;
     const init = async () => {
       try {
-        // Setup Firebase admin if not already done (check first to avoid quota issues)
-        const adminProfile = await firebaseAuthService.getUserProfile("admin_check");
-        if (!adminProfile?.isAdmin) {
+        // Setup Firebase admin only once on mount
+        if (isMounted) {
           await firebaseAuthService.initializeAdmin("tolgatunahan@icloud.com", "1Liraversene");
+          await initializeDefaultAdmin();
         }
-        // Also setup local admin for backwards compatibility
-        await initializeDefaultAdmin();
       } catch (error) {
         console.error("Admin init error:", error);
       }
     };
     init();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array - runs only once
 
   const handleLogin = async () => {
     setError("");
