@@ -135,7 +135,7 @@ export default function SettingsScreen() {
             </ThemedText>
           </View>
 
-          {/* Paid Commissions Card */}
+          {/* Wallet Balance Card */}
           <View
             style={{
               backgroundColor: colors.success,
@@ -155,13 +155,48 @@ export default function SettingsScreen() {
                   alignItems: "center",
                 }}
               >
-                <Feather name="check-circle" size={24} color="#FFFFFF" />
+                <Feather name="wallet" size={24} color="#FFFFFF" />
               </View>
               <View style={{ flex: 1 }}>
                 <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
-                  Ödenen Komisyon
+                  Cüzdan Bakiyesi
                 </ThemedText>
                 <ThemedText type="h3" style={{ color: "#FFFFFF", marginTop: Spacing.xs }}>
+                  {paidCommissionsTotal.toFixed(2)} ₺
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+
+          {/* Paid Commissions Card */}
+          <View
+            style={{
+              backgroundColor: isDark ? "rgba(76, 175, 80, 0.2)" : "rgba(76, 175, 80, 0.1)",
+              borderLeftWidth: 4,
+              borderLeftColor: colors.success,
+              padding: Spacing.lg,
+              borderRadius: BorderRadius.md,
+              marginBottom: Spacing.md,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.success,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Feather name="check-circle" size={20} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Ödenen Komisyon
+                </ThemedText>
+                <ThemedText type="h3" style={{ color: colors.success, marginTop: Spacing.xs }}>
                   {paidCommissionsTotal.toFixed(2)} ₺
                 </ThemedText>
               </View>
@@ -171,7 +206,9 @@ export default function SettingsScreen() {
           {/* Unpaid Commissions Card */}
           <View
             style={{
-              backgroundColor: colors.warning,
+              backgroundColor: isDark ? "rgba(255, 193, 7, 0.2)" : "rgba(255, 193, 7, 0.1)",
+              borderLeftWidth: 4,
+              borderLeftColor: colors.warning,
               padding: Spacing.lg,
               borderRadius: BorderRadius.md,
               marginBottom: Spacing.lg,
@@ -180,21 +217,21 @@ export default function SettingsScreen() {
             <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
               <View
                 style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: "rgba(255,255,255,0.2)",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.warning,
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                <Feather name="clock" size={24} color="#FFFFFF" />
+                <Feather name="clock" size={20} color="#FFFFFF" />
               </View>
               <View style={{ flex: 1 }}>
-                <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
                   Ödenmesi Gereken Komisyon
                 </ThemedText>
-                <ThemedText type="h3" style={{ color: "#FFFFFF", marginTop: Spacing.xs }}>
+                <ThemedText type="h3" style={{ color: colors.warning, marginTop: Spacing.xs }}>
                   {unpaidCommissionsTotal.toFixed(2)} ₺
                 </ThemedText>
               </View>
