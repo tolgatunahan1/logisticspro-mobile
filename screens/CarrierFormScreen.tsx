@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addCarrier, updateCarrier, VEHICLE_TYPES, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -20,6 +21,7 @@ export default function CarrierFormScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
+  const { firebaseUser } = useAuth();
   
   const carrier = route.params?.carrier;
   const mode = route.params?.mode || "add";
@@ -58,6 +60,7 @@ export default function CarrierFormScreen() {
 
   const handleSave = async () => {
     if (!validate()) return;
+    if (!firebaseUser?.uid) return;
 
     setIsLoading(true);
     try {
@@ -70,9 +73,9 @@ export default function CarrierFormScreen() {
 
       let success = false;
       if (isEdit && carrier) {
-        success = await updateCarrier(carrier.id, data);
+        success = await updateCarrier(firebaseUser.uid, carrier.id, data);
       } else {
-        const result = await addCarrier(data);
+        const result = await addCarrier(firebaseUser.uid, data);
         success = !!result;
       }
       

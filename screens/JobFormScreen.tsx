@@ -9,6 +9,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addJob, updateJob, getCompanies, PlannedJob, Company } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -21,6 +22,7 @@ export default function JobFormScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
+  const { firebaseUser } = useAuth();
 
   const { job, mode } = route.params || { mode: "add" };
   const isEdit = mode === "edit";
@@ -66,11 +68,12 @@ export default function JobFormScreen() {
 
   useEffect(() => {
     const loadCompanies = async () => {
-      const allCompanies = await getCompanies();
+      if (!firebaseUser?.uid) return;
+      const allCompanies = await getCompanies(firebaseUser.uid);
       setCompanies(allCompanies);
     };
     loadCompanies();
-  }, []);
+  }, [firebaseUser?.uid]);
 
   const handleSave = useCallback(async () => {
     setIsLoading(true);
@@ -127,11 +130,12 @@ export default function JobFormScreen() {
 
       console.log("İş verileri kaydediliyor:", data);
 
+      if (!firebaseUser?.uid) return;
       if (isEdit && job) {
-        const result = await updateJob(job.id, data);
+        const result = await updateJob(firebaseUser.uid, job.id, data);
         console.log("İş güncelleme sonucu:", result);
       } else {
-        const result = await addJob(data);
+        const result = await addJob(firebaseUser.uid, data);
         console.log("İş ekleme sonucu:", result);
       }
       navigation.goBack();

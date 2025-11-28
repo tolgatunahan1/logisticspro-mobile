@@ -157,8 +157,8 @@ export default function JobListScreen() {
         notes: "",
       };
 
-      await addCompletedJob(completedJobData);
-      await deleteJob(jobForCarrier.id);
+      await addCompletedJob(firebaseUser!.uid, completedJobData);
+      await deleteJob(firebaseUser!.uid, jobForCarrier.id);
       setShowCarrierPicker(false);
       setShowDetailModal(false);
       setSelectedCarrier(null);
@@ -543,7 +543,7 @@ export default function JobListScreen() {
               <Pressable
                 onPress={async () => {
                   await confirmDelete(async (job) => {
-                    const success = await deleteJob(job.id);
+                    const success = await deleteJob(firebaseUser!.uid, job.id);
                     if (success) {
                       await loadData();
                     }

@@ -9,6 +9,7 @@ import * as Linking from "expo-linking";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -19,6 +20,7 @@ export default function CompletedJobListScreen() {
   const { theme, isDark } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+  const { firebaseUser } = useAuth();
 
   const [jobs, setJobs] = useState<CompletedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
@@ -37,6 +39,37 @@ export default function CompletedJobListScreen() {
       headerBackTitle: "",
     });
   }, [navigation]);
+
+  // Load completed jobs
+  const loadData = useCallback(async () => {
+    if (!firebaseUser?.uid) return;
+    const allJobs = await getCompletedJobs(firebaseUser.uid);
+    const allCompanies = await getCompanies(firebaseUser.uid);
+    const allCarriers = await getCarriers(firebaseUser.uid);
+    const allIbans = await getIBANs(firebaseUser.uid);
+    
+    const companiesMap = allCompanies.reduce((acc, company) => {
+      acc[company.id] = company;
+      return acc;
+    }, {} as { [key: string]: Company });
+    
+    const carriersMap = allCarriers.reduce((acc, carrier) => {
+      acc[carrier.id] = carrier;
+      return acc;
+    }, {} as { [key: string]: Carrier });
+
+    setJobs(allJobs);
+    setCompanies(companiesMap);
+    setCarriers(carriersMap);
+    setIbans(allIbans);
+    setFilteredJobs(allJobs);
+  }, [firebaseUser?.uid]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   // Helper function to send carrier info to company via WhatsApp
   const shareCarrierInfoWithCompany = useCallback(async () => {
@@ -125,35 +158,6 @@ export default function CompletedJobListScreen() {
     [selectedJob, carriers]
   );
 
-  const loadData = useCallback(async () => {
-    const allJobs = await getCompletedJobs();
-    const allCompanies = await getCompanies();
-    const allCarriers = await getCarriers();
-    const allIbans = await getIBANs();
-    
-    const companiesMap = allCompanies.reduce((acc, company) => {
-      acc[company.id] = company;
-      return acc;
-    }, {} as { [key: string]: Company });
-
-    const carriersMap = allCarriers.reduce((acc, carrier) => {
-      acc[carrier.id] = carrier;
-      return acc;
-    }, {} as { [key: string]: Carrier });
-
-    setJobs(allJobs);
-    setCompanies(companiesMap);
-    setCarriers(carriersMap);
-    setFilteredJobs(allJobs);
-    setIbans(allIbans);
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
-
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     if (query.trim() === "") {
@@ -237,7 +241,7 @@ export default function CompletedJobListScreen() {
                   const beforeDelete = jobs.filter(j => j.id !== job.id);
                   setJobs(beforeDelete);
                   try {
-                    await deleteCompletedJob(job.id);
+                    await deleteCompletedJob(firebaseUser!.uid, job.id);
                     await loadData();
                   } catch (error) {
                     console.error("Delete error:", error);

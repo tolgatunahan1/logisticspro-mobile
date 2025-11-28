@@ -9,6 +9,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addCompletedJob, updateCompletedJob, getCompanies, getCarriers, CompletedJob, Company, Carrier } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -21,6 +22,7 @@ export default function CompletedJobFormScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
+  const { firebaseUser } = useAuth();
 
   const { job, mode } = route.params || { mode: "add" };
   const isEdit = mode === "edit";
@@ -52,13 +54,14 @@ export default function CompletedJobFormScreen() {
 
   useEffect(() => {
     const loadData = async () => {
-      const allCompanies = await getCompanies();
-      const allCarriers = await getCarriers();
+      if (!firebaseUser?.uid) return;
+      const allCompanies = await getCompanies(firebaseUser.uid);
+      const allCarriers = await getCarriers(firebaseUser.uid);
       setCompanies(allCompanies);
       setCarriers(allCarriers);
     };
     loadData();
-  }, []);
+  }, [firebaseUser?.uid]);
 
   const handleSave = useCallback(async () => {
     setIsLoading(true);
@@ -81,10 +84,11 @@ export default function CompletedJobFormScreen() {
         commissionPaid: job?.commissionPaid || false,
       };
 
+      if (!firebaseUser?.uid) return;
       if (isEdit && job) {
-        await updateCompletedJob(job.id, data);
+        await updateCompletedJob(firebaseUser.uid, job.id, data);
       } else {
-        await addCompletedJob(data);
+        await addCompletedJob(firebaseUser.uid, data);
       }
       navigation.goBack();
     } catch (error) {

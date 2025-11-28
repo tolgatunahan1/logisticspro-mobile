@@ -43,10 +43,13 @@ export default function SettingsScreen() {
     ]);
   };
 
+  const { firebaseUser } = useAuth();
+
   const loadIBANs = useCallback(async () => {
-    const data = await getIBANs();
+    if (!firebaseUser?.uid) return;
+    const data = await getIBANs(firebaseUser.uid);
     setIbans(data);
-  }, []);
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,8 +63,9 @@ export default function SettingsScreen() {
       return;
     }
 
+    if (!firebaseUser?.uid) return;
     setIsAdding(true);
-    const newIBAN = await addIBAN({
+    const newIBAN = await addIBAN(firebaseUser.uid, {
       ibanNumber: ibanInput.trim(),
       nameSurname: nameInput.trim(),
     });
@@ -79,6 +83,17 @@ export default function SettingsScreen() {
 
   const handleDeleteIBAN = (iban: IBAN) => {
     openDeleteConfirm(iban);
+  };
+
+  const handleConfirmDeleteIBAN = async () => {
+    if (!firebaseUser?.uid) return;
+    if (deleteState.toDelete) {
+      const success = await deleteIBAN(firebaseUser.uid, deleteState.toDelete.id);
+      if (success) {
+        closeDeleteConfirm();
+        await loadIBANs();
+      }
+    }
   };
 
 

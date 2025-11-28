@@ -364,7 +364,7 @@ export default function CarrierListScreen() {
               <Pressable
                 onPress={async () => {
                   await confirmDelete(async (carrier) => {
-                    const success = await deleteCarrier(carrier.id);
+                    const success = await deleteCarrier(firebaseUser!.uid, carrier.id);
                     if (success) {
                       await loadCarriers();
                     }

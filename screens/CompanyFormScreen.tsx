@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addCompany, updateCompany } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
@@ -20,6 +21,7 @@ export default function CompanyFormScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
+  const { firebaseUser } = useAuth();
   
   const company = route.params?.company;
   const mode = route.params?.mode || "add";
@@ -49,6 +51,7 @@ export default function CompanyFormScreen() {
 
   const handleSave = async () => {
     if (!validate()) return;
+    if (!firebaseUser?.uid) return;
 
     setIsLoading(true);
     try {
@@ -60,9 +63,9 @@ export default function CompanyFormScreen() {
 
       let success = false;
       if (isEdit && company) {
-        success = await updateCompany(company.id, data);
+        success = await updateCompany(firebaseUser.uid, company.id, data);
       } else {
-        const result = await addCompany(data);
+        const result = await addCompany(firebaseUser.uid, data);
         success = !!result;
       }
       

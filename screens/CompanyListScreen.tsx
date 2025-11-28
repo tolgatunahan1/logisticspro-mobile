@@ -333,7 +333,7 @@ export default function CompanyListScreen() {
               <Pressable
                 onPress={async () => {
                   await confirmDelete(async (company) => {
-                    const success = await deleteCompany(company.id);
+                    const success = await deleteCompany(firebaseUser!.uid, company.id);
                     if (success) {
                       await loadCompanies();
                     }
