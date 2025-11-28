@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/logo-transparent.png",
     "scheme": "logisticspro",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.logisticspro",
