@@ -114,9 +114,9 @@ export default function SignupScreen() {
           "Başarılı",
           "Hesabınız oluşturuldu! Admin onayı bekleniyor. Onaylandıktan sonra giriş yapabilirsiniz.",
           [{ 
-            text: "Geri Dön", 
+            text: "Anladım", 
             onPress: () => {
-              navigation.goBack();
+              navigation.popToTop();
             } 
           }]
         );
