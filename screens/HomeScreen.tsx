@@ -47,7 +47,7 @@ export default function HomeScreen() {
     let total = 0, weekly = 0, monthly = 0, pending = 0, paid = 0;
 
     completedJobs.forEach(job => {
-      const amount = parseFloat(job.transportationCost || "0") + parseFloat(job.commissionCost || "0");
+      const amount = parseFloat(job.commissionCost || "0");
       total += amount;
       if (job.completionDate >= oneMonthAgo) monthly += amount;
       if (job.completionDate >= oneWeekAgo) weekly += amount;
