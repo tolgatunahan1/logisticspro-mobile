@@ -118,57 +118,6 @@ export default function AdminDashboard() {
     ]);
   };
 
-  const handleDelete = async (uid: string, email: string) => {
-    Alert.alert(
-      "Kullanıcıyı Sil",
-      `${email} kullanıcısı TAMAMen silinecek. Geri alınamaz!`,
-      [
-        { text: "İptal" },
-        {
-          text: "Sil",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await firebaseAuthService.deleteUserByUid(uid);
-              await loadUsers();
-              Alert.alert("Başarılı", "Kullanıcı silindi.");
-            } catch (error: any) {
-              Alert.alert("Hata", error?.message || "Silme başarısız");
-            } finally {
-              setLoading(false);
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
-  };
-
-  const handleHardReset = async () => {
-    Alert.alert(
-      "💥 HARD RESET",
-      "TÜM sistem silinecek. Admin hariç HERYŞEY SILINECEK. Geri ALINAMAZ!",
-      [
-        { text: "İptal" },
-        {
-          text: "Sil Hepsini",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await firebaseAuthService.hardReset();
-              await loadUsers();
-              Alert.alert("✅ Tamam", "Her şey silindi.");
-            } catch (error: any) {
-              Alert.alert("Hata", error?.message || "Reset başarısız");
-            } finally {
-              setLoading(false);
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
-  };
 
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp).toLocaleDateString("tr-TR", {
@@ -183,13 +132,6 @@ export default function AdminDashboard() {
       <View style={[styles.header, { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg }]}>
         <ThemedText type="h2">Admin Panel</ThemedText>
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
-          <Pressable
-            onPress={handleHardReset}
-            disabled={loading}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-          >
-            <Feather name="alert-triangle" size={24} color="#dc2626" />
-          </Pressable>
           <Pressable
             onPress={() => {
               Alert.alert("Çıkış", "Çıkış yapmak istiyor musunuz?", [
@@ -320,13 +262,6 @@ export default function AdminDashboard() {
                     style={[styles.button, { backgroundColor: "#f59e0b" }]}
                   >
                     <Feather name="slash" size={20} color="white" />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => handleDelete(user.uid, user.email)}
-                    disabled={loading}
-                    style={[styles.button, { backgroundColor: "#ef4444" }]}
-                  >
-                    <Feather name="trash-2" size={20} color="white" />
                   </Pressable>
                 </View>
               </View>
