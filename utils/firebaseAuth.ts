@@ -213,6 +213,13 @@ export const firebaseAuthService = {
         await signOut(firebaseAuth); // Sign out after setup
         return true;
       } catch (signInError: any) {
+        // If email already in use, throw clear error
+        if (signInError?.message?.includes("email-already-in-use")) {
+          const error = new Error(
+            "Bu email Firebase'de zaten kullanılıyor. Farklı bir email deneyin. (Ör: admin@yeni.com)"
+          );
+          throw error;
+        }
         // If user doesn't exist, create as admin
         if (signInError?.message?.includes("user-not-found") || signInError?.message?.includes("invalid-credential")) {
           const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
@@ -233,9 +240,9 @@ export const firebaseAuthService = {
         }
         throw signInError;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Admin initialization error:", error);
-      return false;
+      throw error;
     }
   },
 };

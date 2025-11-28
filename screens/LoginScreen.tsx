@@ -75,6 +75,11 @@ export default function LoginScreen() {
       return;
     }
     
+    if (newAdminPassword.length < 8) {
+      setError("Şifre en az 8 karakter olmalı");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       // Initialize new admin
@@ -91,7 +96,8 @@ export default function LoginScreen() {
         setError("Admin kurulumu başarısız oldu");
       }
     } catch (error: any) {
-      setError(error?.message || "Admin kurulumu sırasında hata");
+      const errorMsg = error?.message || "Admin kurulumu sırasında hata";
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
