@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Modal, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Modal, ScrollView, Image } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -72,6 +72,17 @@ export default function HomeScreen() {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: () => (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+          <Image
+            source={require("../assets/images/IMG_6804.png")}
+            style={{ width: 48, height: 48 }}
+          />
+          <ThemedText type="h3" style={{ fontSize: 22, fontWeight: "700" }}>
+            LogisticsPRO
+          </ThemedText>
+        </View>
+      ),
       headerLeft: () => (
         <Pressable
           onPress={() => setDrawerVisible(true)}
