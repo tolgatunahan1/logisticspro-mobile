@@ -33,8 +33,7 @@ export default function LoginScreen() {
   const [newAdminPassword, setNewAdminPassword] = useState("");
 
   useEffect(() => {
-    // Admin initialization is disabled for now
-    // Fresh start needed to set up new admin account
+    // No auto-initialization - clean slate for admin setup
   }, []);
 
 
@@ -227,7 +226,10 @@ export default function LoginScreen() {
           {showCreateAdmin ? (
             <>
               <ThemedText type="h4" style={{ textAlign: "center", marginBottom: Spacing.lg, color: theme.link }}>
-                Yeni Admin Oluştur
+                Admin Hesabı Oluştur
+              </ThemedText>
+              <ThemedText type="small" style={{ textAlign: "center", marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                İlk admin hesabını oluştur
               </ThemedText>
               <View style={styles.inputContainer}>
                 <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>

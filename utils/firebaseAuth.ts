@@ -184,11 +184,12 @@ export const firebaseAuthService = {
     }
   },
 
-  // Clean up all users from database
+  // Clean up all users from database - COMPLETE WIPE
   cleanupDatabase: async (): Promise<boolean> => {
     try {
       await remove(ref(firebaseDatabase, "users"));
-      console.log("✅ Database cleaned up - all users removed");
+      await remove(ref(firebaseDatabase, "admins"));
+      console.log("✅ Database completely cleaned - all data removed");
       return true;
     } catch (error) {
       console.error("Database cleanup error:", error);
