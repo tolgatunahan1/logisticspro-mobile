@@ -118,13 +118,24 @@ export default function CarrierListScreen() {
   const handleWhatsAppPress = async (carrier: Carrier) => {
     const phoneNumber = formatPhoneForWhatsApp(carrier.phone);
     
-    // Mesaj oluştur
+    // Mesaj oluştur - seçili nakliyecinin tüm bilgileriyle
     let message = `Nakliyeci Bilgileri:\n\nAdı: ${carrier.name}\nTelefon: ${carrier.phone}`;
-    if (carrier.nationalId) {
+    
+    if (carrier.plate && carrier.plate.trim()) {
+      message += `\nPlaka: ${carrier.plate}`;
+    }
+    
+    if (carrier.nationalId && carrier.nationalId.trim()) {
       message += `\nTC Kimlik: ${carrier.nationalId}`;
     }
-    if (carrier.dorsePlate) {
+    
+    if (carrier.dorsePlate && carrier.dorsePlate.trim()) {
       message += `\nDorse Plakası: ${carrier.dorsePlate}`;
+    }
+    
+    const vehicleLabel = getVehicleTypeLabel(carrier.vehicleType);
+    if (vehicleLabel && vehicleLabel !== "-") {
+      message += `\nAraç Tipi: ${vehicleLabel}`;
     }
     
     try {
