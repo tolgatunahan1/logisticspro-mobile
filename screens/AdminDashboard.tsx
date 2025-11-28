@@ -10,6 +10,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser, deleteFirebaseUser, deleteUser as deleteLocalUser } from "../utils/userManagement";
+import { firebaseAuthService } from "../utils/firebaseAuth";
 
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
