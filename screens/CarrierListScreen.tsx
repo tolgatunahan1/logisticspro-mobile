@@ -117,27 +117,8 @@ export default function CarrierListScreen() {
   const handleWhatsAppPress = async (carrier: Carrier) => {
     const phoneNumber = formatPhoneForWhatsApp(carrier.phone);
     
-    let message = `Nakliyeci Bilgileri:\n\nAdı: ${carrier.name}\nTelefon: ${carrier.phone}`;
-    
-    if (carrier.plate && carrier.plate.trim()) {
-      message += `\nPlaka: ${carrier.plate}`;
-    }
-    
-    if (carrier.nationalId && carrier.nationalId.trim()) {
-      message += `\nTC Kimlik: ${carrier.nationalId}`;
-    }
-    
-    if (carrier.dorsePlate && carrier.dorsePlate.trim()) {
-      message += `\nDorse Plakası: ${carrier.dorsePlate}`;
-    }
-    
-    const vehicleLabel = getVehicleTypeLabel(carrier.vehicleType);
-    if (vehicleLabel && vehicleLabel !== "-") {
-      message += `\nAraç Tipi: ${vehicleLabel}`;
-    }
-    
     try {
-      const webUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      const webUrl = `https://wa.me/${phoneNumber}`;
       const canOpen = await Linking.canOpenURL(webUrl);
       
       if (!canOpen) {
