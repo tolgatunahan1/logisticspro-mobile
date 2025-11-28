@@ -94,12 +94,9 @@ export default function CarrierFormScreen() {
       newErrors.name = "Ad Soyad gerekli";
     }
 
-    // Diğer alanlar isteğe bağlı, ancak doldurulmuşsa validasyon yap
+    // TC Kimlik: boş ise OK, doldurulmuşsa tam 11 hane olmalı
     if (nationalId.trim() && nationalId.trim().length !== 11) {
-      newErrors.nationalId = "TC Kimlik numarası 11 hane olmalı";
-    }
-    if (nationalId.trim() && !/^\d{11}$/.test(nationalId.trim())) {
-      newErrors.nationalId = "TC Kimlik numarası sadece rakam olmalı";
+      newErrors.nationalId = "TC Kimlik numarası tam 11 hane olmalı";
     }
 
     setErrors(newErrors);
@@ -201,6 +198,7 @@ export default function CarrierFormScreen() {
       placeholder?: string;
       keyboardType?: "default" | "phone-pad";
       autoCapitalize?: "none" | "sentences" | "words" | "characters";
+      maxLength?: number;
     }
   ) => (
     <View style={styles.inputContainer}>
@@ -228,6 +226,7 @@ export default function CarrierFormScreen() {
         keyboardType={options?.keyboardType || "default"}
         autoCapitalize={options?.autoCapitalize || "sentences"}
         editable={!isLoading}
+        maxLength={options?.maxLength}
       />
       {errors[errorKey] ? (
         <ThemedText type="small" style={[styles.errorText, { color: colors.destructive }]}>
@@ -246,7 +245,7 @@ export default function CarrierFormScreen() {
       >
         {renderInput("Ad Soyad", name, (text) => setName(text.toUpperCase()), "name", { placeholder: "Nakliyeci adı" })}
         {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
-        {renderInput("TC Kimlik Numarası", nationalId, (text) => setNationalId(text.toUpperCase()), "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
+        {renderInput("TC Kimlik Numarası", nationalId, (text) => setNationalId(text.replace(/\D/g, '')), "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad", maxLength: 11 })}
         {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123" })}
         {renderInput("Dorse Plakası (İsteğe Bağlı)", dorsePlate, (text) => setDorsePlate(formatLicensePlate(text)), "dorsePlate", { placeholder: "34 ABC 123" })}
         
