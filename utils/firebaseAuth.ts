@@ -4,6 +4,10 @@ import {
   signOut,
   User,
   Auth,
+  updatePassword,
+  updateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from "firebase/auth";
 import { firebaseAuth, firebaseDatabase } from "@/constants/firebase";
 import { ref, set, get, update, remove } from "firebase/database";
@@ -313,6 +317,67 @@ export const firebaseAuthService = {
     } catch (error) {
       console.error("Unapprove user error:", error);
       return false;
+    }
+  },
+
+  // Change password
+  changePassword: async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (!user || !user.email) {
+        throw new Error("Kullanıcı oturumu açmamış");
+      }
+
+      // Reauthenticate user with current password
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Update password
+      await updatePassword(user, newPassword);
+      console.log("✅ Password updated successfully");
+      return true;
+    } catch (error: any) {
+      console.error("Change password error:", error?.message);
+      if (error?.message?.includes("wrong-password")) {
+        throw new Error("Mevcut şifre yanlış");
+      }
+      throw error;
+    }
+  },
+
+  // Change email
+  changeEmail: async (currentPassword: string, newEmail: string): Promise<boolean> => {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (!user || !user.email) {
+        throw new Error("Kullanıcı oturumu açmamış");
+      }
+
+      // Reauthenticate user with current password
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Update email
+      await updateEmail(user, newEmail);
+      
+      // Also update email in database
+      if (user.uid) {
+        await update(ref(firebaseDatabase, `users/${user.uid}/profile`), {
+          email: newEmail,
+        });
+      }
+
+      console.log("✅ Email updated successfully");
+      return true;
+    } catch (error: any) {
+      console.error("Change email error:", error?.message);
+      if (error?.message?.includes("wrong-password")) {
+        throw new Error("Mevcut şifre yanlış");
+      }
+      if (error?.message?.includes("email-already-in-use")) {
+        throw new Error("Bu email zaten kullanılıyor");
+      }
+      throw error;
     }
   },
 

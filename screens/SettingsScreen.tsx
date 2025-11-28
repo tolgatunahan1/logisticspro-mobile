@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, ScrollView, Modal } from "react-native";
+import { StyleSheet, View, Pressable, Alert, ScrollView, Modal, TextInput, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -13,12 +13,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { IBANListModal } from "../components/IBANListModal";
+import { firebaseAuthService } from "../utils/firebaseAuth";
 
 export default function SettingsScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { logout } = useAuth();
+  const { logout, firebaseUser } = useAuth();
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<IBAN>("IBAN");
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -32,6 +33,15 @@ export default function SettingsScreen() {
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
   const [paidCommissionsTotal, setPaidCommissionsTotal] = useState(0);
   const [unpaidCommissionsTotal, setUnpaidCommissionsTotal] = useState(0);
+  
+  // Account settings states
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert("Çıkış", "Hesaptan çıkış yapmak istiyor musunuz?", [
@@ -166,10 +176,139 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (!currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+      Alert.alert("Hata", "Tüm alanları doldurunuz");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Hata", "Yeni şifreler eşleşmiyor");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      Alert.alert("Hata", "Yeni şifre en az 8 karakter olmalı");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await firebaseAuthService.changePassword(currentPassword, newPassword);
+      Alert.alert("Başarılı", "Şifreniz başarıyla değiştirildi");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowPasswordModal(false);
+    } catch (error: any) {
+      Alert.alert("Hata", error?.message || "Şifre değiştirilemedi");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleChangeEmail = async () => {
+    if (!currentPassword.trim() || !newEmail.trim()) {
+      Alert.alert("Hata", "Tüm alanları doldurunuz");
+      return;
+    }
+
+    if (!newEmail.includes("@")) {
+      Alert.alert("Hata", "Geçerli bir email adresi giriniz");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await firebaseAuthService.changeEmail(currentPassword, newEmail);
+      Alert.alert("Başarılı", "Email adresiniz başarıyla değiştirildi");
+      setCurrentPassword("");
+      setNewEmail("");
+      setShowEmailModal(false);
+    } catch (error: any) {
+      Alert.alert("Hata", error?.message || "Email değiştirilemedi");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl * 2, paddingBottom: insets.bottom + Spacing.xl }}>
+        {/* Hesap Ayarları Section */}
+        <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+              Hesap Ayarları
+            </ThemedText>
+          </View>
+
+          <View style={[styles.infoRow, { marginBottom: Spacing.md, paddingBottom: Spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+            <Feather name="mail" size={20} color={colors.textSecondary} />
+            <View style={styles.infoText}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Email Adresiniz
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "600", marginTop: Spacing.xs }}>
+                {firebaseUser?.email}
+              </ThemedText>
+            </View>
+          </View>
+
+          <Pressable
+            onPress={() => setShowPasswordModal(true)}
+            style={({ pressed }) => [
+              styles.section,
+              {
+                backgroundColor: theme.link,
+                opacity: pressed ? 0.8 : 1,
+                marginBottom: Spacing.md,
+                paddingHorizontal: Spacing.lg,
+                paddingVertical: Spacing.md,
+                borderRadius: BorderRadius.sm,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 0,
+              },
+            ]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <Feather name="lock" size={20} color="#FFFFFF" />
+              <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                Şifre Değiştir
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color="#FFFFFF" />
+          </Pressable>
+
+          <Pressable
+            onPress={() => setShowEmailModal(true)}
+            style={({ pressed }) => [
+              styles.section,
+              {
+                backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                opacity: pressed ? 0.6 : 1,
+                paddingHorizontal: Spacing.lg,
+                paddingVertical: Spacing.md,
+                borderRadius: BorderRadius.sm,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 0,
+              },
+            ]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+              <Feather name="edit-2" size={20} color={colors.textSecondary} />
+              <ThemedText type="body" style={{ color: colors.text, fontWeight: "600" }}>
+                Email Değiştir
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          </Pressable>
+        </View>
+
         {/* Ödeme Takip Section */}
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.sectionHeader}>
@@ -506,6 +645,134 @@ export default function SettingsScreen() {
         </View>
       )}
 
+      {/* Change Password Modal */}
+      <Modal visible={showPasswordModal} animationType="fade" transparent onRequestClose={() => !isUpdating && setShowPasswordModal(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
+          <View style={{ backgroundColor: theme.backgroundRoot, borderRadius: BorderRadius.lg, padding: Spacing.xl, width: "100%", maxWidth: 350 }}>
+            <ThemedText type="h4" style={{ marginBottom: Spacing.lg, fontWeight: "700" }}>Şifre Değiştir</ThemedText>
+            
+            <View style={{ marginBottom: Spacing.md }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Mevcut Şifre
+              </ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: theme.text }]}
+                placeholder="Mevcut şifreniz"
+                placeholderTextColor={colors.textSecondary}
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry
+                editable={!isUpdating}
+              />
+            </View>
+
+            <View style={{ marginBottom: Spacing.md }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Yeni Şifre
+              </ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: theme.text }]}
+                placeholder="Yeni şifreniz (8+ karakter)"
+                placeholderTextColor={colors.textSecondary}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry
+                editable={!isUpdating}
+              />
+            </View>
+
+            <View style={{ marginBottom: Spacing.lg }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Yeni Şifre Onayla
+              </ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: theme.text }]}
+                placeholder="Yeni şifrenizi tekrar giriniz"
+                placeholderTextColor={colors.textSecondary}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                editable={!isUpdating}
+              />
+            </View>
+
+            <View style={{ flexDirection: "row", gap: Spacing.md }}>
+              <Pressable
+                onPress={() => !isUpdating && setShowPasswordModal(false)}
+                disabled={isUpdating}
+                style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}
+              >
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleChangePassword}
+                disabled={isUpdating}
+                style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: theme.link, justifyContent: "center", alignItems: "center" }}
+              >
+                {isUpdating ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Değiştir</ThemedText>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Change Email Modal */}
+      <Modal visible={showEmailModal} animationType="fade" transparent onRequestClose={() => !isUpdating && setShowEmailModal(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
+          <View style={{ backgroundColor: theme.backgroundRoot, borderRadius: BorderRadius.lg, padding: Spacing.xl, width: "100%", maxWidth: 350 }}>
+            <ThemedText type="h4" style={{ marginBottom: Spacing.lg, fontWeight: "700" }}>Email Değiştir</ThemedText>
+            
+            <View style={{ marginBottom: Spacing.md }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Mevcut Şifre
+              </ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: theme.text }]}
+                placeholder="Şifreniz"
+                placeholderTextColor={colors.textSecondary}
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry
+                editable={!isUpdating}
+              />
+            </View>
+
+            <View style={{ marginBottom: Spacing.lg }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                Yeni Email Adresi
+              </ThemedText>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: theme.text }]}
+                placeholder="Yeni email adresiniz"
+                placeholderTextColor={colors.textSecondary}
+                value={newEmail}
+                onChangeText={setNewEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                editable={!isUpdating}
+              />
+            </View>
+
+            <View style={{ flexDirection: "row", gap: Spacing.md }}>
+              <Pressable
+                onPress={() => !isUpdating && setShowEmailModal(false)}
+                disabled={isUpdating}
+                style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}
+              >
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={handleChangeEmail}
+                disabled={isUpdating}
+                style={{ flex: 1, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.sm, backgroundColor: theme.link, justifyContent: "center", alignItems: "center" }}
+              >
+                {isUpdating ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Değiştir</ThemedText>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* About Modal */}
       {showAboutModal && (
         <View style={styles.modalOverlay}>
@@ -771,5 +1038,12 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "rgba(0, 0, 0, 0.1)",
     marginBottom: Spacing.xl,
+  },
+  input: {
+    height: 44,
+    borderWidth: 1,
+    borderRadius: BorderRadius.xs,
+    paddingHorizontal: Spacing.md,
+    fontSize: 16,
   },
 });
