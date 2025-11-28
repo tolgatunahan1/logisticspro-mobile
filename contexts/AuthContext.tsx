@@ -37,7 +37,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (authUser) => {
       setFirebaseUser(authUser);
-      if (!authUser) {
+      if (authUser) {
+        // Firebase kullanıcısı giriş yapmış - user state'i güncelle
+        const userData: User = {
+          username: authUser.email || "Firebase User",
+          type: "user",
+          firebaseUid: authUser.uid,
+          email: authUser.email || "",
+        };
+        setUser(userData);
+      } else {
+        // Firebase kullanıcısı çıkmış - local storage'dan yükle
         loadStoredAuth();
       }
       setIsLoading(false);
