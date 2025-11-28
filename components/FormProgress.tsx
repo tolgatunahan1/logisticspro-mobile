@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   withSpring,
   useSharedValue,
-  useEffect,
 } from "react-native-reanimated";
 
 import { ThemedText } from "./ThemedText";

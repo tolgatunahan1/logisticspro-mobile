@@ -274,34 +274,34 @@ export default function CarrierListScreen() {
 
                 <View style={styles.idCardGrid}>
                   <View style={styles.idCardGridRow}>
-                    <View style={styles.idCardGridItem}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Telefon</ThemedText>
-                      <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCarrier.phone}</ThemedText>
+                    <View style={[styles.idCardGridItem, { flex: 1 }]}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>TELEFON</ThemedText>
+                      <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{selectedCarrier.phone}</ThemedText>
                     </View>
-                    <View style={styles.idCardGridItem}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Plaka</ThemedText>
-                      <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCarrier?.plate || "-"}</ThemedText>
+                    <View style={[styles.idCardGridItem, { flex: 1 }]}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>PLAKA</ThemedText>
+                      <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{selectedCarrier?.plate || "-"}</ThemedText>
                     </View>
                   </View>
 
                   {selectedCarrier?.nationalId && selectedCarrier.nationalId.trim() && (
                     <View style={styles.idCardGridRow}>
-                      <View style={styles.idCardGridItem}>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>TC Kimlik</ThemedText>
-                        <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCarrier.nationalId}</ThemedText>
+                      <View style={[styles.idCardGridItem, { flex: 1 }]}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>TC KİMLİK</ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{selectedCarrier.nationalId}</ThemedText>
                       </View>
-                      <View style={styles.idCardGridItem}>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Araç Tipi</ThemedText>
-                        <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{getVehicleTypeLabel(selectedCarrier.vehicleType)}</ThemedText>
+                      <View style={[styles.idCardGridItem, { flex: 1 }]}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>ARAÇ TİPİ</ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{getVehicleTypeLabel(selectedCarrier.vehicleType)}</ThemedText>
                       </View>
                     </View>
                   )}
 
                   {selectedCarrier?.dorsePlate && (
-                    <View style={[styles.idCardGridRow, { paddingHorizontal: 0 }]}>
+                    <View style={[styles.idCardGridRow, { paddingHorizontal: 0, marginTop: Spacing.xs }]}>
                       <View style={[styles.idCardGridItem, { flex: 1 }]}>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Dorse Plakası</ThemedText>
-                        <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCarrier.dorsePlate}</ThemedText>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>DORSE PLAKASI</ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{selectedCarrier.dorsePlate}</ThemedText>
                       </View>
                     </View>
                   )}
@@ -455,6 +455,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: BorderRadius.sm,
     padding: Spacing.lg,
+    marginVertical: Spacing.xs,
   },
   cardHeader: {
     flexDirection: "row",

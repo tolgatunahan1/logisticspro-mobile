@@ -240,17 +240,17 @@ export default function CompanyListScreen() {
 
                 <View style={styles.idCardGrid}>
                   <View style={styles.idCardGridRow}>
-                    <View style={styles.idCardGridItem}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Telefon</ThemedText>
-                      <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCompany.phone}</ThemedText>
+                    <View style={[styles.idCardGridItem, { flex: 1 }]}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>TELEFON</ThemedText>
+                      <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{selectedCompany.phone}</ThemedText>
                     </View>
                   </View>
 
                   {selectedCompany.address && (
-                    <View style={[styles.idCardGridRow, { paddingHorizontal: 0 }]}>
+                    <View style={[styles.idCardGridRow, { paddingHorizontal: 0, marginTop: Spacing.xs }]}>
                       <View style={[styles.idCardGridItem, { flex: 1 }]}>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Adres</ThemedText>
-                        <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCompany.address}</ThemedText>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 4, fontSize: 11 }}>ADRES</ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "700", color: theme.text }}>{selectedCompany.address}</ThemedText>
                       </View>
                     </View>
                   )}
