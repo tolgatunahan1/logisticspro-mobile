@@ -73,7 +73,7 @@ export default function HomeScreen() {
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
-        <View style={{ justifyContent: "center", alignItems: "center", marginTop: 8 }}>
+        <View style={{ justifyContent: "center", alignItems: "center", marginTop: 24 }}>
           <Image
             source={require("../assets/images/IMG_6804.png")}
             style={{ width: 80, height: 80 }}
