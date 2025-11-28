@@ -92,7 +92,24 @@ export default function CompletedJobListScreen() {
       return;
     }
 
-    const message = `Nakliyeci Bilgileri:\n\nAdı: ${carrier.name || "-"}\nTelefon: ${carrier.phone || "-"}\nAraç Plakası: ${carrier.plate || "-"}\nAraç Tipi: ${carrier.vehicleType ? getVehicleTypeLabel(carrier.vehicleType) : "-"}`;
+    let message = `Nakliyeci Bilgileri:\n\nAdı: ${carrier.name}\nTelefon: ${carrier.phone}`;
+    
+    if (carrier.plate && carrier.plate.trim()) {
+      message += `\nPlaka: ${carrier.plate}`;
+    }
+    
+    if (carrier.nationalId && carrier.nationalId.trim()) {
+      message += `\nTC Kimlik: ${carrier.nationalId}`;
+    }
+    
+    if (carrier.dorsePlate && carrier.dorsePlate.trim()) {
+      message += `\nDorse Plakası: ${carrier.dorsePlate}`;
+    }
+    
+    const vehicleLabel = getVehicleTypeLabel(carrier.vehicleType);
+    if (vehicleLabel && vehicleLabel !== "-") {
+      message += `\nAraç Tipi: ${vehicleLabel}`;
+    }
 
     let phoneNumber = company.phone.replace(/\D/g, "");
     if (!phoneNumber.startsWith("90")) {
