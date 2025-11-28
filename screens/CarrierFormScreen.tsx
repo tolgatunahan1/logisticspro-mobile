@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { ScreenKeyboardAwareScrollView } from "../components/ScreenKeyboardAwareScrollView";
+import { FormInput } from "../components/FormInput";
+import { FormProgress } from "../components/FormProgress";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
@@ -39,6 +41,8 @@ export default function CarrierFormScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showVehiclePicker, setShowVehiclePicker] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 2;
 
   // Check if form has been modified
   const isDirty = !isEdit && (
@@ -255,11 +259,104 @@ export default function CarrierFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {renderInput("Ad Soyad", name, (text) => setName(text.toUpperCase()), "name", { placeholder: "Nakliyeci adı" })}
-        {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
-        {renderInput("TC Kimlik Numarası", nationalId, (text) => setNationalId(text.replace(/\D/g, '')), "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad", maxLength: 11 })}
-        {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123" })}
-        {renderInput("Dorse Plakası (İsteğe Bağlı)", dorsePlate, (text) => setDorsePlate(formatLicensePlate(text)), "dorsePlate", { placeholder: "34 ABC 123" })}
+        {!isEdit && <FormProgress currentStep={currentStep} totalSteps={totalSteps} />}
+
+        {currentStep === 1 ? (
+          <>
+            <FormInput
+              label="Ad Soyad"
+              value={name}
+              onChangeText={(text) => {
+                setName(text.toUpperCase());
+                if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
+              }}
+              error={errors.name}
+              success={name.trim().length > 0}
+              placeholder="Nakliyeci adı"
+            />
+            <FormInput
+              label="Telefon Numarası"
+              value={phone}
+              onChangeText={(text) => {
+                setPhone(formatPhoneNumber(text));
+                if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
+              }}
+              error={errors.phone}
+              success={phone.length > 0 && !errors.phone}
+              placeholder="05XX XXX XXXX"
+              keyboardType="phone-pad"
+            />
+            <Pressable
+              style={({ pressed }) => [
+                styles.stepButton,
+                {
+                  backgroundColor: theme.link,
+                  opacity: pressed ? 0.8 : 1,
+                  marginTop: Spacing.lg,
+                },
+              ]}
+              onPress={() => setCurrentStep(2)}
+            >
+              <ThemedText style={{ color: "#fff", fontWeight: "700" }}>İleri</ThemedText>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <FormInput
+              label="TC Kimlik Numarası"
+              value={nationalId}
+              onChangeText={(text) => {
+                setNationalId(text.replace(/\D/g, ""));
+                if (errors.nationalId) setErrors((prev) => ({ ...prev, nationalId: "" }));
+              }}
+              error={errors.nationalId}
+              success={nationalId.length > 0 && !errors.nationalId}
+              placeholder="11 haneli kimlik numarası"
+              keyboardType="phone-pad"
+            />
+            <FormInput
+              label="Plaka"
+              value={plate}
+              onChangeText={(text) => {
+                setPlate(formatLicensePlate(text));
+                if (errors.plate) setErrors((prev) => ({ ...prev, plate: "" }));
+              }}
+              error={errors.plate}
+              success={plate.length > 0}
+              placeholder="34 ABC 123"
+            />
+            <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.stepButton,
+                  {
+                    flex: 1,
+                    backgroundColor: colors.border,
+                    opacity: pressed ? 0.8 : 1,
+                  },
+                ]}
+                onPress={() => setCurrentStep(1)}
+              >
+                <ThemedText style={{ color: theme.text, fontWeight: "700" }}>Geri</ThemedText>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.stepButton,
+                  {
+                    flex: 1,
+                    backgroundColor: theme.link,
+                    opacity: pressed ? 0.8 : 1,
+                  },
+                ]}
+                onPress={handleSave}
+              >
+                <ThemedText style={{ color: "#fff", fontWeight: "700" }}>
+                  {isLoading ? "Kaydediliyor..." : "Kaydet"}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </>
+        )}
         
         <View style={styles.inputContainer}>
           <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
@@ -364,6 +461,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginLeft: Spacing.xs,
+  },
+  stepButton: {
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerButton: {
     padding: Spacing.sm,
