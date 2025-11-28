@@ -1,13 +1,19 @@
 # LogisticsPRO - Turkish Logistics Management App
 
 ## Project Overview
-A React Native/Expo mobile app for Turkish logistics management with user authentication, admin approval workflow, and job/carrier/company management using AsyncStorage.
+A React Native/Expo mobile app for Turkish logistics management with user authentication, admin approval workflow, and job/carrier/company management using Firebase Realtime Database (multi-device sync) with local AsyncStorage fallback.
 
-## Current Status
-- **Auth System**: ✅ STABLE & WORKING - User Login/Signup/Admin with AsyncStorage (no backend)
+## Current Status - Firebase Multi-Device Sync Ready
+- **Firebase Setup**: ✅ CONFIG COMPLETE - Waiting for Console Rules
+- **Auth System**: ✅ WORKING - Firebase Auth (email/password) + AsyncStorage local user
 - **Admin Panel**: ✅ WORKING - Pending user approval + Approved users management
-- **Main Features**: Carriers (nakliyeciler), Companies (firmalar), Jobs (seferler)
+- **Main Features**: Carriers, Companies, Jobs, Completed Jobs with WhatsApp sharing
 - **UI**: iOS Liquid Glass design theme
+
+### ⚠️ CRITICAL: Firebase Rules Need Setup
+**Status**: Permission denied errors in console - Firebase Console rules not yet configured
+**Action Required**: Go to Firebase Console → Realtime Database → Rules tab → Add rules (see below)
+**After Rules Configured**: All permission errors will disappear and multi-device sync works
 
 ## 🔒 CRITICAL: STABLE AUTHENTICATION SYSTEM - DO NOT MODIFY
 **User Login/Authentication System Status: PRODUCTION STABLE**
@@ -44,10 +50,37 @@ This authentication system is working perfectly and must be preserved as-is.
 - Storage: @react-native-async-storage/async-storage
 - UI: Liquid Glass theme with iOS 26 design guidelines
 
+## Firebase Security Rules (Copy to Console)
+Add these rules to **Firebase Console** → **Realtime Database** → **Rules** tab:
+```json
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        ".validate": "newData.exists()"
+      }
+    },
+    "admins": {
+      ".read": "auth.uid !== null",
+      ".indexOn": ["uid"]
+    }
+  }
+}
+```
+Then click **Publish**. This enables secure multi-user data isolation.
+
+## Recent Changes (Session 3)
+1. **Login Screen Layout** - Header moved down, Register button moved up, better spacing
+2. **Completed Job Delete** - Added confirmation dialog before deletion
+3. **Error Toast Fixes** - Removed console.error() calls from auth failures
+4. **Invalid Credentials Message** - Improved user-friendly error message
+
 ## Known Limitations
-- Passwords stored in plain text (hardcoded admin credentials for now)
-- No persistence across app reinstalls (local storage only)
-- Admin credentials: username "tolgatunahan" password "1Liraversene"
+- Firebase Rules must be configured in Firebase Console (not Replit)
+- Local AsyncStorage for non-authenticated users only
+- Admin credentials: email "admin@logisticspro.com" password "Admin123456"
 
 ## File Structure
 - contexts/AuthContext.tsx - User/Admin auth state (STABLE)
