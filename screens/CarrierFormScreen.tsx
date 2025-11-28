@@ -8,14 +8,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { ScreenKeyboardAwareScrollView } from "../components/ScreenKeyboardAwareScrollView";
-import { FormInput } from "../components/FormInput";
-import { FormProgress } from "../components/FormProgress";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addCarrier, updateCarrier, VEHICLE_TYPES, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { validatePhoneNumber, validateTCIdNumber } from "../utils/validation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "CarrierForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "CarrierForm">;
@@ -41,8 +38,6 @@ export default function CarrierFormScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showVehiclePicker, setShowVehiclePicker] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 2;
 
   // Check if form has been modified
   const isDirty = !isEdit && (
@@ -94,25 +89,17 @@ export default function CarrierFormScreen() {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    // Ad Soyad zorunlu
+    // Sadece Ad Soyad zorunlu
     if (!name.trim()) {
       newErrors.name = "Ad Soyad gerekli";
     }
 
-    // Telefon: boş ise OK, doldurulmuşsa validasyonu geç
-    if (phone.trim()) {
-      const phoneValidation = validatePhoneNumber(phone);
-      if (!phoneValidation.isValid) {
-        newErrors.phone = phoneValidation.error;
-      }
+    // Diğer alanlar isteğe bağlı, ancak doldurulmuşsa validasyon yap
+    if (nationalId.trim() && nationalId.trim().length !== 11) {
+      newErrors.nationalId = "TC Kimlik numarası 11 hane olmalı";
     }
-
-    // TC Kimlik: boş ise OK, doldurulmuşsa validasyonu geç
-    if (nationalId.trim()) {
-      const tcValidation = validateTCIdNumber(nationalId);
-      if (!tcValidation.isValid) {
-        newErrors.nationalId = tcValidation.error;
-      }
+    if (nationalId.trim() && !/^\d{11}$/.test(nationalId.trim())) {
+      newErrors.nationalId = "TC Kimlik numarası sadece rakam olmalı";
     }
 
     setErrors(newErrors);
@@ -214,7 +201,6 @@ export default function CarrierFormScreen() {
       placeholder?: string;
       keyboardType?: "default" | "phone-pad";
       autoCapitalize?: "none" | "sentences" | "words" | "characters";
-      maxLength?: number;
     }
   ) => (
     <View style={styles.inputContainer}>
@@ -242,7 +228,6 @@ export default function CarrierFormScreen() {
         keyboardType={options?.keyboardType || "default"}
         autoCapitalize={options?.autoCapitalize || "sentences"}
         editable={!isLoading}
-        maxLength={options?.maxLength}
       />
       {errors[errorKey] ? (
         <ThemedText type="small" style={[styles.errorText, { color: colors.destructive }]}>
@@ -259,104 +244,11 @@ export default function CarrierFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {!isEdit && <FormProgress currentStep={currentStep} totalSteps={totalSteps} />}
-
-        {currentStep === 1 ? (
-          <>
-            <FormInput
-              label="Ad Soyad"
-              value={name}
-              onChangeText={(text) => {
-                setName(text.toUpperCase());
-                if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
-              }}
-              error={errors.name}
-              success={name.trim().length > 0}
-              placeholder="Nakliyeci adı"
-            />
-            <FormInput
-              label="Telefon Numarası"
-              value={phone}
-              onChangeText={(text) => {
-                setPhone(formatPhoneNumber(text));
-                if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
-              }}
-              error={errors.phone}
-              success={phone.length > 0 && !errors.phone}
-              placeholder="05XX XXX XXXX"
-              keyboardType="phone-pad"
-            />
-            <Pressable
-              style={({ pressed }) => [
-                styles.stepButton,
-                {
-                  backgroundColor: theme.link,
-                  opacity: pressed ? 0.8 : 1,
-                  marginTop: Spacing.lg,
-                },
-              ]}
-              onPress={() => setCurrentStep(2)}
-            >
-              <ThemedText style={{ color: "#fff", fontWeight: "700" }}>İleri</ThemedText>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <FormInput
-              label="TC Kimlik Numarası"
-              value={nationalId}
-              onChangeText={(text) => {
-                setNationalId(text.replace(/\D/g, ""));
-                if (errors.nationalId) setErrors((prev) => ({ ...prev, nationalId: "" }));
-              }}
-              error={errors.nationalId}
-              success={nationalId.length > 0 && !errors.nationalId}
-              placeholder="11 haneli kimlik numarası"
-              keyboardType="phone-pad"
-            />
-            <FormInput
-              label="Plaka"
-              value={plate}
-              onChangeText={(text) => {
-                setPlate(formatLicensePlate(text));
-                if (errors.plate) setErrors((prev) => ({ ...prev, plate: "" }));
-              }}
-              error={errors.plate}
-              success={plate.length > 0}
-              placeholder="34 ABC 123"
-            />
-            <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.stepButton,
-                  {
-                    flex: 1,
-                    backgroundColor: colors.border,
-                    opacity: pressed ? 0.8 : 1,
-                  },
-                ]}
-                onPress={() => setCurrentStep(1)}
-              >
-                <ThemedText style={{ color: theme.text, fontWeight: "700" }}>Geri</ThemedText>
-              </Pressable>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.stepButton,
-                  {
-                    flex: 1,
-                    backgroundColor: theme.link,
-                    opacity: pressed ? 0.8 : 1,
-                  },
-                ]}
-                onPress={handleSave}
-              >
-                <ThemedText style={{ color: "#fff", fontWeight: "700" }}>
-                  {isLoading ? "Kaydediliyor..." : "Kaydet"}
-                </ThemedText>
-              </Pressable>
-            </View>
-          </>
-        )}
+        {renderInput("Ad Soyad", name, (text) => setName(text.toUpperCase()), "name", { placeholder: "Nakliyeci adı" })}
+        {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
+        {renderInput("TC Kimlik Numarası", nationalId, (text) => setNationalId(text.toUpperCase()), "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
+        {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123" })}
+        {renderInput("Dorse Plakası (İsteğe Bağlı)", dorsePlate, (text) => setDorsePlate(formatLicensePlate(text)), "dorsePlate", { placeholder: "34 ABC 123" })}
         
         <View style={styles.inputContainer}>
           <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
@@ -461,12 +353,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginLeft: Spacing.xs,
-  },
-  stepButton: {
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerButton: {
     padding: Spacing.sm,
