@@ -281,7 +281,7 @@ export default function JobListScreen() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
           >
-            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flex: 1, maxHeight: "95%", flexDirection: "column" }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flex: 1, maxHeight: "95%", flexDirection: "column", paddingTop: insets.top + Spacing.lg }]}>
               {/* Modal Header */}
               <View style={[styles.modalHeader, { paddingHorizontal: Spacing.lg }]}>
                 <ThemedText type="h3">İş Detayları</ThemedText>
