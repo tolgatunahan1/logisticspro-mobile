@@ -38,15 +38,12 @@ export interface UserProfile {
 const isFirebaseConfigured = (): boolean => {
   try {
     if (!firebaseAuth?.app?.options?.apiKey) {
-      console.warn("🔥 Firebase app not initialized or apiKey missing");
       return false;
     }
     const apiKey = firebaseAuth.app.options.apiKey;
     const isValid = apiKey.startsWith("AIzaSy") && apiKey.length > 30;
-    console.log("✅ Firebase configured:", isValid, "apiKey:", apiKey.substring(0, 20) + "...");
     return isValid;
   } catch (error) {
-    console.error("🔥 Firebase Config Error:", error);
     return false;
   }
 };
@@ -61,12 +58,8 @@ export const firebaseAuthService = {
       const apiKey = firebaseAuth.app?.options?.apiKey || "";
       // Valid API keys start with AIzaSy and are longer than 30 chars
       const isValid = apiKey.startsWith("AIzaSy") && apiKey.length > 30;
-      if (!isValid) {
-        console.warn("🔥 Firebase not configured - apiKey:", apiKey?.substring(0, 20) + "...");
-      }
       return isValid;
     } catch (error) {
-      console.error("🔥 Firebase config check error:", error);
       return false;
     }
   },
@@ -95,7 +88,6 @@ export const firebaseAuthService = {
       await set(ref(firebaseDatabase, `users/${user.uid}/profile`), userProfile);
       return user;
     } catch (error: any) {
-      console.error("Firebase register error:", error?.message);
       if (error?.message?.includes("api-key-not-valid")) {
         throw new Error(FIREBASE_CONFIG_ERROR);
       }
@@ -124,7 +116,6 @@ export const firebaseAuthService = {
     try {
       await signOut(firebaseAuth);
     } catch (error) {
-      console.error("Logout error:", error);
       throw error;
     }
   },
@@ -135,7 +126,6 @@ export const firebaseAuthService = {
       const snapshot = await get(ref(firebaseDatabase, `users/${uid}/profile`));
       return snapshot.val();
     } catch (error) {
-      console.error("Get user profile error:", error);
       return null;
     }
   },
@@ -146,7 +136,6 @@ export const firebaseAuthService = {
       const profile = await firebaseAuthService.getUserProfile(uid);
       return profile?.status === "approved";
     } catch (error) {
-      console.error("User approval check error:", error);
       return false;
     }
   },
@@ -157,7 +146,6 @@ export const firebaseAuthService = {
       await update(ref(firebaseDatabase, `users/${uid}/profile`), updates);
       return true;
     } catch (error) {
-      console.error("Update user profile error:", error);
       return false;
     }
   },
@@ -184,10 +172,8 @@ export const firebaseAuthService = {
       await remove(ref(firebaseDatabase, `users/${uid}`));
       // Delete any associated data
       await remove(ref(firebaseDatabase, `data/${uid}`));
-      console.log("✅ User completely deleted from database:", uid);
       return true;
     } catch (error) {
-      console.error("Delete user error:", error);
       return false;
     }
   },
@@ -197,10 +183,8 @@ export const firebaseAuthService = {
     try {
       await remove(ref(firebaseDatabase, "users"));
       await remove(ref(firebaseDatabase, "admins"));
-      console.log("✅ Database completely cleaned - all data removed");
       return true;
     } catch (error) {
-      console.error("Database cleanup error:", error);
       return false;
     }
   },
@@ -212,10 +196,8 @@ export const firebaseAuthService = {
       await remove(ref(firebaseDatabase, "users"));
       await remove(ref(firebaseDatabase, "admins"));
       await remove(ref(firebaseDatabase, "data"));
-      console.log("✅ Firebase completely wiped");
       return true;
     } catch (error) {
-      console.error("Hard reset error:", error);
       return false;
     }
   },
@@ -226,7 +208,6 @@ export const firebaseAuthService = {
       const snapshot = await get(ref(firebaseDatabase, `admins/${uid}`));
       return snapshot.exists() && snapshot.val()?.isAdmin === true;
     } catch (error) {
-      console.error("Check admin error:", error);
       return false;
     }
   },
@@ -250,7 +231,6 @@ export const firebaseAuthService = {
       }
       return users;
     } catch (error) {
-      console.error("Get pending users error:", error);
       return [];
     }
   },
@@ -274,7 +254,6 @@ export const firebaseAuthService = {
       }
       return users;
     } catch (error) {
-      console.error("Get approved users error:", error);
       return [];
     }
   },
@@ -288,7 +267,6 @@ export const firebaseAuthService = {
       });
       return true;
     } catch (error) {
-      console.error("Approve user error:", error);
       return false;
     }
   },
@@ -298,10 +276,8 @@ export const firebaseAuthService = {
     try {
       // Delete from database completely
       await remove(ref(firebaseDatabase, `users/${uid}`));
-      console.log("✅ User rejected and deleted from database:", uid);
       return true;
     } catch (error) {
-      console.error("Reject user error:", error);
       return false;
     }
   },
@@ -314,7 +290,6 @@ export const firebaseAuthService = {
       });
       return true;
     } catch (error) {
-      console.error("Unapprove user error:", error);
       return false;
     }
   },
@@ -333,10 +308,8 @@ export const firebaseAuthService = {
 
       // Update password
       await updatePassword(user, newPassword);
-      console.log("✅ Password updated successfully");
       return true;
     } catch (error: any) {
-      console.error("Change password error:", error?.message);
       if (error?.message?.includes("wrong-password")) {
         throw new Error("Mevcut şifre yanlış");
       }
@@ -366,10 +339,8 @@ export const firebaseAuthService = {
         });
       }
 
-      console.log("✅ Email updated successfully");
       return true;
     } catch (error: any) {
-      console.error("Change email error:", error?.message);
       if (error?.message?.includes("wrong-password")) {
         throw new Error("Mevcut şifre yanlış");
       }
@@ -395,7 +366,6 @@ export const firebaseAuthService = {
           isAdmin: true,
           createdAt: Date.now(),
         });
-        console.log("✅ User marked as admin:", email);
         await signOut(firebaseAuth); // Sign out after setup
         return true;
       } catch (signInError: any) {
@@ -418,14 +388,12 @@ export const firebaseAuthService = {
             isAdmin: true,
             createdAt: Date.now(),
           });
-          console.log("✅ New admin created (ADMIN ONLY):", email);
           await signOut(firebaseAuth); // Sign out after setup
           return true;
         }
         throw signInError;
       }
     } catch (error: any) {
-      console.error("Admin initialization error:", error);
       throw error;
     }
   },

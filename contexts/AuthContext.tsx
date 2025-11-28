@@ -100,7 +100,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      console.error("Admin login error:", error);
       throw error;
     }
   };
@@ -110,7 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const success = await firebaseAuthService.initializeAdmin(email, password);
       return success;
     } catch (error) {
-      console.error("Create admin error:", error);
       throw error;
     }
   };
@@ -121,7 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setFirebaseUser(null);
     } catch (error) {
-      console.error("Logout error:", error);
       setUser(null);
       setFirebaseUser(null);
     }

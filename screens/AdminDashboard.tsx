@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       setPendingUsers(pending);
       setApprovedUsers(approved);
     } catch (error) {
-      console.error("Error loading users:", error);
+      // Silent fail - returns empty arrays
     } finally {
       setLoading(false);
     }
