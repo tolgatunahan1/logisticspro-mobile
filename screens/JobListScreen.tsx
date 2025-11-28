@@ -281,7 +281,7 @@ export default function JobListScreen() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
           >
-            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flexDirection: "column" }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flex: 1, maxHeight: "95%", flexDirection: "column" }]}>
               {/* Modal Header */}
               <View style={[styles.modalHeader, { paddingHorizontal: Spacing.lg }]}>
                 <ThemedText type="h3">İş Detayları</ThemedText>
@@ -294,7 +294,7 @@ export default function JobListScreen() {
               </View>
 
               {/* Modal Body - Scrollable Job Details */}
-              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} contentContainerStyle={{ paddingBottom: Spacing.xl }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false}>
               {selectedJob && (
                 <View style={{ gap: Spacing.lg }}>
                   <View style={styles.detailSection}>
