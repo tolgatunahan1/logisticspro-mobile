@@ -35,6 +35,16 @@ export default function CompanyFormScreen() {
 
   const colors = isDark ? Colors.dark : Colors.light;
 
+  const formatPhoneNumber = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 0) return '';
+    let withZero = cleaned;
+    if (!cleaned.startsWith('0')) {
+      withZero = '0' + cleaned;
+    }
+    return withZero.slice(0, 11);
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
@@ -173,7 +183,7 @@ export default function CompanyFormScreen() {
         showsVerticalScrollIndicator={false}
       >
         {renderInput("Firma Adı", name, setName, "name", { placeholder: "Firma adı", autoCapitalize: "words" })}
-        {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
+        {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
         {renderInput("Adres", address, setAddress, "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true })}
 
       </ScrollView>

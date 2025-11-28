@@ -38,6 +38,16 @@ export default function CarrierFormScreen() {
 
   const colors = isDark ? Colors.dark : Colors.light;
 
+  const formatPhoneNumber = (value: string): string => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 0) return '';
+    let withZero = cleaned;
+    if (!cleaned.startsWith('0')) {
+      withZero = '0' + cleaned;
+    }
+    return withZero.slice(0, 11);
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
@@ -178,7 +188,7 @@ export default function CarrierFormScreen() {
         showsVerticalScrollIndicator={false}
       >
         {renderInput("Ad Soyad", name, setName, "name", { placeholder: "Nakliyeci adı", autoCapitalize: "words" })}
-        {renderInput("Telefon Numarası", phone, setPhone, "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
+        {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
         {renderInput("Plaka", plate, (text) => setPlate(text.toUpperCase()), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
         
         <View style={styles.inputContainer}>
