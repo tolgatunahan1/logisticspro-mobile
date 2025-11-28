@@ -25,7 +25,7 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   AdminDashboard: undefined;
-  MainTabs: undefined;
+  AnaSayfa: undefined;
   CarrierList: undefined;
   CarrierForm: { carrier?: Carrier; mode: "add" | "edit"; initialData?: { name?: string; phone?: string; vehicleType?: string } };
   CompanyList: undefined;
@@ -87,7 +87,7 @@ export default function RootNavigator() {
       ) : (
         <>
           <Stack.Screen
-            name="MainTabs"
+            name="AnaSayfa"
             component={BottomTabNavigator}
             options={{
               headerShown: false,
