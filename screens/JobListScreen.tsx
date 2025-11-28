@@ -294,9 +294,9 @@ export default function JobListScreen() {
               </View>
 
               {/* Modal Body - Scrollable Job Details */}
-              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} contentContainerStyle={{ paddingBottom: Spacing.xl }} showsVerticalScrollIndicator={false}>
               {selectedJob && (
-                <View style={{ gap: Spacing.lg }}>
+                <View style={{ gap: Spacing.md }}>
                   <View style={styles.detailSection}>
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
                       Firma Adı
@@ -392,8 +392,8 @@ export default function JobListScreen() {
 
               {/* Fixed Nakliyeci Seçim Bölümü - Bottom Section */}
               {selectedJob && (
-                <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: theme.backgroundRoot }}>
-                <View style={{ gap: Spacing.md }}>
+                <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, paddingBottom: Spacing.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: theme.backgroundRoot }}>
+                <View style={{ gap: Spacing.sm }}>
                   <View style={{ gap: Spacing.sm }}>
                     <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                       Nakliyeci Seçin
@@ -476,7 +476,7 @@ export default function JobListScreen() {
 
                 {/* Modal Footer Buttons */}
                 {selectedJob && (
-                  <View style={{ gap: Spacing.md, paddingVertical: Spacing.lg }}>
+                  <View style={{ gap: Spacing.md, paddingVertical: Spacing.md }}>
                     <View style={{ flexDirection: "row", gap: Spacing.md }}>
                       <Pressable
                         onPress={() => handleShareJob(selectedJob)}
