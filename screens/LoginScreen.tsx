@@ -16,8 +16,8 @@ import { RootStackParamList } from "../navigation/RootNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
-const REMEMBER_ME_KEY_ADMIN = "@logistics_remember_admin";
-const REMEMBER_ME_KEY_USER = "@logistics_remember_user";
+const REMEMBER_ME_KEY_ADMIN = "logistics_remember_admin";
+const REMEMBER_ME_KEY_USER = "logistics_remember_user";
 
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();

@@ -17,7 +17,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Signup">;
 
-const REMEMBER_ME_KEY_SIGNUP = "@logistics_remember_signup";
+const REMEMBER_ME_KEY_SIGNUP = "logistics_remember_signup";
 
 export default function SignupScreen() {
   const { theme, isDark } = useTheme();
