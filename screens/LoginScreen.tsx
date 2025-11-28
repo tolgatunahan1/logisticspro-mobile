@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -7,8 +7,6 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { initializeDefaultAdmin } from "../utils/userManagement";
-import { firebaseAuthService } from "../utils/firebaseAuth";
 
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,23 +17,17 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { loginUser, loginAdmin, loginWithFirebase } = useAuth();
+  const { loginWithFirebase, loginAdmin, createAdmin } = useAuth();
   const navigation = useNavigation<NavigationProp>();
   
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Default: Firebase (normal users)
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
-
-  useEffect(() => {
-    // No auto-initialization - clean slate for admin setup
-  }, []);
-
 
   const handleCreateAdmin = async () => {
     setError("");
@@ -51,13 +43,13 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      const success = await firebaseAuthService.initializeAdmin(newAdminEmail, newAdminPassword);
+      const success = await createAdmin(newAdminEmail, newAdminPassword);
       if (success) {
-        Alert.alert("Başarılı", "Admin hesabı oluşturuldu. Admin olarak giriş yapabilirsiniz.");
+        Alert.alert("Başarılı", "Admin hesabı oluşturuldu. Giriş yapabilirsiniz.");
         setShowCreateAdmin(false);
         setNewAdminEmail("");
         setNewAdminPassword("");
-        setUsername(newAdminEmail);
+        setEmail(newAdminEmail);
         setPassword(newAdminPassword);
       } else {
         setError("Admin oluşturma başarısız");
@@ -71,46 +63,27 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     setError("");
-    if (!username.trim() || !password.trim()) {
-      setError("Email/Kullanıcı adı ve şifre gerekli");
+    if (!email.trim() || !password.trim()) {
+      setError("Email ve şifre gerekli");
       return;
     }
 
     setIsLoading(true);
     try {
       let success = false;
-      if (isFirebaseMode) {
-        // Firebase login with email
-        success = await loginWithFirebase(username, password);
-      } else if (isAdminMode) {
-        // Admin mode - only try admin login
-        success = await loginAdmin(username, password);
+      if (isAdminMode) {
+        success = await loginAdmin(email, password);
       } else {
-        // User mode - only try user login
-        success = await loginUser(username, password);
+        success = await loginWithFirebase(email, password);
       }
       
       if (!success) {
-        if (isFirebaseMode) {
-          setError("Email veya şifre yanlış");
-        } else {
-          setError(isAdminMode ? "Admin şifresi yanlış" : "Onaylanmamış kullanıcı veya yanlış şifre");
-        }
+        setError("Email veya şifre yanlış");
       }
     } catch (error: any) {
       console.error("Login error:", error);
       const errorMsg = error?.message || "Giriş sırasında hata oluştu";
-      if (errorMsg.includes("Firebase yapılandırılmamış")) {
-        setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
-      } else if (isFirebaseMode) {
-        if (errorMsg.includes("onaylanmamıştır")) {
-          setError("Admin onayı bekleniyor. Lütfen daha sonra tekrar deneyin.");
-        } else {
-          setError(errorMsg);
-        }
-      } else {
-        setError(errorMsg);
-      }
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +110,7 @@ export default function LoginScreen() {
 
         <View style={[styles.modeToggle, { borderColor: colors.border }]}>
           <Pressable
-            onPress={() => { setIsAdminMode(false); setIsFirebaseMode(true); }}
+            onPress={() => setIsAdminMode(false)}
             disabled={isLoading}
             style={[
               styles.modeButton,
@@ -152,7 +125,7 @@ export default function LoginScreen() {
             </ThemedText>
           </Pressable>
           <Pressable
-            onPress={() => { setIsAdminMode(true); setIsFirebaseMode(false); }}
+            onPress={() => setIsAdminMode(true)}
             disabled={isLoading}
             style={[
               styles.modeButton,
@@ -182,10 +155,10 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder={isAdminMode ? "admin@logisticspro.com" : "Email adresiniz"}
+              placeholder="Email adresiniz"
               placeholderTextColor={colors.textSecondary}
-              value={username}
-              onChangeText={setUsername}
+              value={email}
+              onChangeText={setEmail}
               editable={!isLoading}
               autoCapitalize="none"
               autoCorrect={false}
@@ -206,7 +179,7 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Şifre (8+ karakter, büyük harf, rakam)"
+              placeholder="Şifre (8+ karakter)"
               placeholderTextColor={colors.textSecondary}
               value={password}
               onChangeText={setPassword}
@@ -338,16 +311,18 @@ export default function LoginScreen() {
             </>
           )}
 
-          <View style={styles.signupLink}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Hesabın yok mu?{" "}
-            </ThemedText>
-            <Pressable onPress={() => navigation.navigate("Signup")}>
-              <ThemedText type="small" style={{ color: theme.link, fontWeight: "600" }}>
-                Kayıt Ol
+          {!isAdminMode && (
+            <View style={styles.signupLink}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Hesabın yok mu?{" "}
               </ThemedText>
-            </Pressable>
-          </View>
+              <Pressable onPress={() => navigation.navigate("Signup")}>
+                <ThemedText type="small" style={{ color: theme.link, fontWeight: "600" }}>
+                  Kayıt Ol
+                </ThemedText>
+              </Pressable>
+            </View>
+          )}
         </View>
       </ScrollView>
     </ThemedView>

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, ActivityIndicator, ScrollView } from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { StyleSheet, View, Pressable, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
@@ -9,35 +9,39 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser, deleteFirebaseUser, deleteUser as deleteLocalUser } from "../utils/userManagement";
 import { firebaseAuthService } from "../utils/firebaseAuth";
+
+interface PendingUser {
+  uid: string;
+  email: string;
+  createdAt: number;
+}
+
+interface ApprovedUser {
+  uid: string;
+  email: string;
+  approvedAt: number;
+}
 
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const { logout } = useAuth();
-  const [pendingUsers, setPendingUsers] = useState<any[]>([]);
-  const [approvedUsers, setApprovedUsers] = useState<any[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+  const [approvedUsers, setApprovedUsers] = useState<ApprovedUser[]>([]);
   const [loading, setLoading] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
   const loadUsers = useCallback(async () => {
-    setPendingUsers([]);
-    setApprovedUsers([]);
     setLoading(true);
     try {
-      // Get both local and Firebase users
-      const [localPending, localApproved, fbPending, fbApproved] = await Promise.all([
-        getPendingUsers(),
-        getApprovedUsers(),
-        getPendingFirebaseUsers(),
-        getApprovedFirebaseUsers(),
-      ]);
-      // Merge all pending and approved users
-      setPendingUsers([...localPending, ...fbPending]);
-      setApprovedUsers([...localApproved, ...fbApproved]);
+      const pending = await firebaseAuthService.getPendingUsers();
+      const approved = await firebaseAuthService.getApprovedUsers();
+      setPendingUsers(pending);
+      setApprovedUsers(approved);
+    } catch (error) {
+      console.error("Error loading users:", error);
     } finally {
       setLoading(false);
     }
@@ -49,77 +53,40 @@ export default function AdminDashboard() {
     }, [loadUsers])
   );
 
-  const handleApprove = async (userId: string) => {
-    Alert.alert("Onayla", "Kullanıcı onaylanacak mı?", [
+  const handleApprove = async (uid: string, email: string) => {
+    Alert.alert("Onayla", `${email} kullanıcısını onaylamak istiyor musunuz?`, [
       { text: "İptal" },
       {
         text: "Onayla",
         onPress: async () => {
-          // Try Firebase first, then local
-          let approved = await approveFirebaseUser(userId);
-          if (!approved) {
-            approved = await approveUser(userId);
+          setLoading(true);
+          try {
+            await firebaseAuthService.approveUser(uid);
+            await loadUsers();
+            Alert.alert("Başarılı", "Kullanıcı onaylandı.");
+          } catch (error: any) {
+            Alert.alert("Hata", error?.message || "Onaylama başarısız");
+          } finally {
+            setLoading(false);
           }
-          await loadUsers();
         },
       },
     ]);
   };
 
-  const handleReject = async (userId: string) => {
-    Alert.alert("Reddet", "Kullanıcı reddedilecek mi?", [
+  const handleReject = async (uid: string, email: string) => {
+    Alert.alert("Reddet", `${email} kullanıcısını reddetmek istiyor musunuz?`, [
       { text: "İptal" },
       {
         text: "Reddet",
         onPress: async () => {
-          // Try Firebase first, then local
-          let rejected = await rejectFirebaseUser(userId);
-          if (!rejected) {
-            rejected = await rejectUser(userId);
-          }
-          await loadUsers();
-        },
-        style: "destructive",
-      },
-    ]);
-  };
-
-  const handleRevoke = async (userId: string, username: string) => {
-    Alert.alert("Onayı Kaldır", `${username} kullanıcısının onayını kaldırmak istiyor musunuz?`, [
-      { text: "İptal" },
-      {
-        text: "Kaldır",
-        onPress: async () => {
-          // Try Firebase first, then local
-          let revoked = await unapproveFirebaseUser(userId);
-          if (!revoked) {
-            revoked = await unapproveUser(userId);
-          }
-          await loadUsers();
-        },
-        style: "destructive",
-      },
-    ]);
-  };
-
-  const handleDelete = async (userId: string, username: string) => {
-    Alert.alert("Kullanıcıyı Tamamen Sil", `${username} kullanıcısı sistemden TAMAMen silinecek. Tüm verileri sıfırlanacak. Geri alınamaz!`, [
-      { text: "İptal" },
-      {
-        text: "Sil",
-        onPress: async () => {
           setLoading(true);
           try {
-            // Delete from Firebase completely
-            const deleted = await firebaseAuthService.deleteUserByUid(userId);
-            if (deleted) {
-              Alert.alert("Başarılı", "Kullanıcı tamamen silindi.");
-              await loadUsers();
-            } else {
-              Alert.alert("Hata", "Silme işlemi başarısız.");
-            }
+            await firebaseAuthService.rejectUser(uid);
+            await loadUsers();
+            Alert.alert("Başarılı", "Kullanıcı reddedildi.");
           } catch (error: any) {
-            Alert.alert("Hata", error?.message || "Silme sırasında hata oluştu");
+            Alert.alert("Hata", error?.message || "Reddetme başarısız");
           } finally {
             setLoading(false);
           }
@@ -129,27 +96,44 @@ export default function AdminDashboard() {
     ]);
   };
 
-  const handleEmergencyCleanup = async () => {
+  const handleRevoke = async (uid: string, email: string) => {
+    Alert.alert("Onayı Kaldır", `${email} kullanıcısının onayını kaldırmak istiyor musunuz?`, [
+      { text: "İptal" },
+      {
+        text: "Kaldır",
+        onPress: async () => {
+          setLoading(true);
+          try {
+            await firebaseAuthService.unapproveUser(uid);
+            await loadUsers();
+            Alert.alert("Başarılı", "Kullanıcı onayı kaldırıldı.");
+          } catch (error: any) {
+            Alert.alert("Hata", error?.message || "Onay kaldırma başarısız");
+          } finally {
+            setLoading(false);
+          }
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
+  const handleDelete = async (uid: string, email: string) => {
     Alert.alert(
-      "🚨 ACİL TEMIZLIK",
-      "Tüm verileri kalıcı olarak sil? Admin hariç TÜM KULLANICILAR ve tüm veriler SILINECEK. Geri ALINAMAZ!",
+      "Kullanıcıyı Sil",
+      `${email} kullanıcısı TAMAMen silinecek. Geri alınamaz!`,
       [
         { text: "İptal" },
         {
-          text: "Evet, Sil",
+          text: "Sil",
           onPress: async () => {
             setLoading(true);
             try {
-              const cleaned = await firebaseAuthService.cleanupDatabase();
-              if (cleaned) {
-                Alert.alert("✅ Temizlik Tamamlandı", "Tüm veriler silindi.");
-                setPendingUsers([]);
-                setApprovedUsers([]);
-              } else {
-                Alert.alert("Hata", "Temizlik başarısız.");
-              }
+              await firebaseAuthService.deleteUserByUid(uid);
+              await loadUsers();
+              Alert.alert("Başarılı", "Kullanıcı silindi.");
             } catch (error: any) {
-              Alert.alert("Hata", error?.message || "Temizlik sırasında hata oluştu");
+              Alert.alert("Hata", error?.message || "Silme başarısız");
             } finally {
               setLoading(false);
             }
@@ -162,8 +146,8 @@ export default function AdminDashboard() {
 
   const handleHardReset = async () => {
     Alert.alert(
-      "💥 HARD RESET - BÜTÜN SİSTEM",
-      "YERİL HAFIZA + FIREBASE = TAM TEMIZLIK. Tüm hesaplar silinecek. GERI ALINAMAZ!",
+      "💥 HARD RESET",
+      "TÜM sistem silinecek. Admin hariç HERYŞEY SILINECEK. Geri ALINAMAZ!",
       [
         { text: "İptal" },
         {
@@ -171,16 +155,11 @@ export default function AdminDashboard() {
           onPress: async () => {
             setLoading(true);
             try {
-              const reset = await firebaseAuthService.hardReset();
-              if (reset) {
-                Alert.alert("✅ Hard Reset Tamam", "Her şey silindi. Sayfayı yenile.");
-                setPendingUsers([]);
-                setApprovedUsers([]);
-              } else {
-                Alert.alert("Hata", "Hard reset başarısız.");
-              }
+              await firebaseAuthService.hardReset();
+              await loadUsers();
+              Alert.alert("✅ Tamam", "Her şey silindi.");
             } catch (error: any) {
-              Alert.alert("Hata", error?.message || "Reset sırasında hata oluştu");
+              Alert.alert("Hata", error?.message || "Reset başarısız");
             } finally {
               setLoading(false);
             }
@@ -191,8 +170,7 @@ export default function AdminDashboard() {
     );
   };
 
-  const formatDate = (timestamp?: number): string => {
-    if (!timestamp) return "-";
+  const formatDate = (timestamp: number): string => {
     return new Date(timestamp).toLocaleDateString("tr-TR", {
       year: "numeric",
       month: "2-digit",
@@ -207,15 +185,10 @@ export default function AdminDashboard() {
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
             onPress={handleHardReset}
+            disabled={loading}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
             <Feather name="alert-triangle" size={24} color="#dc2626" />
-          </Pressable>
-          <Pressable
-            onPress={handleEmergencyCleanup}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-          >
-            <Feather name="trash" size={24} color="#ef4444" />
           </Pressable>
           <Pressable
             onPress={() => {
@@ -223,13 +196,12 @@ export default function AdminDashboard() {
                 { text: "İptal" },
                 {
                   text: "Çıkış",
-                  onPress: async () => {
-                    await logout();
-                  },
+                  onPress: logout,
                   style: "destructive",
                 },
               ]);
             }}
+            disabled={loading}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
             <Feather name="log-out" size={24} color={theme.text} />
@@ -240,7 +212,7 @@ export default function AdminDashboard() {
       <View style={[styles.statsContainer, { paddingHorizontal: Spacing.xl }]}>
         <View style={[styles.statCard, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
           <ThemedText type="small" style={{ color: colors.textSecondary }}>
-            Aktif Kullanıcılar
+            Aktif
           </ThemedText>
           <ThemedText type="h3" style={{ fontWeight: "700", color: theme.link }}>
             {approvedUsers.length}
@@ -257,10 +229,10 @@ export default function AdminDashboard() {
       </View>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Beklemede Kullanıcılar */}
+        {/* Beklemede */}
         <View style={styles.section}>
           <ThemedText type="h4" style={{ paddingHorizontal: Spacing.xl }}>
-            Beklemede Kullanıcılar ({pendingUsers.length})
+            Beklemede ({pendingUsers.length})
           </ThemedText>
         </View>
 
@@ -276,9 +248,9 @@ export default function AdminDashboard() {
           </View>
         ) : (
           <View style={{ paddingHorizontal: Spacing.xl, gap: Spacing.md, paddingBottom: Spacing.lg }}>
-            {pendingUsers.map((item) => (
+            {pendingUsers.map((user) => (
               <View
-                key={item.id}
+                key={user.uid}
                 style={[
                   styles.card,
                   { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
@@ -286,18 +258,20 @@ export default function AdminDashboard() {
               >
                 <View style={styles.userInfo}>
                   <ThemedText type="body" style={{ fontWeight: "600" }}>
-                    {item.username || item.email}
+                    {user.email}
                   </ThemedText>
                 </View>
                 <View style={styles.actions}>
                   <Pressable
-                    onPress={() => handleApprove(item.id)}
+                    onPress={() => handleApprove(user.uid, user.email)}
+                    disabled={loading}
                     style={[styles.button, { backgroundColor: "#10b981" }]}
                   >
                     <Feather name="check" size={20} color="white" />
                   </Pressable>
                   <Pressable
-                    onPress={() => handleReject(item.id)}
+                    onPress={() => handleReject(user.uid, user.email)}
+                    disabled={loading}
                     style={[styles.button, { backgroundColor: colors.destructive }]}
                   >
                     <Feather name="x" size={20} color="white" />
@@ -308,10 +282,10 @@ export default function AdminDashboard() {
           </View>
         )}
 
-        {/* Onaylanmış Kullanıcılar */}
+        {/* Onaylanmış */}
         <View style={styles.section}>
           <ThemedText type="h4" style={{ paddingHorizontal: Spacing.xl }}>
-            Onaylanmış Kullanıcılar ({approvedUsers.length})
+            Onaylanmış ({approvedUsers.length})
           </ThemedText>
         </View>
 
@@ -322,10 +296,10 @@ export default function AdminDashboard() {
             </ThemedText>
           </View>
         ) : (
-          <View style={{ paddingHorizontal: Spacing.xl, gap: Spacing.md, paddingBottom: Spacing.lg }}>
-            {approvedUsers.map((item) => (
+          <View style={{ paddingHorizontal: Spacing.xl, gap: Spacing.md, paddingBottom: Spacing.xl }}>
+            {approvedUsers.map((user) => (
               <View
-                key={item.id}
+                key={user.uid}
                 style={[
                   styles.card,
                   { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
@@ -333,21 +307,23 @@ export default function AdminDashboard() {
               >
                 <View style={styles.userInfo}>
                   <ThemedText type="body" style={{ fontWeight: "600" }}>
-                    {item.username || item.email}
+                    {user.email}
                   </ThemedText>
                   <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
-                    Onaylandı: {formatDate(item.approvedAt)}
+                    Onay: {formatDate(user.approvedAt)}
                   </ThemedText>
                 </View>
                 <View style={styles.actions}>
                   <Pressable
-                    onPress={() => handleRevoke(item.id, item.username || item.email)}
+                    onPress={() => handleRevoke(user.uid, user.email)}
+                    disabled={loading}
                     style={[styles.button, { backgroundColor: "#f59e0b" }]}
                   >
                     <Feather name="slash" size={20} color="white" />
                   </Pressable>
                   <Pressable
-                    onPress={() => handleDelete(item.id, item.username || item.email)}
+                    onPress={() => handleDelete(user.uid, user.email)}
+                    disabled={loading}
                     style={[styles.button, { backgroundColor: "#ef4444" }]}
                   >
                     <Feather name="trash-2" size={20} color="white" />
@@ -420,4 +396,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-

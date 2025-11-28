@@ -8,6 +8,18 @@ import {
 import { firebaseAuth, firebaseDatabase } from "@/constants/firebase";
 import { ref, set, get, update, remove } from "firebase/database";
 
+export interface PendingUser {
+  uid: string;
+  email: string;
+  createdAt: number;
+}
+
+export interface ApprovedUser {
+  uid: string;
+  email: string;
+  approvedAt: number;
+}
+
 const FIREBASE_CONFIG_ERROR = "Firebase yapılandırılmamış. Lütfen Firebase credentials'ı constants/firebase.ts dosyasına ekleyin.";
 
 export interface UserProfile {
@@ -201,6 +213,105 @@ export const firebaseAuthService = {
       return true;
     } catch (error) {
       console.error("Hard reset error:", error);
+      return false;
+    }
+  },
+
+  // Check if user is admin
+  isUserAdmin: async (uid: string): Promise<boolean> => {
+    try {
+      const snapshot = await get(ref(firebaseDatabase, `admins/${uid}`));
+      return snapshot.exists() && snapshot.val()?.isAdmin === true;
+    } catch (error) {
+      console.error("Check admin error:", error);
+      return false;
+    }
+  },
+
+  // Get all pending users
+  getPendingUsers: async (): Promise<PendingUser[]> => {
+    try {
+      const snapshot = await get(ref(firebaseDatabase, "users"));
+      const users: PendingUser[] = [];
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          const profile = child.val()?.profile;
+          if (profile && profile.status === "pending") {
+            users.push({
+              uid: profile.uid,
+              email: profile.email,
+              createdAt: profile.createdAt,
+            });
+          }
+        });
+      }
+      return users;
+    } catch (error) {
+      console.error("Get pending users error:", error);
+      return [];
+    }
+  },
+
+  // Get all approved users
+  getApprovedUsers: async (): Promise<ApprovedUser[]> => {
+    try {
+      const snapshot = await get(ref(firebaseDatabase, "users"));
+      const users: ApprovedUser[] = [];
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          const profile = child.val()?.profile;
+          if (profile && profile.status === "approved") {
+            users.push({
+              uid: profile.uid,
+              email: profile.email,
+              approvedAt: profile.approvedAt || Date.now(),
+            });
+          }
+        });
+      }
+      return users;
+    } catch (error) {
+      console.error("Get approved users error:", error);
+      return [];
+    }
+  },
+
+  // Approve user
+  approveUser: async (uid: string): Promise<boolean> => {
+    try {
+      await update(ref(firebaseDatabase, `users/${uid}/profile`), {
+        status: "approved",
+        approvedAt: Date.now(),
+      });
+      return true;
+    } catch (error) {
+      console.error("Approve user error:", error);
+      return false;
+    }
+  },
+
+  // Reject user
+  rejectUser: async (uid: string): Promise<boolean> => {
+    try {
+      await update(ref(firebaseDatabase, `users/${uid}/profile`), {
+        status: "rejected",
+      });
+      return true;
+    } catch (error) {
+      console.error("Reject user error:", error);
+      return false;
+    }
+  },
+
+  // Unapprove user
+  unapproveUser: async (uid: string): Promise<boolean> => {
+    try {
+      await update(ref(firebaseDatabase, `users/${uid}/profile`), {
+        status: "pending",
+      });
+      return true;
+    } catch (error) {
+      console.error("Unapprove user error:", error);
       return false;
     }
   },
