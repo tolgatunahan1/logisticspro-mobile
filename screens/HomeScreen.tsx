@@ -13,7 +13,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { AnimatedMap } from "../components/AnimatedMap";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -115,9 +114,8 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Animated Map Hero */}
+        {/* Hero Text */}
         <View style={styles.heroSection}>
-          <AnimatedMap />
           <ThemedText type="h2" style={styles.heroTitle}>
             Nakliye Yönetimine Hoşgeldiniz
           </ThemedText>
