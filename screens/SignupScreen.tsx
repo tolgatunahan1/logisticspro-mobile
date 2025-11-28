@@ -27,7 +27,7 @@ export default function SignupScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [isFirebaseMode, setIsFirebaseMode] = useState(false);
+  const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Always Firebase
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -44,17 +44,12 @@ export default function SignupScreen() {
     setError("");
 
     if (!username.trim()) {
-      setError(isFirebaseMode ? "Email gerekli" : "Kullanıcı adı gerekli");
+      setError("Email gerekli");
       return;
     }
 
-    if (isFirebaseMode && !username.includes("@")) {
+    if (!username.includes("@")) {
       setError("Geçerli email adresi girin");
-      return;
-    }
-
-    if (!isFirebaseMode && username.length < 3) {
-      setError("Kullanıcı adı en az 3 karakter olmalı");
       return;
     }
 
@@ -75,43 +70,27 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
-      if (isFirebaseMode) {
-        // Firebase Registration
-        const success = await registerWithFirebase(username.trim(), password);
-        if (success) {
-          Alert.alert(
-            "Başarılı",
-            "Firebase hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.",
-            [{ 
-              text: "Giriş Yap", 
-              onPress: () => {
-                navigation.navigate("Login");
-              } 
-            }]
-          );
-        } else {
-          setError("Firebase kaydı başarısız oldu");
-        }
+      // Firebase Registration
+      const success = await registerWithFirebase(username.trim(), password);
+      if (success) {
+        Alert.alert(
+          "Başarılı",
+          "Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.",
+          [{ 
+            text: "Giriş Yap", 
+            onPress: () => {
+              navigation.navigate("Login");
+            } 
+          }]
+        );
       } else {
-        // Local Registration (Admin Approval)
-        const success = await requestSignup(username.trim(), password);
-        if (success) {
-          Alert.alert(
-            "Başarılı",
-            "Kayıt talebiniz alınmıştır. Admin onayı bekleniyor.",
-            [{ text: "Tamam", onPress: () => navigation.navigate("Login") }]
-          );
-        } else {
-          setError("Bu kullanıcı adı zaten kullanılıyor");
-        }
+        setError("Kayıt başarısız oldu");
       }
     } catch (error: any) {
       console.error("Signup error:", error);
       const errorMsg = error?.message || "Kayıt sırasında hata oluştu";
       if (errorMsg.includes("Firebase yapılandırılmamış")) {
         setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
-      } else if (isFirebaseMode) {
-        setError("Firebase bağlantı hatası. Başka bir modla deneyin.");
       } else {
         setError(errorMsg);
       }
@@ -143,41 +122,11 @@ export default function SignupScreen() {
           </ThemedText>
         </View>
 
-        <View style={[styles.modeToggle, { borderColor: colors.border }]}>
-          <Pressable
-            onPress={() => setIsFirebaseMode(false)}
-            disabled={isLoading}
-            style={[
-              styles.modeButton,
-              {
-                backgroundColor: !isFirebaseMode ? theme.link : colors.inputBackground,
-              },
-            ]}
-          >
-            <ThemedText style={[styles.modeButtonText, { color: !isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
-              Yerel
-            </ThemedText>
-          </Pressable>
-          <Pressable
-            onPress={() => setIsFirebaseMode(true)}
-            disabled={isLoading}
-            style={[
-              styles.modeButton,
-              {
-                backgroundColor: isFirebaseMode ? theme.link : colors.inputBackground,
-              },
-            ]}
-          >
-            <ThemedText style={[styles.modeButtonText, { color: isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
-              Firebase
-            </ThemedText>
-          </Pressable>
-        </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              {isFirebaseMode ? "Email" : "Kullanıcı Adı"}
+              Email
             </ThemedText>
             <TextInput
               style={[
@@ -188,14 +137,14 @@ export default function SignupScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder={isFirebaseMode ? "Email adresiniz" : "Kullanıcı adınız"}
+              placeholder="Email adresiniz"
               placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
               editable={!isLoading}
               autoCapitalize="none"
               autoCorrect={false}
-              keyboardType={isFirebaseMode ? "email-address" : "default"}
+              keyboardType="email-address"
             />
           </View>
 
