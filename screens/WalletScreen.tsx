@@ -71,10 +71,10 @@ export default function WalletScreen() {
   const handleMarkAsPaid = async (jobId: string) => {
     if (!firebaseUser?.uid) return;
     setIsMarkingPaid(jobId);
-    const result = await markCommissionAsPaid(firebaseUser.uid, jobId);
+    const result = await markCommissionAsPaid(firebaseUser.uid, jobId, true);
     if (result) {
       await loadData();
-      Alert.alert("Başarılı", "Komisyon ödendi olarak işaretlendi ve cüzdana eklendi");
+      Alert.alert("Başarılı", "Komisyon ödendi olarak işaretlendi");
     } else {
       Alert.alert("Hata", "İşlem başarısız oldu");
     }
