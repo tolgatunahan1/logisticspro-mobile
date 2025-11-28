@@ -35,23 +35,29 @@ export default function LoginScreen() {
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
 
-  // Load saved credentials on mount
+  // Load saved credentials on mount or when mode changes
   useEffect(() => {
     loadSavedCredentials();
-  }, []);
+  }, [isAdminMode]);
 
   const loadSavedCredentials = async () => {
     try {
       const key = isAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
       const saved = await SecureStore.getItemAsync(key);
+      console.log("📌 Loading credentials for", key, ":", saved ? "Found" : "Not found");
       if (saved) {
         const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
+        console.log("✅ Loaded email:", savedEmail);
         setEmail(savedEmail || "");
         setPassword(savedPassword || "");
         setRememberMe(true);
+      } else {
+        setEmail("");
+        setPassword("");
+        setRememberMe(false);
       }
     } catch (error) {
-      console.log("Could not load saved credentials:", error);
+      console.log("❌ Could not load saved credentials:", error);
     }
   };
 
@@ -84,11 +90,13 @@ export default function LoginScreen() {
       const key = isAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
       if (rememberMe) {
         await SecureStore.setItemAsync(key, JSON.stringify({ email, password }));
+        console.log("✅ Credentials saved for", key, ":", email);
       } else {
         await SecureStore.deleteItemAsync(key);
+        console.log("🗑️ Credentials deleted for", key);
       }
     } catch (error) {
-      console.log("Could not save credentials:", error);
+      console.log("❌ Could not save credentials:", error);
     }
   };
 
