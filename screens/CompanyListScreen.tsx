@@ -244,13 +244,6 @@ export default function CompanyListScreen() {
 
                   <View style={styles.detailSection}>
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Yetkili Kişi
-                    </ThemedText>
-                    <ThemedText type="h4">{selectedCompany.contactPerson}</ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
                       Adres
                     </ThemedText>
                     <ThemedText type="h4">{selectedCompany.address || "-"}</ThemedText>

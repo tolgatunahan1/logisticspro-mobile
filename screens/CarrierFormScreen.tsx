@@ -98,8 +98,8 @@ export default function CarrierFormScreen() {
     if (!nationalId.trim()) {
       newErrors.nationalId = "TC Kimlik numarası gerekli";
     }
-    if (nationalId.trim() && !/^\d{11}$/.test(nationalId.trim())) {
-      newErrors.nationalId = "TC Kimlik numarası 11 hane olmalı";
+    if (nationalId.trim().length !== 11 || !/^\d{11}$/.test(nationalId.trim())) {
+      newErrors.nationalId = "TC Kimlik numarası tam 11 hane olmalı";
     }
     if (!plate.trim()) {
       newErrors.plate = "Plaka gerekli";
