@@ -4,16 +4,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import * as SecureStore from "expo-secure-store";
+import Checkbox from "expo-checkbox";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { requestSignup, validatePassword } from "../utils/userManagement";
+import { validatePassword } from "../utils/userManagement";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuth } from "../contexts/AuthContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Signup">;
+
+const REMEMBER_ME_KEY_SIGNUP = "@logistics_remember_signup";
 
 export default function SignupScreen() {
   const { theme, isDark } = useTheme();
@@ -24,12 +28,44 @@ export default function SignupScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Always Firebase
+  const [isFirebaseMode, setIsFirebaseMode] = useState(true);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    loadSavedCredentials();
+  }, []);
+
+  const loadSavedCredentials = async () => {
+    try {
+      const saved = await SecureStore.getItemAsync(REMEMBER_ME_KEY_SIGNUP);
+      if (saved) {
+        const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
+        setUsername(savedEmail || "");
+        setPassword(savedPassword || "");
+        setRememberMe(true);
+      }
+    } catch (error) {
+      console.log("Could not load saved credentials:", error);
+    }
+  };
+
+  const saveCredentials = async () => {
+    try {
+      if (rememberMe) {
+        await SecureStore.setItemAsync(REMEMBER_ME_KEY_SIGNUP, JSON.stringify({ email: username, password }));
+      } else {
+        await SecureStore.deleteItemAsync(REMEMBER_ME_KEY_SIGNUP);
+      }
+    } catch (error) {
+      console.log("Could not save credentials:", error);
+    }
+  };
 
   const checkPasswordStrength = (pwd: string) => {
     let strength = 0;
@@ -70,9 +106,10 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
-      // Firebase Registration
       const success = await registerWithFirebase(username.trim(), password);
       if (success) {
+        // Save credentials if remember me is checked
+        await saveCredentials();
         Alert.alert(
           "Başarılı",
           "Hesabınız oluşturuldu! Admin onayı bekleniyor. Onaylandıktan sonra giriş yapabilirsiniz.",
@@ -217,6 +254,18 @@ export default function SignupScreen() {
             />
           </View>
 
+          {/* Remember Me Checkbox */}
+          <View style={[styles.rememberMeContainer, { flexDirection: "row", alignItems: "center", gap: Spacing.md }]}>
+            <Checkbox
+              value={rememberMe}
+              onValueChange={setRememberMe}
+              color={rememberMe ? theme.link : undefined}
+            />
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Beni Hatırla
+            </ThemedText>
+          </View>
+
           {error ? (
             <ThemedText type="small" style={[styles.error, { color: colors.destructive }]}>
               {error}
@@ -283,25 +332,6 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
   },
-  modeToggle: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderRadius: BorderRadius.sm,
-    padding: Spacing.xs,
-  },
-  modeButton: {
-    flex: 1,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.xs,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modeButtonText: {
-    fontWeight: "600",
-    fontSize: 12,
-  },
   form: {
     gap: Spacing.lg,
   },
@@ -318,6 +348,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 16,
   },
+  rememberMeContainer: {
+    marginVertical: Spacing.md,
+  },
   strengthBar: {
     height: 4,
     borderRadius: 2,
@@ -325,9 +358,9 @@ const styles = StyleSheet.create({
   },
   strengthFill: {
     height: "100%",
+    borderRadius: 2,
   },
   error: {
-    marginTop: Spacing.md,
     textAlign: "center",
   },
   button: {
@@ -335,10 +368,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: Spacing.lg,
   },
   buttonText: {
-    color: "white",
     fontWeight: "600",
   },
   loginLink: {

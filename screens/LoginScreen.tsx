@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as SecureStore from "expo-secure-store";
+import Checkbox from "expo-checkbox";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
@@ -14,6 +16,9 @@ import { RootStackParamList } from "../navigation/RootNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
+const REMEMBER_ME_KEY_ADMIN = "@logistics_remember_admin";
+const REMEMBER_ME_KEY_USER = "@logistics_remember_user";
+
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -22,12 +27,70 @@ export default function LoginScreen() {
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminPassword, setNewAdminPassword] = useState("");
+
+  // Load saved credentials on mount
+  useEffect(() => {
+    loadSavedCredentials();
+  }, []);
+
+  const loadSavedCredentials = async () => {
+    try {
+      const key = isAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
+      const saved = await SecureStore.getItemAsync(key);
+      if (saved) {
+        const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
+        setEmail(savedEmail || "");
+        setPassword(savedPassword || "");
+        setRememberMe(true);
+      }
+    } catch (error) {
+      console.log("Could not load saved credentials:", error);
+    }
+  };
+
+  const handleModeChange = async (newAdminMode: boolean) => {
+    setIsAdminMode(newAdminMode);
+    // Load credentials for the new mode
+    try {
+      const key = newAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
+      const saved = await SecureStore.getItemAsync(key);
+      if (saved) {
+        const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
+        setEmail(savedEmail || "");
+        setPassword(savedPassword || "");
+        setRememberMe(true);
+      } else {
+        setEmail("");
+        setPassword("");
+        setRememberMe(false);
+      }
+    } catch (error) {
+      console.log("Could not load saved credentials:", error);
+      setEmail("");
+      setPassword("");
+      setRememberMe(false);
+    }
+  };
+
+  const saveCredentials = async () => {
+    try {
+      const key = isAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
+      if (rememberMe) {
+        await SecureStore.setItemAsync(key, JSON.stringify({ email, password }));
+      } else {
+        await SecureStore.deleteItemAsync(key);
+      }
+    } catch (error) {
+      console.log("Could not save credentials:", error);
+    }
+  };
 
   const handleCreateAdmin = async () => {
     setError("");
@@ -77,7 +140,10 @@ export default function LoginScreen() {
         success = await loginWithFirebase(email, password);
       }
       
-      if (!success) {
+      if (success) {
+        // Save credentials if remember me is checked
+        await saveCredentials();
+      } else {
         setError("Email veya şifre yanlış");
       }
     } catch (error: any) {
@@ -110,7 +176,7 @@ export default function LoginScreen() {
 
         <View style={[styles.modeToggle, { borderColor: colors.border }]}>
           <Pressable
-            onPress={() => setIsAdminMode(false)}
+            onPress={() => handleModeChange(false)}
             disabled={isLoading}
             style={[
               styles.modeButton,
@@ -125,7 +191,7 @@ export default function LoginScreen() {
             </ThemedText>
           </Pressable>
           <Pressable
-            onPress={() => setIsAdminMode(true)}
+            onPress={() => handleModeChange(true)}
             disabled={isLoading}
             style={[
               styles.modeButton,
@@ -188,6 +254,18 @@ export default function LoginScreen() {
               autoCapitalize="none"
               autoCorrect={false}
             />
+          </View>
+
+          {/* Remember Me Checkbox */}
+          <View style={[styles.rememberMeContainer, { flexDirection: "row", alignItems: "center", gap: Spacing.md }]}>
+            <Checkbox
+              value={rememberMe}
+              onValueChange={setRememberMe}
+              color={rememberMe ? theme.link : undefined}
+            />
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              Beni Hatırla
+            </ThemedText>
           </View>
 
           {error ? (
@@ -369,6 +447,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xs,
     paddingHorizontal: Spacing.md,
     fontSize: 16,
+  },
+  rememberMeContainer: {
+    marginVertical: Spacing.md,
   },
   error: {
     textAlign: "center",
