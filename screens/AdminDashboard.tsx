@@ -160,6 +160,37 @@ export default function AdminDashboard() {
     );
   };
 
+  const handleHardReset = async () => {
+    Alert.alert(
+      "💥 HARD RESET - BÜTÜN SİSTEM",
+      "YERİL HAFIZA + FIREBASE = TAM TEMIZLIK. Tüm hesaplar silinecek. GERI ALINAMAZ!",
+      [
+        { text: "İptal" },
+        {
+          text: "Sil Hepsini",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              const reset = await firebaseAuthService.hardReset();
+              if (reset) {
+                Alert.alert("✅ Hard Reset Tamam", "Her şey silindi. Sayfayı yenile.");
+                setPendingUsers([]);
+                setApprovedUsers([]);
+              } else {
+                Alert.alert("Hata", "Hard reset başarısız.");
+              }
+            } catch (error: any) {
+              Alert.alert("Hata", error?.message || "Reset sırasında hata oluştu");
+            } finally {
+              setLoading(false);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
   const formatDate = (timestamp?: number): string => {
     if (!timestamp) return "-";
     return new Date(timestamp).toLocaleDateString("tr-TR", {
@@ -174,6 +205,12 @@ export default function AdminDashboard() {
       <View style={[styles.header, { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg }]}>
         <ThemedText type="h2">Admin Panel</ThemedText>
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
+          <Pressable
+            onPress={handleHardReset}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Feather name="alert-triangle" size={24} color="#dc2626" />
+          </Pressable>
           <Pressable
             onPress={handleEmergencyCleanup}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}

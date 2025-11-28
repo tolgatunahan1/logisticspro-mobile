@@ -190,6 +190,21 @@ export const firebaseAuthService = {
     }
   },
 
+  // HARD RESET - Sil HERYŞEY
+  hardReset: async (): Promise<boolean> => {
+    try {
+      // Firebase'den sil
+      await remove(ref(firebaseDatabase, "users"));
+      await remove(ref(firebaseDatabase, "admins"));
+      await remove(ref(firebaseDatabase, "data"));
+      console.log("✅ Firebase completely wiped");
+      return true;
+    } catch (error) {
+      console.error("Hard reset error:", error);
+      return false;
+    }
+  },
+
   // Initialize admin user (Firebase) - ADMIN ONLY
   initializeAdmin: async (email: string, password: string): Promise<boolean> => {
     try {
