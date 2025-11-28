@@ -3,6 +3,7 @@ import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollV
 import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Linking from "expo-linking";
@@ -27,6 +28,7 @@ export default function CompletedJobListScreen() {
   const { theme, isDark } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
   const { firebaseUser } = useAuth();
 
   const [jobs, setJobs] = useState<CompletedJob[]>([]);
@@ -342,7 +344,7 @@ export default function CompletedJobListScreen() {
   );
 
   const renderSearchHeader = () => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={[
           styles.searchBox,
