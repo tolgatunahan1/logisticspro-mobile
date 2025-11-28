@@ -56,32 +56,36 @@ export default function SettingsScreen() {
 
   const loadCommissionStats = useCallback(async () => {
     if (!firebaseUser?.uid) return;
-    const jobs = await getCompletedJobs(firebaseUser.uid);
-    setCompletedJobs(jobs);
-    
-    const paid = jobs.reduce((sum, job) => {
-      if (job.commissionPaid && job.commissionCost) {
-        return sum + parseFloat(job.commissionCost as string);
-      }
-      return sum;
-    }, 0);
-    
-    const unpaid = jobs.reduce((sum, job) => {
-      if (!job.commissionPaid && job.commissionCost) {
-        return sum + parseFloat(job.commissionCost as string);
-      }
-      return sum;
-    }, 0);
-    
-    setPaidCommissionsTotal(paid);
-    setUnpaidCommissionsTotal(unpaid);
+    try {
+      const jobs = await getCompletedJobs(firebaseUser.uid);
+      setCompletedJobs(jobs);
+      
+      const paid = jobs.reduce((sum, job) => {
+        if (job.commissionPaid && job.commissionCost) {
+          return sum + parseFloat(job.commissionCost as string);
+        }
+        return sum;
+      }, 0);
+      
+      const unpaid = jobs.reduce((sum, job) => {
+        if (!job.commissionPaid && job.commissionCost) {
+          return sum + parseFloat(job.commissionCost as string);
+        }
+        return sum;
+      }, 0);
+      
+      setPaidCommissionsTotal(paid);
+      setUnpaidCommissionsTotal(unpaid);
+    } catch (error) {
+      console.error("Commission stats load error:", error);
+    }
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
     useCallback(() => {
       loadIBANs();
       loadCommissionStats();
-    }, [loadIBANs, loadCommissionStats])
+    }, [])
   );
 
   const handleAddIBAN = async () => {
