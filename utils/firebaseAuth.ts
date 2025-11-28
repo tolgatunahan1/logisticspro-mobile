@@ -4,9 +4,8 @@ import {
   signOut,
   User,
   Auth,
-  getAuth,
 } from "firebase/auth";
-import { auth, database } from "@/constants/firebase";
+import { firebaseAuth, firebaseDatabase } from "@/constants/firebase";
 import { ref, set, get } from "firebase/database";
 
 const FIREBASE_CONFIG_ERROR = "Firebase yapılandırılmamış. Lütfen Firebase credentials'ı constants/firebase.ts dosyasına ekleyin.";
@@ -18,15 +17,19 @@ export interface UserProfile {
 }
 
 const isFirebaseConfigured = (): boolean => {
-  const apiKey = auth.app.options.apiKey;
-  return !apiKey?.includes("AIzaSy") || !apiKey?.includes("X");
+  try {
+    const apiKey = firebaseAuth.app?.options?.apiKey;
+    return apiKey ? !apiKey.includes("X") && apiKey.length > 20 : false;
+  } catch {
+    return false;
+  }
 };
 
 export const firebaseAuthService = {
   // Check if Firebase is properly configured
   isConfigured: (): boolean => {
     try {
-      const apiKey = auth.app.options.apiKey || "";
+      const apiKey = firebaseAuth.app?.options?.apiKey || "";
       // Test keys have placeholder values
       return !apiKey.includes("X") && apiKey.length > 20;
     } catch {
@@ -41,7 +44,7 @@ export const firebaseAuthService = {
         throw new Error(FIREBASE_CONFIG_ERROR);
       }
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        firebaseAuth,
         email,
         password
       );
@@ -54,7 +57,7 @@ export const firebaseAuthService = {
         createdAt: Date.now(),
       };
 
-      await set(ref(database, `users/${user.uid}/profile`), userProfile);
+      await set(ref(firebaseDatabase, `users/${user.uid}/profile`), userProfile);
       return user;
     } catch (error: any) {
       console.error("Firebase register error:", error?.message);
@@ -71,7 +74,7 @@ export const firebaseAuthService = {
       if (!firebaseAuthService.isConfigured()) {
         throw new Error(FIREBASE_CONFIG_ERROR);
       }
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
       return userCredential.user;
     } catch (error: any) {
       console.error("Firebase login error:", error?.message);
@@ -85,7 +88,7 @@ export const firebaseAuthService = {
   // Logout
   logout: async (): Promise<void> => {
     try {
-      await signOut(auth);
+      await signOut(firebaseAuth);
     } catch (error) {
       console.error("Logout error:", error);
       throw error;
@@ -95,7 +98,7 @@ export const firebaseAuthService = {
   // Get user profile
   getUserProfile: async (uid: string): Promise<UserProfile | null> => {
     try {
-      const snapshot = await get(ref(database, `users/${uid}/profile`));
+      const snapshot = await get(ref(firebaseDatabase, `users/${uid}/profile`));
       return snapshot.val();
     } catch (error) {
       console.error("Get user profile error:", error);
@@ -105,16 +108,16 @@ export const firebaseAuthService = {
 
   // Get current user
   getCurrentUser: () => {
-    return auth.currentUser;
+    return firebaseAuth.currentUser;
   },
 
   // Get auth instance
   getAuth: (): Auth => {
-    return auth;
+    return firebaseAuth;
   },
 
   // Auth state listener
   onAuthStateChanged: (callback: (user: User | null) => void) => {
-    return auth.onAuthStateChanged(callback);
+    return firebaseAuth.onAuthStateChanged(callback);
   },
 };
