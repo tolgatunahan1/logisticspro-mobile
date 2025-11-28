@@ -11,7 +11,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { getCarriers, getCompanies, getJobs, getCompletedJobs } from "../utils/storage";
+import { getCarriers, getCompanies, getJobs, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -26,10 +26,34 @@ export default function HomeScreen() {
   const [companyCount, setCompanyCount] = useState(0);
   const [jobCount, setJobCount] = useState(0);
   const [completedJobCount, setCompletedJobCount] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [weeklyRevenue, setWeeklyRevenue] = useState(0);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
+  const [pendingCommissions, setPendingCommissions] = useState(0);
+  const [paidCommissions, setPaidCommissions] = useState(0);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const { firebaseUser } = useAuth();
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  const calculateRevenueData = (completedJobs: CompletedJob[]) => {
+    const now = Date.now();
+    const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+    let total = 0, weekly = 0, monthly = 0, pending = 0, paid = 0;
+
+    completedJobs.forEach(job => {
+      const amount = parseFloat(job.transportationCost || "0") + parseFloat(job.commissionCost || "0");
+      total += amount;
+      if (job.completionDate >= oneMonthAgo) monthly += amount;
+      if (job.completionDate >= oneWeekAgo) weekly += amount;
+      if (job.commissionPaid) paid += amount;
+      else pending += amount;
+    });
+
+    return { total, weekly, monthly, pending, paid };
+  };
 
   const loadCounts = useCallback(async () => {
     if (!firebaseUser?.uid) return;
@@ -42,6 +66,13 @@ export default function HomeScreen() {
     setCompanyCount(companies.length);
     setJobCount(jobs.length);
     setCompletedJobCount(completedJobs.length);
+    
+    const revenue = calculateRevenueData(completedJobs);
+    setTotalRevenue(revenue.total);
+    setWeeklyRevenue(revenue.weekly);
+    setMonthlyRevenue(revenue.monthly);
+    setPendingCommissions(revenue.pending);
+    setPaidCommissions(revenue.paid);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
@@ -193,6 +224,116 @@ export default function HomeScreen() {
               <ThemedText type="h3">{completedJobCount}</ThemedText>
             </View>
           </View>
+        </View>
+
+        {/* Revenue Section */}
+        <ThemedText type="h4" style={[styles.sectionHeader, { color: colors.textSecondary }]}>
+          Kazanç Özeti
+        </ThemedText>
+
+        <View
+          style={[
+            styles.revenueCard,
+            { backgroundColor: colors.backgroundDefault },
+          ]}
+        >
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Spacing.lg }}>
+            <View>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Toplam Kazanç
+              </ThemedText>
+              <ThemedText type="h2" style={{ fontWeight: "700" }}>
+                ₺{totalRevenue.toFixed(2)}
+              </ThemedText>
+            </View>
+            <View style={{ backgroundColor: theme.link + "20", padding: Spacing.md, borderRadius: BorderRadius.md }}>
+              <Feather name="trending-up" size={28} color={theme.link} />
+            </View>
+          </View>
+
+          <View style={{ gap: Spacing.md }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <View>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Hafta</ThemedText>
+                <ThemedText type="h4">₺{weeklyRevenue.toFixed(2)}</ThemedText>
+              </View>
+              <View>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Ay</ThemedText>
+                <ThemedText type="h4">₺{monthlyRevenue.toFixed(2)}</ThemedText>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Commission Status */}
+        <View style={{ gap: Spacing.md }}>
+          <ThemedText type="h4" style={[styles.sectionHeader, { color: colors.textSecondary, marginBottom: Spacing.md }]}>
+            Komisyon Durumu
+          </ThemedText>
+          
+          <View
+            style={[
+              styles.commissionCard,
+              { backgroundColor: colors.success + "15", borderLeftColor: colors.success },
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Ödenen Komisyon
+              </ThemedText>
+              <ThemedText type="h3">₺{paidCommissions.toFixed(2)}</ThemedText>
+            </View>
+            <View style={{ backgroundColor: colors.success + "30", padding: Spacing.md, borderRadius: BorderRadius.md }}>
+              <Feather name="check-circle" size={24} color={colors.success} />
+            </View>
+          </View>
+
+          <View
+            style={[
+              styles.commissionCard,
+              { backgroundColor: colors.warning + "15", borderLeftColor: colors.warning },
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                Beklemede
+              </ThemedText>
+              <ThemedText type="h3">₺{pendingCommissions.toFixed(2)}</ThemedText>
+            </View>
+            <View style={{ backgroundColor: colors.warning + "30", padding: Spacing.md, borderRadius: BorderRadius.md }}>
+              <Feather name="clock" size={24} color={colors.warning} />
+            </View>
+          </View>
+
+          {/* Progress Bar */}
+          {totalRevenue > 0 && (
+            <View style={{ gap: Spacing.sm }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Ödeme İlerleme
+                </ThemedText>
+                <ThemedText type="small" style={{ fontWeight: "600", color: theme.link }}>
+                  %{((paidCommissions / totalRevenue) * 100).toFixed(0)}
+                </ThemedText>
+              </View>
+              <View
+                style={{
+                  height: 8,
+                  backgroundColor: colors.border,
+                  borderRadius: 4,
+                  overflow: "hidden",
+                }}
+              >
+                <View
+                  style={{
+                    height: "100%",
+                    backgroundColor: colors.success,
+                    width: `${(paidCommissions / totalRevenue) * 100}%`,
+                  }}
+                />
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Menu Cards */}
@@ -526,6 +667,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: Spacing.md,
+    gap: Spacing.md,
+  },
+  revenueCard: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+  },
+  commissionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    borderLeftWidth: 4,
     gap: Spacing.md,
   },
 });
