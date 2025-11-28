@@ -28,25 +28,46 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Default: Firebase (normal users)
+  const [showAdminSetup, setShowAdminSetup] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
 
   useEffect(() => {
-    let isMounted = true;
-    const init = async () => {
-      try {
-        // Setup Firebase admin only once on mount
-        if (isMounted) {
-          await firebaseAuthService.initializeAdmin("tolgatunahan@icloud.com", "1Liraversene");
-          await initializeDefaultAdmin();
-        }
-      } catch (error) {
-        console.error("Admin init error:", error);
+    // Admin initialization is disabled for now
+    // Fresh start needed to set up new admin account
+  }, []);
+
+  const handleSetupNewAdmin = async () => {
+    setError("");
+    if (!newAdminEmail.trim() || !newAdminPassword.trim()) {
+      setError("Admin email ve şifre gerekli");
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      // Clean up old database
+      await firebaseAuthService.cleanupDatabase();
+      
+      // Initialize new admin
+      const success = await firebaseAuthService.initializeAdmin(newAdminEmail, newAdminPassword);
+      
+      if (success) {
+        Alert.alert("Başarılı", "Yeni admin hesabı oluşturuldu. Giriş yapabilirsiniz.");
+        setShowAdminSetup(false);
+        setNewAdminEmail("");
+        setNewAdminPassword("");
+        setUsername(newAdminEmail);
+        setPassword(newAdminPassword);
+      } else {
+        setError("Admin kurulumu başarısız oldu");
       }
-    };
-    init();
-    return () => {
-      isMounted = false;
-    };
-  }, []); // Empty dependency array - runs only once
+    } catch (error: any) {
+      setError(error?.message || "Admin kurulumu sırasında hata");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setError("");
@@ -202,25 +223,119 @@ export default function LoginScreen() {
             </ThemedText>
           ) : null}
 
-          <Pressable
-            onPress={handleLogin}
-            disabled={isLoading}
-            style={({ pressed }) => [
-              styles.button,
-              {
-                backgroundColor: theme.link,
-                opacity: pressed || isLoading ? 0.8 : 1,
-              },
-            ]}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
-                Giriş Yap
+          {isAdminMode && showAdminSetup ? (
+            <>
+              <ThemedText type="h4" style={[styles.setupTitle, { color: theme.link }]}>
+                Yeni Admin Hesabı Oluştur
               </ThemedText>
-            )}
-          </Pressable>
+              <View style={styles.inputContainer}>
+                <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+                  Admin Email
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  placeholder="admin@logisticspro.com"
+                  placeholderTextColor={colors.textSecondary}
+                  value={newAdminEmail}
+                  onChangeText={setNewAdminEmail}
+                  editable={!isLoading}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+                  Admin Şifre
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  placeholder="Şifre (8+ karakter, büyük harf, rakam)"
+                  placeholderTextColor={colors.textSecondary}
+                  value={newAdminPassword}
+                  onChangeText={setNewAdminPassword}
+                  secureTextEntry
+                  editable={!isLoading}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+              <Pressable
+                onPress={handleSetupNewAdmin}
+                disabled={isLoading}
+                style={({ pressed }) => [
+                  styles.button,
+                  {
+                    backgroundColor: "#10b981",
+                    opacity: pressed || isLoading ? 0.8 : 1,
+                  },
+                ]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                    Admin Oluştur
+                  </ThemedText>
+                )}
+              </Pressable>
+              <Pressable
+                onPress={() => setShowAdminSetup(false)}
+                disabled={isLoading}
+                style={[styles.secondaryButton, { borderColor: colors.border }]}
+              >
+                <ThemedText type="body" style={{ color: theme.link }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                onPress={handleLogin}
+                disabled={isLoading}
+                style={({ pressed }) => [
+                  styles.button,
+                  {
+                    backgroundColor: theme.link,
+                    opacity: pressed || isLoading ? 0.8 : 1,
+                  },
+                ]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                    Giriş Yap
+                  </ThemedText>
+                )}
+              </Pressable>
+              {isAdminMode && (
+                <Pressable
+                  onPress={() => setShowAdminSetup(true)}
+                  style={[styles.secondaryButton, { borderColor: colors.border }]}
+                >
+                  <ThemedText type="body" style={{ color: theme.link }}>
+                    Yeni Admin Oluştur
+                  </ThemedText>
+                </Pressable>
+              )}
+            </>
+          )}
 
           <View style={styles.signupLink}>
             <ThemedText type="small" style={{ color: colors.textSecondary }}>
@@ -316,5 +431,17 @@ const styles = StyleSheet.create({
   modeButtonText: {
     fontWeight: "600",
     fontSize: 14,
+  },
+  setupTitle: {
+    textAlign: "center",
+    marginBottom: Spacing.lg,
+  },
+  secondaryButton: {
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.xs,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: Spacing.sm,
   },
 });

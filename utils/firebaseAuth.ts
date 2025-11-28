@@ -6,7 +6,7 @@ import {
   Auth,
 } from "firebase/auth";
 import { firebaseAuth, firebaseDatabase } from "@/constants/firebase";
-import { ref, set, get, update } from "firebase/database";
+import { ref, set, get, update, remove } from "firebase/database";
 
 const FIREBASE_CONFIG_ERROR = "Firebase yapılandırılmamış. Lütfen Firebase credentials'ı constants/firebase.ts dosyasına ekleyin.";
 
@@ -157,6 +157,18 @@ export const firebaseAuthService = {
   // Auth state listener
   onAuthStateChanged: (callback: (user: User | null) => void) => {
     return firebaseAuth.onAuthStateChanged(callback);
+  },
+
+  // Clean up all users from database
+  cleanupDatabase: async (): Promise<boolean> => {
+    try {
+      await remove(ref(firebaseDatabase, "users"));
+      console.log("✅ Database cleaned up - all users removed");
+      return true;
+    } catch (error) {
+      console.error("Database cleanup error:", error);
+      return false;
+    }
   },
 
   // Initialize admin user (Firebase)
