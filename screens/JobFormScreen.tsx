@@ -4,7 +4,6 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
@@ -16,6 +15,192 @@ import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "JobForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "JobForm">;
+
+// Türkçe Ay Isimleri
+const MONTHS_TR = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+];
+
+// Modal Tarih Seçici Component'i
+interface DatePickerModalProps {
+  visible: boolean;
+  date: number;
+  onDateChange: (timestamp: number) => void;
+  onClose: () => void;
+  theme: any;
+  colors: any;
+}
+
+function DatePickerModal({ visible, date, onDateChange, onClose, theme, colors }: DatePickerModalProps) {
+  const currentDate = new Date(date);
+  const [selectedDay, setSelectedDay] = useState(currentDate.getDate());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
+  const handleConfirm = () => {
+    const newDate = new Date(selectedYear, selectedMonth, selectedDay);
+    onDateChange(newDate.getTime());
+    onClose();
+  };
+
+  const handleToday = () => {
+    const today = new Date();
+    onDateChange(today.getTime());
+    onClose();
+  };
+
+  const handleTomorrow = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    onDateChange(tomorrow.getTime());
+    onClose();
+  };
+
+  // Gün listesi (1-31)
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  
+  // Yıl listesi (5 yıl öncesi - 5 yıl sonrası)
+  const years = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View style={modalStyles.overlay}>
+        <View style={[modalStyles.container, { backgroundColor: theme.backgroundRoot }]}>
+          {/* Header */}
+          <View style={[modalStyles.header, { borderBottomColor: colors.border }]}>
+            <ThemedText type="h3">Tarih Seçin</ThemedText>
+            <Pressable onPress={onClose}>
+              <Feather name="x" size={24} color={theme.text} />
+            </Pressable>
+          </View>
+
+          {/* Quick Options */}
+          <View style={modalStyles.quickButtonsContainer}>
+            <Pressable
+              onPress={handleToday}
+              style={[modalStyles.quickButton, { backgroundColor: theme.link + "20", borderColor: theme.link }]}
+            >
+              <ThemedText style={{ color: theme.link, fontWeight: "600" }}>Bugün</ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={handleTomorrow}
+              style={[modalStyles.quickButton, { backgroundColor: theme.link + "20", borderColor: theme.link }]}
+            >
+              <ThemedText style={{ color: theme.link, fontWeight: "600" }}>Yarın</ThemedText>
+            </Pressable>
+          </View>
+
+          {/* Date Picker Grid */}
+          <View style={modalStyles.pickerContainer}>
+            {/* Gün Seçici */}
+            <View style={modalStyles.pickerColumn}>
+              <ThemedText type="small" style={modalStyles.label}>Gün</ThemedText>
+              <ScrollView style={modalStyles.pickerScroll} showsVerticalScrollIndicator={false}>
+                {days.map((day) => (
+                  <Pressable
+                    key={day}
+                    onPress={() => setSelectedDay(day)}
+                    style={[
+                      modalStyles.pickerOption,
+                      selectedDay === day && { backgroundColor: theme.link + "20" }
+                    ]}
+                  >
+                    <ThemedText
+                      type="body"
+                      style={selectedDay === day ? { fontWeight: "700", color: theme.link } : {}}
+                    >
+                      {day}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Ay Seçici */}
+            <View style={modalStyles.pickerColumn}>
+              <ThemedText type="small" style={modalStyles.label}>Ay</ThemedText>
+              <ScrollView style={modalStyles.pickerScroll} showsVerticalScrollIndicator={false}>
+                {MONTHS_TR.map((month, index) => (
+                  <Pressable
+                    key={month}
+                    onPress={() => setSelectedMonth(index)}
+                    style={[
+                      modalStyles.pickerOption,
+                      selectedMonth === index && { backgroundColor: theme.link + "20" }
+                    ]}
+                  >
+                    <ThemedText
+                      type="body"
+                      style={selectedMonth === index ? { fontWeight: "700", color: theme.link } : {}}
+                    >
+                      {month}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Yıl Seçici */}
+            <View style={modalStyles.pickerColumn}>
+              <ThemedText type="small" style={modalStyles.label}>Yıl</ThemedText>
+              <ScrollView style={modalStyles.pickerScroll} showsVerticalScrollIndicator={false}>
+                {years.map((year) => (
+                  <Pressable
+                    key={year}
+                    onPress={() => setSelectedYear(year)}
+                    style={[
+                      modalStyles.pickerOption,
+                      selectedYear === year && { backgroundColor: theme.link + "20" }
+                    ]}
+                  >
+                    <ThemedText
+                      type="body"
+                      style={selectedYear === year ? { fontWeight: "700", color: theme.link } : {}}
+                    >
+                      {year}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+
+          {/* Preview */}
+          <View style={[modalStyles.preview, { backgroundColor: colors.backgroundDefault }]}>
+            <ThemedText type="body" style={{ color: colors.textSecondary }}>
+              Seçilen Tarih:
+            </ThemedText>
+            <ThemedText type="h3" style={{ fontWeight: "700" }}>
+              {selectedDay} {MONTHS_TR[selectedMonth]} {selectedYear}
+            </ThemedText>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={modalStyles.buttonContainer}>
+            <Pressable
+              onPress={onClose}
+              style={[modalStyles.button, { backgroundColor: colors.backgroundDefault, borderColor: colors.border, borderWidth: 1 }]}
+            >
+              <ThemedText style={{ fontWeight: "600" }}>İptal</ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={handleConfirm}
+              style={[modalStyles.button, { backgroundColor: theme.link }]}
+            >
+              <ThemedText style={{ color: "white", fontWeight: "600" }}>Seç</ThemedText>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
 
 export default function JobFormScreen() {
   const { theme, isDark } = useTheme();
@@ -140,22 +325,12 @@ export default function JobFormScreen() {
     return date.toLocaleDateString(APP_CONSTANTS.LOCALE, APP_CONSTANTS.DATE_FORMAT_OPTIONS);
   };
 
-  const handleLoadingDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === "android") {
-      setShowLoadingDatePicker(false);
-    }
-    if (selectedDate) {
-      setLoadingDate(selectedDate.getTime());
-    }
+  const handleLoadingDateChange = (timestamp: number) => {
+    setLoadingDate(timestamp);
   };
 
-  const handleDeliveryDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === "android") {
-      setShowDeliveryDatePicker(false);
-    }
-    if (selectedDate) {
-      setDeliveryDate(selectedDate.getTime());
-    }
+  const handleDeliveryDateChange = (timestamp: number) => {
+    setDeliveryDate(timestamp);
   };
 
   const selectedCompany = companies.find((c) => c.id === companyId);
@@ -564,25 +739,27 @@ export default function JobFormScreen() {
       </Modal>
     </ScrollView>
 
-    {/* Loading Date Picker - Outside ScrollView for Expo Go */}
-    {showLoadingDatePicker && Platform.OS !== "web" && (
-      <DateTimePicker
-        value={new Date(loadingDate)}
-        mode="date"
-        display={Platform.OS === "ios" ? "spinner" : "default"}
-        onChange={handleLoadingDateChange}
-        onTouchCancel={() => setShowLoadingDatePicker(false)}
+    {/* Loading Date Picker Modal */}
+    {Platform.OS !== "web" && (
+      <DatePickerModal
+        visible={showLoadingDatePicker}
+        date={loadingDate}
+        onDateChange={handleLoadingDateChange}
+        onClose={() => setShowLoadingDatePicker(false)}
+        theme={theme}
+        colors={colors}
       />
     )}
 
-    {/* Delivery Date Picker - Outside ScrollView for Expo Go */}
-    {showDeliveryDatePicker && Platform.OS !== "web" && (
-      <DateTimePicker
-        value={new Date(deliveryDate)}
-        mode="date"
-        display={Platform.OS === "ios" ? "spinner" : "default"}
-        onChange={handleDeliveryDateChange}
-        onTouchCancel={() => setShowDeliveryDatePicker(false)}
+    {/* Delivery Date Picker Modal */}
+    {Platform.OS !== "web" && (
+      <DatePickerModal
+        visible={showDeliveryDatePicker}
+        date={deliveryDate}
+        onDateChange={handleDeliveryDateChange}
+        onClose={() => setShowDeliveryDatePicker(false)}
+        theme={theme}
+        colors={colors}
       />
     )}
     </>
@@ -646,5 +823,82 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(128, 128, 128, 0.1)",
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  container: {
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+    maxHeight: "90%",
+    paddingBottom: Spacing.lg,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    borderBottomWidth: 1,
+  },
+  quickButtonsContainer: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  quickButton: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  pickerContainer: {
+    flexDirection: "row",
+    height: 200,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
+    marginVertical: Spacing.lg,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+  label: {
+    fontWeight: "600",
+    marginBottom: Spacing.sm,
+  },
+  pickerScroll: {
+    flex: 1,
+  },
+  pickerOption: {
+    paddingVertical: Spacing.sm,
+    alignItems: "center",
+    borderRadius: BorderRadius.md,
+  },
+  preview: {
+    marginHorizontal: Spacing.lg,
+    marginVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
   },
 });
