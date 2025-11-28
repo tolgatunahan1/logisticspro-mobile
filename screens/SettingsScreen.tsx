@@ -833,6 +833,7 @@ export default function SettingsScreen() {
               backgroundColor: colors.destructive,
               opacity: pressed ? 0.8 : 1,
               marginHorizontal: Spacing.xl,
+              marginTop: Spacing.xl * 2,
               marginBottom: insets.bottom + Spacing.xl,
             },
           ]}
