@@ -115,11 +115,20 @@ export default function CarrierListScreen() {
     }
   };
 
-  const handleWhatsAppPress = async (phone: string, name: string) => {
-    const phoneNumber = formatPhoneForWhatsApp(phone);
+  const handleWhatsAppPress = async (carrier: Carrier) => {
+    const phoneNumber = formatPhoneForWhatsApp(carrier.phone);
+    
+    // Mesaj oluştur
+    let message = `Nakliyeci Bilgileri:\n\nAdı: ${carrier.name}\nTelefon: ${carrier.phone}`;
+    if (carrier.nationalId) {
+      message += `\nTC Kimlik: ${carrier.nationalId}`;
+    }
+    if (carrier.dorsePlate) {
+      message += `\nDorse Plakası: ${carrier.dorsePlate}`;
+    }
     
     try {
-      const webUrl = `https://wa.me/${phoneNumber}`;
+      const webUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
       await Linking.openURL(webUrl);
     } catch (error) {
       Alert.alert("Hata", "WhatsApp açılamadı. Lütfen daha sonra tekrar deneyin.");
@@ -320,7 +329,7 @@ export default function CarrierListScreen() {
                     <Pressable
                       onPress={() => {
                         setShowDetailModal(false);
-                        handleWhatsAppPress(selectedCarrier.phone, selectedCarrier.name);
+                        handleWhatsAppPress(selectedCarrier);
                       }}
                       style={({ pressed }) => [
                         styles.actionButtonRound,
