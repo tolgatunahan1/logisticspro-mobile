@@ -154,126 +154,128 @@ export default function AvailabilityScreen() {
         )}
       </View>
 
-      <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
-        <View style={{ flex: 1, backgroundColor: colors.backgroundDefault, paddingTop: 12 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12, marginBottom: 12 }}>
-            <ThemedText type="h3">Yeni Bildiri</ThemedText>
-            <Pressable onPress={() => setModalVisible(false)}>
-              <Feather name="x" size={24} color={colors.text} />
-            </Pressable>
+      <Modal visible={modalVisible} animationType="fade" transparent={true} onRequestClose={() => setModalVisible(false)}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <View style={{ width: "85%", maxWidth: 380, borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <ThemedText type="h3">Yeni Bildiri</ThemedText>
+              <Pressable onPress={() => setModalVisible(false)}>
+                <Feather name="x" size={24} color={colors.text} />
+              </Pressable>
+            </View>
+
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ maxHeight: "80%", borderRadius: BorderRadius.md }}>
+              <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled">
+                <View style={{ marginBottom: 10 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
+                    Ad
+                  </ThemedText>
+                  <TextInput
+                    placeholder="Adı Soyadı"
+                    value={name}
+                    onChangeText={setName}
+                    placeholderTextColor={colors.textSecondary}
+                    editable={!isSaving}
+                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
+                  />
+                </View>
+
+                <View style={{ marginBottom: 10 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
+                    Tel
+                  </ThemedText>
+                  <TextInput
+                    placeholder="555-555-5555"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                    placeholderTextColor={colors.textSecondary}
+                    editable={!isSaving}
+                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
+                  />
+                </View>
+
+                <View style={{ marginBottom: 10 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
+                    Araç
+                  </ThemedText>
+                  <TextInput
+                    placeholder="Kamyon, Pickup, vb"
+                    value={vehicleType}
+                    onChangeText={setVehicleType}
+                    placeholderTextColor={colors.textSecondary}
+                    editable={!isSaving}
+                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
+                  />
+                </View>
+
+                <View style={{ marginBottom: 10 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
+                    Bulunduğu Yer
+                  </ThemedText>
+                  <TextInput
+                    placeholder="İstanbul, Ankara, vb"
+                    value={currentLocation}
+                    onChangeText={setCurrentLocation}
+                    placeholderTextColor={colors.textSecondary}
+                    editable={!isSaving}
+                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
+                  />
+                </View>
+
+                <View style={{ marginBottom: 10 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
+                    Gideceği Yer
+                  </ThemedText>
+                  <TextInput
+                    placeholder="İzmir, Bursa, vb"
+                    value={destinationLocation}
+                    onChangeText={setDestinationLocation}
+                    placeholderTextColor={colors.textSecondary}
+                    editable={!isSaving}
+                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
+                  />
+                </View>
+
+                <View style={{ marginBottom: 12 }}>
+                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
+                    Durum
+                  </ThemedText>
+                  <TextInput
+                    placeholder="Parça yük, tam yük, vb"
+                    value={notes}
+                    onChangeText={setNotes}
+                    multiline
+                    numberOfLines={2}
+                    placeholderTextColor={colors.textSecondary}
+                    editable={!isSaving}
+                    style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 45 }]}
+                  />
+                </View>
+
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Pressable
+                    onPress={() => setModalVisible(false)}
+                    disabled={isSaving}
+                    style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
+                  >
+                    <ThemedText type="small" style={{ fontWeight: "600", fontSize: 12 }}>
+                      İptal
+                    </ThemedText>
+                  </Pressable>
+                  <Pressable 
+                    onPress={handleSave} 
+                    disabled={isSaving}
+                    style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
+                  >
+                    <ThemedText type="small" style={{ fontWeight: "600", color: "white", fontSize: 12 }}>
+                      {isSaving ? "Kaydediliyor..." : "Kaydet"}
+                    </ThemedText>
+                  </Pressable>
+                </View>
+              </ScrollView>
+            </KeyboardAvoidingView>
           </View>
-
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-            <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 100 }}>
-              <View style={{ marginBottom: 12 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                  Ad
-                </ThemedText>
-                <TextInput
-                  placeholder="Adı Soyadı"
-                  value={name}
-                  onChangeText={setName}
-                  placeholderTextColor={colors.textSecondary}
-                  editable={!isSaving}
-                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                />
-              </View>
-
-              <View style={{ marginBottom: 12 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                  Tel
-                </ThemedText>
-                <TextInput
-                  placeholder="555-555-5555"
-                  value={phone}
-                  onChangeText={setPhone}
-                  keyboardType="phone-pad"
-                  placeholderTextColor={colors.textSecondary}
-                  editable={!isSaving}
-                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                />
-              </View>
-
-              <View style={{ marginBottom: 12 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                  Araç
-                </ThemedText>
-                <TextInput
-                  placeholder="Kamyon, Pickup, vb"
-                  value={vehicleType}
-                  onChangeText={setVehicleType}
-                  placeholderTextColor={colors.textSecondary}
-                  editable={!isSaving}
-                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                />
-              </View>
-
-              <View style={{ marginBottom: 12 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                  Bulunduğu Yer
-                </ThemedText>
-                <TextInput
-                  placeholder="İstanbul, Ankara, vb"
-                  value={currentLocation}
-                  onChangeText={setCurrentLocation}
-                  placeholderTextColor={colors.textSecondary}
-                  editable={!isSaving}
-                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                />
-              </View>
-
-              <View style={{ marginBottom: 12 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                  Gideceği Yer
-                </ThemedText>
-                <TextInput
-                  placeholder="İzmir, Bursa, vb"
-                  value={destinationLocation}
-                  onChangeText={setDestinationLocation}
-                  placeholderTextColor={colors.textSecondary}
-                  editable={!isSaving}
-                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
-                />
-              </View>
-
-              <View style={{ marginBottom: 16 }}>
-                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4 }}>
-                  Durum
-                </ThemedText>
-                <TextInput
-                  placeholder="Parça yük, tam yük, vb"
-                  value={notes}
-                  onChangeText={setNotes}
-                  multiline
-                  numberOfLines={2}
-                  placeholderTextColor={colors.textSecondary}
-                  editable={!isSaving}
-                  style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 60 }]}
-                />
-              </View>
-
-              <View style={{ flexDirection: "row", gap: 12, marginBottom: 20 }}>
-                <Pressable
-                  onPress={() => setModalVisible(false)}
-                  disabled={isSaving}
-                  style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1 }]}
-                >
-                  <ThemedText type="small" style={{ fontWeight: "600" }}>
-                    İptal
-                  </ThemedText>
-                </Pressable>
-                <Pressable 
-                  onPress={handleSave} 
-                  disabled={isSaving}
-                  style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1 }]}
-                >
-                  <ThemedText type="small" style={{ fontWeight: "600", color: "white" }}>
-                    {isSaving ? "Kaydediliyor..." : "Kaydet"}
-                  </ThemedText>
-                </Pressable>
-              </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
         </View>
       </Modal>
     </ScreenScrollView>
