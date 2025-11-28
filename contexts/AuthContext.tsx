@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const isApproved = await firebaseAuthService.isUserApproved(fbUser.uid);
         if (!isApproved) {
           await firebaseAuthService.logout();
-          throw new Error("Kullanıcı henüz onaylanmamıştır. Admin onayı bekleniyor.");
+          throw new Error("Admin onayı bekleniyor. Lütfen kısa bir süre sonra tekrar deneyin.");
         }
         return true;
       }
