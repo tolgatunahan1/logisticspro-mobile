@@ -54,7 +54,6 @@ export default function CompanyListScreen() {
       const data = await getCompanies(firebaseUser.uid);
       setCompanies(data);
     } catch (error) {
-      console.error("Failed to load companies:", error);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -141,6 +140,9 @@ export default function CompanyListScreen() {
             <ThemedText type="h4" numberOfLines={1}>
               {item.name}
             </ThemedText>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>
+              {item.phone}
+            </ThemedText>
           </View>
           <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
             <Pressable
@@ -175,17 +177,15 @@ export default function CompanyListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg }]}>
-        <View style={[styles.searchBar, { backgroundColor: colors.backgroundDefault }]}>
+      <View style={[styles.searchContainer, { paddingTop: Spacing.lg }]}>
+        <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
           <Feather name="search" size={18} color={colors.textSecondary} />
           <TextInput
             style={[styles.searchInput, { color: theme.text }]}
-            placeholder="Ara..."
+            placeholder="Firma Ara"
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
           />
           {searchQuery ? (
             <Pressable onPress={() => setSearchQuery("")}>
@@ -214,80 +214,80 @@ export default function CompanyListScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Detail Modal */}
+      {/* ID Card Detail Modal */}
       <Modal
         visible={showDetailModal}
-        animationType="slide"
+        animationType="fade"
         transparent
         onRequestClose={() => setShowDetailModal(false)}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0, 0, 0, 0.4)", backdropFilter: "blur(8px)" }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, borderTopLeftRadius: 28, borderTopRightRadius: 28, backdropFilter: "blur(12px)" }]}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">Firma Detayları</ThemedText>
-              <Pressable onPress={() => setShowDetailModal(false)}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-
-            {/* Modal Body */}
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              {selectedCompany && (
-                <View style={{ gap: Spacing.lg }}>
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Firma Adı
-                    </ThemedText>
-                    <ThemedText type="h4">{selectedCompany.name}</ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Telefon
-                    </ThemedText>
-                    <ThemedText type="h4">{selectedCompany.phone}</ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Adres
-                    </ThemedText>
-                    <ThemedText type="h4">{selectedCompany.address || "-"}</ThemedText>
-                  </View>
-
-                  {/* Action Buttons */}
-                  <View style={{ flexDirection: "row", gap: Spacing.lg, marginTop: Spacing.lg, justifyContent: "center" }}>
-                    <Pressable
-                      onPress={() => {
-                        setShowDetailModal(false);
-                        handleCallPress(selectedCompany.phone);
-                      }}
-                      style={({ pressed }) => [
-                        styles.actionButtonRound,
-                        { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
-                      ]}
-                    >
-                      <Feather name="phone" size={24} color="#FFFFFF" />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => {
-                        setShowDetailModal(false);
-                        handleWhatsAppPress(selectedCompany.phone, selectedCompany.name);
-                      }}
-                      style={({ pressed }) => [
-                        styles.actionButtonRound,
-                        { backgroundColor: "#25D366", opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
-                      ]}
-                    >
-                      <Feather name="message-circle" size={24} color="#FFFFFF" />
-                    </Pressable>
-                  </View>
+        <Pressable 
+          style={styles.idCardOverlay}
+          onPress={() => setShowDetailModal(false)}
+        >
+          <Pressable style={styles.idCardWrapper} onPress={(e) => e.stopPropagation()}>
+            {selectedCompany && (
+              <View style={[styles.idCard, { backgroundColor: colors.backgroundDefault, borderColor: colors.success }]}>
+                <View style={[styles.idCardHeader, { backgroundColor: colors.success }]}>
+                  <Feather name="briefcase" size={40} color="#FFFFFF" />
                 </View>
-              )}
-            </ScrollView>
-          </View>
-        </View>
+
+                <View style={styles.idCardName}>
+                  <ThemedText type="h3" style={{ fontWeight: "700", textAlign: "center", color: theme.text }}>
+                    {selectedCompany.name}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.idCardGrid}>
+                  <View style={styles.idCardGridRow}>
+                    <View style={styles.idCardGridItem}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Telefon</ThemedText>
+                      <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCompany.phone}</ThemedText>
+                    </View>
+                  </View>
+
+                  {selectedCompany.address && (
+                    <View style={[styles.idCardGridRow, { paddingHorizontal: 0 }]}>
+                      <View style={[styles.idCardGridItem, { flex: 1 }]}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: 6 }}>Adres</ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "600", color: theme.text }}>{selectedCompany.address}</ThemedText>
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.idCardActions}>
+                  <Pressable
+                    onPress={() => {
+                      setShowDetailModal(false);
+                      handleCallPress(selectedCompany.phone);
+                    }}
+                    style={({ pressed }) => [
+                      styles.idCardActionBtn,
+                      { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
+                    ]}
+                  >
+                    <Feather name="phone" size={16} color="#FFFFFF" />
+                    <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>Ara</ThemedText>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setShowDetailModal(false);
+                      handleWhatsAppPress(selectedCompany.phone, selectedCompany.name);
+                    }}
+                    style={({ pressed }) => [
+                      styles.idCardActionBtn,
+                      { backgroundColor: "#25D366", opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
+                    ]}
+                  >
+                    <Feather name="message-circle" size={16} color="#FFFFFF" />
+                    <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>WhatsApp</ThemedText>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          </Pressable>
+        </Pressable>
       </Modal>
 
       <Modal
@@ -412,76 +412,83 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.lg,
-    borderTopRightRadius: BorderRadius.lg,
-    paddingBottom: Spacing["3xl"],
-    maxHeight: "80%",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(128, 128, 128, 0.2)",
-  },
-  modalBody: {
-    padding: Spacing.lg,
-  },
-  detailSection: {
-    gap: Spacing.xs,
-  },
-  actionButtonRound: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#4F46E5",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  editButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.xs,
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.xs,
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
-  },
   emptyState: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
-    paddingTop: Spacing["5xl"],
-    gap: Spacing.md,
+    alignItems: "center",
+    paddingVertical: Spacing["5xl"],
   },
   emptyTitle: {
     marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   emptyText: {
     textAlign: "center",
-    paddingHorizontal: Spacing["3xl"],
+    paddingHorizontal: Spacing.xl,
+  },
+  idCardOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.lg,
+  },
+  idCardWrapper: {
+    width: "100%",
+    maxWidth: 340,
+  },
+  idCard: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 2,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  idCardHeader: {
+    padding: Spacing.xl,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  idCardName: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.05)",
+  },
+  idCardGrid: {
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  idCardGridRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  idCardGridItem: {
+    flex: 1,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    backgroundColor: "rgba(0,0,0,0.02)",
+    borderRadius: BorderRadius.sm,
+  },
+  idCardActions: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    padding: Spacing.lg,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.05)",
+  },
+  idCardActionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
   },
   fab: {
     position: "absolute",
@@ -489,12 +496,12 @@ const styles = StyleSheet.create({
     width: Spacing.fabSize,
     height: Spacing.fabSize,
     borderRadius: Spacing.fabSize / 2,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
