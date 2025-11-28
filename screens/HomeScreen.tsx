@@ -431,16 +431,14 @@ export default function HomeScreen() {
             </ThemedText>
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
+        </LiftPressable>
 
-        <Pressable
+        <LiftPressable
           onPress={() => navigation.navigate("CompletedJobList")}
-          style={({ pressed }) => [
+          style={[
             styles.menuCard,
             {
               backgroundColor: colors.backgroundDefault,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
               borderRadius: 0,
               marginTop: 0,
               borderBottomLeftRadius: 20,

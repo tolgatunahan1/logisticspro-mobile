@@ -30,17 +30,10 @@ export function AnimatedCounter({ value, type = "h3", style }: AnimatedCounterPr
     animatedValue.value = withSpring(value, springConfig);
   }, [value]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const displayValue = Math.round(interpolate(animatedValue.value, [0, value], [0, value], Extrapolate.CLAMP));
-    return {};
-  });
-
   return (
-    <Animated.View style={animatedStyle}>
-      <ThemedText type={type} style={[{ fontWeight: "700" }, style]}>
-        {Math.round(animatedValue.value)}
-      </ThemedText>
-    </Animated.View>
+    <ThemedText type={type} style={[{ fontWeight: "700" }, style]}>
+      {Math.round(value)}
+    </ThemedText>
   );
 }
 
