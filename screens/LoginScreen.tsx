@@ -28,12 +28,47 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isFirebaseMode, setIsFirebaseMode] = useState(true); // Default: Firebase (normal users)
+  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
 
   useEffect(() => {
     // Admin initialization is disabled for now
     // Fresh start needed to set up new admin account
   }, []);
 
+
+  const handleCreateAdmin = async () => {
+    setError("");
+    if (!newAdminEmail.trim() || !newAdminPassword.trim()) {
+      setError("Email ve şifre gerekli");
+      return;
+    }
+
+    if (newAdminPassword.length < 8) {
+      setError("Şifre en az 8 karakter olmalı");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const success = await firebaseAuthService.initializeAdmin(newAdminEmail, newAdminPassword);
+      if (success) {
+        Alert.alert("Başarılı", "Admin hesabı oluşturuldu. Admin olarak giriş yapabilirsiniz.");
+        setShowCreateAdmin(false);
+        setNewAdminEmail("");
+        setNewAdminPassword("");
+        setUsername(newAdminEmail);
+        setPassword(newAdminPassword);
+      } else {
+        setError("Admin oluşturma başarısız");
+      }
+    } catch (error: any) {
+      setError(error?.message || "Hata oluştu");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setError("");
@@ -189,25 +224,117 @@ export default function LoginScreen() {
             </ThemedText>
           ) : null}
 
-          <Pressable
-            onPress={handleLogin}
-            disabled={isLoading}
-            style={({ pressed }) => [
-              styles.button,
-              {
-                backgroundColor: theme.link,
-                opacity: pressed || isLoading ? 0.8 : 1,
-              },
-            ]}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
-                Giriş Yap
+          {showCreateAdmin ? (
+            <>
+              <ThemedText type="h4" style={{ textAlign: "center", marginBottom: Spacing.lg, color: theme.link }}>
+                Yeni Admin Oluştur
               </ThemedText>
-            )}
-          </Pressable>
+              <View style={styles.inputContainer}>
+                <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+                  Admin Email
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  placeholder="admin@logisticspro.com"
+                  placeholderTextColor={colors.textSecondary}
+                  value={newAdminEmail}
+                  onChangeText={setNewAdminEmail}
+                  editable={!isLoading}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
+                  Admin Şifre
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                      color: theme.text,
+                    },
+                  ]}
+                  placeholder="Şifre (8+ karakter)"
+                  placeholderTextColor={colors.textSecondary}
+                  value={newAdminPassword}
+                  onChangeText={setNewAdminPassword}
+                  secureTextEntry
+                  editable={!isLoading}
+                  autoCapitalize="none"
+                />
+              </View>
+              <Pressable
+                onPress={handleCreateAdmin}
+                disabled={isLoading}
+                style={({ pressed }) => [
+                  styles.button,
+                  {
+                    backgroundColor: "#10b981",
+                    opacity: pressed || isLoading ? 0.8 : 1,
+                  },
+                ]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                    Admin Oluştur
+                  </ThemedText>
+                )}
+              </Pressable>
+              <Pressable
+                onPress={() => setShowCreateAdmin(false)}
+                disabled={isLoading}
+                style={[styles.button, { backgroundColor: colors.inputBackground }]}
+              >
+                <ThemedText type="body" style={{ color: theme.text }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                onPress={handleLogin}
+                disabled={isLoading}
+                style={({ pressed }) => [
+                  styles.button,
+                  {
+                    backgroundColor: theme.link,
+                    opacity: pressed || isLoading ? 0.8 : 1,
+                  },
+                ]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <ThemedText type="body" style={[styles.buttonText, { color: "#FFFFFF" }]}>
+                    Giriş Yap
+                  </ThemedText>
+                )}
+              </Pressable>
+              {isAdminMode && (
+                <Pressable
+                  onPress={() => setShowCreateAdmin(true)}
+                  style={[styles.button, { backgroundColor: colors.inputBackground }]}
+                >
+                  <ThemedText type="body" style={{ color: theme.link, fontWeight: "600" }}>
+                    Yeni Admin Oluştur
+                  </ThemedText>
+                </Pressable>
+              )}
+            </>
+          )}
 
           <View style={styles.signupLink}>
             <ThemedText type="small" style={{ color: colors.textSecondary }}>
