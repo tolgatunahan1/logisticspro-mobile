@@ -281,7 +281,7 @@ export default function JobListScreen() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
           >
-            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, maxHeight: "88%", flexDirection: "column" }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flexDirection: "column" }]}>
               {/* Modal Header */}
               <View style={[styles.modalHeader, { paddingHorizontal: Spacing.lg }]}>
                 <ThemedText type="h3">İş Detayları</ThemedText>
@@ -294,9 +294,9 @@ export default function JobListScreen() {
               </View>
 
               {/* Modal Body - Scrollable Job Details */}
-              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} contentContainerStyle={{ paddingBottom: Spacing.sm }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} contentContainerStyle={{ paddingBottom: Spacing.xl }} showsVerticalScrollIndicator={false}>
               {selectedJob && (
-                <View style={{ gap: Spacing.md }}>
+                <View style={{ gap: Spacing.lg }}>
                   <View style={styles.detailSection}>
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
                       Firma Adı
@@ -688,21 +688,21 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: BorderRadius.lg,
     borderTopRightRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.lg,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
   modalBody: {
     maxHeight: "60%",
     marginBottom: Spacing.lg,
   },
   detailSection: {
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   shareButton: {
     flexDirection: "row",
