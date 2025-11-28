@@ -39,7 +39,7 @@ export default function CompletedJobListScreen() {
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [ibans, setIbans] = useState<IBAN[]>([]);
-  const [showIBANModal, setShowIBANModal] = useState(false);
+  const [showIBANList, setShowIBANList] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -216,6 +216,16 @@ export default function CompletedJobListScreen() {
     },
     [selectedJob, carriers]
   );
+
+  const handleOpenIBANList = useCallback(async () => {
+    if (!firebaseUser?.uid) return;
+    console.log("=== SHARE IBAN BUTTON PRESSED ===");
+    console.log("Loading IBANs for user:", firebaseUser.uid);
+    const allIbans = await getIBANs(firebaseUser.uid);
+    console.log("IBANs loaded:", allIbans);
+    setIbans(allIbans);
+    setShowIBANList(true);
+  }, [firebaseUser?.uid]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
@@ -610,13 +620,7 @@ export default function CompletedJobListScreen() {
 
                     {/* Share IBAN Button */}
                     <Pressable
-                      onPress={async () => {
-                        if (firebaseUser?.uid) {
-                          const allIbans = await getIBANs(firebaseUser.uid);
-                          setIbans(allIbans);
-                        }
-                        setShowIBANModal(true);
-                      }}
+                      onPress={handleOpenIBANList}
                       style={({ pressed }) => [
                         {
                           backgroundColor: theme.link,
@@ -722,60 +726,73 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                   </View>
 
+                  {showIBANList && (
+                    <View style={{
+                      marginTop: Spacing.md,
+                      paddingTop: Spacing.md,
+                      borderTopWidth: 1,
+                      borderTopColor: colors.border,
+                    }}>
+                      <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                        IBAN Seç
+                      </ThemedText>
+                      {ibans && ibans.length > 0 ? (
+                        <View style={{ gap: Spacing.sm }}>
+                          {ibans.map((iban) => (
+                            <Pressable
+                              key={iban.id}
+                              onPress={() => {
+                                console.log("IBAN item pressed:", iban);
+                                shareIBANWithCarrier(iban);
+                                setShowIBANList(false);
+                              }}
+                              style={({ pressed }) => [
+                                {
+                                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
+                                  paddingVertical: Spacing.md,
+                                  paddingHorizontal: Spacing.lg,
+                                  borderRadius: BorderRadius.sm,
+                                  opacity: pressed ? 0.7 : 1,
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                },
+                              ]}
+                            >
+                              <View style={{ flex: 1 }}>
+                                <ThemedText type="small" style={{ fontWeight: "600" }}>
+                                  {iban.nameSurname}
+                                </ThemedText>
+                                <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
+                                  {iban.ibanNumber}
+                                </ThemedText>
+                              </View>
+                              <Feather name="send" size={18} color={theme.link} />
+                            </Pressable>
+                          ))}
+                        </View>
+                      ) : (
+                        <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                          Kayıtlı IBAN bulunamadı
+                        </ThemedText>
+                      )}
+                      <Pressable
+                        onPress={() => setShowIBANList(false)}
+                        style={{
+                          marginTop: Spacing.md,
+                          paddingVertical: Spacing.sm,
+                          alignItems: "center",
+                        }}
+                      >
+                        <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                          Kapat
+                        </ThemedText>
+                      </Pressable>
+                    </View>
+                  )}
+
                   <View style={{ marginBottom: Spacing.xl }} />
                 </View>
-              )}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* IBAN Modal */}
-      <Modal
-        visible={showIBANModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowIBANModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">IBAN Seç</ThemedText>
-              <Pressable onPress={() => setShowIBANModal(false)}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              {ibans && ibans.length > 0 ? (
-                ibans.map((iban) => (
-                  <Pressable
-                    key={iban.id}
-                    onPress={() => {
-                      console.log("IBAN item pressed:", iban);
-                      shareIBANWithCarrier(iban);
-                    }}
-                    style={({ pressed }) => [
-                      styles.ibanItem,
-                      {
-                        backgroundColor: colors.backgroundDefault,
-                        opacity: pressed ? 0.7 : 1,
-                      },
-                    ]}
-                  >
-                    <View>
-                      <ThemedText type="h4">{iban.nameSurname}</ThemedText>
-                      <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
-                        {iban.ibanNumber}
-                      </ThemedText>
-                    </View>
-                    <Feather name="arrow-right" size={20} color={theme.link} />
-                  </Pressable>
-                ))
-              ) : (
-                <ThemedText type="body" style={{ color: colors.textSecondary, textAlign: "center", marginTop: Spacing.lg }}>
-                  Kayıtlı IBAN bulunamadı
-                </ThemedText>
               )}
             </ScrollView>
           </View>
