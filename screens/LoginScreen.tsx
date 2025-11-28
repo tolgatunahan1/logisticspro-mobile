@@ -33,7 +33,7 @@ export default function LoginScreen() {
     const init = async () => {
       try {
         // Setup Firebase admin if not already done
-        await firebaseAuthService.initializeAdmin("admin@logisticspro.com", "Admin1234");
+        await firebaseAuthService.initializeAdmin("tolgatunahan@icloud.com", "1Liraversene");
         // Also setup local admin for backwards compatibility
         await initializeDefaultAdmin();
       } catch (error) {
