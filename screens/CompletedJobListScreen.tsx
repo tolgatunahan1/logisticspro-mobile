@@ -265,24 +265,9 @@ export default function CompletedJobListScreen() {
         >
           <View style={styles.jobCardHeader}>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md, flexWrap: "wrap" }}>
-                <ThemedText type="h4" numberOfLines={1} style={{ flex: 1 }}>
-                  {company?.name || "Bilinmeyen Firma"}
-                </ThemedText>
-                {job.commissionPaid ? (
-                  <View style={{ backgroundColor: colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
-                    <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                      Ödendi
-                    </ThemedText>
-                  </View>
-                ) : (
-                  <View style={{ backgroundColor: colors.warning, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
-                    <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "600" }}>
-                      Ödenmedi
-                    </ThemedText>
-                  </View>
-                )}
-              </View>
+              <ThemedText type="h4" numberOfLines={1}>
+                {company?.name || "Bilinmeyen Firma"}
+              </ThemedText>
               <View style={{ marginTop: Spacing.sm, gap: Spacing.xs }}>
                 <ThemedText type="small" style={{ color: colors.textSecondary }}>
                   {job.loadingLocation || "-"} → {job.deliveryLocation || "-"}
@@ -662,68 +647,6 @@ export default function CompletedJobListScreen() {
                     <ThemedText type="body">
                       {selectedJob.notes || "-"}
                     </ThemedText>
-                  </View>
-
-                  {/* Commission Section */}
-                  <View style={{
-                    backgroundColor: selectedJob.commissionPaid ? colors.success : colors.warning,
-                    padding: Spacing.lg,
-                    borderRadius: BorderRadius.md,
-                    gap: Spacing.md,
-                  }}>
-                    <ThemedText type="h4" style={{ fontWeight: "700", color: "#FFFFFF" }}>
-                      Komisyon
-                    </ThemedText>
-                    <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                        Tutar
-                      </ThemedText>
-                      <ThemedText type="h4" style={{ color: "#FFFFFF" }}>
-                        {selectedJob.commission || "-"}
-                      </ThemedText>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                        Durum
-                      </ThemedText>
-                      <ThemedText type="h4" style={{ color: "#FFFFFF" }}>
-                        {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
-                      </ThemedText>
-                    </View>
-
-                    {!selectedJob.commissionPaid && (
-                      <Pressable
-                        onPress={async () => {
-                          if (!firebaseUser) return;
-                          try {
-                            await markCommissionAsPaid(firebaseUser.uid, selectedJob.id);
-                            await loadData();
-                            setShowDetailModal(false);
-                          } catch (error) {
-                            Alert.alert("Hata", "Komisyon ödendi olarak işaretlenemedi");
-                          }
-                        }}
-                        style={({ pressed }) => [
-                          {
-                            backgroundColor: "rgba(255, 255, 255, 0.3)",
-                            opacity: pressed ? 0.7 : 1,
-                            marginTop: Spacing.md,
-                            paddingVertical: Spacing.md,
-                            paddingHorizontal: Spacing.lg,
-                            borderRadius: BorderRadius.sm,
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: Spacing.md,
-                          },
-                        ]}
-                      >
-                        <Feather name="check" size={18} color="#FFFFFF" />
-                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                          Ödendi Olarak İşaretle
-                        </ThemedText>
-                      </Pressable>
-                    )}
                   </View>
 
                   <View style={{ marginBottom: Spacing.xl }} />
