@@ -619,7 +619,9 @@ export default function CompletedJobListScreen() {
                             const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, true);
                             if (success) {
                               const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: true } : j);
+                              const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: true } : j);
                               setJobs(updatedJobs);
+                              setFilteredJobs(updatedFiltered);
                               setSelectedJob({ ...selectedJob, commissionPaid: true });
                             }
                           }
@@ -654,7 +656,9 @@ export default function CompletedJobListScreen() {
                               const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, false);
                               if (success) {
                                 const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: false } : j);
+                                const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: false } : j);
                                 setJobs(updatedJobs);
+                                setFilteredJobs(updatedFiltered);
                                 setSelectedJob({ ...selectedJob, commissionPaid: false });
                               }
                             }
