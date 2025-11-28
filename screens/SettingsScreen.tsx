@@ -54,8 +54,6 @@ export default function SettingsScreen() {
     ]);
   };
 
-  const { firebaseUser } = useAuth();
-
   const loadIBANs = useCallback(async () => {
     if (!firebaseUser?.uid) return;
     const data = await getIBANs(firebaseUser.uid);
