@@ -110,7 +110,7 @@ export default function HomeScreen() {
         <View style={{ justifyContent: "center", alignItems: "center", marginBottom: Spacing.lg }}>
           <Image
             source={require("../assets/images/IMG_6804.png")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: 180, height: 180 }}
           />
         </View>
 
