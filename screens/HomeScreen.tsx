@@ -26,7 +26,6 @@ export default function HomeScreen() {
   const [companyCount, setCompanyCount] = useState(0);
   const [jobCount, setJobCount] = useState(0);
   const [completedJobCount, setCompletedJobCount] = useState(0);
-  const [walletBalance, setWalletBalance] = useState(0);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const { firebaseUser } = useAuth();
 
@@ -39,19 +38,10 @@ export default function HomeScreen() {
     const jobs = await getJobs(firebaseUser.uid);
     const completedJobs = await getCompletedJobs(firebaseUser.uid);
     
-    // Calculate wallet balance - sum of all paid commissions
-    const totalPaidCommissions = completedJobs.reduce((sum, job) => {
-      if (job.commissionPaid && job.commissionCost) {
-        return sum + parseFloat(job.commissionCost as string);
-      }
-      return sum;
-    }, 0);
-    
     setCarrierCount(carriers.length);
     setCompanyCount(companies.length);
     setJobCount(jobs.length);
     setCompletedJobCount(completedJobs.length);
-    setWalletBalance(totalPaidCommissions);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
@@ -202,28 +192,6 @@ export default function HomeScreen() {
               </ThemedText>
               <ThemedText type="h3">{completedJobCount}</ThemedText>
             </View>
-          </View>
-        </View>
-
-        {/* Wallet Balance Card */}
-        <View
-          style={[
-            styles.statCard,
-            {
-              backgroundColor: colors.success,
-              borderLeftColor: colors.success,
-              marginTop: Spacing.md,
-            },
-          ]}
-        >
-          <ThemedText style={{ fontSize: 24, fontWeight: "700", color: "#FFFFFF" }}>₺</ThemedText>
-          <View style={styles.statContent}>
-            <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
-              Cüzdan Bakiyesi
-            </ThemedText>
-            <ThemedText type="h3" style={{ color: "#FFFFFF" }}>
-              {walletBalance.toFixed(2)} ₺
-            </ThemedText>
           </View>
         </View>
 
