@@ -18,9 +18,16 @@ export interface UserProfile {
 
 const isFirebaseConfigured = (): boolean => {
   try {
-    const apiKey = firebaseAuth.app?.options?.apiKey;
-    return apiKey ? apiKey.startsWith("AIzaSy") && apiKey.length > 30 : false;
-  } catch {
+    if (!firebaseAuth?.app?.options?.apiKey) {
+      console.warn("🔥 Firebase app not initialized or apiKey missing");
+      return false;
+    }
+    const apiKey = firebaseAuth.app.options.apiKey;
+    const isValid = apiKey.startsWith("AIzaSy") && apiKey.length > 30;
+    console.log("✅ Firebase configured:", isValid, "apiKey:", apiKey.substring(0, 20) + "...");
+    return isValid;
+  } catch (error) {
+    console.error("🔥 Firebase Config Error:", error);
     return false;
   }
 };
@@ -31,8 +38,13 @@ export const firebaseAuthService = {
     try {
       const apiKey = firebaseAuth.app?.options?.apiKey || "";
       // Valid API keys start with AIzaSy and are longer than 30 chars
-      return apiKey.startsWith("AIzaSy") && apiKey.length > 30;
-    } catch {
+      const isValid = apiKey.startsWith("AIzaSy") && apiKey.length > 30;
+      if (!isValid) {
+        console.warn("🔥 Firebase not configured - apiKey:", apiKey?.substring(0, 20) + "...");
+      }
+      return isValid;
+    } catch (error) {
+      console.error("🔥 Firebase config check error:", error);
       return false;
     }
   },
