@@ -290,12 +290,12 @@ export const firebaseAuthService = {
     }
   },
 
-  // Reject user
+  // Reject user - removes from system completely so they can re-register
   rejectUser: async (uid: string): Promise<boolean> => {
     try {
-      await update(ref(firebaseDatabase, `users/${uid}/profile`), {
-        status: "rejected",
-      });
+      // Delete from database completely
+      await remove(ref(firebaseDatabase, `users/${uid}`));
+      console.log("✅ User rejected and deleted from database:", uid);
       return true;
     } catch (error) {
       console.error("Reject user error:", error);
