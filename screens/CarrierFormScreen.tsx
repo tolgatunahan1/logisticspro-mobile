@@ -49,6 +49,32 @@ export default function CarrierFormScreen() {
     return withZero.slice(0, 11);
   };
 
+  const formatLicensePlate = (value: string): string => {
+    // Remove spaces and convert to uppercase
+    const cleaned = value.replace(/\s/g, '').toUpperCase();
+    
+    // Extract numbers and letters
+    const numbers = cleaned.match(/\d/g) || [];
+    const letters = cleaned.match(/[A-Z]/g) || [];
+    
+    if (numbers.length === 0 && letters.length === 0) return '';
+    
+    // Format: DD LLL DDD (2 digits, 3 letters, 3 digits)
+    const firstDigits = numbers.slice(0, 2).join('');
+    const lettersPart = letters.slice(0, 3).join('');
+    const lastDigits = numbers.slice(2, 5).join('');
+    
+    let result = firstDigits;
+    if (lettersPart) {
+      result += (result ? ' ' : '') + lettersPart;
+    }
+    if (lastDigits) {
+      result += (result ? ' ' : '') + lastDigits;
+    }
+    
+    return result;
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
@@ -198,7 +224,7 @@ export default function CarrierFormScreen() {
         {renderInput("Ad Soyad", name, setName, "name", { placeholder: "Nakliyeci adı", autoCapitalize: "words" })}
         {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
         {renderInput("TC Kimlik Numarası", nationalId, setNationalId, "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
-        {renderInput("Plaka", plate, (text) => setPlate(text.toUpperCase()), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
+        {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
         
         <View style={styles.inputContainer}>
           <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
