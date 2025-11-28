@@ -18,6 +18,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 const REMEMBER_ME_KEY_ADMIN = "logistics_remember_admin";
 const REMEMBER_ME_KEY_USER = "logistics_remember_user";
+const REMEMBER_ME_KEY_SIGNUP = "logistics_remember_signup"; // Also check signup key for backward compatibility
 
 export default function LoginScreen() {
   const { theme, isDark } = useTheme();
@@ -42,8 +43,15 @@ export default function LoginScreen() {
 
   const loadSavedCredentials = async () => {
     try {
-      const key = isAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
-      const saved = await SecureStore.getItemAsync(key);
+      let key = isAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
+      let saved = await SecureStore.getItemAsync(key);
+      
+      // For user mode, also check signup key if main key has no data
+      if (!isAdminMode && !saved) {
+        saved = await SecureStore.getItemAsync(REMEMBER_ME_KEY_SIGNUP);
+        if (saved) key = REMEMBER_ME_KEY_SIGNUP;
+      }
+      
       console.log("📌 Loading credentials for", key, ":", saved ? "Found" : "Not found");
       if (saved) {
         const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
@@ -65,8 +73,15 @@ export default function LoginScreen() {
     setIsAdminMode(newAdminMode);
     // Load credentials for the new mode
     try {
-      const key = newAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
-      const saved = await SecureStore.getItemAsync(key);
+      let key = newAdminMode ? REMEMBER_ME_KEY_ADMIN : REMEMBER_ME_KEY_USER;
+      let saved = await SecureStore.getItemAsync(key);
+      
+      // For user mode, also check signup key if main key has no data
+      if (!newAdminMode && !saved) {
+        saved = await SecureStore.getItemAsync(REMEMBER_ME_KEY_SIGNUP);
+        if (saved) key = REMEMBER_ME_KEY_SIGNUP;
+      }
+      
       if (saved) {
         const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
         setEmail(savedEmail || "");
