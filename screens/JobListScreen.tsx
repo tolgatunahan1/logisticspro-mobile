@@ -32,6 +32,7 @@ export default function JobListScreen() {
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
+  const [carrierSearchQuery, setCarrierSearchQuery] = useState("");
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -97,6 +98,15 @@ export default function JobListScreen() {
     navigation.navigate("JobForm", { job, mode: "edit" });
   };
 
+  const getFilteredCarriers = useCallback(() => {
+    if (!carrierSearchQuery.trim()) return carriers;
+    const query = carrierSearchQuery.toLowerCase().trim();
+    return carriers.filter((carrier) =>
+      carrier.name.toLowerCase().includes(query) ||
+      carrier.phone.includes(query)
+    );
+  }, [carriers, carrierSearchQuery]);
+
   const handleShareJob = async (job: PlannedJob) => {
     
     let message = "*Yeni Sefer Programı*\n\n";
@@ -157,6 +167,7 @@ export default function JobListScreen() {
       await deleteJob(firebaseUser.uid, job.id);
       setShowDetailModal(false);
       setSelectedCarrier(null);
+      setCarrierSearchQuery("");
       await loadData();
       Alert.alert("Başarılı", "Sefer başarıyla oluşturuldu");
     } catch (error) {
@@ -260,14 +271,20 @@ export default function JobListScreen() {
         visible={showDetailModal}
         animationType="slide"
         transparent
-        onRequestClose={() => setShowDetailModal(false)}
+        onRequestClose={() => {
+          setShowDetailModal(false);
+          setCarrierSearchQuery("");
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <ThemedText type="h3">İş Detayları</ThemedText>
-              <Pressable onPress={() => setShowDetailModal(false)}>
+              <Pressable onPress={() => {
+                setShowDetailModal(false);
+                setCarrierSearchQuery("");
+              }}>
                 <Feather name="x" size={24} color={theme.text} />
               </Pressable>
             </View>
@@ -372,16 +389,49 @@ export default function JobListScreen() {
             {/* Nakliyeci Seçim Bölümü */}
             {selectedJob && (
               <View style={{ gap: Spacing.md, marginBottom: Spacing.lg, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Nakliyeci Seçin
-                </ThemedText>
+                <View style={{ gap: Spacing.sm }}>
+                  <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                    Nakliyeci Seçin
+                  </ThemedText>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingHorizontal: Spacing.md,
+                      borderRadius: BorderRadius.md,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      backgroundColor: colors.backgroundDefault,
+                    }}
+                  >
+                    <Feather name="search" size={16} color={colors.textSecondary} />
+                    <TextInput
+                      style={{
+                        flex: 1,
+                        paddingVertical: Spacing.sm,
+                        paddingHorizontal: Spacing.md,
+                        color: theme.text,
+                        fontSize: 14,
+                      }}
+                      placeholder="Nakliyeci adı veya telefon..."
+                      placeholderTextColor={colors.textSecondary}
+                      value={carrierSearchQuery}
+                      onChangeText={setCarrierSearchQuery}
+                    />
+                    {carrierSearchQuery.length > 0 && (
+                      <Pressable onPress={() => setCarrierSearchQuery("")}>
+                        <Feather name="x" size={16} color={colors.textSecondary} />
+                      </Pressable>
+                    )}
+                  </View>
+                </View>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: Spacing.md }}
+                  contentContainerStyle={{ gap: Spacing.md, paddingRight: Spacing.lg }}
                 >
-                  {carriers.length > 0 ? (
-                    carriers.map((carrier) => (
+                  {getFilteredCarriers().length > 0 ? (
+                    getFilteredCarriers().map((carrier) => (
                       <Pressable
                         key={carrier.id}
                         onPress={() => setSelectedCarrier(carrier)}
@@ -407,9 +457,11 @@ export default function JobListScreen() {
                       </Pressable>
                     ))
                   ) : (
-                    <ThemedText type="body" style={{ color: colors.textSecondary }}>
-                      Nakliyeci bulunamadı
-                    </ThemedText>
+                    <View style={{ paddingHorizontal: Spacing.lg }}>
+                      <ThemedText type="body" style={{ color: colors.textSecondary }}>
+                        {carrierSearchQuery.trim() ? "Eşleşen nakliyeci bulunamadı" : "Nakliyeci bulunamadı"}
+                      </ThemedText>
+                    </View>
                   )}
                 </ScrollView>
               </View>
