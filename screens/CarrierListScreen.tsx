@@ -140,6 +140,13 @@ export default function CarrierListScreen() {
     
     try {
       const webUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      const canOpen = await Linking.canOpenURL(webUrl);
+      
+      if (!canOpen) {
+        Alert.alert("Hata", "WhatsApp uygulaması yüklü değil. Lütfen WhatsApp'ı yükleyin.");
+        return;
+      }
+      
       await Linking.openURL(webUrl);
     } catch (error) {
       Alert.alert("Hata", "WhatsApp açılamadı. Lütfen daha sonra tekrar deneyin.");

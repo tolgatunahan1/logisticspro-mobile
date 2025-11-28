@@ -298,6 +298,11 @@ export default function CompletedJobListScreen() {
   };
 
   const handleShareJob = async (job: CompletedJob) => {
+    if (Platform.OS === "web") {
+      Alert.alert("Bilgi", "Bu özellik mobil cihazlarda kullanılabilir. Expo Go uygulamasında açın.");
+      return;
+    }
+    
     let message = "*Gerçekleşen Sefer*\n\n";
     message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
     message += `*Teslimat Yeri:* ${job.deliveryLocation || "-"}\n`;
@@ -313,7 +318,6 @@ export default function CompletedJobListScreen() {
         title: "İşi Paylaş",
       });
     } catch (error) {
-      console.error("Share hatası:", error);
       Alert.alert("Hata", "Paylaşma işlemi başarısız oldu");
     }
   };
@@ -387,7 +391,6 @@ export default function CompletedJobListScreen() {
                             await deleteCompletedJob(firebaseUser!.uid, job.id);
                             await loadData();
                           } catch (error) {
-                            console.error("Delete error:", error);
                             await loadData();
                           }
                         },

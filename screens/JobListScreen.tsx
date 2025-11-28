@@ -108,6 +108,10 @@ export default function JobListScreen() {
   }, [carriers, carrierSearchQuery]);
 
   const handleShareJob = async (job: PlannedJob) => {
+    if (Platform.OS === "web") {
+      Alert.alert("Bilgi", "Bu özellik mobil cihazlarda kullanılabilir. Expo Go uygulamasında açın.");
+      return;
+    }
     
     let message = "*Yeni Sefer Programı*\n\n";
     message += `*Yükleme Yeri:* ${job.loadingLocation || "-"}\n`;
@@ -128,7 +132,6 @@ export default function JobListScreen() {
         title: "İşi Paylaş",
       });
     } catch (error) {
-      console.error("Share hatası:", error);
       Alert.alert("Hata", "Paylaşma işlemi başarısız oldu");
     }
   };
@@ -171,7 +174,6 @@ export default function JobListScreen() {
       await loadData();
       Alert.alert("Başarılı", "Sefer başarıyla oluşturuldu");
     } catch (error) {
-      console.error("Sefer oluşturma hatası:", error);
       Alert.alert("Hata", "Sefer oluşturulurken hata oluştu");
     } finally {
       setIsCreatingTrip(false);
