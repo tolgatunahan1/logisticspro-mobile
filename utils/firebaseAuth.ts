@@ -19,7 +19,7 @@ export interface UserProfile {
 const isFirebaseConfigured = (): boolean => {
   try {
     const apiKey = firebaseAuth.app?.options?.apiKey;
-    return apiKey ? !apiKey.includes("X") && apiKey.length > 20 : false;
+    return apiKey ? apiKey.startsWith("AIzaSy") && apiKey.length > 30 : false;
   } catch {
     return false;
   }
@@ -30,8 +30,8 @@ export const firebaseAuthService = {
   isConfigured: (): boolean => {
     try {
       const apiKey = firebaseAuth.app?.options?.apiKey || "";
-      // Test keys have placeholder values
-      return !apiKey.includes("X") && apiKey.length > 20;
+      // Valid API keys start with AIzaSy and are longer than 30 chars
+      return apiKey.startsWith("AIzaSy") && apiKey.length > 30;
     } catch {
       return false;
     }
