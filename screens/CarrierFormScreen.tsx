@@ -223,11 +223,11 @@ export default function CarrierFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {renderInput("Ad Soyad", name, setName, "name", { placeholder: "Nakliyeci adı", autoCapitalize: "words" })}
+        {renderInput("Ad Soyad", name, (text) => setName(text.toUpperCase()), "name", { placeholder: "Nakliyeci adı" })}
         {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
-        {renderInput("TC Kimlik Numarası", nationalId, setNationalId, "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
-        {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
-        {renderInput("Dorse Plakası (İsteğe Bağlı)", dorsePlate, (text) => setDorsePlate(formatLicensePlate(text)), "dorsePlate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
+        {renderInput("TC Kimlik Numarası", nationalId, (text) => setNationalId(text.toUpperCase()), "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
+        {renderInput("Plaka", plate, (text) => setPlate(formatLicensePlate(text)), "plate", { placeholder: "34 ABC 123" })}
+        {renderInput("Dorse Plakası (İsteğe Bağlı)", dorsePlate, (text) => setDorsePlate(formatLicensePlate(text)), "dorsePlate", { placeholder: "34 ABC 123" })}
         
         <View style={styles.inputContainer}>
           <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
