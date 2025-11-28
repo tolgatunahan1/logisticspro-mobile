@@ -5,6 +5,7 @@ export interface Carrier {
   id: string;
   name: string;
   phone: string;
+  nationalId: string;
   plate: string;
   vehicleType: string;
   createdAt: number;

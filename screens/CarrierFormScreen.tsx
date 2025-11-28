@@ -30,6 +30,7 @@ export default function CarrierFormScreen() {
 
   const [name, setName] = useState(carrier?.name || initialData?.name || "");
   const [phone, setPhone] = useState(carrier?.phone || initialData?.phone || "");
+  const [nationalId, setNationalId] = useState(carrier?.nationalId || "");
   const [plate, setPlate] = useState(carrier?.plate || "");
   const [vehicleType, setVehicleType] = useState(carrier?.vehicleType || initialData?.vehicleType || "kamyon");
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +58,12 @@ export default function CarrierFormScreen() {
     if (!phone.trim()) {
       newErrors.phone = "Telefon numarası gerekli";
     }
+    if (!nationalId.trim()) {
+      newErrors.nationalId = "TC Kimlik numarası gerekli";
+    }
+    if (nationalId.trim() && !/^\d{11}$/.test(nationalId.trim())) {
+      newErrors.nationalId = "TC Kimlik numarası 11 hane olmalı";
+    }
     if (!plate.trim()) {
       newErrors.plate = "Plaka gerekli";
     }
@@ -77,6 +84,7 @@ export default function CarrierFormScreen() {
       const data = {
         name: name.trim(),
         phone: phone.trim(),
+        nationalId: nationalId.trim(),
         plate: plate.trim().toUpperCase(),
         vehicleType,
       };
@@ -133,7 +141,7 @@ export default function CarrierFormScreen() {
         </Pressable>
       ),
     });
-  }, [navigation, theme, isLoading, name, phone, plate, vehicleType]);
+  }, [navigation, theme, isLoading, name, phone, nationalId, plate, vehicleType]);
 
   const renderInput = (
     label: string,
@@ -189,6 +197,7 @@ export default function CarrierFormScreen() {
       >
         {renderInput("Ad Soyad", name, setName, "name", { placeholder: "Nakliyeci adı", autoCapitalize: "words" })}
         {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
+        {renderInput("TC Kimlik Numarası", nationalId, setNationalId, "nationalId", { placeholder: "11 haneli kimlik numarası", keyboardType: "phone-pad" })}
         {renderInput("Plaka", plate, (text) => setPlate(text.toUpperCase()), "plate", { placeholder: "34 ABC 123", autoCapitalize: "characters" })}
         
         <View style={styles.inputContainer}>
