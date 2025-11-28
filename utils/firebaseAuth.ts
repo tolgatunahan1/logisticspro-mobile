@@ -147,4 +147,46 @@ export const firebaseAuthService = {
   onAuthStateChanged: (callback: (user: User | null) => void) => {
     return firebaseAuth.onAuthStateChanged(callback);
   },
+
+  // Initialize admin user (Firebase)
+  initializeAdmin: async (email: string, password: string): Promise<boolean> => {
+    try {
+      const existingAdmin = await firebaseAuthService.getUserProfile(
+        email.replace("@", "_").replace(".", "_")
+      );
+      if (existingAdmin?.isAdmin) {
+        console.log("✅ Admin already exists");
+        return true;
+      }
+
+      // Try to create admin user
+      try {
+        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        const admin = userCredential.user;
+
+        // Mark as admin in profile
+        const adminProfile: UserProfile = {
+          uid: admin.uid,
+          email: admin.email || "",
+          createdAt: Date.now(),
+          status: "approved",
+          isAdmin: true,
+        };
+
+        await set(ref(firebaseDatabase, `users/${admin.uid}/profile`), adminProfile);
+        console.log("✅ Admin user created:", email);
+        return true;
+      } catch (createError: any) {
+        if (createError?.message?.includes("email-already-in-use")) {
+          // Admin might exist, try checking by email pattern
+          console.log("📌 Admin email already exists, checking status...");
+          return true;
+        }
+        throw createError;
+      }
+    } catch (error) {
+      console.error("Admin initialization error:", error);
+      return false;
+    }
+  },
 };

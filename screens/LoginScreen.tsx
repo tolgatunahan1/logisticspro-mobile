@@ -8,6 +8,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { initializeDefaultAdmin } from "../utils/userManagement";
+import { firebaseAuthService } from "../utils/firebaseAuth";
 
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -31,6 +32,9 @@ export default function LoginScreen() {
   useEffect(() => {
     const init = async () => {
       try {
+        // Setup Firebase admin if not already done
+        await firebaseAuthService.initializeAdmin("admin@logisticspro.com", "Admin1234");
+        // Also setup local admin for backwards compatibility
         await initializeDefaultAdmin();
       } catch (error) {
         console.error("Admin init error:", error);
@@ -141,7 +145,7 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              {isAdminMode ? "Admin Adı" : "Email"}
+              Email
             </ThemedText>
             <TextInput
               style={[
@@ -152,13 +156,14 @@ export default function LoginScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder={isAdminMode ? "Admin adınız" : "Email adresiniz"}
+              placeholder={isAdminMode ? "admin@logisticspro.com" : "Email adresiniz"}
               placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
               editable={!isLoading}
               autoCapitalize="none"
               autoCorrect={false}
+              keyboardType="email-address"
             />
           </View>
 
