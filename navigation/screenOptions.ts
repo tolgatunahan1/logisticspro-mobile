@@ -21,7 +21,6 @@ export const getCommonScreenOptions = ({
   headerBlurEffect: isDark ? "dark" : "light",
   headerTintColor: theme.text,
   headerStyle: {
-    height: 140,
     backgroundColor: Platform.select({
       ios: undefined,
       android: theme.backgroundRoot,

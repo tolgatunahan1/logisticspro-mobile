@@ -72,14 +72,7 @@ export default function HomeScreen() {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => (
-        <View style={{ justifyContent: "center", alignItems: "center", marginTop: 40 }}>
-          <Image
-            source={require("../assets/images/IMG_6804.png")}
-            style={{ width: 80, height: 80 }}
-          />
-        </View>
-      ),
+      headerTitle: "LogisticsPRO",
       headerLeft: () => (
         <Pressable
           onPress={() => setDrawerVisible(true)}
@@ -114,6 +107,14 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Logo */}
+        <View style={{ justifyContent: "center", alignItems: "center", marginBottom: Spacing.lg }}>
+          <Image
+            source={require("../assets/images/IMG_6804.png")}
+            style={{ width: 100, height: 100 }}
+          />
+        </View>
+
         {/* Animated Map Hero */}
         <View style={styles.heroSection}>
           <AnimatedMap />
