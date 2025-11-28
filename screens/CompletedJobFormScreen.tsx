@@ -97,7 +97,7 @@ export default function CompletedJobFormScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, loadingDate, deliveryDate, completionDate, transportationCost, commissionCost, notes, isEdit, job, navigation]);
+  }, [firebaseUser?.uid, cargoType, tonnage, dimensions, loadingLocation, deliveryLocation, companyId, carrierId, loadingDate, deliveryDate, completionDate, transportationCost, commissionCost, notes, isEdit, job, navigation]);
 
   const handleCancel = () => {
     navigation.goBack();
