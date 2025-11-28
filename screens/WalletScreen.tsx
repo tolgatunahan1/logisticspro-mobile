@@ -25,6 +25,9 @@ export default function WalletScreen() {
 
   const [paidTotal, setPaidTotal] = useState<number>(0);
   const [unpaidTotal, setUnpaidTotal] = useState<number>(0);
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [weeklyRevenue, setWeeklyRevenue] = useState<number>(0);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number>(0);
   const [allJobs, setAllJobs] = useState<CompletedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
   const [isTogglingPaid, setIsTogglingPaid] = useState<string | null>(null);
@@ -35,6 +38,23 @@ export default function WalletScreen() {
     if (activeTab === "paid") return allJobs.filter(job => job.commissionPaid);
     return allJobs.filter(job => !job.commissionPaid);
   }, [allJobs, activeTab]);
+
+  const calculateRevenueData = (completedJobs: CompletedJob[]) => {
+    const now = Date.now();
+    const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+    let total = 0, weekly = 0, monthly = 0;
+
+    completedJobs.forEach(job => {
+      const amount = parseFloat(job.commissionCost || "0");
+      total += amount;
+      if (job.completionDate >= oneMonthAgo) monthly += amount;
+      if (job.completionDate >= oneWeekAgo) weekly += amount;
+    });
+
+    return { total, weekly, monthly };
+  };
 
   const loadData = useCallback(async () => {
     if (!firebaseUser?.uid) return;
@@ -60,9 +80,13 @@ export default function WalletScreen() {
         }
         return sum;
       }, 0);
+      const revenue = calculateRevenueData(jobs);
 
       setPaidTotal(paid);
       setUnpaidTotal(unpaid);
+      setTotalRevenue(revenue.total);
+      setWeeklyRevenue(revenue.weekly);
+      setMonthlyRevenue(revenue.monthly);
       setAllJobs(jobs);
       setCompanies(companiesMap);
     } catch (error) {
@@ -173,8 +197,38 @@ export default function WalletScreen() {
         keyExtractor={(item) => item.id}
         ListHeaderComponent={() => (
           <>
+            {/* Revenue Summary Section */}
+            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: headerHeight + Spacing.lg, marginBottom: Spacing.md }]}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Spacing.lg }}>
+                <View>
+                  <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                    Toplam Komisyon Kazancı
+                  </ThemedText>
+                  <ThemedText type="h2" style={{ fontWeight: "700" }}>
+                    ₺{formatCurrency(totalRevenue)}
+                  </ThemedText>
+                </View>
+                <View style={{ backgroundColor: theme.link + "20", padding: Spacing.md, borderRadius: BorderRadius.md }}>
+                  <Feather name="trending-up" size={28} color={theme.link} />
+                </View>
+              </View>
+
+              <View style={{ gap: Spacing.md }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <View>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Hafta</ThemedText>
+                    <ThemedText type="h4">₺{formatCurrency(weeklyRevenue)}</ThemedText>
+                  </View>
+                  <View>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Ay</ThemedText>
+                    <ThemedText type="h4">₺{formatCurrency(monthlyRevenue)}</ThemedText>
+                  </View>
+                </View>
+              </View>
+            </View>
+
             {/* Header Stats */}
-            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: headerHeight + Spacing.lg }]}>
+            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg }]}>
               <View style={{ gap: Spacing.md }}>
                 {/* Bekleyen Ödemeler Bakiyesi Card */}
                 <View
