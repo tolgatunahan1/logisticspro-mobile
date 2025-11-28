@@ -76,7 +76,7 @@ export default function HomeScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
           <Image
             source={require("../assets/images/IMG_6804.png")}
-            style={{ width: 48, height: 48 }}
+            style={{ width: 80, height: 80 }}
           />
           <ThemedText type="h3" style={{ fontSize: 22, fontWeight: "700" }}>
             LogisticsPRO
