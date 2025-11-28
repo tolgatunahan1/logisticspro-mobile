@@ -13,7 +13,6 @@ import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { validatePassword as validatePasswordUtil } from "../utils/userManagement";
 import { validateEmail, validatePassword } from "../utils/validation";
-import { handleError } from "../utils/errorHandling";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -125,8 +124,13 @@ export default function SignupScreen() {
         setError("Kayıt başarısız oldu");
       }
     } catch (error: any) {
-      const errorResult = handleError(error);
-      setError(errorResult.message);
+      console.error("Signup error:", error);
+      const errorMsg = error?.message || "Kayıt sırasında hata oluştu";
+      if (errorMsg.includes("Firebase yapılandırılmamış")) {
+        setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }

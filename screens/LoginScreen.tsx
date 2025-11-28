@@ -9,7 +9,6 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
-import { handleError } from "../utils/errorHandling";
 
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -136,8 +135,7 @@ export default function LoginScreen() {
         setError("Admin oluşturma başarısız");
       }
     } catch (error: any) {
-      const errorResult = handleError(error);
-      setError(errorResult.message || "Hata oluştu");
+      setError(error?.message || "Hata oluştu");
     } finally {
       setIsLoading(false);
     }
@@ -166,8 +164,15 @@ export default function LoginScreen() {
         setError("Email veya şifre yanlış");
       }
     } catch (error: any) {
-      const errorResult = handleError(error);
-      setError(errorResult.message);
+      const errorMsg = error?.message || "Giriş sırasında hata oluştu";
+      // Check if user is not registered
+      if (errorMsg.includes("invalid-credential") || errorMsg.includes("henüz onaylanmamıştır")) {
+        setError("Lütfen geçerli bir mail adresi veya şifre giriniz. Yoksa kayıt olunuz.");
+      } else if (errorMsg.includes("Admin onayı bekleniyor")) {
+        setError("Admin onayı bekleniyor. Lütfen kısa bir süre sonra tekrar deneyin.");
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }
