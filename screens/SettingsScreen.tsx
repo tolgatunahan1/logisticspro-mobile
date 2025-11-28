@@ -158,7 +158,7 @@ export default function SettingsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl * 2, paddingBottom: insets.bottom + Spacing.xl }}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }}>
         {/* Hesap Ayarları Section */}
         <View style={[styles.section, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.sectionHeader}>
