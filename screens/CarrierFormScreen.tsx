@@ -89,23 +89,17 @@ export default function CarrierFormScreen() {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
+    // Sadece Ad Soyad zorunlu
     if (!name.trim()) {
       newErrors.name = "Ad Soyad gerekli";
     }
-    if (!phone.trim()) {
-      newErrors.phone = "Telefon numarası gerekli";
+
+    // Diğer alanlar isteğe bağlı, ancak doldurulmuşsa validasyon yap
+    if (nationalId.trim() && nationalId.trim().length !== 11) {
+      newErrors.nationalId = "TC Kimlik numarası 11 hane olmalı";
     }
-    if (!nationalId.trim()) {
-      newErrors.nationalId = "TC Kimlik numarası gerekli";
-    }
-    if (nationalId.trim().length !== 11 || !/^\d{11}$/.test(nationalId.trim())) {
-      newErrors.nationalId = "TC Kimlik numarası tam 11 hane olmalı";
-    }
-    if (!plate.trim()) {
-      newErrors.plate = "Plaka gerekli";
-    }
-    if (!vehicleType) {
-      newErrors.vehicleType = "Araç tipi seçin";
+    if (nationalId.trim() && !/^\d{11}$/.test(nationalId.trim())) {
+      newErrors.nationalId = "TC Kimlik numarası sadece rakam olmalı";
     }
 
     setErrors(newErrors);
@@ -120,10 +114,10 @@ export default function CarrierFormScreen() {
     try {
       const data = {
         name: name.trim(),
-        phone: phone.trim(),
-        nationalId: nationalId.trim(),
-        plate: plate.trim().toUpperCase(),
-        vehicleType,
+        ...(phone.trim() && { phone: phone.trim() }),
+        ...(nationalId.trim() && { nationalId: nationalId.trim() }),
+        ...(plate.trim() && { plate: plate.trim().toUpperCase() }),
+        ...(vehicleType && vehicleType !== "kamyon" && { vehicleType }),
         ...(dorsePlate.trim() && { dorsePlate: dorsePlate.trim() }),
       };
 
