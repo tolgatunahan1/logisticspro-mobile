@@ -112,7 +112,6 @@ export const firebaseAuthService = {
       const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
       return userCredential.user;
     } catch (error: any) {
-      console.error("Firebase login error:", error?.message);
       if (error?.message?.includes("api-key-not-valid")) {
         throw new Error(FIREBASE_CONFIG_ERROR);
       }

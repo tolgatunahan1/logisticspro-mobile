@@ -67,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      console.error("Firebase login error:", error);
       throw error;
     }
   };
@@ -82,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      console.error("Firebase register error:", error);
       throw error;
     }
   };
