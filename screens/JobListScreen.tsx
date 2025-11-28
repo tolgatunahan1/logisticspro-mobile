@@ -29,11 +29,8 @@ export default function JobListScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [currentCarrier, setCurrentCarrier] = useState<Carrier | null>(null);
-  const [showCarrierPicker, setShowCarrierPicker] = useState(false);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
-  const [jobForCarrier, setJobForCarrier] = useState<PlannedJob | null>(null);
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -127,50 +124,40 @@ export default function JobListScreen() {
     }
   };
 
-  const handleCreateTrip = (job: PlannedJob) => {
+  const handleCreateTrip = async (job: PlannedJob) => {
     if (!job) {
       Alert.alert("Hata", "Seçili iş bulunamadı");
       return;
     }
-    if (carriers.length === 0) {
-      Alert.alert("Hata", "Lütfen önce nakliyeci ekleyin");
-      return;
-    }
-    setJobForCarrier(job);
-    setShowCarrierPicker(true);
-  };
-
-  const handleConfirmTrip = async () => {
-    if (!jobForCarrier || !selectedCarrier) {
+    if (!selectedCarrier) {
       Alert.alert("Hata", "Lütfen nakliyeci seçiniz");
       return;
     }
+    if (!firebaseUser?.uid) return;
 
     setIsCreatingTrip(true);
     try {
       const completedJobData = {
-        companyId: jobForCarrier.companyId,
+        companyId: job.companyId,
         carrierId: selectedCarrier.id,
-        plannedJobId: jobForCarrier.id,
-        cargoType: jobForCarrier.cargoType,
-        tonnage: jobForCarrier.tonnage,
-        dimensions: jobForCarrier.dimensions,
-        loadingLocation: jobForCarrier.loadingLocation,
-        deliveryLocation: jobForCarrier.deliveryLocation,
-        loadingDate: jobForCarrier.loadingDate,
-        deliveryDate: jobForCarrier.deliveryDate,
-        transportationCost: jobForCarrier.transportationCost,
-        commissionCost: jobForCarrier.commissionCost,
+        plannedJobId: job.id,
+        cargoType: job.cargoType,
+        tonnage: job.tonnage,
+        dimensions: job.dimensions,
+        loadingLocation: job.loadingLocation,
+        deliveryLocation: job.deliveryLocation,
+        loadingDate: job.loadingDate,
+        deliveryDate: job.deliveryDate,
+        transportationCost: job.transportationCost,
+        commissionCost: job.commissionCost,
         completionDate: Date.now(),
         notes: "",
       };
 
-      await addCompletedJob(firebaseUser!.uid, completedJobData);
-      await deleteJob(firebaseUser!.uid, jobForCarrier.id);
-      setShowCarrierPicker(false);
+      await addCompletedJob(firebaseUser.uid, completedJobData);
+      await deleteJob(firebaseUser.uid, job.id);
       setShowDetailModal(false);
       setSelectedCarrier(null);
-      setJobForCarrier(null);
       await loadData();
       Alert.alert("Başarılı", "Sefer başarıyla oluşturuldu");
     } catch (error) {
@@ -180,6 +167,7 @@ export default function JobListScreen() {
       setIsCreatingTrip(false);
     }
   };
+
 
   const renderJobItem = ({ item: job }: { item: PlannedJob }) => {
     const company = companies[job.companyId];
@@ -382,9 +370,55 @@ export default function JobListScreen() {
               )}
             </ScrollView>
 
+            {/* Nakliyeci Seçim Bölümü */}
+            {selectedJob && (
+              <View style={{ gap: Spacing.md, marginBottom: Spacing.lg, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  Nakliyeci Seçin
+                </ThemedText>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: Spacing.md }}
+                >
+                  {carriers.length > 0 ? (
+                    carriers.map((carrier) => (
+                      <Pressable
+                        key={carrier.id}
+                        onPress={() => setSelectedCarrier(carrier)}
+                        style={({ pressed }) => [
+                          {
+                            paddingHorizontal: Spacing.lg,
+                            paddingVertical: Spacing.md,
+                            borderRadius: BorderRadius.md,
+                            borderWidth: 2,
+                            borderColor: selectedCarrier?.id === carrier.id ? theme.link : colors.border,
+                            backgroundColor: selectedCarrier?.id === carrier.id ? theme.link + "15" : colors.backgroundDefault,
+                            opacity: pressed ? 0.7 : 1,
+                            minWidth: 140,
+                          },
+                        ]}
+                      >
+                        <ThemedText type="small" style={{ fontWeight: "600" }}>
+                          {carrier.name}
+                        </ThemedText>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
+                          {carrier.phone}
+                        </ThemedText>
+                      </Pressable>
+                    ))
+                  ) : (
+                    <ThemedText type="body" style={{ color: colors.textSecondary }}>
+                      Nakliyeci bulunamadı
+                    </ThemedText>
+                  )}
+                </ScrollView>
+              </View>
+            )}
+
             {/* Modal Footer - Share, Create Trip and Delete Buttons */}
             {selectedJob && (
-              <View style={{ gap: Spacing.md }}>
+              <View style={{ gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
                 <View style={{ flexDirection: "row", gap: Spacing.md }}>
                   <Pressable
                     onPress={() => handleShareJob(selectedJob)}
@@ -392,10 +426,11 @@ export default function JobListScreen() {
                       styles.shareButton,
                       {
                         backgroundColor: theme.link,
-                        opacity: pressed ? 0.9 : 1,
+                        opacity: pressed || isCreatingTrip ? 0.9 : 1,
                         flex: 1,
                       },
                     ]}
+                    disabled={isCreatingTrip}
                   >
                     <Feather name="share-2" size={20} color="#FFFFFF" />
                     <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
@@ -405,17 +440,18 @@ export default function JobListScreen() {
                 </View>
                 <Pressable
                   onPress={() => handleCreateTrip(selectedJob)}
+                  disabled={isCreatingTrip || !selectedCarrier}
                   style={({ pressed }) => [
                     styles.shareButton,
                     {
                       backgroundColor: colors.success,
-                      opacity: pressed ? 0.9 : 1,
+                      opacity: pressed || isCreatingTrip || !selectedCarrier ? 0.7 : 1,
                     },
                   ]}
                 >
                   <Feather name="check-circle" size={20} color="#FFFFFF" />
                   <ThemedText type="body" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Seferi Oluştur
+                    {isCreatingTrip ? "Oluşturuluyor..." : "Seferi Oluştur"}
                   </ThemedText>
                 </Pressable>
               </View>
@@ -424,88 +460,6 @@ export default function JobListScreen() {
         </View>
       </Modal>
 
-      {/* Carrier Picker Modal */}
-      <Modal
-        visible={showCarrierPicker}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowCarrierPicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">Nakliyeci Seçin</ThemedText>
-              <Pressable onPress={() => setShowCarrierPicker(false)}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-            <FlatList
-              data={carriers}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item: carrier }) => (
-                <Pressable
-                  onPress={() => setSelectedCarrier(carrier)}
-                  style={({ pressed }) => [
-                    styles.carrierOption,
-                    {
-                      backgroundColor: selectedCarrier?.id === carrier.id ? theme.link + "20" : "transparent",
-                      opacity: pressed ? 0.7 : 1,
-                    },
-                  ]}
-                >
-                  <View>
-                    <ThemedText type="body" style={{ fontWeight: "600" }}>
-                      {carrier.name}
-                    </ThemedText>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      {carrier.phone}
-                    </ThemedText>
-                  </View>
-                  {selectedCarrier?.id === carrier.id && (
-                    <Feather name="check" size={20} color={theme.link} />
-                  )}
-                </Pressable>
-              )}
-              scrollEnabled
-              contentContainerStyle={{ paddingBottom: Spacing.xl }}
-            />
-            <View style={{ flexDirection: "row", gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg }}>
-              <Pressable
-                onPress={() => setShowCarrierPicker(false)}
-                disabled={isCreatingTrip}
-                style={({ pressed }) => [
-                  {
-                    flex: 1,
-                    paddingVertical: Spacing.md,
-                    paddingHorizontal: Spacing.lg,
-                    borderRadius: BorderRadius.md,
-                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                    opacity: pressed || isCreatingTrip ? 0.5 : 1,
-                  },
-                ]}
-              >
-                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
-              </Pressable>
-              <Pressable
-                onPress={handleConfirmTrip}
-                disabled={isCreatingTrip || !selectedCarrier}
-                style={({ pressed }) => [
-                  {
-                    flex: 1,
-                    paddingVertical: Spacing.md,
-                    paddingHorizontal: Spacing.lg,
-                    borderRadius: BorderRadius.md,
-                    backgroundColor: colors.success,
-                    opacity: pressed || isCreatingTrip || !selectedCarrier ? 0.7 : 1,
-                  },
-                ]}
-              >
-                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>Onayla</ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal
