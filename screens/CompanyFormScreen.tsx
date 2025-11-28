@@ -12,6 +12,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addCompany, updateCompany } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { validatePhoneNumber } from "../utils/validation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "CompanyForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "CompanyForm">;
@@ -51,8 +52,15 @@ export default function CompanyFormScreen() {
     if (!name.trim()) {
       newErrors.name = "Firma adı gerekli";
     }
+
     if (!phone.trim()) {
       newErrors.phone = "Telefon numarası gerekli";
+    } else {
+      // Telefon Validasyonu
+      const phoneValidation = validatePhoneNumber(phone);
+      if (!phoneValidation.isValid) {
+        newErrors.phone = phoneValidation.error;
+      }
     }
 
     setErrors(newErrors);

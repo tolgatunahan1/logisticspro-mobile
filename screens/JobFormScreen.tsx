@@ -12,6 +12,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addJob, updateJob, getCompanies, PlannedJob, Company } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
+import { validateDateLogic, validateNotEmpty, validatePositiveNumber } from "../utils/validation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "JobForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "JobForm">;
@@ -257,7 +258,6 @@ export default function JobFormScreen() {
   const handleSave = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Web'de refs'ten values oku, native'de state'ten oku
       let finalCargoType = cargoType;
       let finalTonnage = tonnage;
       let finalDimensions = dimensions;
@@ -285,6 +285,68 @@ export default function JobFormScreen() {
         }
         if (deliveryDateRef.current?.value) {
           finalDeliveryDate = new Date(deliveryDateRef.current.value).getTime();
+        }
+      }
+
+      // VALIDASYON
+      if (!finalCompanyId) {
+        Alert.alert("Hata", "Lütfen bir firma seçin");
+        setIsLoading(false);
+        return;
+      }
+
+      const cargoValidation = validateNotEmpty(finalCargoType, "Yükün cinsi");
+      if (!cargoValidation.isValid) {
+        Alert.alert("Hata", cargoValidation.error);
+        setIsLoading(false);
+        return;
+      }
+
+      const tonnageValidation = validateNotEmpty(finalTonnage, "Tonaj");
+      if (!tonnageValidation.isValid) {
+        Alert.alert("Hata", tonnageValidation.error);
+        setIsLoading(false);
+        return;
+      }
+
+      const loadingLocValidation = validateNotEmpty(finalLoadingLocation, "Yükleme yeri");
+      if (!loadingLocValidation.isValid) {
+        Alert.alert("Hata", loadingLocValidation.error);
+        setIsLoading(false);
+        return;
+      }
+
+      const deliveryLocValidation = validateNotEmpty(finalDeliveryLocation, "Teslim yeri");
+      if (!deliveryLocValidation.isValid) {
+        Alert.alert("Hata", deliveryLocValidation.error);
+        setIsLoading(false);
+        return;
+      }
+
+      // Tarih Mantık Validasyonu (edit modunda geçmiş tarihler izin ver)
+      const dateValidation = validateDateLogic(finalLoadingDate, finalDeliveryDate, isEdit);
+      if (!dateValidation.isValid) {
+        Alert.alert("Hata", dateValidation.error);
+        setIsLoading(false);
+        return;
+      }
+
+      // Cost validasyonları (isteğe bağlı ama doldurulmuşsa pozitif olmalı)
+      if (finalTransportationCost.trim()) {
+        const costValidation = validatePositiveNumber(finalTransportationCost, "Nakliye Bedeli");
+        if (!costValidation.isValid) {
+          Alert.alert("Hata", costValidation.error);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (finalCommissionCost.trim()) {
+        const commissionValidation = validatePositiveNumber(finalCommissionCost, "Komisyon Bedeli");
+        if (!commissionValidation.isValid) {
+          Alert.alert("Hata", commissionValidation.error);
+          setIsLoading(false);
+          return;
         }
       }
 

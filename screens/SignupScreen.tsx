@@ -11,7 +11,8 @@ import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { validatePassword } from "../utils/userManagement";
+import { validatePassword as validatePasswordUtil } from "../utils/userManagement";
+import { validateEmail, validatePassword } from "../utils/validation";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -79,13 +80,10 @@ export default function SignupScreen() {
   const handleSignup = async () => {
     setError("");
 
-    if (!username.trim()) {
-      setError("Email gerekli");
-      return;
-    }
-
-    if (!username.includes("@")) {
-      setError("Geçerli email adresi girin");
+    // Email Validasyonu
+    const emailValidation = validateEmail(username);
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error);
       return;
     }
 
@@ -94,8 +92,10 @@ export default function SignupScreen() {
       return;
     }
 
-    if (!validatePassword(password)) {
-      setError("Şifre: min 8 char, 1 büyük harf, 1 rakam");
+    // Şifre Validasyonu
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.error);
       return;
     }
 

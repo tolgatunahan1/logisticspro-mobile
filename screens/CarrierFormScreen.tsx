@@ -13,6 +13,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addCarrier, updateCarrier, VEHICLE_TYPES, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { validatePhoneNumber, validateTCIdNumber } from "../utils/validation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "CarrierForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "CarrierForm">;
@@ -89,14 +90,25 @@ export default function CarrierFormScreen() {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    // Sadece Ad Soyad zorunlu
+    // Ad Soyad zorunlu
     if (!name.trim()) {
       newErrors.name = "Ad Soyad gerekli";
     }
 
-    // TC Kimlik: boş ise OK, doldurulmuşsa tam 11 hane olmalı
-    if (nationalId.trim() && nationalId.trim().length !== 11) {
-      newErrors.nationalId = "TC Kimlik numarası tam 11 hane olmalı";
+    // Telefon: boş ise OK, doldurulmuşsa validasyonu geç
+    if (phone.trim()) {
+      const phoneValidation = validatePhoneNumber(phone);
+      if (!phoneValidation.isValid) {
+        newErrors.phone = phoneValidation.error;
+      }
+    }
+
+    // TC Kimlik: boş ise OK, doldurulmuşsa validasyonu geç
+    if (nationalId.trim()) {
+      const tcValidation = validateTCIdNumber(nationalId);
+      if (!tcValidation.isValid) {
+        newErrors.nationalId = tcValidation.error;
+      }
     }
 
     setErrors(newErrors);

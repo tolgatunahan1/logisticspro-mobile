@@ -13,6 +13,7 @@ import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN, getCompletedJobs, CompletedJob } from "../utils/storage";
+import { validateIBAN, validateEmail, validatePassword } from "../utils/validation";
 import { IBANListModal } from "../components/IBANListModal";
 import { firebaseAuthService } from "../utils/firebaseAuth";
 
@@ -75,6 +76,13 @@ export default function SettingsScreen() {
       return;
     }
 
+    // IBAN Validasyonu
+    const ibanValidation = validateIBAN(ibanInput);
+    if (!ibanValidation.isValid) {
+      Alert.alert("Hata", ibanValidation.error);
+      return;
+    }
+
     if (!firebaseUser?.uid) return;
     setIsAdding(true);
     const newIBAN = await addIBAN(firebaseUser.uid, {
@@ -87,6 +95,7 @@ export default function SettingsScreen() {
       setNameInput("");
       setShowAddModal(false);
       await loadIBANs();
+      Alert.alert("Başarılı", "IBAN başarıyla eklendi");
     } else {
       Alert.alert("Hata", "IBAN kaydedilemedi");
     }
@@ -119,8 +128,10 @@ export default function SettingsScreen() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      Alert.alert("Hata", "Yeni şifre en az 8 karakter olmalı");
+    // Yeni Şifre Validasyonu
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      Alert.alert("Hata", passwordValidation.error);
       return;
     }
 
@@ -145,8 +156,10 @@ export default function SettingsScreen() {
       return;
     }
 
-    if (!newEmail.includes("@")) {
-      Alert.alert("Hata", "Geçerli bir email adresi giriniz");
+    // Email Validasyonu
+    const emailValidation = validateEmail(newEmail);
+    if (!emailValidation.isValid) {
+      Alert.alert("Hata", emailValidation.error);
       return;
     }
 
