@@ -156,19 +156,29 @@ export default function CompletedJobListScreen() {
   // Helper function to share IBAN with carrier via WhatsApp
   const shareIBANWithCarrier = useCallback(
     async (selectedIBAN: IBAN) => {
-      if (!selectedJob) return;
+      if (!selectedJob || !selectedJob.carrierId) {
+        Alert.alert("Hata", "İş veya nakliyeci bilgileri eksik");
+        return;
+      }
 
       const carrier = carriers[selectedJob.carrierId];
 
-      if (!carrier?.phone) {
+      if (!carrier || !carrier.phone || !carrier.phone.trim()) {
         Alert.alert("Hata", "Nakliyeci telefon numarası eksik");
         return;
       }
 
-      const message = `Ödeme Bilgileri:\n\nAd Soyad: ${selectedIBAN.nameSurname}\nİBAN: ${selectedIBAN.ibanNumber}`;
+      if (!selectedIBAN || !selectedIBAN.nameSurname || !selectedIBAN.ibanNumber) {
+        Alert.alert("Hata", "IBAN bilgileri eksik");
+        return;
+      }
+
+      let message = `Ödeme Bilgileri:\n\nAd Soyad: ${selectedIBAN.nameSurname}\nİBAN: ${selectedIBAN.ibanNumber}`;
 
       let phoneNumber = carrier.phone.replace(/\D/g, "");
-      if (!phoneNumber.startsWith("90")) {
+      if (phoneNumber.startsWith("0")) {
+        phoneNumber = "90" + phoneNumber.substring(1);
+      } else if (!phoneNumber.startsWith("90")) {
         phoneNumber = "90" + phoneNumber;
       }
 
