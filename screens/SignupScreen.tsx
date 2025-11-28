@@ -116,7 +116,7 @@ export default function SignupScreen() {
           [{ 
             text: "Anladım", 
             onPress: () => {
-              navigation.popToTop();
+              navigation.navigate("Login");
             } 
           }]
         );

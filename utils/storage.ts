@@ -116,7 +116,6 @@ export const getCarriers = async (uid: string): Promise<Carrier[]> => {
     }
     return [];
   } catch (error) {
-    console.error("Failed to get carriers:", error);
     return [];
   }
 };
@@ -132,7 +131,6 @@ export const addCarrier = async (uid: string, carrier: Omit<Carrier, "id" | "cre
     await set(ref(firebaseDatabase, `users/${uid}/data/carriers/${newCarrier.id}`), newCarrier);
     return newCarrier;
   } catch (error) {
-    console.error("Failed to add carrier:", error);
     return null;
   }
 };
@@ -145,7 +143,6 @@ export const updateCarrier = async (uid: string, id: string, updates: Partial<Om
     });
     return true;
   } catch (error) {
-    console.error("Failed to update carrier:", error);
     return false;
   }
 };
@@ -155,7 +152,6 @@ export const deleteCarrier = async (uid: string, id: string): Promise<boolean> =
     await remove(ref(firebaseDatabase, `users/${uid}/data/carriers/${id}`));
     return true;
   } catch (error) {
-    console.error("Failed to delete carrier:", error);
     return false;
   }
 };
@@ -181,7 +177,6 @@ export const getCompanies = async (uid: string): Promise<Company[]> => {
     }
     return [];
   } catch (error) {
-    console.error("Failed to get companies:", error);
     return [];
   }
 };
@@ -197,7 +192,6 @@ export const addCompany = async (uid: string, company: Omit<Company, "id" | "cre
     await set(ref(firebaseDatabase, `users/${uid}/data/companies/${newCompany.id}`), newCompany);
     return newCompany;
   } catch (error) {
-    console.error("Failed to add company:", error);
     return null;
   }
 };
@@ -210,7 +204,6 @@ export const updateCompany = async (uid: string, id: string, updates: Partial<Om
     });
     return true;
   } catch (error) {
-    console.error("Failed to update company:", error);
     return false;
   }
 };
@@ -220,7 +213,6 @@ export const deleteCompany = async (uid: string, id: string): Promise<boolean> =
     await remove(ref(firebaseDatabase, `users/${uid}/data/companies/${id}`));
     return true;
   } catch (error) {
-    console.error("Failed to delete company:", error);
     return false;
   }
 };
@@ -247,7 +239,6 @@ export const getJobs = async (uid: string): Promise<PlannedJob[]> => {
     }
     return [];
   } catch (error) {
-    console.error("Failed to get jobs:", error);
     return [];
   }
 };
@@ -263,7 +254,6 @@ export const addJob = async (uid: string, job: Omit<PlannedJob, "id" | "createdA
     await set(ref(firebaseDatabase, `users/${uid}/data/jobs/${newJob.id}`), newJob);
     return newJob;
   } catch (error) {
-    console.error("Failed to add job:", error);
     return null;
   }
 };
@@ -276,7 +266,6 @@ export const updateJob = async (uid: string, id: string, updates: Partial<Omit<P
     });
     return true;
   } catch (error) {
-    console.error("Failed to update job:", error);
     return false;
   }
 };
@@ -286,7 +275,6 @@ export const deleteJob = async (uid: string, id: string): Promise<boolean> => {
     await remove(ref(firebaseDatabase, `users/${uid}/data/jobs/${id}`));
     return true;
   } catch (error) {
-    console.error("Failed to delete job:", error);
     return false;
   }
 };
@@ -325,7 +313,6 @@ export const getCompletedJobs = async (uid: string): Promise<CompletedJob[]> => 
     }
     return [];
   } catch (error) {
-    console.error("Failed to get completed jobs:", error);
     return [];
   }
 };
@@ -341,7 +328,6 @@ export const addCompletedJob = async (uid: string, job: Omit<CompletedJob, "id" 
     await set(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${newJob.id}`), newJob);
     return newJob;
   } catch (error) {
-    console.error("Failed to add completed job:", error);
     return null;
   }
 };
@@ -354,7 +340,6 @@ export const updateCompletedJob = async (uid: string, id: string, updates: Parti
     });
     return true;
   } catch (error) {
-    console.error("Failed to update completed job:", error);
     return false;
   }
 };
@@ -367,7 +352,6 @@ export const markCommissionAsPaid = async (uid: string, id: string, isPaid: bool
     });
     return true;
   } catch (error) {
-    console.error("Failed to update commission status:", error);
     return false;
   }
 };
@@ -405,7 +389,6 @@ export const deleteCompletedJob = async (uid: string, id: string): Promise<boole
     await remove(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`));
     return true;
   } catch (error) {
-    console.error("Failed to delete completed job:", error);
     return false;
   }
 };
@@ -432,7 +415,6 @@ export const getIBANs = async (uid: string): Promise<IBAN[]> => {
     }
     return [];
   } catch (error) {
-    console.error("Failed to get IBANs:", error);
     return [];
   }
 };
@@ -448,7 +430,6 @@ export const addIBAN = async (uid: string, iban: Omit<IBAN, "id" | "createdAt" |
     await set(ref(firebaseDatabase, `users/${uid}/data/ibans/${newIBAN.id}`), newIBAN);
     return newIBAN;
   } catch (error) {
-    console.error("Failed to add IBAN:", error);
     return null;
   }
 };
@@ -458,7 +439,6 @@ export const deleteIBAN = async (uid: string, id: string): Promise<boolean> => {
     await remove(ref(firebaseDatabase, `users/${uid}/data/ibans/${id}`));
     return true;
   } catch (error) {
-    console.error("Failed to delete IBAN:", error);
     return false;
   }
 };
@@ -481,7 +461,6 @@ export const getCompanyWallet = async (uid: string): Promise<CompanyWallet> => {
       updatedAt: Date.now(),
     };
   } catch (error) {
-    console.error("Failed to get company wallet:", error);
     return {
       id: generateId(),
       totalBalance: 0,
@@ -502,7 +481,6 @@ export const updateCompanyWallet = async (uid: string, wallet: CompanyWallet): P
     });
     return true;
   } catch (error) {
-    console.error("Failed to update company wallet:", error);
     return false;
   }
 };
@@ -517,7 +495,6 @@ export const getCarrierAvailabilities = async (): Promise<CarrierAvailability[]>
     }
     return [];
   } catch (error) {
-    console.error("Failed to get carrier availabilities:", error);
     return [];
   }
 };
@@ -533,7 +510,6 @@ export const addCarrierAvailability = async (availability: Omit<CarrierAvailabil
     await set(ref(firebaseDatabase, `public/carrierAvailabilities/${newAvailability.id}`), newAvailability);
     return newAvailability;
   } catch (error) {
-    console.error("Failed to add carrier availability:", error);
     return null;
   }
 };
@@ -543,7 +519,6 @@ export const deleteCarrierAvailability = async (id: string): Promise<boolean> =>
     await remove(ref(firebaseDatabase, `public/carrierAvailabilities/${id}`));
     return true;
   } catch (error) {
-    console.error("Failed to delete carrier availability:", error);
     return false;
   }
 };
