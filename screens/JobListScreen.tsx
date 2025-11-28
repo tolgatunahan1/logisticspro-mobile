@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useLayoutEffect } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -277,20 +277,24 @@ export default function JobListScreen() {
         }}
       >
         <View style={[styles.modalOverlay, { justifyContent: "flex-end" }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flex: 1, maxHeight: "95%" }]}>
-            {/* Modal Header */}
-            <View style={[styles.modalHeader, { paddingHorizontal: Spacing.lg }]}>
-              <ThemedText type="h3">İş Detayları</ThemedText>
-              <Pressable onPress={() => {
-                setShowDetailModal(false);
-                setCarrierSearchQuery("");
-              }}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+          >
+            <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot, flex: 1, maxHeight: "95%", flexDirection: "column" }]}>
+              {/* Modal Header */}
+              <View style={[styles.modalHeader, { paddingHorizontal: Spacing.lg }]}>
+                <ThemedText type="h3">İş Detayları</ThemedText>
+                <Pressable onPress={() => {
+                  setShowDetailModal(false);
+                  setCarrierSearchQuery("");
+                }}>
+                  <Feather name="x" size={24} color={theme.text} />
+                </Pressable>
+              </View>
 
-            {/* Modal Body - Scrollable Job Details */}
-            <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false}>
+              {/* Modal Body - Scrollable Job Details */}
+              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false}>
               {selectedJob && (
                 <View style={{ gap: Spacing.lg }}>
                   <View style={styles.detailSection}>
@@ -384,12 +388,11 @@ export default function JobListScreen() {
                   </View>
                 </View>
               )}
-            </ScrollView>
+              </ScrollView>
 
-
-            {/* Fixed Nakliyeci Seçim Bölümü - Bottom Section */}
-            {selectedJob && (
-              <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: theme.backgroundRoot }}>
+              {/* Fixed Nakliyeci Seçim Bölümü - Bottom Section */}
+              {selectedJob && (
+                <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: theme.backgroundRoot }}>
                 <View style={{ gap: Spacing.md }}>
                   <View style={{ gap: Spacing.sm }}>
                     <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
@@ -512,9 +515,10 @@ export default function JobListScreen() {
                     </View>
                   </View>
                 )}
-              </View>
-            )}
-          </View>
+                </View>
+              )}
+            </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
 
