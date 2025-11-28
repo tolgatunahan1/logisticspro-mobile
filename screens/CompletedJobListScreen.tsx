@@ -326,14 +326,20 @@ export default function CompletedJobListScreen() {
         visible={showDetailModal}
         animationType="slide"
         transparent
-        onRequestClose={() => setShowDetailModal(false)}
+        onRequestClose={async () => {
+          setShowDetailModal(false);
+          await loadData();
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <ThemedText type="h3">İş Detayları</ThemedText>
-              <Pressable onPress={() => setShowDetailModal(false)}>
+              <Pressable onPress={async () => {
+                setShowDetailModal(false);
+                await loadData();
+              }}>
                 <Feather name="x" size={24} color={theme.text} />
               </Pressable>
             </View>
@@ -607,78 +613,69 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                   </View>
 
-                  {/* Commission Payment Status - Toggle Button */}
+                  {/* Commission Payment Status - Modern Toggle Switch */}
                   <View style={{ gap: Spacing.sm }}>
                     <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                       Komisyon Ödeme Durumu
                     </ThemedText>
-                    <View style={{ flexDirection: "row", gap: Spacing.md }}>
-                      <Pressable
-                        onPress={async () => {
-                          if (selectedJob && firebaseUser && !selectedJob.commissionPaid) {
-                            const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, true);
-                            if (success) {
-                              const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: true } : j);
-                              const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: true } : j);
-                              setJobs(updatedJobs);
-                              setFilteredJobs(updatedFiltered);
-                              setSelectedJob({ ...selectedJob, commissionPaid: true });
-                            }
+                    <Pressable
+                      onPress={async () => {
+                        if (selectedJob && firebaseUser) {
+                          const newState = !selectedJob.commissionPaid;
+                          const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, newState);
+                          if (success) {
+                            const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newState } : j);
+                            const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newState } : j);
+                            setJobs(updatedJobs);
+                            setFilteredJobs(updatedFiltered);
+                            setSelectedJob({ ...selectedJob, commissionPaid: newState });
                           }
+                        }
+                      }}
+                      style={({ pressed }) => [
+                        {
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: Spacing.md,
+                          paddingVertical: Spacing.md,
+                          paddingHorizontal: Spacing.lg,
+                          borderRadius: BorderRadius.lg,
+                          backgroundColor: selectedJob.commissionPaid ? colors.success + "20" : isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                          borderWidth: 1,
+                          borderColor: selectedJob.commissionPaid ? colors.success : colors.border,
+                          opacity: pressed ? 0.8 : 1,
+                        },
+                      ]}
+                    >
+                      <View
+                        style={{
+                          width: 48,
+                          height: 28,
+                          borderRadius: 14,
+                          backgroundColor: selectedJob.commissionPaid ? colors.success : colors.textSecondary + "40",
+                          justifyContent: "center",
+                          alignItems: selectedJob.commissionPaid ? "flex-end" : "flex-start",
+                          paddingHorizontal: 2,
                         }}
-                        style={({ pressed }) => [
-                          {
-                            flex: 1,
-                            paddingVertical: Spacing.md,
-                            paddingHorizontal: Spacing.lg,
-                            borderRadius: BorderRadius.md,
-                            backgroundColor: selectedJob.commissionPaid ? colors.success : colors.border,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            opacity: pressed ? 0.8 : 1,
-                          },
-                        ]}
                       >
-                        <ThemedText
-                          type="small"
+                        <View
                           style={{
-                            color: selectedJob.commissionPaid ? "#FFFFFF" : colors.textSecondary,
-                            fontWeight: "600",
+                            width: 24,
+                            height: 24,
+                            borderRadius: 12,
+                            backgroundColor: "#FFFFFF",
                           }}
-                        >
+                        />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <ThemedText type="small" style={{ fontWeight: "600", color: selectedJob.commissionPaid ? colors.success : colors.textSecondary }}>
                           {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
                         </ThemedText>
-                      </Pressable>
+                      </View>
                       {selectedJob.commissionPaid && (
-                        <Pressable
-                          onPress={async () => {
-                            if (selectedJob && firebaseUser) {
-                              const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, false);
-                              if (success) {
-                                const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: false } : j);
-                                const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: false } : j);
-                                setJobs(updatedJobs);
-                                setFilteredJobs(updatedFiltered);
-                                setSelectedJob({ ...selectedJob, commissionPaid: false });
-                              }
-                            }
-                          }}
-                          style={({ pressed }) => [
-                            {
-                              paddingVertical: Spacing.md,
-                              paddingHorizontal: Spacing.lg,
-                              borderRadius: BorderRadius.md,
-                              backgroundColor: colors.border,
-                              justifyContent: "center",
-                              alignItems: "center",
-                              opacity: pressed ? 0.8 : 1,
-                            },
-                          ]}
-                        >
-                          <Feather name="x" size={18} color={colors.textSecondary} />
-                        </Pressable>
+                        <Feather name="check" size={18} color={colors.success} />
                       )}
-                    </View>
+                    </Pressable>
                   </View>
 
                   <View style={styles.detailSection}>
