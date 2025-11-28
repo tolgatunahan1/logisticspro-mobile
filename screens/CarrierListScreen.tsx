@@ -277,24 +277,24 @@ export default function CarrierListScreen() {
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
                       TC Kimlik Numarası
                     </ThemedText>
-                    <ThemedText type="h4">{selectedCarrier.nationalId}</ThemedText>
+                    <ThemedText type="h4">{selectedCarrier?.nationalId || "-"}</ThemedText>
                   </View>
 
                   <View style={styles.detailSection}>
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
                       Plaka
                     </ThemedText>
-                    <ThemedText type="h4">{selectedCarrier.plate}</ThemedText>
+                    <ThemedText type="h4">{selectedCarrier?.plate || "-"}</ThemedText>
                   </View>
 
-                  {selectedCarrier.dorsePlate && (
+                  {selectedCarrier?.dorsePlate ? (
                     <View style={styles.detailSection}>
                       <ThemedText type="small" style={{ color: colors.textSecondary }}>
                         Dorse Plakası
                       </ThemedText>
                       <ThemedText type="h4">{selectedCarrier.dorsePlate}</ThemedText>
                     </View>
-                  )}
+                  ) : null}
 
                   <View style={styles.detailSection}>
                     <ThemedText type="small" style={{ color: colors.textSecondary }}>
