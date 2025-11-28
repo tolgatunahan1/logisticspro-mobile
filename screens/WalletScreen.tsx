@@ -3,6 +3,7 @@ import { StyleSheet, View, Pressable, Alert, FlatList } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 import { ScreenScrollView } from "../components/ScreenScrollView";
 import { ThemedView } from "../components/ThemedView";
@@ -18,6 +19,7 @@ export default function WalletScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const colors = isDark ? Colors.dark : Colors.light;
+  const headerHeight = useHeaderHeight();
   const { firebaseUser } = useAuth();
 
   const [paidTotal, setPaidTotal] = useState<number>(0);
@@ -181,7 +183,7 @@ export default function WalletScreen() {
         ListHeaderComponent={() => (
           <>
             {/* Header Stats */}
-            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg }]}>
+            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: headerHeight + Spacing.lg }]}>
               <View style={{ gap: Spacing.md }}>
                 {/* Bekleyen Ödemeler Bakiyesi Card */}
                 <View
