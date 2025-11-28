@@ -81,44 +81,51 @@ export default function SettingsScreen() {
     }
   }, [firebaseUser?.uid]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const loadData = async () => {
-        if (!firebaseUser?.uid) return;
-        
+  React.useEffect(() => {
+    const loadData = async () => {
+      if (!firebaseUser?.uid) {
+        console.log("❌ No firebaseUser.uid in SettingsScreen");
+        return;
+      }
+      
+      console.log("📊 Loading commission stats for:", firebaseUser.uid);
+      
+      try {
         // Load IBANs
         const ibanData = await getIBANs(firebaseUser.uid);
         setIbans(ibanData);
         
         // Load Commission Stats
-        try {
-          const jobs = await getCompletedJobs(firebaseUser.uid);
-          setCompletedJobs(jobs);
-          
-          const paid = jobs.reduce((sum, job) => {
-            if (job.commissionPaid && job.commissionCost) {
-              return sum + parseFloat(job.commissionCost as string);
-            }
-            return sum;
-          }, 0);
-          
-          const unpaid = jobs.reduce((sum, job) => {
-            if (!job.commissionPaid && job.commissionCost) {
-              return sum + parseFloat(job.commissionCost as string);
-            }
-            return sum;
-          }, 0);
-          
-          setPaidCommissionsTotal(paid);
-          setUnpaidCommissionsTotal(unpaid);
-        } catch (error) {
-          console.error("Commission stats load error:", error);
-        }
-      };
-      
-      loadData();
-    }, [firebaseUser?.uid])
-  );
+        const jobs = await getCompletedJobs(firebaseUser.uid);
+        console.log("📦 Got jobs:", jobs.length);
+        setCompletedJobs(jobs);
+        
+        const paid = jobs.reduce((sum, job) => {
+          if (job.commissionPaid && job.commissionCost) {
+            const cost = parseFloat(job.commissionCost as string);
+            return sum + cost;
+          }
+          return sum;
+        }, 0);
+        
+        const unpaid = jobs.reduce((sum, job) => {
+          if (!job.commissionPaid && job.commissionCost) {
+            const cost = parseFloat(job.commissionCost as string);
+            return sum + cost;
+          }
+          return sum;
+        }, 0);
+        
+        console.log("✅ Paid:", paid, "Unpaid:", unpaid);
+        setPaidCommissionsTotal(paid);
+        setUnpaidCommissionsTotal(unpaid);
+      } catch (error) {
+        console.error("❌ Commission stats load error:", error);
+      }
+    };
+    
+    loadData();
+  }, [firebaseUser?.uid]);
 
   const handleAddIBAN = async () => {
     if (!ibanInput.trim() || !nameInput.trim()) {

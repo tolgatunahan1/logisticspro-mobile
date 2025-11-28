@@ -209,7 +209,7 @@ export default function HomeScreen() {
             },
           ]}
         >
-          <Feather name="wallet" size={24} color="#FFFFFF" />
+          <Feather name="dollar-sign" size={24} color="#FFFFFF" />
           <View style={styles.statContent}>
             <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
               Cüzdan Bakiyesi
