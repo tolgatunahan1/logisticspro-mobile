@@ -40,8 +40,8 @@ export default function AdminDashboard() {
       const approved = await firebaseAuthService.getApprovedUsers();
       setPendingUsers(pending);
       setApprovedUsers(approved);
-    } catch (error) {
-      // Silent fail - returns empty arrays
+    } catch (error: any) {
+      Alert.alert("Hata", "Verileri yüklemede hata: " + (error?.message || "Bilinmeyen hata"));
     } finally {
       setLoading(false);
     }
