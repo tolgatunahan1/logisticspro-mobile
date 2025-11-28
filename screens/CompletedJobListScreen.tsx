@@ -392,16 +392,29 @@ export default function CompletedJobListScreen() {
                 <Feather name="edit" size={18} color={theme.link} />
               </Pressable>
               <Pressable
-                onPress={async () => {
-                  const beforeDelete = jobs.filter(j => j.id !== job.id);
-                  setJobs(beforeDelete);
-                  try {
-                    await deleteCompletedJob(firebaseUser!.uid, job.id);
-                    await loadData();
-                  } catch (error) {
-                    console.error("Delete error:", error);
-                    await loadData();
-                  }
+                onPress={() => {
+                  Alert.alert(
+                    "İşi Sil",
+                    "Bu işi silmek istediğinizden emin misiniz?",
+                    [
+                      { text: "İptal", onPress: () => {}, style: "cancel" },
+                      {
+                        text: "Sil",
+                        onPress: async () => {
+                          const beforeDelete = jobs.filter(j => j.id !== job.id);
+                          setJobs(beforeDelete);
+                          try {
+                            await deleteCompletedJob(firebaseUser!.uid, job.id);
+                            await loadData();
+                          } catch (error) {
+                            console.error("Delete error:", error);
+                            await loadData();
+                          }
+                        },
+                        style: "destructive"
+                      }
+                    ]
+                  );
                 }}
                 style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
               >
