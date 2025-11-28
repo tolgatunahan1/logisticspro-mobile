@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "../constants/firebase";
 import { firebaseAuthService } from "../utils/firebaseAuth";
+import { initializeConnectionMonitoring, onConnectionStatusChange, ConnectionStatus } from "../utils/firebaseConnection";
 
 interface User {
   id?: string;
@@ -14,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   firebaseUser: FirebaseUser | null;
   isLoading: boolean;
+  connectionStatus: ConnectionStatus;
   loginWithFirebase: (email: string, password: string) => Promise<boolean>;
   registerWithFirebase: (email: string, password: string) => Promise<boolean>;
   loginAdmin: (email: string, password: string) => Promise<boolean>;
@@ -27,6 +29,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("checking");
+
+  // Initialize Firebase connection monitoring on mount
+  useEffect(() => {
+    initializeConnectionMonitoring();
+  }, []);
+
+  // Subscribe to connection status changes
+  useEffect(() => {
+    const unsubscribe = onConnectionStatusChange((status) => {
+      setConnectionStatus(status);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Firebase Authentication State
   useEffect(() => {
@@ -130,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         firebaseUser,
         isLoading,
+        connectionStatus,
         loginWithFirebase,
         registerWithFirebase,
         loginAdmin,
