@@ -37,22 +37,35 @@ export default function LoginScreen() {
     // Fresh start needed to set up new admin account
   }, []);
 
-  const handleCleanupOldAdmin = async () => {
-    setError("");
-    setIsLoading(true);
-    try {
-      // Delete old admin user from database
-      const deleted = await firebaseAuthService.deleteUserByEmail("tolgatunahan@icloud.com");
-      if (deleted) {
-        Alert.alert("Başarılı", "Eski admin kullanıcısı silindi. Şimdi yeni admin oluştur.");
-      } else {
-        Alert.alert("Bilgi", "tolgatunahan@icloud.com kullanıcısı bulunamadı.");
-      }
-      setIsLoading(false);
-    } catch (error: any) {
-      setError(error?.message || "Silme işlemi sırasında hata");
-      setIsLoading(false);
-    }
+  const handleCleanupAllData = async () => {
+    Alert.alert(
+      "Tüm Verileri Sil",
+      "Firebase'den tüm kullanıcıları ve verileri silecek. Bu işlem geri alınamaz!",
+      [
+        { text: "İptal" },
+        {
+          text: "Sil",
+          onPress: async () => {
+            setError("");
+            setIsLoading(true);
+            try {
+              const cleaned = await firebaseAuthService.cleanupDatabase();
+              if (cleaned) {
+                Alert.alert("Başarılı", "Tüm veriler silindi. Sayfayı yenileyebilirsin.");
+                setIsLoading(false);
+              } else {
+                setError("Veriler silinirken hata oluştu");
+                setIsLoading(false);
+              }
+            } catch (error: any) {
+              setError(error?.message || "Silme işlemi sırasında hata");
+              setIsLoading(false);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
   };
 
   const handleSetupNewAdmin = async () => {
@@ -350,12 +363,12 @@ export default function LoginScreen() {
                     </ThemedText>
                   </Pressable>
                   <Pressable
-                    onPress={handleCleanupOldAdmin}
+                    onPress={handleCleanupAllData}
                     style={[styles.secondaryButton, { borderColor: colors.destructive }]}
                     disabled={isLoading}
                   >
                     <ThemedText type="body" style={{ color: colors.destructive }}>
-                      Eski Admin Sil (tolgatunahan)
+                      Tüm Verileri Temizle
                     </ThemedText>
                   </Pressable>
                 </>
