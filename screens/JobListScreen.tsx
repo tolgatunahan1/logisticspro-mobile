@@ -128,6 +128,14 @@ export default function JobListScreen() {
   };
 
   const handleCreateTrip = (job: PlannedJob) => {
+    if (!job) {
+      Alert.alert("Hata", "Seçili iş bulunamadı");
+      return;
+    }
+    if (carriers.length === 0) {
+      Alert.alert("Hata", "Lütfen önce nakliyeci ekleyin");
+      return;
+    }
     setJobForCarrier(job);
     setShowCarrierPicker(true);
   };
