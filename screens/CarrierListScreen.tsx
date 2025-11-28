@@ -210,7 +210,7 @@ export default function CarrierListScreen() {
   );
 
   const renderSearchBar = () => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.md, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
@@ -238,7 +238,7 @@ export default function CarrierListScreen() {
         ListHeaderComponent={renderSearchBar}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
