@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect } from "react";
+import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
 import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -16,6 +16,12 @@ import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Compa
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+interface GroupedJobs {
+  date: string;
+  timestamp: number;
+  jobs: CompletedJob[];
+}
 
 export default function CompletedJobListScreen() {
   const { theme, isDark } = useTheme();
@@ -173,6 +179,37 @@ export default function CompletedJobListScreen() {
     return date.toLocaleDateString("tr-TR");
   };
 
+  const formatDateLong = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: "long", 
+      year: "numeric", 
+      month: "long", 
+      day: "numeric" 
+    };
+    return date.toLocaleDateString("tr-TR", options);
+  };
+
+  // Group jobs by loading date
+  const groupedJobs = useMemo(() => {
+    const groups: { [key: string]: { date: string; timestamp: number; jobs: CompletedJob[] } } = {};
+    
+    filteredJobs.forEach((job) => {
+      const dateStr = formatDate(job.loadingDate);
+      if (!groups[dateStr]) {
+        groups[dateStr] = {
+          date: dateStr,
+          timestamp: job.loadingDate,
+          jobs: [],
+        };
+      }
+      groups[dateStr].jobs.push(job);
+    });
+
+    // Sort by date descending (newest first)
+    return Object.values(groups).sort((a, b) => b.timestamp - a.timestamp);
+  }, [filteredJobs]);
+
   const handleAddPress = () => {
     navigation.navigate("CompletedJobForm", { mode: "add" });
   };
@@ -217,6 +254,8 @@ export default function CompletedJobListScreen() {
           styles.jobCard,
           {
             backgroundColor: colors.backgroundDefault,
+            marginHorizontal: Spacing.lg,
+            marginVertical: Spacing.sm,
           },
         ]}
       >
@@ -243,6 +282,14 @@ export default function CompletedJobListScreen() {
                     </ThemedText>
                   </View>
                 )}
+              </View>
+              <View style={{ marginTop: Spacing.sm, gap: Spacing.xs }}>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  {job.loadingLocation || "-"} → {job.deliveryLocation || "-"}
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                  {job.cargoType || "-"} • {job.tonnage ? `${job.tonnage} Ton` : "-"}
+                </ThemedText>
               </View>
             </View>
             <View style={{ flexDirection: "row", gap: Spacing.md, alignItems: "center" }}>
@@ -274,6 +321,28 @@ export default function CompletedJobListScreen() {
       </View>
     );
   };
+
+  const renderDateGroup = ({ item: group }: { item: GroupedJobs }) => (
+    <View>
+      {/* Date Header */}
+      <View style={[styles.dateHeader, { backgroundColor: colors.backgroundDefault, marginTop: Spacing.lg }]}>
+        <Feather name="calendar" size={18} color={theme.link} />
+        <ThemedText type="h4" style={{ fontWeight: "700" }}>
+          {formatDateLong(group.timestamp)}
+        </ThemedText>
+        <ThemedText type="small" style={{ color: colors.textSecondary, marginLeft: "auto" }}>
+          {group.jobs.length} sefer
+        </ThemedText>
+      </View>
+      
+      {/* Jobs for this date */}
+      {group.jobs.map((job) => (
+        <React.Fragment key={job.id}>
+          {renderJobItem({ item: job })}
+        </React.Fragment>
+      ))}
+    </View>
+  );
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
@@ -312,9 +381,9 @@ export default function CompletedJobListScreen() {
   return (
     <ThemedView style={styles.container}>
       <FlatList
-        data={filteredJobs}
-        renderItem={renderJobItem}
-        keyExtractor={(item) => item.id}
+        data={groupedJobs}
+        renderItem={renderDateGroup}
+        keyExtractor={(item) => item.date}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
@@ -582,111 +651,8 @@ export default function CompletedJobListScreen() {
                       Teslimat Tarihi
                     </ThemedText>
                     <ThemedText type="h4">
-                      {formatDate(selectedJob.deliveryDate)}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Tamamlanma Tarihi
-                    </ThemedText>
-                    <ThemedText type="h4">
                       {formatDate(selectedJob.completionDate)}
                     </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Nakliye Bedeli
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.transportationCost ? `${selectedJob.transportationCost} ₺` : "-"}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Komisyon Bedeli
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.commissionCost ? `${selectedJob.commissionCost} ₺` : "-"}
-                    </ThemedText>
-                  </View>
-
-                  {/* Commission Payment Status - Modern One-Tap Toggle */}
-                  <View style={{ gap: Spacing.sm }}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
-                      Komisyon Ödeme Durumu
-                    </ThemedText>
-                    <Pressable
-                      onPress={async () => {
-                        if (selectedJob && firebaseUser) {
-                          const newState = !selectedJob.commissionPaid;
-                          const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, newState);
-                          if (success) {
-                            // Update state immediately
-                            const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newState } : j);
-                            const updatedFiltered = filteredJobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newState } : j);
-                            setJobs(updatedJobs);
-                            setFilteredJobs(updatedFiltered);
-                            setSelectedJob({ ...selectedJob, commissionPaid: newState });
-                            
-                            // Close modal and refresh list immediately
-                            setTimeout(() => {
-                              setShowDetailModal(false);
-                              loadData();
-                            }, 300);
-                          }
-                        }
-                      }}
-                      style={({ pressed }) => [
-                        {
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: Spacing.md,
-                          paddingVertical: Spacing.lg,
-                          paddingHorizontal: Spacing.lg,
-                          borderRadius: BorderRadius.lg,
-                          backgroundColor: selectedJob.commissionPaid ? colors.success + "20" : isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
-                          borderWidth: 2,
-                          borderColor: selectedJob.commissionPaid ? colors.success : colors.border,
-                          opacity: pressed ? 0.85 : 1,
-                          transform: [{ scale: pressed ? 0.98 : 1 }],
-                        },
-                      ]}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <ThemedText type="small" style={{ fontWeight: "600", color: selectedJob.commissionPaid ? colors.success : colors.textSecondary, fontSize: 16 }}>
-                          {selectedJob.commissionPaid ? "✓ Ödendi" : "○ Ödenmedi"}
-                        </ThemedText>
-                      </View>
-                      <View
-                        style={{
-                          width: 52,
-                          height: 32,
-                          borderRadius: 16,
-                          backgroundColor: selectedJob.commissionPaid ? colors.success : colors.textSecondary + "40",
-                          justifyContent: "center",
-                          alignItems: selectedJob.commissionPaid ? "flex-end" : "flex-start",
-                          paddingHorizontal: 3,
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: 26,
-                            height: 26,
-                            borderRadius: 13,
-                            backgroundColor: "#FFFFFF",
-                            shadowColor: "#000",
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.25,
-                            shadowRadius: 3.84,
-                            elevation: 5,
-                          }}
-                        />
-                      </View>
-                    </Pressable>
                   </View>
 
                   <View style={styles.detailSection}>
@@ -697,114 +663,119 @@ export default function CompletedJobListScreen() {
                       {selectedJob.notes || "-"}
                     </ThemedText>
                   </View>
+
+                  {/* Commission Section */}
+                  <View style={{
+                    backgroundColor: selectedJob.commissionPaid ? colors.success : colors.warning,
+                    padding: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    gap: Spacing.md,
+                  }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700", color: "#FFFFFF" }}>
+                      Komisyon
+                    </ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                        Tutar
+                      </ThemedText>
+                      <ThemedText type="h4" style={{ color: "#FFFFFF" }}>
+                        {selectedJob.commission || "-"}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                        Durum
+                      </ThemedText>
+                      <ThemedText type="h4" style={{ color: "#FFFFFF" }}>
+                        {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
+                      </ThemedText>
+                    </View>
+
+                    {!selectedJob.commissionPaid && (
+                      <Pressable
+                        onPress={async () => {
+                          if (!firebaseUser) return;
+                          try {
+                            await markCommissionAsPaid(firebaseUser.uid, selectedJob.id);
+                            await loadData();
+                            setShowDetailModal(false);
+                          } catch (error) {
+                            Alert.alert("Hata", "Komisyon ödendi olarak işaretlenemedi");
+                          }
+                        }}
+                        style={({ pressed }) => [
+                          {
+                            backgroundColor: "rgba(255, 255, 255, 0.3)",
+                            opacity: pressed ? 0.7 : 1,
+                            marginTop: Spacing.md,
+                            paddingVertical: Spacing.md,
+                            paddingHorizontal: Spacing.lg,
+                            borderRadius: BorderRadius.sm,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: Spacing.md,
+                          },
+                        ]}
+                      >
+                        <Feather name="check" size={18} color="#FFFFFF" />
+                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                          Ödendi Olarak İşaretle
+                        </ThemedText>
+                      </Pressable>
+                    )}
+                  </View>
+
+                  <View style={{ marginBottom: Spacing.xl }} />
                 </View>
               )}
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
-            {/* Modal Footer - Share and Delete Buttons */}
-            {selectedJob && (
-              <View style={{ flexDirection: "row", gap: Spacing.md }}>
+      {/* IBAN Modal */}
+      <Modal
+        visible={showIBANModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowIBANModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">IBAN Seç</ThemedText>
+              <Pressable onPress={() => setShowIBANModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              {ibans.map((iban) => (
                 <Pressable
-                  onPress={() => handleShareJob(selectedJob)}
+                  key={iban.id}
+                  onPress={() => shareIBANWithCarrier(iban)}
                   style={({ pressed }) => [
-                    styles.shareButton,
+                    styles.ibanItem,
                     {
-                      backgroundColor: theme.link,
-                      opacity: pressed ? 0.9 : 1,
-                      flex: 1,
+                      backgroundColor: colors.backgroundDefault,
+                      opacity: pressed ? 0.7 : 1,
                     },
                   ]}
                 >
-                  <Feather name="share-2" size={16} color="#FFFFFF" />
-                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Paylaş
-                  </ThemedText>
+                  <View>
+                    <ThemedText type="h4">{iban.nameSurname}</ThemedText>
+                    <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm }}>
+                      {iban.ibanNumber}
+                    </ThemedText>
+                  </View>
+                  <Feather name="arrow-right" size={20} color={theme.link} />
                 </Pressable>
-              </View>
-            )}
-          </View>
-        </View>
-      </Modal>
-
-      {/* IBAN Selection Modal */}
-      <Modal visible={showIBANModal} transparent animationType="fade">
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: Spacing.lg }}>
-          <View style={{ backgroundColor: colors.backgroundDefault, borderRadius: BorderRadius.lg, maxHeight: "70%", width: "100%" }}>
-            <View style={{ padding: Spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-              <ThemedText type="h3" style={{ fontWeight: "700" }}>
-                İBAN Seç
-              </ThemedText>
-            </View>
-
-            <ScrollView style={{ maxHeight: "100%" }}>
-              {ibans.length > 0 ? (
-                <View style={{ padding: Spacing.lg, gap: Spacing.md }}>
-                  {ibans.map((iban) => (
-                    <Pressable
-                      key={iban.id}
-                      onPress={() => shareIBANWithCarrier(iban)}
-                      style={({ pressed }) => [
-                        {
-                          backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-                          padding: Spacing.md,
-                          borderRadius: BorderRadius.sm,
-                          opacity: pressed ? 0.7 : 1,
-                        },
-                      ]}
-                    >
-                      <ThemedText type="small" style={{ fontWeight: "600" }}>
-                        {iban.nameSurname}
-                      </ThemedText>
-                      <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.xs }}>
-                        {iban.ibanNumber}
-                      </ThemedText>
-                    </Pressable>
-                  ))}
-                </View>
-              ) : (
-                <View style={{ padding: Spacing.lg, alignItems: "center" }}>
-                  <ThemedText type="body" style={{ color: colors.textSecondary, textAlign: "center" }}>
-                    Kayıtlı İBAN bulunamadı. Lütfen Ayarlar'dan İBAN ekleyin.
-                  </ThemedText>
-                </View>
-              )}
+              ))}
             </ScrollView>
-
-            <View style={{ padding: Spacing.lg, borderTopWidth: 1, borderTopColor: colors.border }}>
-              <Pressable
-                onPress={() => setShowIBANModal(false)}
-                style={({ pressed }) => [
-                  {
-                    paddingVertical: Spacing.md,
-                    borderRadius: BorderRadius.sm,
-                    backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-                    opacity: pressed ? 0.7 : 1,
-                  },
-                ]}
-              >
-                <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600" }}>
-                  İptal
-                </ThemedText>
-              </Pressable>
-            </View>
           </View>
         </View>
       </Modal>
-
-      <Pressable
-        onPress={handleAddPress}
-        style={({ pressed }) => [
-          styles.fab,
-          {
-            backgroundColor: theme.link,
-            opacity: pressed ? 0.9 : 1,
-            transform: [{ scale: pressed ? 0.95 : 1 }],
-            bottom: insets.bottom + Spacing.xl,
-          },
-        ]}
-      >
-        <Feather name="plus" size={24} color="#FFFFFF" />
-      </Pressable>
     </ThemedView>
   );
 }
@@ -813,6 +784,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  listContent: {
+    paddingBottom: Spacing.xl,
+  },
   searchContainer: {
     paddingHorizontal: Spacing.lg,
   },
@@ -820,25 +794,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: Spacing.md,
     fontSize: 16,
   },
-  listContent: {
+  dateHeader: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing["5xl"] + Spacing["2xl"] + Spacing.xl,
-    paddingBottom: Spacing.lg,
-    gap: Spacing.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
   },
   jobCard: {
-    padding: Spacing.lg,
     borderRadius: BorderRadius.md,
-    gap: Spacing.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   jobCardHeader: {
     flexDirection: "row",
@@ -850,21 +826,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: Spacing.xl * 2,
-  },
-  fab: {
-    position: "absolute",
-    right: Spacing.xl,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingHorizontal: Spacing.lg,
+    minHeight: 400,
   },
   modalOverlay: {
     flex: 1,
@@ -892,13 +855,13 @@ const styles = StyleSheet.create({
   detailSection: {
     gap: Spacing.sm,
   },
-  shareButton: {
+  ibanItem: {
     flexDirection: "row",
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.sm,
+    borderRadius: BorderRadius.md,
   },
 });
