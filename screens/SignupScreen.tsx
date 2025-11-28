@@ -11,6 +11,7 @@ import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { requestSignup, validatePassword } from "../utils/userManagement";
 import { RootStackParamList } from "../navigation/RootNavigator";
+import { useAuth } from "../contexts/AuthContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Signup">;
 
@@ -18,6 +19,7 @@ export default function SignupScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
+  const { registerWithFirebase } = useAuth();
   
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +27,7 @@ export default function SignupScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [isFirebaseMode, setIsFirebaseMode] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -41,11 +44,16 @@ export default function SignupScreen() {
     setError("");
 
     if (!username.trim()) {
-      setError("Kullanıcı adı gerekli");
+      setError(isFirebaseMode ? "Email gerekli" : "Kullanıcı adı gerekli");
       return;
     }
 
-    if (username.length < 3) {
+    if (isFirebaseMode && !username.includes("@")) {
+      setError("Geçerli email adresi girin");
+      return;
+    }
+
+    if (!isFirebaseMode && username.length < 3) {
       setError("Kullanıcı adı en az 3 karakter olmalı");
       return;
     }
@@ -67,20 +75,46 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
-      const success = await requestSignup(username.trim(), password);
-
-      if (success) {
-        Alert.alert(
-          "Başarılı",
-          "Kayıt talebiniz alınmıştır. Admin onayı bekleniyor.",
-          [{ text: "Tamam", onPress: () => navigation.navigate("Login") }]
-        );
+      if (isFirebaseMode) {
+        // Firebase Registration
+        const success = await registerWithFirebase(username.trim(), password);
+        if (success) {
+          Alert.alert(
+            "Başarılı",
+            "Firebase hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.",
+            [{ 
+              text: "Giriş Yap", 
+              onPress: () => {
+                navigation.navigate("Login");
+              } 
+            }]
+          );
+        } else {
+          setError("Firebase kaydı başarısız oldu");
+        }
       } else {
-        setError("Bu kullanıcı adı zaten kullanılıyor");
+        // Local Registration (Admin Approval)
+        const success = await requestSignup(username.trim(), password);
+        if (success) {
+          Alert.alert(
+            "Başarılı",
+            "Kayıt talebiniz alınmıştır. Admin onayı bekleniyor.",
+            [{ text: "Tamam", onPress: () => navigation.navigate("Login") }]
+          );
+        } else {
+          setError("Bu kullanıcı adı zaten kullanılıyor");
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
-      setError("Kayıt sırasında hata oluştu");
+      const errorMsg = error?.message || "Kayıt sırasında hata oluştu";
+      if (errorMsg.includes("Firebase yapılandırılmamış")) {
+        setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
+      } else if (isFirebaseMode) {
+        setError("Firebase bağlantı hatası. Başka bir modla deneyin.");
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -109,10 +143,41 @@ export default function SignupScreen() {
           </ThemedText>
         </View>
 
+        <View style={[styles.modeToggle, { borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => setIsFirebaseMode(false)}
+            disabled={isLoading}
+            style={[
+              styles.modeButton,
+              {
+                backgroundColor: !isFirebaseMode ? theme.link : colors.inputBackground,
+              },
+            ]}
+          >
+            <ThemedText style={[styles.modeButtonText, { color: !isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
+              Yerel
+            </ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={() => setIsFirebaseMode(true)}
+            disabled={isLoading}
+            style={[
+              styles.modeButton,
+              {
+                backgroundColor: isFirebaseMode ? theme.link : colors.inputBackground,
+              },
+            ]}
+          >
+            <ThemedText style={[styles.modeButtonText, { color: isFirebaseMode ? "#FFF" : colors.textSecondary }]}>
+              Firebase
+            </ThemedText>
+          </Pressable>
+        </View>
+
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              Kullanıcı Adı
+              {isFirebaseMode ? "Email" : "Kullanıcı Adı"}
             </ThemedText>
             <TextInput
               style={[
@@ -123,13 +188,14 @@ export default function SignupScreen() {
                   color: theme.text,
                 },
               ]}
-              placeholder="Kullanıcı adınız"
+              placeholder={isFirebaseMode ? "Email adresiniz" : "Kullanıcı adınız"}
               placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
               editable={!isLoading}
               autoCapitalize="none"
               autoCorrect={false}
+              keyboardType={isFirebaseMode ? "email-address" : "default"}
             />
           </View>
 
@@ -267,6 +333,25 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: "center",
+  },
+  modeToggle: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.xs,
+  },
+  modeButton: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.xs,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modeButtonText: {
+    fontWeight: "600",
+    fontSize: 12,
   },
   form: {
     gap: Spacing.lg,
