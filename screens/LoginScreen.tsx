@@ -37,6 +37,24 @@ export default function LoginScreen() {
     // Fresh start needed to set up new admin account
   }, []);
 
+  const handleCleanupOldAdmin = async () => {
+    setError("");
+    setIsLoading(true);
+    try {
+      // Delete old admin user from database
+      const deleted = await firebaseAuthService.deleteUserByEmail("tolgatunahan@icloud.com");
+      if (deleted) {
+        Alert.alert("Başarılı", "Eski admin kullanıcısı silindi. Şimdi yeni admin oluştur.");
+      } else {
+        Alert.alert("Bilgi", "tolgatunahan@icloud.com kullanıcısı bulunamadı.");
+      }
+      setIsLoading(false);
+    } catch (error: any) {
+      setError(error?.message || "Silme işlemi sırasında hata");
+      setIsLoading(false);
+    }
+  };
+
   const handleSetupNewAdmin = async () => {
     setError("");
     if (!newAdminEmail.trim() || !newAdminPassword.trim()) {
@@ -46,9 +64,6 @@ export default function LoginScreen() {
     
     setIsLoading(true);
     try {
-      // Clean up old database
-      await firebaseAuthService.cleanupDatabase();
-      
       // Initialize new admin
       const success = await firebaseAuthService.initializeAdmin(newAdminEmail, newAdminPassword);
       
@@ -325,14 +340,25 @@ export default function LoginScreen() {
                 )}
               </Pressable>
               {isAdminMode && (
-                <Pressable
-                  onPress={() => setShowAdminSetup(true)}
-                  style={[styles.secondaryButton, { borderColor: colors.border }]}
-                >
-                  <ThemedText type="body" style={{ color: theme.link }}>
-                    Yeni Admin Oluştur
-                  </ThemedText>
-                </Pressable>
+                <>
+                  <Pressable
+                    onPress={() => setShowAdminSetup(true)}
+                    style={[styles.secondaryButton, { borderColor: colors.border }]}
+                  >
+                    <ThemedText type="body" style={{ color: theme.link }}>
+                      Yeni Admin Oluştur
+                    </ThemedText>
+                  </Pressable>
+                  <Pressable
+                    onPress={handleCleanupOldAdmin}
+                    style={[styles.secondaryButton, { borderColor: colors.destructive }]}
+                    disabled={isLoading}
+                  >
+                    <ThemedText type="body" style={{ color: colors.destructive }}>
+                      Eski Admin Sil (tolgatunahan)
+                    </ThemedText>
+                  </Pressable>
+                </>
               )}
             </>
           )}

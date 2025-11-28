@@ -159,6 +159,31 @@ export const firebaseAuthService = {
     return firebaseAuth.onAuthStateChanged(callback);
   },
 
+  // Delete user by email from database
+  deleteUserByEmail: async (email: string): Promise<boolean> => {
+    try {
+      const snapshot = await get(ref(firebaseDatabase, "users"));
+      if (!snapshot.exists()) {
+        console.log("No users in database");
+        return false;
+      }
+      
+      const users = snapshot.val();
+      for (const uid in users) {
+        if (users[uid].profile?.email === email) {
+          await remove(ref(firebaseDatabase, `users/${uid}`));
+          console.log("✅ User deleted from database:", email);
+          return true;
+        }
+      }
+      console.log("User not found:", email);
+      return false;
+    } catch (error) {
+      console.error("Delete user by email error:", error);
+      return false;
+    }
+  },
+
   // Clean up all users from database
   cleanupDatabase: async (): Promise<boolean> => {
     try {
