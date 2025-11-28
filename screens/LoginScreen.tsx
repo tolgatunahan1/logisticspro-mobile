@@ -433,11 +433,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
     justifyContent: "center",
   },
   header: {
     alignItems: "center",
-    marginBottom: Spacing["4xl"],
+    marginBottom: Spacing["2xl"],
   },
   logo: {
     width: 150,
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: Spacing.xs,
-    marginTop: Spacing.lg,
+    marginTop: Spacing.md,
   },
   modeToggle: {
     flexDirection: "row",
