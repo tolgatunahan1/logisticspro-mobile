@@ -404,10 +404,10 @@ export default function SettingsScreen() {
                   Veri Toplama ve Kullanım
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
-                  LogisticsPRO, tüm kişisel verilerinizi cihazınızda yerel olarak saklar. Hiçbir veri sunucuya, buluta veya üçüncü taraf hizmetlerine gönderilmez.
+                  LogisticsPRO, tüm verilerinizi Firebase Realtime Database'de güvenli bir şekilde saklar. Her kullanıcının verileri kendi benzersiz kimliği (UID) altında, tamamen izole edilmiş şekilde tutulur.
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  Veriler yalnızca sizin tarafından erişilir. Geliştirici veya başka hiç kimse verilerinize erişemez.
+                  Verilerinize sadece siz erişebilirsiniz. Geliştirici veya başka kimse verilerinize erişemez. Tüm veri transferleri SSL/TLS ile şifrelenmiştir.
                 </ThemedText>
               </View>
 
@@ -443,19 +443,22 @@ export default function SettingsScreen() {
                   Güvenlik Teknolojileri
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.sm }}>
-                  Hassas veriler (şifreler, IBAN) aşağıdaki güvenlik katmanları ile korunmaktadır:
+                  Verileriniz aşağıdaki güvenlik katmanları ile korunmaktadır:
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • iOS Keychain - Apple'ın işletim sistemi düzeyinde güvenli depolama
+                  • Firebase Authentication - Email/şifre tabanlı güvenli kimlik doğrulama
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Android Keystore - Donanım tarafından desteklenen kriptografik anahtar yönetimi
+                  • SSL/TLS Şifreleme - Sunucu ile tüm veri transferleri şifrelenmiştir
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Veri Şifreleme - Hassas bilgiler cihazda şifrelenip saklanır
+                  • iOS Keychain & Android Keystore - Hassas veriler cihazda kriptografik olarak saklanır
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Yerel Depolama - Tüm veriler cihazın yerel dosya sisteminde tutulur
+                  • Reauthentication - Şifre ve email değişimi sırasında güvenli yeniden doğrulama
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Admin Onay Sistemi - Hesaplar aktif kullanılmadan önce yönetici tarafından onaylanır
                 </ThemedText>
               </View>
 
@@ -476,25 +479,61 @@ export default function SettingsScreen() {
                   • İş ve proje detayları
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • IBAN ve banka bilgileri (Keychain'de şifrelenmiş)
+                  • IBAN ve banka bilgileri (Cihazda şifrelenmiş tutulur)
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
                   • Ödeme ve komisyon kayıtları
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Email adresi ve hesap bilgileri (Firebase Authentication tarafından yönetilir)
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  Sızıntı Olmayan Mimarı
+                  Firebase Realtime Database
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.sm }}>
+                  Verileriniz Google Firebase tarafından işletilen güvenli veritabanında saklanmaktadır.
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  LogisticsPRO tamamen offline çalışır ve hiçbir ağ bağlantısı gerektirmez. İnternet olup olmadığı uygulamanın çalışmasını etkilemez.
+                  • Veri Izolasyonu - Her kullanıcının verileri kendi UID altında tamamen izole edilmiştir
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Otomatik Yedekleme - Tüm veriler otomatik olarak yedeklenip korunur
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Real-time Senkronizasyon - Cihazlar arasında anlık veri senkronizasyonu sağlanır
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Hesap Güvenliği
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  Hesabınızı korumak için:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Güçlü bir şifre kullanınız (8+ karakter)
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Şifrenizi düzenli olarak değiştiriniz
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Email adresinizi güncel tutunuz
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Hesabınızdan çıkış yaptıktan sonra uygulamayı kapatınız
                 </ThemedText>
               </View>
 
               <View style={styles.section}>
                 <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
                   Gizlilik Politikası - © 2025 Tolga Tunahan
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20, marginTop: Spacing.md }}>
+                  Güncellenme: 28 Kasım 2025
                 </ThemedText>
               </View>
             </ScrollView>
@@ -700,25 +739,46 @@ export default function SettingsScreen() {
 
               <View style={styles.section}>
                 <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
-                  Kişisel Bilgi Güvenliği
+                  Güvenlik Mimarı
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
-                  Hassas bilgileriniz (IBAN, şifreler, iletişim verileri) aşağıdaki güvenlik teknolojileri ile korunmaktadır:
+                  Verileriniz çok katmanlı güvenlik teknolojileri ile korunmaktadır:
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • iOS Keychain - Apple'ın güvenli depolama sistemi
+                  • Firebase Authentication - Güvenli kimlik doğrulama ve hesap yönetimi
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Android Keystore - Android cihazlarda kriptografik anahtar depolaması
+                  • SSL/TLS Şifreleme - Sunucu ile tüm veri transferleri şifrelenmiştir
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • expo-secure-store - Expo framework'ün güvenli depolama kütüphanesi
+                  • iOS Keychain & Android Keystore - Hassas veriler cihazda kriptografik olarak saklanır
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
-                  • Veri Şifreleme - Hassas veriler cihazda şifrelenip saklanır
+                  • Reauthentication - Hesap değişiklikleri sırasında güvenli yeniden doğrulama
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.md, lineHeight: 20 }}>
-                  Tüm veriler cihazda yerel olarak saklanır. Sunucuya hiçbir kişisel bilgi gönderilmez.
+                  Tüm veriler Firebase Realtime Database'de saklanır. Her kullanıcının verileri kendi UID altında tamamen izole edilmiştir.
+                </ThemedText>
+              </View>
+
+              <View style={styles.section}>
+                <ThemedText type="h4" style={{ marginBottom: Spacing.md }}>
+                  Teknoloji ve Altyapı
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20, marginBottom: Spacing.md }}>
+                  Uygulama modern teknolojiler ile geliştirilmiştir:
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • React Native & Expo - Cross-platform mobil geliştirme
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Firebase Realtime Database - Real-time veri senkronizasyonu
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • Firebase Authentication - Güvenli hesap yönetimi
+                </ThemedText>
+                <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                  • React Navigation - Sorunsuz ekran navigasyonu
                 </ThemedText>
               </View>
 
@@ -728,9 +788,6 @@ export default function SettingsScreen() {
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, lineHeight: 20 }}>
                   LogisticsPRO tescilli yazılımdır. Telif hakkı © 2025 Tolga Tunahan. Tüm hakları saklıdır.
-                </ThemedText>
-                <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.md, lineHeight: 20 }}>
-                  Bu uygulama Expo, React Native, React Navigation ve açık kaynak topluluğu tarafından geliştirilen teknolojiler kullanarak oluşturulmuştur.
                 </ThemedText>
               </View>
 
@@ -760,7 +817,7 @@ export default function SettingsScreen() {
                   © 2025 Tolga Tunahan. Tüm hakları saklıdır.
                 </ThemedText>
                 <ThemedText type="small" style={{ color: colors.textSecondary, textAlign: "center", lineHeight: 20, marginTop: Spacing.md }}>
-                  Güncelleme: 26 Kasım 2025
+                  Güncelleme: 28 Kasım 2025
                 </ThemedText>
               </View>
             </ScrollView>
