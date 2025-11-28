@@ -83,9 +83,41 @@ export default function SettingsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadIBANs();
-      loadCommissionStats();
-    }, [])
+      const loadData = async () => {
+        if (!firebaseUser?.uid) return;
+        
+        // Load IBANs
+        const ibanData = await getIBANs(firebaseUser.uid);
+        setIbans(ibanData);
+        
+        // Load Commission Stats
+        try {
+          const jobs = await getCompletedJobs(firebaseUser.uid);
+          setCompletedJobs(jobs);
+          
+          const paid = jobs.reduce((sum, job) => {
+            if (job.commissionPaid && job.commissionCost) {
+              return sum + parseFloat(job.commissionCost as string);
+            }
+            return sum;
+          }, 0);
+          
+          const unpaid = jobs.reduce((sum, job) => {
+            if (!job.commissionPaid && job.commissionCost) {
+              return sum + parseFloat(job.commissionCost as string);
+            }
+            return sum;
+          }, 0);
+          
+          setPaidCommissionsTotal(paid);
+          setUnpaidCommissionsTotal(unpaid);
+        } catch (error) {
+          console.error("Commission stats load error:", error);
+        }
+      };
+      
+      loadData();
+    }, [firebaseUser?.uid])
   );
 
   const handleAddIBAN = async () => {
@@ -139,107 +171,64 @@ export default function SettingsScreen() {
             </ThemedText>
           </View>
 
-          {/* Wallet Balance Card */}
-          <View
-            style={{
-              backgroundColor: colors.success,
-              padding: Spacing.lg,
-              borderRadius: BorderRadius.md,
-              marginBottom: Spacing.md,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Feather name="wallet" size={24} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
-                  Cüzdan Bakiyesi
-                </ThemedText>
-                <ThemedText type="h3" style={{ color: "#FFFFFF", marginTop: Spacing.xs }}>
-                  {paidCommissionsTotal.toFixed(2)} ₺
-                </ThemedText>
-              </View>
+          {/* Main Summary Cards - Row 1 */}
+          <View style={{ flexDirection: "row", gap: Spacing.md, marginBottom: Spacing.md }}>
+            {/* Ödenen Bakiye */}
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: colors.success,
+                padding: Spacing.lg,
+                borderRadius: BorderRadius.lg,
+                justifyContent: "center",
+              }}
+            >
+              <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)", marginBottom: Spacing.sm }}>
+                Ödenen Toplam
+              </ThemedText>
+              <ThemedText type="h3" style={{ color: "#FFFFFF", fontSize: 24, fontWeight: "700" }}>
+                {paidCommissionsTotal.toFixed(2)} ₺
+              </ThemedText>
+            </View>
+
+            {/* Bekleyen Bakiye */}
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: colors.warning,
+                padding: Spacing.lg,
+                borderRadius: BorderRadius.lg,
+                justifyContent: "center",
+              }}
+            >
+              <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)", marginBottom: Spacing.sm }}>
+                Bekleyen Toplam
+              </ThemedText>
+              <ThemedText type="h3" style={{ color: "#FFFFFF", fontSize: 24, fontWeight: "700" }}>
+                {unpaidCommissionsTotal.toFixed(2)} ₺
+              </ThemedText>
             </View>
           </View>
 
-          {/* Paid Commissions Card */}
+          {/* Toplam Komisyon Card */}
           <View
             style={{
-              backgroundColor: isDark ? "rgba(76, 175, 80, 0.2)" : "rgba(76, 175, 80, 0.1)",
+              backgroundColor: isDark ? "rgba(100, 150, 255, 0.1)" : "rgba(100, 150, 255, 0.15)",
               borderLeftWidth: 4,
-              borderLeftColor: colors.success,
+              borderLeftColor: theme.link,
               padding: Spacing.lg,
-              borderRadius: BorderRadius.md,
-              marginBottom: Spacing.md,
+              borderRadius: BorderRadius.lg,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: colors.success,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Feather name="check-circle" size={20} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Ödenen Komisyon
-                </ThemedText>
-                <ThemedText type="h3" style={{ color: colors.success, marginTop: Spacing.xs }}>
-                  {paidCommissionsTotal.toFixed(2)} ₺
-                </ThemedText>
-              </View>
-            </View>
-          </View>
-
-          {/* Unpaid Commissions Card */}
-          <View
-            style={{
-              backgroundColor: isDark ? "rgba(255, 193, 7, 0.2)" : "rgba(255, 193, 7, 0.1)",
-              borderLeftWidth: 4,
-              borderLeftColor: colors.warning,
-              padding: Spacing.lg,
-              borderRadius: BorderRadius.md,
-              marginBottom: Spacing.lg,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: colors.warning,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Feather name="clock" size={20} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                  Ödenmesi Gereken Komisyon
-                </ThemedText>
-                <ThemedText type="h3" style={{ color: colors.warning, marginTop: Spacing.xs }}>
-                  {unpaidCommissionsTotal.toFixed(2)} ₺
-                </ThemedText>
-              </View>
-            </View>
+            <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
+              Toplam Komisyon
+            </ThemedText>
+            <ThemedText type="h3" style={{ color: theme.link, fontSize: 28, fontWeight: "700" }}>
+              {(paidCommissionsTotal + unpaidCommissionsTotal).toFixed(2)} ₺
+            </ThemedText>
+            <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: Spacing.sm, fontStyle: "italic" }}>
+              Ödenen: {paidCommissionsTotal.toFixed(2)} ₺ + Bekleyen: {unpaidCommissionsTotal.toFixed(2)} ₺
+            </ThemedText>
           </View>
         </View>
 
