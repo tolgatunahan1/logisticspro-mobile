@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Pressable, TextInput, StyleSheet, Alert } from "react-native";
+import { Modal, View, Pressable, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "./ThemedText";
 import { useTheme } from "../hooks/useTheme";
@@ -31,7 +31,10 @@ export function IBANListModal({
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}
+      >
         <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
           <View style={styles.modalHeader}>
             <ThemedText type="h3">İBAN Ekle</ThemedText>
@@ -40,47 +43,54 @@ export function IBANListModal({
             </Pressable>
           </View>
 
-          <View style={styles.modalInputs}>
-            <View>
-              <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                Ad Soyad
-              </ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    borderColor: colors.border,
-                    color: colors.text,
-                    backgroundColor: colors.backgroundRoot,
-                  },
-                ]}
-                placeholder="Adınız Soyadınız"
-                placeholderTextColor={colors.textSecondary}
-                value={nameInput}
-                onChangeText={setNameInput}
-              />
-            </View>
+          <ScrollView 
+            scrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            style={{ maxHeight: 300 }}
+          >
+            <View style={styles.modalInputs}>
+              <View>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
+                  Ad Soyad
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.backgroundRoot,
+                    },
+                  ]}
+                  placeholder="Adınız Soyadınız"
+                  placeholderTextColor={colors.textSecondary}
+                  value={nameInput}
+                  onChangeText={setNameInput}
+                />
+              </View>
 
-            <View>
-              <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                IBAN Numarası
-              </ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    borderColor: colors.border,
-                    color: colors.text,
-                    backgroundColor: colors.backgroundRoot,
-                  },
-                ]}
-                placeholder="TR00 0000 0000..."
-                placeholderTextColor={colors.textSecondary}
-                value={ibanInput}
-                onChangeText={setIbanInput}
-              />
+              <View>
+                <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
+                  IBAN Numarası
+                </ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.backgroundRoot,
+                    },
+                  ]}
+                  placeholder="TR00 0000 0000..."
+                  placeholderTextColor={colors.textSecondary}
+                  value={ibanInput}
+                  onChangeText={setIbanInput}
+                />
+              </View>
             </View>
-          </View>
+          </ScrollView>
 
           <View style={styles.modalButtons}>
             <Pressable
@@ -113,7 +123,7 @@ export function IBANListModal({
             </Pressable>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
