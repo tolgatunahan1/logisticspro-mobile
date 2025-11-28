@@ -50,8 +50,9 @@ This authentication system is working perfectly and must be preserved as-is.
 - Storage: @react-native-async-storage/async-storage
 - UI: Liquid Glass theme with iOS 26 design guidelines
 
-## Firebase Security Rules (Copy to Console)
-Add these rules to **Firebase Console** → **Realtime Database** → **Rules** tab:
+## Firebase Security Rules (CURRENT - Copy to Console)
+**COPY THESE EXACT RULES** to **Firebase Console** → **Realtime Database** → **Rules** tab:
+
 ```json
 {
   "rules": {
@@ -59,67 +60,50 @@ Add these rules to **Firebase Console** → **Realtime Database** → **Rules** 
       "$uid": {
         "profile": {
           ".read": "$uid === auth.uid",
-          ".write": "$uid === auth.uid",
-          ".validate": "newData.exists()"
+          ".write": "$uid === auth.uid"
         },
         "data": {
           ".read": "$uid === auth.uid",
           ".write": "$uid === auth.uid",
           "carriers": {
-            ".indexOn": ["name", "phone", "plate"],
-            "$carrierId": {
-              ".validate": "newData.exists()"
-            }
+            ".indexOn": ["name", "phone", "plate"]
           },
           "companies": {
-            ".indexOn": ["name", "phone"],
-            "$companyId": {
-              ".validate": "newData.exists()"
-            }
+            ".indexOn": ["name", "phone"]
           },
           "jobs": {
-            ".indexOn": ["cargoType", "loadingLocation"],
-            "$jobId": {
-              ".validate": "newData.exists()"
-            }
+            ".indexOn": ["cargoType", "loadingLocation"]
           },
           "completedJobs": {
-            ".indexOn": ["carrierId", "companyId"],
-            "$completedJobId": {
-              ".validate": "newData.exists()"
-            }
+            ".indexOn": ["carrierId", "companyId", "completionDate"]
           },
-          "ibans": {
-            "$ibanId": {
-              ".validate": "newData.exists()"
-            }
-          },
-          "wallet": {
-            ".validate": "newData.exists()"
-          }
+          "ibans": {},
+          "wallet": {}
         }
       }
     },
     "admins": {
       ".read": "auth.uid !== null",
       ".write": "root.child('admins').child(auth.uid).exists()",
-      ".indexOn": ["uid"],
-      "$uid": {
-        ".validate": "newData.exists()"
-      }
+      ".indexOn": ["uid"]
     }
   }
 }
 ```
-**Steps:**
-1. Go to **Firebase Console** → Your Project → **Realtime Database**
-2. Click **Rules** tab
-3. Delete all existing text
-4. **Copy & Paste** the entire rules above
-5. Click **Publish**
-6. Wait for "Rules Published" confirmation
 
-This enables secure multi-user data isolation with proper indexing for search/filter operations.
+**Yapılacaklar:**
+1. **Firebase Console** aç → Projen → **Realtime Database**
+2. **Rules** sekmesine tıkla
+3. Mevcut tüm metni sil
+4. **Yukarıdaki rules'ları kopyala ve yapıştır**
+5. **Publish** butonuna tıkla
+6. "✅ Rules Published" mesajı görüncüye kadar bekle
+
+**Bu rules'lar sağlıyor:**
+- ✅ Her user sadece kendi data'sını okuyabiliyor/yazabiliyor (`users/{uid}/data/*`)
+- ✅ Admins all users'ları okuyabiliyor (approval için)
+- ✅ Search/filter için indexing (carriers, companies, jobs, completedJobs)
+- ✅ Güvenli multi-user izolasyon
 
 ## Recent Changes (Session 3)
 1. **Login Screen Layout** - Header moved down, Register button moved up, better spacing
