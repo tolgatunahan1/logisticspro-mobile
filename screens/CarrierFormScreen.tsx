@@ -1,6 +1,6 @@
-import React, { useState, useLayoutEffect, useEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Platform, Modal, BackHandler } from "react-native";
-import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
+import React, { useState, useLayoutEffect } from "react";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Platform, Modal } from "react-native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -48,35 +48,6 @@ export default function CarrierFormScreen() {
   );
 
   const colors = isDark ? Colors.dark : Colors.light;
-
-  // Handle back press with unsaved changes warning
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        if (isDirty && !isLoading) {
-          Alert.alert(
-            "Kaydedilmemiş Değişiklikler",
-            "Değişiklikleri kaydetmeden çıkmak istediğinize emin misiniz?",
-            [
-              { text: "İptal", onPress: () => {}, style: "cancel" },
-              {
-                text: "Çık",
-                onPress: () => {
-                  navigation.goBack();
-                },
-                style: "destructive",
-              },
-            ]
-          );
-          return true;
-        }
-        return false;
-      };
-
-      const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-      return () => subscription.remove();
-    }, [isDirty, isLoading, navigation])
-  );
 
   const formatPhoneNumber = (value: string): string => {
     const cleaned = value.replace(/\D/g, '');
