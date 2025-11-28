@@ -57,19 +57,69 @@ Add these rules to **Firebase Console** → **Realtime Database** → **Rules** 
   "rules": {
     "users": {
       "$uid": {
-        ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid",
-        ".validate": "newData.exists()"
+        "profile": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid",
+          ".validate": "newData.exists()"
+        },
+        "data": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid",
+          "carriers": {
+            ".indexOn": ["name", "phone", "plate"],
+            "$carrierId": {
+              ".validate": "newData.exists()"
+            }
+          },
+          "companies": {
+            ".indexOn": ["name", "phone"],
+            "$companyId": {
+              ".validate": "newData.exists()"
+            }
+          },
+          "jobs": {
+            ".indexOn": ["cargoType", "loadingLocation"],
+            "$jobId": {
+              ".validate": "newData.exists()"
+            }
+          },
+          "completedJobs": {
+            ".indexOn": ["carrierId", "companyId"],
+            "$completedJobId": {
+              ".validate": "newData.exists()"
+            }
+          },
+          "ibans": {
+            "$ibanId": {
+              ".validate": "newData.exists()"
+            }
+          },
+          "wallet": {
+            ".validate": "newData.exists()"
+          }
+        }
       }
     },
     "admins": {
       ".read": "auth.uid !== null",
-      ".indexOn": ["uid"]
+      ".write": "root.child('admins').child(auth.uid).exists()",
+      ".indexOn": ["uid"],
+      "$uid": {
+        ".validate": "newData.exists()"
+      }
     }
   }
 }
 ```
-Then click **Publish**. This enables secure multi-user data isolation.
+**Steps:**
+1. Go to **Firebase Console** → Your Project → **Realtime Database**
+2. Click **Rules** tab
+3. Delete all existing text
+4. **Copy & Paste** the entire rules above
+5. Click **Publish**
+6. Wait for "Rules Published" confirmation
+
+This enables secure multi-user data isolation with proper indexing for search/filter operations.
 
 ## Recent Changes (Session 3)
 1. **Login Screen Layout** - Header moved down, Register button moved up, better spacing
