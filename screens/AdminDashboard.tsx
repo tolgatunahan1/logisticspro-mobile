@@ -9,7 +9,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser, deleteFirebaseUser, deleteUser } from "../utils/userManagement";
+import { getPendingUsers, getApprovedUsers, approveUser, rejectUser, unapproveUser, getPendingFirebaseUsers, getApprovedFirebaseUsers, approveFirebaseUser, rejectFirebaseUser, unapproveFirebaseUser, deleteFirebaseUser, deleteUser as deleteLocalUser } from "../utils/userManagement";
 
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
           // Try Firebase first, then local
           let deleted = await deleteFirebaseUser(userId);
           if (!deleted) {
-            deleted = await deleteUser(userId);
+            deleted = await deleteLocalUser(userId);
           }
           await loadUsers();
         },

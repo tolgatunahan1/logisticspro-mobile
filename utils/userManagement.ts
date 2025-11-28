@@ -308,18 +308,6 @@ export const deleteFirebaseUser = async (userId: string): Promise<boolean> => {
   }
 };
 
-export const deleteUser = async (userId: string): Promise<boolean> => {
-  try {
-    const users = await getUsers();
-    const filtered = users.filter((u) => u.id !== userId);
-    await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(filtered));
-    return true;
-  } catch (error) {
-    console.error("Delete user error:", error);
-    return false;
-  }
-};
-
 export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
     console.log("🔧 Initializing default admin...");
