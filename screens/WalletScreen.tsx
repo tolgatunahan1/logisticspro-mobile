@@ -136,7 +136,7 @@ export default function WalletScreen() {
               </ThemedText>
             </View>
             <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
-              <ThemedText style={{ fontSize: 18, fontWeight: "700", color: "#FFFFFF" }}>₺</ThemedText>
+              <Feather name="check-circle" size={20} color="#FFFFFF" />
             </View>
           </View>
         </View>

@@ -209,7 +209,7 @@ export default function HomeScreen() {
             },
           ]}
         >
-          <Feather name="dollar-sign" size={24} color="#FFFFFF" />
+          <ThemedText style={{ fontSize: 24, fontWeight: "700", color: "#FFFFFF" }}>₺</ThemedText>
           <View style={styles.statContent}>
             <ThemedText type="small" style={{ color: "rgba(255,255,255,0.8)" }}>
               Cüzdan Bakiyesi
