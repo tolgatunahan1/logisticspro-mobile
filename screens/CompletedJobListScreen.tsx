@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useLayoutEffect } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
+import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -11,7 +12,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN } from "../utils/storage";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -589,6 +590,34 @@ export default function CompletedJobListScreen() {
                     <ThemedText type="h4">
                       {selectedJob.commissionCost ? `${selectedJob.commissionCost} ₺` : "-"}
                     </ThemedText>
+                  </View>
+
+                  {/* Commission Payment Status */}
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, backgroundColor: colors.backgroundDefault, borderRadius: BorderRadius.md }}>
+                    <Checkbox
+                      value={selectedJob.commissionPaid || false}
+                      onValueChange={async (newValue) => {
+                        if (selectedJob && firebaseUser) {
+                          const success = await markCommissionAsPaid(firebaseUser.uid, selectedJob.id, newValue);
+                          if (success) {
+                            const updatedJobs = jobs.map(j => j.id === selectedJob.id ? { ...j, commissionPaid: newValue } : j);
+                            setJobs(updatedJobs);
+                            setSelectedJob({ ...selectedJob, commissionPaid: newValue });
+                          } else {
+                            Alert.alert("Hata", "Komisyon durumu güncellenemedi");
+                          }
+                        }
+                      }}
+                      color={theme.link}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Komisyon Ödendi
+                      </ThemedText>
+                      <ThemedText type="body" style={{ marginTop: Spacing.xs }}>
+                        {selectedJob.commissionPaid ? "Ödendi" : "Ödenmedi"}
+                      </ThemedText>
+                    </View>
                   </View>
 
                   <View style={styles.detailSection}>

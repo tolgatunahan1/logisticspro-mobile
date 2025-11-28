@@ -357,6 +357,19 @@ export const updateCompletedJob = async (uid: string, id: string, updates: Parti
   }
 };
 
+export const markCommissionAsPaid = async (uid: string, id: string, isPaid: boolean): Promise<boolean> => {
+  try {
+    await update(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`), {
+      commissionPaid: isPaid,
+      updatedAt: Date.now(),
+    });
+    return true;
+  } catch (error) {
+    console.error("Failed to update commission status:", error);
+    return false;
+  }
+};
+
 export const deleteCompletedJob = async (uid: string, id: string): Promise<boolean> => {
   try {
     const completedJob = await get(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`));
