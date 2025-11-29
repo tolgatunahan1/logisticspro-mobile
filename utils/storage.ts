@@ -507,6 +507,8 @@ export const addCarrierAvailability = async (availability: Omit<CarrierAvailabil
   try {
     const newAvailability: CarrierAvailability = {
       ...availability,
+      carrierPhone: availability.carrierPhone || "",
+      loadType: availability.loadType || "",
       id: generateId(),
       createdAt: Date.now(),
       expiresAt: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
