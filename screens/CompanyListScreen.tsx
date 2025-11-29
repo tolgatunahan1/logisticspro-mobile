@@ -14,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Company, getCompanies, searchCompanies, deleteCompany } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { useDebounceSearch } from "../hooks/useDebounceSearch";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -40,13 +41,15 @@ export default function CompanyListScreen() {
   const { firebaseUser } = useAuth();
   
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  const searchFn = useCallback((query: string) => searchCompanies(companies, query.toUpperCase()), [companies]);
+  const { query: searchQuery, setQuery: setSearchQuery, results: filteredCompanies } = useDebounceSearch(searchFn, 300);
 
   const loadCompanies = useCallback(async () => {
     if (!firebaseUser?.uid) return;
@@ -117,7 +120,6 @@ export default function CompanyListScreen() {
     }
   };
 
-  const filteredCompanies = useMemo(() => searchCompanies(companies, searchQuery.toUpperCase()), [companies, searchQuery]);
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
     <View

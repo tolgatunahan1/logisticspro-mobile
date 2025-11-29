@@ -14,6 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Carrier, getCarriers, searchCarriers, deleteCarrier, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { useDebounceSearch } from "../hooks/useDebounceSearch";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -40,13 +41,15 @@ export default function CarrierListScreen() {
   const { firebaseUser } = useAuth();
   
   const [carriers, setCarriers] = useState<Carrier[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  const searchFn = useCallback((query: string) => searchCarriers(carriers, query.toUpperCase()), [carriers]);
+  const { query: searchQuery, setQuery: setSearchQuery, results: filteredCarriers } = useDebounceSearch(searchFn, 300);
 
   const loadCarriers = useCallback(async () => {
     if (!firebaseUser?.uid) return;
@@ -132,7 +135,6 @@ export default function CarrierListScreen() {
     }
   };
 
-  const filteredCarriers = useMemo(() => searchCarriers(carriers, searchQuery.toUpperCase()), [carriers, searchQuery]);
 
   const renderCarrierItem = ({ item }: { item: Carrier }) => (
     <View
