@@ -443,7 +443,7 @@ export default function CompletedJobListScreen() {
   );
 
   const renderSearchHeader = () => (
-    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: headerHeight + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
+    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
       <View
         style={{
           flexDirection: "row",
@@ -498,7 +498,7 @@ export default function CompletedJobListScreen() {
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
-      <View style={{ position: 'absolute', top: headerHeight + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
+      <View style={{ position: 'absolute', top: insets.top + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
         {renderSearchHeader()}
       </View>
 
