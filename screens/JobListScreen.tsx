@@ -266,12 +266,12 @@ export default function JobListScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <SearchBarComponent />
       <FlatList
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={SearchBarComponent}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />

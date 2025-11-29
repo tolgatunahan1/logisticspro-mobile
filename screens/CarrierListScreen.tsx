@@ -216,14 +216,14 @@ export default function CarrierListScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <SearchBarComponent />
       <FlatList
         data={filteredCarriers}
         keyExtractor={(item) => item.id}
         renderItem={renderCarrierItem}
-        ListHeaderComponent={SearchBarComponent}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: Spacing.md, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
