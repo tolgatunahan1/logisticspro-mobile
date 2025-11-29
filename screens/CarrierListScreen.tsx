@@ -200,6 +200,7 @@ export default function CarrierListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          autoCapitalize="characters"
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>

@@ -461,6 +461,7 @@ export default function CompletedJobListScreen() {
             placeholder="İş ara..."
             value={searchQuery}
             onChangeText={handleSearch}
+            autoCapitalize="characters"
           />
         </View>
       </View>

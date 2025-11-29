@@ -185,6 +185,7 @@ export default function CompanyListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          autoCapitalize="characters"
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>

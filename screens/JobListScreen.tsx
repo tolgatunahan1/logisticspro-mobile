@@ -254,6 +254,7 @@ export default function JobListScreen() {
           placeholder="İş ara..."
           value={searchQuery}
           onChangeText={handleSearch}
+          autoCapitalize="characters"
         />
       </View>
     </View>
@@ -427,6 +428,7 @@ export default function JobListScreen() {
                         placeholderTextColor={colors.textSecondary}
                         value={carrierSearchQuery}
                         onChangeText={setCarrierSearchQuery}
+                        autoCapitalize="characters"
                       />
                       {carrierSearchQuery.length > 0 && (
                         <Pressable onPress={() => setCarrierSearchQuery("")}>
