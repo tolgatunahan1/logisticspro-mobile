@@ -117,7 +117,7 @@ export default function CompanyListScreen() {
     }
   };
 
-  const filteredCompanies = searchCompanies(companies, searchQuery);
+  const filteredCompanies = searchCompanies(companies, searchQuery.toUpperCase());
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
     <View

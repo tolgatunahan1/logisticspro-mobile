@@ -71,7 +71,8 @@ export default function JobListScreen() {
     if (query.trim() === "") {
       setFilteredJobs(jobs);
     } else {
-      setFilteredJobs(searchJobs(jobs, query.toUpperCase()));
+      const upperQuery = query.toUpperCase().trim();
+      setFilteredJobs(searchJobs(jobs, upperQuery));
     }
   }, [jobs]);
 
@@ -101,10 +102,10 @@ export default function JobListScreen() {
 
   const getFilteredCarriers = useCallback(() => {
     if (!carrierSearchQuery.trim()) return carriers;
-    const query = carrierSearchQuery.toLowerCase().trim();
+    const query = carrierSearchQuery.toUpperCase().trim();
     return carriers.filter((carrier) =>
-      carrier.name.toLowerCase().includes(query) ||
-      carrier.phone.toLowerCase().includes(query)
+      carrier.name.toUpperCase().includes(query) ||
+      carrier.phone.toUpperCase().includes(query)
     );
   }, [carriers, carrierSearchQuery]);
 

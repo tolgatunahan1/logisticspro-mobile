@@ -242,7 +242,8 @@ export default function CompletedJobListScreen() {
     if (query.trim() === "") {
       setFilteredJobs(jobs);
     } else {
-      setFilteredJobs(searchCompletedJobs(jobs, query.toUpperCase()));
+      const upperQuery = query.toUpperCase().trim();
+      setFilteredJobs(searchCompletedJobs(jobs, upperQuery));
     }
   }, [jobs]);
 

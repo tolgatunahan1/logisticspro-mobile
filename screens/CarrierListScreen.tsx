@@ -132,7 +132,7 @@ export default function CarrierListScreen() {
     }
   };
 
-  const filteredCarriers = searchCarriers(carriers, searchQuery);
+  const filteredCarriers = searchCarriers(carriers, searchQuery.toUpperCase());
 
   const renderCarrierItem = ({ item }: { item: Carrier }) => (
     <View
