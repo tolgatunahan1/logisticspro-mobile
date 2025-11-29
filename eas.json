@@ -1,31 +1,10 @@
 {
-  "cli": {
-    "version": ">= 5.0.0"
-  },
   "build": {
     "preview": {
       "android": {
         "buildType": "apk"
       }
     },
-    "preview2": {
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "production": {
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:bundleRelease"
-      }
-    }
-  },
-  "submit": {
-    "production": {
-      "android": {
-        "serviceAccount": "api-service-account.json",
-        "track": "internal"
-      }
-    }
+    "production": {}
   }
 }
