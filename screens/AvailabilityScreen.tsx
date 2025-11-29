@@ -63,32 +63,30 @@ export default function AvailabilityScreen() {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
-      setIsSaving(true);
-
-      const result = await addCarrierAvailability({
-        carrierName: name.trim() || "Belirtilmedi",
-        carrierPhone: phone.trim() || undefined,
-        currentLocation: currentLocation.trim() || "Belirtilmedi",
-        destinationLocation: destinationLocation.trim() || "Belirtilmedi",
-        notes: notes.trim() || "Bilgi yok",
+      await addCarrierAvailability({
+        carrierName: name.trim() === "" ? "Belirtilmedi" : name.trim(),
+        carrierPhone: phone.trim() === "" ? undefined : phone.trim(),
+        currentLocation: currentLocation.trim() === "" ? "Belirtilmedi" : currentLocation.trim(),
+        destinationLocation: destinationLocation.trim() === "" ? "Belirtilmedi" : destinationLocation.trim(),
+        notes: notes.trim() === "" ? "Bilgi yok" : notes.trim(),
         capacity: "boş",
-        loadType: vehicleType.trim() || undefined,
+        loadType: vehicleType.trim() === "" ? undefined : vehicleType.trim(),
       });
-
-      if (result) {
-        setName("");
-        setPhone("");
-        setVehicleType("");
-        setCurrentLocation("");
-        setDestinationLocation("");
-        setNotes("");
-        setModalVisible(false);
-        await loadData();
-        Alert.alert("Başarılı", "Bildiri kaydedildi");
-      } else {
-        Alert.alert("Hata", "Bildiri kaydedilemedi. Tekrar dene.");
-      }
+      
+      setName("");
+      setPhone("");
+      setVehicleType("");
+      setCurrentLocation("");
+      setDestinationLocation("");
+      setNotes("");
+      setModalVisible(false);
+      await loadData();
+      Alert.alert("Başarılı", "Bildiri kaydedildi");
+    } catch (error) {
+      console.error("Save error:", error);
+      Alert.alert("Hata", "Bildiri kaydedilemedi");
     } finally {
       setIsSaving(false);
     }
