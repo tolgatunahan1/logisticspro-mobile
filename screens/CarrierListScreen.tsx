@@ -240,6 +240,7 @@ export default function CarrierListScreen() {
     <ThemedView style={styles.container}>
       {renderSearchBar()}
       <FlatList
+        style={{ flex: 1 }}
         data={filteredCarriers}
         keyExtractor={(item) => item.id}
         renderItem={renderCarrierItem}

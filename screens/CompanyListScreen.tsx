@@ -225,6 +225,7 @@ export default function CompanyListScreen() {
     <ThemedView style={styles.container}>
       {renderSearchBar()}
       <FlatList
+        style={{ flex: 1 }}
         data={filteredCompanies}
         keyExtractor={(item) => item.id}
         renderItem={renderCompanyItem}

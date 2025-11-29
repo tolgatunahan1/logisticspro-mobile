@@ -489,6 +489,7 @@ export default function CompletedJobListScreen() {
     <ThemedView style={styles.container}>
       {renderSearchHeader()}
       <FlatList
+        style={{ flex: 1 }}
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}

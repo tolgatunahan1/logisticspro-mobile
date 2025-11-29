@@ -282,6 +282,7 @@ export default function JobListScreen() {
     <ThemedView style={styles.container}>
       {renderSearchHeader()}
       <FlatList
+        style={{ flex: 1 }}
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
