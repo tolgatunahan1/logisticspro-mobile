@@ -447,7 +447,7 @@ export default function CompletedJobListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md, paddingHorizontal: Spacing.xl }]}>
       <View
         style={[
           styles.searchBox,
