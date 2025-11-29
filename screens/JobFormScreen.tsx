@@ -287,66 +287,11 @@ export default function JobFormScreen() {
         }
       }
 
-      // VALIDASYON
+      // Firma seçimi zorunlu
       if (!finalCompanyId) {
         Alert.alert("Hata", "Lütfen bir firma seçin");
         setIsLoading(false);
         return;
-      }
-
-      // Removed validation
-      if (!cargoValidation.isValid) {
-        Alert.alert("Hata", cargoValidation.error);
-        setIsLoading(false);
-        return;
-      }
-
-      // Removed validation
-      if (!tonnageValidation.isValid) {
-        Alert.alert("Hata", tonnageValidation.error);
-        setIsLoading(false);
-        return;
-      }
-
-      // Removed validation
-      if (!loadingLocValidation.isValid) {
-        Alert.alert("Hata", loadingLocValidation.error);
-        setIsLoading(false);
-        return;
-      }
-
-      // Removed validation
-      if (!deliveryLocValidation.isValid) {
-        Alert.alert("Hata", deliveryLocValidation.error);
-        setIsLoading(false);
-        return;
-      }
-
-      // Tarih Mantık Validasyonu (edit modunda geçmiş tarihler izin ver)
-      // Removed validation
-      if (!dateValidation.isValid) {
-        Alert.alert("Hata", dateValidation.error);
-        setIsLoading(false);
-        return;
-      }
-
-      // Cost validasyonları (isteğe bağlı ama doldurulmuşsa pozitif olmalı)
-      if (finalTransportationCost.trim()) {
-        // Removed validation
-        if (!costValidation.isValid) {
-          Alert.alert("Hata", costValidation.error);
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      if (finalCommissionCost.trim()) {
-        // Removed validation
-        if (!commissionValidation.isValid) {
-          Alert.alert("Hata", commissionValidation.error);
-          setIsLoading(false);
-          return;
-        }
       }
 
       const data = {
