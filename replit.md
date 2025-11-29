@@ -57,10 +57,12 @@ This authentication system is working perfectly and must be preserved as-is.
 {
   "rules": {
     "users": {
+      ".read": "root.child('admins').child(auth.uid).exists()",
+      ".write": "root.child('admins').child(auth.uid).exists()",
       "$uid": {
         "profile": {
-          ".read": "$uid === auth.uid",
-          ".write": "$uid === auth.uid"
+          ".read": "$uid === auth.uid || root.child('admins').child(auth.uid).exists()",
+          ".write": "$uid === auth.uid || root.child('admins').child(auth.uid).exists()"
         },
         "data": {
           ".read": "$uid === auth.uid",
@@ -84,8 +86,7 @@ This authentication system is working perfectly and must be preserved as-is.
     },
     "admins": {
       ".read": "auth.uid !== null",
-      ".write": "root.child('admins').child(auth.uid).exists()",
-      ".indexOn": ["uid"]
+      ".write": "root.child('admins').child(auth.uid).exists()"
     },
     "public": {
       "carrierAvailabilities": {
