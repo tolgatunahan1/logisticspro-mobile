@@ -447,7 +447,7 @@ export default function CompletedJobListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.xs, paddingBottom: Spacing.xs, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.searchContainer, { padding: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
       <View
         style={[
           styles.searchBox,
@@ -478,6 +478,7 @@ export default function CompletedJobListScreen() {
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
         contentContainerStyle={styles.listContent}
+        style={{ flex: 1 }}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />

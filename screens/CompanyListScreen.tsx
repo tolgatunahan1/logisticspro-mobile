@@ -178,7 +178,7 @@ export default function CompanyListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.xs, paddingBottom: Spacing.xs, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.searchContainer, { padding: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
       <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
@@ -208,8 +208,9 @@ export default function CompanyListScreen() {
         renderItem={renderCompanyItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Spacing.xs, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: Spacing.md, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
+        style={{ flex: 1 }}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl

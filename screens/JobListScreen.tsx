@@ -241,7 +241,7 @@ export default function JobListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.xs, paddingBottom: Spacing.xs, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.searchContainer, { padding: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
       <View
         style={[
           styles.searchBox,
@@ -272,6 +272,7 @@ export default function JobListScreen() {
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        style={{ flex: 1 }}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />
