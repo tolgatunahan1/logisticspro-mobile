@@ -86,6 +86,13 @@ This authentication system is working perfectly and must be preserved as-is.
       ".read": "auth.uid !== null",
       ".write": "root.child('admins').child(auth.uid).exists()",
       ".indexOn": ["uid"]
+    },
+    "public": {
+      "carrierAvailabilities": {
+        ".read": true,
+        ".write": true,
+        ".indexOn": ["carrierName", "currentLocation", "destinationLocation"]
+      }
     }
   }
 }
