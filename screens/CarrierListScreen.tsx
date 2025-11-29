@@ -245,7 +245,7 @@ export default function CarrierListScreen() {
         renderItem={renderCarrierItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + Spacing.xl + 80, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + Spacing.xl + 140, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={

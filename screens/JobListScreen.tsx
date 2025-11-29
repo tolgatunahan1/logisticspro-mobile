@@ -285,7 +285,7 @@ export default function JobListScreen() {
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingTop: insets.top + Spacing.xl + 80 }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: insets.top + Spacing.xl + 140 }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
