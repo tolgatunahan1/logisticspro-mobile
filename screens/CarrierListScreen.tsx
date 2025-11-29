@@ -193,7 +193,7 @@ export default function CarrierListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.md, paddingBottom: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.searchContainer, { paddingTop: Spacing.xs, paddingBottom: Spacing.xs, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
       <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
@@ -223,7 +223,7 @@ export default function CarrierListScreen() {
         renderItem={renderCarrierItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Spacing.md, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: Spacing.xs, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
