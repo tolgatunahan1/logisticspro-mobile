@@ -285,13 +285,13 @@ export default function JobListScreen() {
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingTop: insets.top + Spacing.lg + 60 }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: insets.top + Spacing.xl + 40 }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
+      <View style={{ position: 'absolute', top: insets.top + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
         {renderSearchHeader()}
       </View>
 

@@ -492,13 +492,13 @@ export default function CompletedJobListScreen() {
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
-        contentContainerStyle={[styles.listContent, { paddingTop: headerHeight + Spacing.lg + 60 }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: headerHeight + Spacing.xl + 40 }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
+      <View style={{ position: 'absolute', top: headerHeight + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
         {renderSearchHeader()}
       </View>
 
