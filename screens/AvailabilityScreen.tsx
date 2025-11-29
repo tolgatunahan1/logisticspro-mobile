@@ -293,7 +293,7 @@ export default function AvailabilityScreen() {
                   />
                 </View>
 
-                <View style={{ marginBottom: 12 }}>
+                <View style={{ marginBottom: 0 }}>
                   <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
                     Durum
                   </ThemedText>
