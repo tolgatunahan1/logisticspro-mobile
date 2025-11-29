@@ -5,25 +5,29 @@
     "version": "1.0.0",
     "runtimeVersion": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo-transparent.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "logisticspro",
     "userInterfaceStyle": "light",
+    "description": "Profesyonel lojistik yönetim uygulaması. İşleri, nakliyecileri ve firmaları kolayca yönetin.",
+    "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.logisticspro",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "privacyManifests": true
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/logo-transparent.png",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/logo-transparent.png"
+        "monochromeImage": "./assets/images/android-icon-foreground.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.logisticspro",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": []
     },
     "web": {
       "output": "single",
