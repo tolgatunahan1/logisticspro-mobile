@@ -15,7 +15,9 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
-import { formatCurrency } from "../utils/validation";
+const formatCurrency = (amount: number): string => {
+  return amount.toFixed(2).replace(".", ",");
+};
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

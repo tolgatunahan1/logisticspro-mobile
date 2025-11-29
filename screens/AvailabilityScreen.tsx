@@ -89,7 +89,7 @@ export default function AvailabilityScreen() {
         await loadData();
         Alert.alert("Başarılı", "Bildiri kaydedildi");
       } else {
-        Alert.alert("Hata", "Bildiri kaydedilemedi");
+        Alert.alert("Hata", "Bildiri kaydedilemedi. Firebase kuralları konfigüre edilmelidir.");
       }
     } catch (e) {
       console.error("Save error:", e);
