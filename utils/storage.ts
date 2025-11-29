@@ -161,9 +161,9 @@ export const searchCarriers = (carriers: Carrier[], query: string): Carrier[] =>
   const lowerQuery = query.toLowerCase().trim();
   return carriers.filter(
     (c) =>
-      c.name.toLowerCase().includes(lowerQuery) ||
-      c.phone.toLowerCase().includes(lowerQuery) ||
-      c.plate.toLowerCase().includes(lowerQuery)
+      c.name?.toLowerCase().includes(lowerQuery) ||
+      c.phone?.toLowerCase().includes(lowerQuery) ||
+      c.plate?.toLowerCase().includes(lowerQuery)
   );
 };
 
@@ -222,10 +222,10 @@ export const searchCompanies = (companies: Company[], query: string): Company[] 
   const lowerQuery = query.toLowerCase().trim();
   return companies.filter(
     (c) =>
-      c.name.toLowerCase().includes(lowerQuery) ||
-      c.phone.toLowerCase().includes(lowerQuery) ||
-      c.contactPerson.toLowerCase().includes(lowerQuery) ||
-      c.address.toLowerCase().includes(lowerQuery)
+      c.name?.toLowerCase().includes(lowerQuery) ||
+      c.phone?.toLowerCase().includes(lowerQuery) ||
+      c.contactPerson?.toLowerCase().includes(lowerQuery) ||
+      c.address?.toLowerCase().includes(lowerQuery)
   );
 };
 
@@ -284,9 +284,9 @@ export const searchJobs = (jobs: PlannedJob[], query: string): PlannedJob[] => {
   const lowerQuery = query.toLowerCase().trim();
   return jobs.filter(
     (j) =>
-      j.cargoType.toLowerCase().includes(lowerQuery) ||
-      j.loadingLocation.toLowerCase().includes(lowerQuery) ||
-      j.deliveryLocation.toLowerCase().includes(lowerQuery)
+      j.cargoType?.toLowerCase().includes(lowerQuery) ||
+      j.loadingLocation?.toLowerCase().includes(lowerQuery) ||
+      j.deliveryLocation?.toLowerCase().includes(lowerQuery)
   );
 };
 
