@@ -238,11 +238,12 @@ export default function CompletedJobListScreen() {
   }, [firebaseUser?.uid, selectedJob, carriers, shareIBANWithCarrier]);
 
   const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    if (query.trim() === "") {
+    const upperQuery = query.toUpperCase();
+    setSearchQuery(upperQuery);
+    if (upperQuery.trim() === "") {
       setFilteredJobs(jobs);
     } else {
-      setFilteredJobs(searchCompletedJobs(jobs, query));
+      setFilteredJobs(searchCompletedJobs(jobs, upperQuery));
     }
   }, [jobs]);
 
@@ -461,7 +462,6 @@ export default function CompletedJobListScreen() {
             placeholder="İş ara..."
             value={searchQuery}
             onChangeText={handleSearch}
-            autoCapitalize="characters"
           />
         </View>
       </View>

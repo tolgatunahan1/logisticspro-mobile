@@ -67,11 +67,12 @@ export default function JobListScreen() {
   );
 
   const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    if (query.trim() === "") {
+    const upperQuery = query.toUpperCase();
+    setSearchQuery(upperQuery);
+    if (upperQuery.trim() === "") {
       setFilteredJobs(jobs);
     } else {
-      setFilteredJobs(searchJobs(jobs, query));
+      setFilteredJobs(searchJobs(jobs, upperQuery));
     }
   }, [jobs]);
 
@@ -427,8 +428,7 @@ export default function JobListScreen() {
                         placeholder="Ara..."
                         placeholderTextColor={colors.textSecondary}
                         value={carrierSearchQuery}
-                        onChangeText={setCarrierSearchQuery}
-                        autoCapitalize="characters"
+                        onChangeText={(text) => setCarrierSearchQuery(text.toUpperCase())}
                       />
                       {carrierSearchQuery.length > 0 && (
                         <Pressable onPress={() => setCarrierSearchQuery("")}>
