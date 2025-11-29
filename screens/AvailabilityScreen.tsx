@@ -201,17 +201,17 @@ export default function AvailabilityScreen() {
       </View>
 
       <Modal visible={modalVisible} animationType="fade" transparent={true} onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-            <View style={{ width: "85%", maxWidth: 380, maxHeight: "85%", borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12, display: "flex", flexDirection: "column" }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <ThemedText type="h3">Yeni Bildiri</ThemedText>
-                <Pressable onPress={() => setModalVisible(false)}>
-                  <Feather name="x" size={24} color={colors.text} />
-                </Pressable>
-              </View>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <View style={{ width: "85%", maxWidth: 380, height: "80%", borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12, display: "flex", flexDirection: "column" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <ThemedText type="h3">Yeni Bildiri</ThemedText>
+              <Pressable onPress={() => setModalVisible(false)}>
+                <Feather name="x" size={24} color={colors.text} />
+              </Pressable>
+            </View>
 
-              <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled" style={{ flex: 1 }}>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+              <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled">
                 <View style={{ marginBottom: 10 }}>
                   <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
                     Ad
@@ -311,30 +311,30 @@ export default function AvailabilityScreen() {
                   />
                 </View>
               </ScrollView>
+            </KeyboardAvoidingView>
 
-              <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
-                <Pressable
-                  onPress={() => setModalVisible(false)}
-                  disabled={isSaving}
-                  style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
-                >
-                  <ThemedText type="small" style={{ fontWeight: "600", fontSize: 12 }}>
-                    İptal
-                  </ThemedText>
-                </Pressable>
-                <Pressable 
-                  onPress={handleSave} 
-                  disabled={isSaving}
-                  style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
-                >
-                  <ThemedText type="small" style={{ fontWeight: "600", color: "white", fontSize: 12 }}>
-                    {isSaving ? "Kaydediliyor..." : "Kaydet"}
-                  </ThemedText>
-                </Pressable>
-              </View>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+              <Pressable
+                onPress={() => setModalVisible(false)}
+                disabled={isSaving}
+                style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
+              >
+                <ThemedText type="small" style={{ fontWeight: "600", fontSize: 12 }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+              <Pressable 
+                onPress={handleSave} 
+                disabled={isSaving}
+                style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
+              >
+                <ThemedText type="small" style={{ fontWeight: "600", color: "white", fontSize: 12 }}>
+                  {isSaving ? "Kaydediliyor..." : "Kaydet"}
+                </ThemedText>
+              </Pressable>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </Modal>
     </ScreenScrollView>
   );
