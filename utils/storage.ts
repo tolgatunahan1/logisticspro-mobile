@@ -162,7 +162,7 @@ export const searchCarriers = (carriers: Carrier[], query: string): Carrier[] =>
   return carriers.filter(
     (c) =>
       c.name.toLowerCase().includes(lowerQuery) ||
-      c.phone.includes(lowerQuery) ||
+      c.phone.toLowerCase().includes(lowerQuery) ||
       c.plate.toLowerCase().includes(lowerQuery)
   );
 };
@@ -223,7 +223,7 @@ export const searchCompanies = (companies: Company[], query: string): Company[] 
   return companies.filter(
     (c) =>
       c.name.toLowerCase().includes(lowerQuery) ||
-      c.phone.includes(lowerQuery) ||
+      c.phone.toLowerCase().includes(lowerQuery) ||
       c.contactPerson.toLowerCase().includes(lowerQuery) ||
       c.address.toLowerCase().includes(lowerQuery)
   );
