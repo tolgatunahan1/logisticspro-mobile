@@ -178,7 +178,7 @@ export default function CompanyListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { paddingTop: insets.top + Spacing.lg, paddingBottom: Spacing.md, paddingHorizontal: Spacing.xl }]}>
+    <View style={[styles.searchContainer, { paddingTop: insets.top + Spacing.lg, paddingBottom: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
       <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
