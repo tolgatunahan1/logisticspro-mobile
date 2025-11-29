@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { ThemedText } from "../components/ThemedText";
@@ -173,6 +173,7 @@ export default function AvailabilityScreen() {
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
+            onSubmitEditing={() => Keyboard.dismiss()}
             autoCorrect={false}
             autoCapitalize="none"
             returnKeyType="search"

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView, Keyboard } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -261,6 +261,7 @@ export default function JobListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={handleSearch}
+          onSubmitEditing={() => Keyboard.dismiss()}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"

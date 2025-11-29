@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, Keyboard } from "react-native";
 import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -468,6 +468,7 @@ export default function CompletedJobListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={handleSearch}
+          onSubmitEditing={() => Keyboard.dismiss()}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"

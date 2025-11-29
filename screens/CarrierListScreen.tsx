@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView, Keyboard } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -219,6 +219,7 @@ export default function CarrierListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onSubmitEditing={() => Keyboard.dismiss()}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView, Platform } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView, Platform, Keyboard } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -204,6 +204,7 @@ export default function CompanyListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onSubmitEditing={() => Keyboard.dismiss()}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"
