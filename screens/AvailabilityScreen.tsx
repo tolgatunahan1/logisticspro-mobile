@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -19,6 +19,7 @@ export default function AvailabilityScreen() {
 
   const [availabilities, setAvailabilities] = useState<CarrierAvailability[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [vehicleType, setVehicleType] = useState("");
@@ -39,6 +40,16 @@ export default function AvailabilityScreen() {
   useFocusEffect(useCallback(() => {
     loadData();
   }, [loadData]));
+
+  const filteredAvailabilities = useMemo(() => {
+    if (searchQuery.trim() === "") return availabilities;
+    const lowerQuery = searchQuery.toLowerCase().trim();
+    return availabilities.filter((a) =>
+      a.carrierName.toLowerCase().includes(lowerQuery) ||
+      a.currentLocation.toLowerCase().includes(lowerQuery) ||
+      a.destinationLocation.toLowerCase().includes(lowerQuery)
+    );
+  }, [availabilities, searchQuery]);
 
   const handleDelete = async (item: CarrierAvailability) => {
     const backup = [...availabilities];
@@ -137,19 +148,39 @@ export default function AvailabilityScreen() {
           </Pressable>
         </View>
 
-        {availabilities.length === 0 ? (
+        <View style={[s.searchBar, { backgroundColor: colors.backgroundSecondary, marginBottom: 12 }]}>
+          <Feather name="search" size={18} color={colors.textSecondary} />
+          <TextInput
+            style={[s.searchInput, { color: theme.text }]}
+            placeholder="Bildiri ara..."
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          {searchQuery ? (
+            <Pressable onPress={() => setSearchQuery("")}>
+              <Feather name="x" size={18} color={colors.textSecondary} />
+            </Pressable>
+          ) : null}
+        </View>
+
+        {filteredAvailabilities.length === 0 ? (
           <View style={{ alignItems: "center", paddingVertical: 40 }}>
             <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Bildiri yok
+              {searchQuery ? "Arama sonucu bulunamadı" : "Bildiri yok"}
             </ThemedText>
           </View>
         ) : (
           <FlatList
-            data={availabilities}
+            data={filteredAvailabilities}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             contentContainerStyle={{ gap: 6 }}
+            keyboardShouldPersistTaps="handled"
+            removeClippedSubviews={true}
           />
         )}
       </View>
@@ -176,6 +207,8 @@ export default function AvailabilityScreen() {
                     onChangeText={setName}
                     placeholderTextColor={colors.textSecondary}
                     editable={!isSaving}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text }]}
                   />
                 </View>
@@ -191,6 +224,8 @@ export default function AvailabilityScreen() {
                     keyboardType="phone-pad"
                     placeholderTextColor={colors.textSecondary}
                     editable={!isSaving}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
                   />
                 </View>
@@ -205,6 +240,8 @@ export default function AvailabilityScreen() {
                     onChangeText={setVehicleType}
                     placeholderTextColor={colors.textSecondary}
                     editable={!isSaving}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
                   />
                 </View>
@@ -219,6 +256,8 @@ export default function AvailabilityScreen() {
                     onChangeText={setCurrentLocation}
                     placeholderTextColor={colors.textSecondary}
                     editable={!isSaving}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
                   />
                 </View>
@@ -233,6 +272,8 @@ export default function AvailabilityScreen() {
                     onChangeText={setDestinationLocation}
                     placeholderTextColor={colors.textSecondary}
                     editable={!isSaving}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, height: 40 }]}
                   />
                 </View>
@@ -249,6 +290,8 @@ export default function AvailabilityScreen() {
                     numberOfLines={2}
                     placeholderTextColor={colors.textSecondary}
                     editable={!isSaving}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 45 }]}
                   />
                 </View>
