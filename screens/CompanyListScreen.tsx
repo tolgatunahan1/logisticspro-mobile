@@ -230,7 +230,7 @@ export default function CompanyListScreen() {
         renderItem={renderCompanyItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + Spacing.xl + 40, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + Spacing.xl + 80, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={

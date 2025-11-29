@@ -492,7 +492,7 @@ export default function CompletedJobListScreen() {
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
-        contentContainerStyle={[styles.listContent, { paddingTop: headerHeight + Spacing.xl + 40 }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: headerHeight + Spacing.xl + 80 }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
