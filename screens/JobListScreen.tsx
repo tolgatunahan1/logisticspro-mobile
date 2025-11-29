@@ -265,7 +265,7 @@ export default function JobListScreen() {
   ));
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { flex: 1 }]}>
       <SearchBarComponent />
       <FlatList
         data={filteredJobs}

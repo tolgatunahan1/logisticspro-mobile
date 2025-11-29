@@ -200,7 +200,7 @@ export default function CompanyListScreen() {
   ));
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { flex: 1 }]}>
       <SearchBarComponent />
       <FlatList
         data={filteredCompanies}

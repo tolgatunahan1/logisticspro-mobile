@@ -215,7 +215,7 @@ export default function CarrierListScreen() {
   ));
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { flex: 1 }]}>
       <SearchBarComponent />
       <FlatList
         data={filteredCarriers}
