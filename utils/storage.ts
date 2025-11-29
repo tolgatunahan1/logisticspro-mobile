@@ -491,10 +491,14 @@ export const getCarrierAvailabilities = async (): Promise<CarrierAvailability[]>
     const snapshot = await get(ref(firebaseDatabase, `public/carrierAvailabilities`));
     if (snapshot.exists()) {
       const data = snapshot.val();
-      return Object.values(data) as CarrierAvailability[];
+      if (typeof data === 'object' && data !== null) {
+        const result = Object.values(data).filter(item => item && typeof item === 'object') as CarrierAvailability[];
+        return result;
+      }
     }
     return [];
   } catch (error) {
+    console.error("❌ Firebase read error:", error);
     return [];
   }
 };
@@ -508,8 +512,10 @@ export const addCarrierAvailability = async (availability: Omit<CarrierAvailabil
       expiresAt: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
     };
     await set(ref(firebaseDatabase, `public/carrierAvailabilities/${newAvailability.id}`), newAvailability);
+    await new Promise(resolve => setTimeout(resolve, 300));
     return newAvailability;
   } catch (error) {
+    console.error("Write error:", error);
     return null;
   }
 };
