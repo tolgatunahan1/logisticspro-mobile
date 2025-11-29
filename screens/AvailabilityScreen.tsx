@@ -66,7 +66,6 @@ export default function AvailabilityScreen() {
     try {
       setIsSaving(true);
 
-      const expiresAt = Date.now() + 12 * 60 * 60 * 1000;
       const result = await addCarrierAvailability({
         carrierName: name.trim() || "Adı belirtilmedi",
         carrierPhone: phone.trim() || undefined,
@@ -75,7 +74,6 @@ export default function AvailabilityScreen() {
         notes: notes.trim() || "Bilgi yok",
         capacity: "boş",
         loadType: vehicleType.trim() || undefined,
-        expiresAt,
       });
 
       if (result) {
