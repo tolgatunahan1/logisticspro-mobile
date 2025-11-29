@@ -206,14 +206,14 @@ export default function CompanyListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {renderSearchBar()}
       <FlatList
         data={filteredCompanies}
         keyExtractor={(item) => item.id}
         renderItem={renderCompanyItem}
+        ListHeaderComponent={renderSearchBar}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: 0, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
