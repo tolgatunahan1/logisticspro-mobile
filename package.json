@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "name": "my-app",
   "main": "index.js",
   "version": "1.0.0",
