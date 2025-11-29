@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView, Platform } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -117,7 +117,10 @@ export default function CompanyListScreen() {
     }
   };
 
-  const filteredCompanies = searchCompanies(companies, searchQuery);
+  const filteredCompanies = useMemo(() => 
+    searchCompanies(companies, searchQuery), 
+    [companies, searchQuery]
+  );
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
     <View
@@ -185,6 +188,8 @@ export default function CompanyListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          autoCorrect={false}
+          autoCapitalize="none"
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
@@ -215,6 +220,8 @@ export default function CompanyListScreen() {
           />
         }
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={true}
       />
 
       {/* ID Card Detail Modal */}

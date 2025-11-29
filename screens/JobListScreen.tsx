@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect } from "react";
+import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -26,7 +26,6 @@ export default function JobListScreen() {
 
   const [jobs, setJobs] = useState<PlannedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
-  const [filteredJobs, setFilteredJobs] = useState<PlannedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -34,6 +33,11 @@ export default function JobListScreen() {
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
   const [carrierSearchQuery, setCarrierSearchQuery] = useState("");
+
+  const filteredJobs = useMemo(() => {
+    if (searchQuery.trim() === "") return jobs;
+    return searchJobs(jobs, searchQuery);
+  }, [jobs, searchQuery]);
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -56,7 +60,6 @@ export default function JobListScreen() {
 
     setJobs(allJobs);
     setCompanies(companiesMap);
-    setFilteredJobs(allJobs);
     setCarriers(allCarriers);
   }, [firebaseUser?.uid]);
 
@@ -68,12 +71,7 @@ export default function JobListScreen() {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    if (query.trim() === "") {
-      setFilteredJobs(jobs);
-    } else {
-      setFilteredJobs(searchJobs(jobs, query));
-    }
-  }, [jobs]);
+  }, []);
 
   const handleDeletePress = (job: PlannedJob) => {
     openDeleteConfirm(job);
@@ -254,6 +252,8 @@ export default function JobListScreen() {
           placeholder="İş ara..."
           value={searchQuery}
           onChangeText={handleSearch}
+          autoCorrect={false}
+          autoCapitalize="none"
         />
       </View>
     </View>
@@ -269,6 +269,8 @@ export default function JobListScreen() {
         ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={true}
       />
 
       {/* Detail Modal */}
@@ -299,7 +301,7 @@ export default function JobListScreen() {
               </View>
 
               {/* Modal Body - Scrollable Job Details */}
-              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false}>
+              <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {selectedJob && (
                 <View style={{ gap: Spacing.lg }}>
                   <View style={styles.detailSection}>
@@ -427,6 +429,8 @@ export default function JobListScreen() {
                         placeholderTextColor={colors.textSecondary}
                         value={carrierSearchQuery}
                         onChangeText={setCarrierSearchQuery}
+                        autoCorrect={false}
+                        autoCapitalize="none"
                       />
                       {carrierSearchQuery.length > 0 && (
                         <Pressable onPress={() => setCarrierSearchQuery("")}>
@@ -441,6 +445,7 @@ export default function JobListScreen() {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ gap: Spacing.md, paddingRight: Spacing.lg }}
                     style={{ maxHeight: 90 }}
+                    keyboardShouldPersistTaps="handled"
                   >
                     {getFilteredCarriers().length > 0 ? (
                       getFilteredCarriers().map((carrier) => (

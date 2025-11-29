@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -132,7 +132,10 @@ export default function CarrierListScreen() {
     }
   };
 
-  const filteredCarriers = searchCarriers(carriers, searchQuery);
+  const filteredCarriers = useMemo(() => 
+    searchCarriers(carriers, searchQuery), 
+    [carriers, searchQuery]
+  );
 
   const renderCarrierItem = ({ item }: { item: Carrier }) => (
     <View
@@ -200,6 +203,8 @@ export default function CarrierListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          autoCorrect={false}
+          autoCapitalize="none"
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
@@ -230,6 +235,8 @@ export default function CarrierListScreen() {
           />
         }
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={true}
       />
 
       {/* ID Card Detail Modal */}

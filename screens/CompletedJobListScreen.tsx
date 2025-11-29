@@ -34,7 +34,6 @@ export default function CompletedJobListScreen() {
   const [jobs, setJobs] = useState<CompletedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
   const [carriers, setCarriers] = useState<{ [key: string]: Carrier }>({});
-  const [filteredJobs, setFilteredJobs] = useState<CompletedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -70,7 +69,6 @@ export default function CompletedJobListScreen() {
     setCompanies(companiesMap);
     setCarriers(carriersMap);
     setIbans(allIbans);
-    setFilteredJobs(allJobs);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
@@ -239,12 +237,12 @@ export default function CompletedJobListScreen() {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    if (query.trim() === "") {
-      setFilteredJobs(jobs);
-    } else {
-      setFilteredJobs(searchCompletedJobs(jobs, query));
-    }
-  }, [jobs]);
+  }, []);
+
+  const filteredJobs = useMemo(() => {
+    if (searchQuery.trim() === "") return jobs;
+    return searchCompletedJobs(jobs, searchQuery);
+  }, [jobs, searchQuery]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -280,7 +278,7 @@ export default function CompletedJobListScreen() {
 
     // Sort by date descending (newest first)
     return Object.values(groups).sort((a, b) => b.timestamp - a.timestamp);
-  }, [filteredJobs]);
+  }, [filteredJobs, formatDate]);
 
   const handleAddPress = () => {
     navigation.navigate("CompletedJobForm", { mode: "add" });
@@ -461,6 +459,8 @@ export default function CompletedJobListScreen() {
             placeholder="İş ara..."
             value={searchQuery}
             onChangeText={handleSearch}
+            autoCorrect={false}
+            autoCapitalize="none"
           />
         </View>
       </View>
@@ -476,6 +476,8 @@ export default function CompletedJobListScreen() {
         ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={true}
       />
 
       {/* Detail Modal */}
@@ -502,7 +504,7 @@ export default function CompletedJobListScreen() {
             </View>
 
             {/* Modal Body */}
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {selectedJob && (
                 <View style={{ gap: Spacing.lg }}>
                   {/* Company Information Section */}
