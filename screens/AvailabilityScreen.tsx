@@ -67,10 +67,10 @@ export default function AvailabilityScreen() {
       setIsSaving(true);
 
       const result = await addCarrierAvailability({
-        carrierName: name.trim() || "Adı belirtilmedi",
+        carrierName: name.trim() || "Belirtilmedi",
         carrierPhone: phone.trim() || undefined,
-        currentLocation: currentLocation.trim() || "Yer belirtilmedi",
-        destinationLocation: destinationLocation.trim() || "Yer belirtilmedi",
+        currentLocation: currentLocation.trim() || "Belirtilmedi",
+        destinationLocation: destinationLocation.trim() || "Belirtilmedi",
         notes: notes.trim() || "Bilgi yok",
         capacity: "boş",
         loadType: vehicleType.trim() || undefined,
@@ -87,11 +87,8 @@ export default function AvailabilityScreen() {
         await loadData();
         Alert.alert("Başarılı", "Bildiri kaydedildi");
       } else {
-        Alert.alert("Hata", "Bildiri kaydedilemedi. Lütfen tüm alanları doldur ve tekrar dene.");
+        Alert.alert("Hata", "Bildiri kaydedilemedi. Tekrar dene.");
       }
-    } catch (e) {
-      console.error("Save error:", e);
-      Alert.alert("Hata", "Bir hata oluştu");
     } finally {
       setIsSaving(false);
     }
