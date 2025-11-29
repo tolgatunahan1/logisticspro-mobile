@@ -236,7 +236,7 @@ export default function JobListScreen() {
   );
 
   const renderSearchHeader = () => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={{
           flexDirection: "row",
@@ -285,7 +285,7 @@ export default function JobListScreen() {
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingTop: Spacing.lg }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"

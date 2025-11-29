@@ -443,7 +443,7 @@ export default function CompletedJobListScreen() {
   );
 
   const renderSearchHeader = () => (
-    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={{
           flexDirection: "row",
@@ -492,7 +492,7 @@ export default function CompletedJobListScreen() {
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingTop: Spacing.lg }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"

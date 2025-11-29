@@ -194,7 +194,7 @@ export default function CarrierListScreen() {
   );
 
   const renderSearchBar = () => (
-    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={{
           flexDirection: "row",
@@ -245,7 +245,7 @@ export default function CarrierListScreen() {
         renderItem={renderCarrierItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: 0, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: Spacing.lg, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
