@@ -104,7 +104,7 @@ export default function JobListScreen() {
     const query = carrierSearchQuery.toLowerCase().trim();
     return carriers.filter((carrier) =>
       carrier.name.toLowerCase().includes(query) ||
-      carrier.phone.includes(query)
+      carrier.phone.toLowerCase().includes(query)
     );
   }, [carriers, carrierSearchQuery]);
 
