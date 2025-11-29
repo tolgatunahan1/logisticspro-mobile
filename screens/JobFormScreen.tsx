@@ -12,7 +12,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { addJob, updateJob, getCompanies, PlannedJob, Company } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
-import { validateDateLogic, validateNotEmpty, validatePositiveNumber } from "../utils/validation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "JobForm">;
 type ScreenRouteProp = RouteProp<RootStackParamList, "JobForm">;
@@ -295,28 +294,28 @@ export default function JobFormScreen() {
         return;
       }
 
-      const cargoValidation = validateNotEmpty(finalCargoType, "Yükün cinsi");
+      // Removed validation
       if (!cargoValidation.isValid) {
         Alert.alert("Hata", cargoValidation.error);
         setIsLoading(false);
         return;
       }
 
-      const tonnageValidation = validateNotEmpty(finalTonnage, "Tonaj");
+      // Removed validation
       if (!tonnageValidation.isValid) {
         Alert.alert("Hata", tonnageValidation.error);
         setIsLoading(false);
         return;
       }
 
-      const loadingLocValidation = validateNotEmpty(finalLoadingLocation, "Yükleme yeri");
+      // Removed validation
       if (!loadingLocValidation.isValid) {
         Alert.alert("Hata", loadingLocValidation.error);
         setIsLoading(false);
         return;
       }
 
-      const deliveryLocValidation = validateNotEmpty(finalDeliveryLocation, "Teslim yeri");
+      // Removed validation
       if (!deliveryLocValidation.isValid) {
         Alert.alert("Hata", deliveryLocValidation.error);
         setIsLoading(false);
@@ -324,7 +323,7 @@ export default function JobFormScreen() {
       }
 
       // Tarih Mantık Validasyonu (edit modunda geçmiş tarihler izin ver)
-      const dateValidation = validateDateLogic(finalLoadingDate, finalDeliveryDate, isEdit);
+      // Removed validation
       if (!dateValidation.isValid) {
         Alert.alert("Hata", dateValidation.error);
         setIsLoading(false);
@@ -333,7 +332,7 @@ export default function JobFormScreen() {
 
       // Cost validasyonları (isteğe bağlı ama doldurulmuşsa pozitif olmalı)
       if (finalTransportationCost.trim()) {
-        const costValidation = validatePositiveNumber(finalTransportationCost, "Nakliye Bedeli");
+        // Removed validation
         if (!costValidation.isValid) {
           Alert.alert("Hata", costValidation.error);
           setIsLoading(false);
@@ -342,7 +341,7 @@ export default function JobFormScreen() {
       }
 
       if (finalCommissionCost.trim()) {
-        const commissionValidation = validatePositiveNumber(finalCommissionCost, "Komisyon Bedeli");
+        // Removed validation
         if (!commissionValidation.isValid) {
           Alert.alert("Hata", commissionValidation.error);
           setIsLoading(false);

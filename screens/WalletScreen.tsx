@@ -12,7 +12,10 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob, getCompanies, Company } from "../utils/storage";
-import { formatCurrency } from "../utils/validation";
+
+const formatCurrency = (amount: number): string => {
+  return amount.toFixed(2).replace(".", ",");
+};
 
 type TabType = "all" | "paid" | "unpaid";
 

@@ -12,7 +12,6 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { validatePassword as validatePasswordUtil } from "../utils/userManagement";
-import { validateEmail, validatePassword } from "../utils/validation";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuth } from "../contexts/AuthContext";
 

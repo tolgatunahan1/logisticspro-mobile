@@ -13,7 +13,6 @@ import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN, getCompletedJobs, CompletedJob } from "../utils/storage";
-import { validateIBAN, validateEmail, validatePassword } from "../utils/validation";
 import { IBANListModal } from "../components/IBANListModal";
 import { firebaseAuthService } from "../utils/firebaseAuth";
 
