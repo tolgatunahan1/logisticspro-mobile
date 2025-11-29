@@ -202,7 +202,7 @@ export default function AvailabilityScreen() {
 
       <Modal visible={modalVisible} animationType="fade" transparent={true} onRequestClose={() => setModalVisible(false)}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ width: "85%", maxWidth: 380, borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12 }}>
+          <View style={{ width: "85%", maxWidth: 380, height: "80%", borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12, display: "flex", flexDirection: "column" }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <ThemedText type="h3">Yeni Bildiri</ThemedText>
               <Pressable onPress={() => setModalVisible(false)}>
@@ -210,7 +210,7 @@ export default function AvailabilityScreen() {
               </Pressable>
             </View>
 
-            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ maxHeight: "80%", borderRadius: BorderRadius.md }}>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
               <ScrollView bounces={false} showsVerticalScrollIndicator={false} pinchGestureEnabled={false} keyboardShouldPersistTaps="handled">
                 <View style={{ marginBottom: 10 }}>
                   <ThemedText type="small" style={{ fontWeight: "600", marginBottom: 4, fontSize: 12 }}>
@@ -310,29 +310,29 @@ export default function AvailabilityScreen() {
                     style={[s.input, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", color: colors.text, minHeight: 45 }]}
                   />
                 </View>
-
-                <View style={{ flexDirection: "row", gap: 8 }}>
-                  <Pressable
-                    onPress={() => setModalVisible(false)}
-                    disabled={isSaving}
-                    style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
-                  >
-                    <ThemedText type="small" style={{ fontWeight: "600", fontSize: 12 }}>
-                      İptal
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable 
-                    onPress={handleSave} 
-                    disabled={isSaving}
-                    style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
-                  >
-                    <ThemedText type="small" style={{ fontWeight: "600", color: "white", fontSize: 12 }}>
-                      {isSaving ? "Kaydediliyor..." : "Kaydet"}
-                    </ThemedText>
-                  </Pressable>
-                </View>
               </ScrollView>
             </KeyboardAvoidingView>
+
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+              <Pressable
+                onPress={() => setModalVisible(false)}
+                disabled={isSaving}
+                style={[s.actionBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
+              >
+                <ThemedText type="small" style={{ fontWeight: "600", fontSize: 12 }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+              <Pressable 
+                onPress={handleSave} 
+                disabled={isSaving}
+                style={[s.actionBtn, { backgroundColor: theme.link, opacity: isSaving ? 0.5 : 1, paddingVertical: 10 }]}
+              >
+                <ThemedText type="small" style={{ fontWeight: "600", color: "white", fontSize: 12 }}>
+                  {isSaving ? "Kaydediliyor..." : "Kaydet"}
+                </ThemedText>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
