@@ -238,18 +238,27 @@ export default function JobListScreen() {
   const renderSearchHeader = () => (
     <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
-        style={[
-          styles.searchBox,
-          {
-            backgroundColor: colors.backgroundDefault,
-            borderColor: colors.border,
-          },
-        ]}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: Spacing.md,
+          borderRadius: BorderRadius.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.backgroundDefault,
+          height: 40,
+        }}
       >
-        <Feather name="search" size={18} color={colors.textSecondary} />
+        <Feather name="search" size={16} color={colors.textSecondary} />
         <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
+          style={{
+            flex: 1,
+            paddingHorizontal: Spacing.md,
+            color: theme.text,
+            fontSize: 14,
+          }}
           placeholder="İş ara..."
+          placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={handleSearch}
           autoCorrect={false}
@@ -259,6 +268,11 @@ export default function JobListScreen() {
           underlineColorAndroid="transparent"
           textContentType="none"
         />
+        {searchQuery.length > 0 && (
+          <Pressable onPress={() => setSearchQuery("")}>
+            <Feather name="x" size={16} color={colors.textSecondary} />
+          </Pressable>
+        )}
       </View>
     </View>
   );

@@ -148,10 +148,27 @@ export default function AvailabilityScreen() {
           </Pressable>
         </View>
 
-        <View style={[s.searchBar, { backgroundColor: colors.backgroundSecondary, marginBottom: 12 }]}>
-          <Feather name="search" size={18} color={colors.textSecondary} />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: Spacing.md,
+            borderRadius: BorderRadius.md,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.backgroundDefault,
+            height: 40,
+            marginBottom: 12,
+          }}
+        >
+          <Feather name="search" size={16} color={colors.textSecondary} />
           <TextInput
-            style={[s.searchInput, { color: theme.text }]}
+            style={{
+              flex: 1,
+              paddingHorizontal: Spacing.md,
+              color: theme.text,
+              fontSize: 14,
+            }}
             placeholder="Bildiri ara..."
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
@@ -163,11 +180,11 @@ export default function AvailabilityScreen() {
             underlineColorAndroid="transparent"
             textContentType="none"
           />
-          {searchQuery ? (
+          {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery("")}>
-              <Feather name="x" size={18} color={colors.textSecondary} />
+              <Feather name="x" size={16} color={colors.textSecondary} />
             </Pressable>
-          ) : null}
+          )}
         </View>
 
         {filteredAvailabilities.length === 0 ? (

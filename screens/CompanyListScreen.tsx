@@ -180,10 +180,26 @@ export default function CompanyListScreen() {
 
   const renderSearchBar = () => (
     <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
-      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
-        <Feather name="search" size={18} color={colors.textSecondary} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: Spacing.md,
+          borderRadius: BorderRadius.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.backgroundDefault,
+          height: 40,
+        }}
+      >
+        <Feather name="search" size={16} color={colors.textSecondary} />
         <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
+          style={{
+            flex: 1,
+            paddingHorizontal: Spacing.md,
+            color: theme.text,
+            fontSize: 14,
+          }}
           placeholder="Firma Ara"
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
@@ -195,11 +211,11 @@ export default function CompanyListScreen() {
           underlineColorAndroid="transparent"
           textContentType="none"
         />
-        {searchQuery ? (
+        {searchQuery.length > 0 && (
           <Pressable onPress={() => setSearchQuery("")}>
-            <Feather name="x" size={18} color={colors.textSecondary} />
+            <Feather name="x" size={16} color={colors.textSecondary} />
           </Pressable>
-        ) : null}
+        )}
       </View>
     </View>
   );

@@ -445,30 +445,44 @@ export default function CompletedJobListScreen() {
   const renderSearchHeader = () => (
     <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
-        style={[
-          styles.searchBox,
-          {
-            backgroundColor: colors.backgroundDefault,
-            borderColor: colors.border,
-          },
-        ]}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: Spacing.md,
+          borderRadius: BorderRadius.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.backgroundDefault,
+          height: 40,
+        }}
       >
-        <Feather name="search" size={18} color={colors.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="İş ara..."
-            value={searchQuery}
-            onChangeText={handleSearch}
-            autoCorrect={false}
-            autoCapitalize="none"
-            returnKeyType="search"
-            blurOnSubmit={false}
-            underlineColorAndroid="transparent"
-            textContentType="none"
-          />
-        </View>
+        <Feather name="search" size={16} color={colors.textSecondary} />
+        <TextInput
+          style={{
+            flex: 1,
+            paddingHorizontal: Spacing.md,
+            color: theme.text,
+            fontSize: 14,
+          }}
+          placeholder="İş ara..."
+          placeholderTextColor={colors.textSecondary}
+          value={searchQuery}
+          onChangeText={handleSearch}
+          autoCorrect={false}
+          autoCapitalize="none"
+          returnKeyType="search"
+          blurOnSubmit={false}
+          underlineColorAndroid="transparent"
+          textContentType="none"
+        />
+        {searchQuery.length > 0 && (
+          <Pressable onPress={() => setSearchQuery("")}>
+            <Feather name="x" size={16} color={colors.textSecondary} />
+          </Pressable>
+        )}
       </View>
-    );
+    </View>
+  );
 
   return (
     <ThemedView style={styles.container}>
