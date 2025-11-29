@@ -538,37 +538,48 @@ export default function CompletedJobListScreen() {
                     marginBottom: Spacing.md,
                   }}>
                     <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                      Gönderen Firma
+                      🏢 Gönderen Firma
                     </ThemedText>
+                    
+                    {/* Primary Info */}
                     <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                         Firma Adı
                       </ThemedText>
-                      <ThemedText type="h4">
+                      <ThemedText type="h4" style={{ fontWeight: "700" }}>
                         {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
                       </ThemedText>
                     </View>
-                    <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                        Telefon
-                      </ThemedText>
-                      <ThemedText type="body">
-                        {companies[selectedJob.companyId]?.phone || "-"}
-                      </ThemedText>
+
+                    {/* Divider */}
+                    <View style={{ height: 1, backgroundColor: colors.border }} />
+
+                    {/* Contact Info Grid */}
+                    <View style={{ flexDirection: "row", gap: Spacing.lg }}>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                          Telefon
+                        </ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "500" }}>
+                          {companies[selectedJob.companyId]?.phone || "-"}
+                        </ThemedText>
+                      </View>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                          İletişim Kişisi
+                        </ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "500" }}>
+                          {companies[selectedJob.companyId]?.contactPerson || "-"}
+                        </ThemedText>
+                      </View>
                     </View>
+
+                    {/* Address */}
                     <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                        İletişim Kişisi
-                      </ThemedText>
-                      <ThemedText type="body">
-                        {companies[selectedJob.companyId]?.contactPerson || "-"}
-                      </ThemedText>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                         Adres
                       </ThemedText>
-                      <ThemedText type="body">
+                      <ThemedText type="body" numberOfLines={2} style={{ fontWeight: "500" }}>
                         {companies[selectedJob.companyId]?.address || "-"}
                       </ThemedText>
                     </View>
@@ -580,19 +591,19 @@ export default function CompletedJobListScreen() {
                         {
                           backgroundColor: "#25D366",
                           opacity: pressed ? 0.9 : 1,
-                          marginTop: Spacing.md,
+                          marginTop: Spacing.sm,
                           paddingVertical: Spacing.md,
                           paddingHorizontal: Spacing.lg,
-                          borderRadius: BorderRadius.sm,
+                          borderRadius: BorderRadius.md,
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "center",
                           gap: Spacing.md,
-                          minHeight: 48,
+                          minHeight: 44,
                         },
                       ]}
                     >
-                      <Feather name="message-circle" size={18} color="#FFFFFF" />
+                      <Feather name="message-circle" size={16} color="#FFFFFF" />
                       <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
                         Nakliyeci Bilgilerini Paylaş
                       </ThemedText>
@@ -608,90 +619,101 @@ export default function CompletedJobListScreen() {
                     marginBottom: Spacing.md,
                   }}>
                     <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                      Nakliyeci Bilgileri
+                      🚚 Nakliyeci Bilgileri
                     </ThemedText>
+                    
+                    {/* Primary Info */}
                     <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                         Nakliyeci Adı
                       </ThemedText>
-                      <ThemedText type="h4">
+                      <ThemedText type="h4" style={{ fontWeight: "700" }}>
                         {carriers[selectedJob.carrierId]?.name || "Bilinmeyen Nakliyeci"}
                       </ThemedText>
                     </View>
-                    <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                        Telefon
-                      </ThemedText>
-                      <ThemedText type="body">
-                        {carriers[selectedJob.carrierId]?.phone || "-"}
-                      </ThemedText>
+
+                    {/* Divider */}
+                    <View style={{ height: 1, backgroundColor: colors.border }} />
+
+                    {/* Contact and Plate */}
+                    <View style={{ flexDirection: "row", gap: Spacing.lg }}>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                          Telefon
+                        </ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "500" }}>
+                          {carriers[selectedJob.carrierId]?.phone || "-"}
+                        </ThemedText>
+                      </View>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                          Araç Plakası
+                        </ThemedText>
+                        <ThemedText type="body" style={{ fontWeight: "500", color: theme.link }} numberOfLines={1}>
+                          {carriers[selectedJob.carrierId]?.plate || "-"}
+                        </ThemedText>
+                      </View>
                     </View>
+
+                    {/* Vehicle Type */}
                     <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                        Araç Plakası
-                      </ThemedText>
-                      <ThemedText type="body">
-                        {carriers[selectedJob.carrierId]?.plate || "-"}
-                      </ThemedText>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
                         Araç Tipi
                       </ThemedText>
-                      <ThemedText type="body">
+                      <ThemedText type="body" style={{ fontWeight: "500" }}>
                         {carriers[selectedJob.carrierId]?.vehicleType ? getVehicleTypeLabel(carriers[selectedJob.carrierId].vehicleType) : "-"}
                       </ThemedText>
                     </View>
 
-                    {/* Share Company Info Button */}
-                    <Pressable
-                      onPress={shareCompanyInfoWithCarrier}
-                      style={({ pressed }) => [
-                        {
-                          backgroundColor: "#25D366",
-                          opacity: pressed ? 0.9 : 1,
-                          marginTop: Spacing.md,
-                          paddingVertical: Spacing.md,
-                          paddingHorizontal: Spacing.lg,
-                          borderRadius: BorderRadius.sm,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: Spacing.md,
-                          minHeight: 48,
-                        },
-                      ]}
-                    >
-                      <Feather name="message-circle" size={18} color="#FFFFFF" />
-                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        Firma Bilgilerini Paylaş
-                      </ThemedText>
-                    </Pressable>
+                    {/* Action Buttons */}
+                    <View style={{ gap: Spacing.md, marginTop: Spacing.sm }}>
+                      <Pressable
+                        onPress={shareCompanyInfoWithCarrier}
+                        style={({ pressed }) => [
+                          {
+                            backgroundColor: "#25D366",
+                            opacity: pressed ? 0.9 : 1,
+                            paddingVertical: Spacing.md,
+                            paddingHorizontal: Spacing.lg,
+                            borderRadius: BorderRadius.md,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: Spacing.md,
+                            minHeight: 44,
+                          },
+                        ]}
+                      >
+                        <Feather name="message-circle" size={16} color="#FFFFFF" />
+                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                          Firma Bilgilerini Paylaş
+                        </ThemedText>
+                      </Pressable>
 
-                    {/* Share IBAN Button */}
-                    <Pressable
-                      onPress={handleOpenIBANList}
-                      style={({ pressed }) => [
-                        {
-                          backgroundColor: theme.link,
-                          opacity: pressed ? 0.9 : 1,
-                          marginTop: Spacing.md,
-                          paddingVertical: Spacing.md,
-                          paddingHorizontal: Spacing.lg,
-                          borderRadius: BorderRadius.sm,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: Spacing.md,
-                          minHeight: 48,
-                        },
-                      ]}
-                    >
-                      <Feather name="credit-card" size={18} color="#FFFFFF" />
-                      <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                        Kayıtlı İBANı Paylaş
-                      </ThemedText>
-                    </Pressable>
+                      {/* Share IBAN Button */}
+                      <Pressable
+                        onPress={handleOpenIBANList}
+                        style={({ pressed }) => [
+                          {
+                            backgroundColor: theme.link,
+                            opacity: pressed ? 0.9 : 1,
+                            paddingVertical: Spacing.md,
+                            paddingHorizontal: Spacing.lg,
+                            borderRadius: BorderRadius.md,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: Spacing.md,
+                            minHeight: 44,
+                          },
+                        ]}
+                      >
+                        <Feather name="credit-card" size={16} color="#FFFFFF" />
+                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                          Kayıtlı İBANı Paylaş
+                        </ThemedText>
+                      </Pressable>
+                    </View>
                   </View>
 
 
