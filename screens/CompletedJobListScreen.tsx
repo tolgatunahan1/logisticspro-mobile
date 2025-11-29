@@ -443,7 +443,7 @@ export default function CompletedJobListScreen() {
   );
 
   const renderSearchHeader = () => (
-    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
+    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: headerHeight + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
       <View
         style={{
           flexDirection: "row",
