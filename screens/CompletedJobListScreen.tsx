@@ -487,12 +487,12 @@ export default function CompletedJobListScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      {renderSearchHeader()}
       <FlatList
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
