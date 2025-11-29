@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -132,7 +132,7 @@ export default function CarrierListScreen() {
     }
   };
 
-  const filteredCarriers = searchCarriers(carriers, searchQuery.toUpperCase());
+  const filteredCarriers = useMemo(() => searchCarriers(carriers, searchQuery.toUpperCase()), [carriers, searchQuery]);
 
   const renderCarrierItem = ({ item }: { item: Carrier }) => (
     <View

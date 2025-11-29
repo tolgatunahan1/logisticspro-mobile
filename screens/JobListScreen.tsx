@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect } from "react";
+import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -100,7 +100,7 @@ export default function JobListScreen() {
     navigation.navigate("JobForm", { job, mode: "edit" });
   };
 
-  const getFilteredCarriers = useCallback(() => {
+  const getFilteredCarriers = useMemo(() => {
     if (!carrierSearchQuery.trim()) return carriers;
     const query = carrierSearchQuery.toUpperCase().trim();
     return carriers.filter((carrier) =>
