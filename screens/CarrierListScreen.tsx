@@ -190,7 +190,7 @@ export default function CarrierListScreen() {
     </View>
   );
 
-  const renderSearchBar = () => (
+  const renderSearchBar = useCallback(() => (
     <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
@@ -208,7 +208,7 @@ export default function CarrierListScreen() {
         ) : null}
       </View>
     </View>
-  );
+  ), [searchQuery, colors.backgroundSecondary, colors.textSecondary, theme.text]);
 
   return (
     <ThemedView style={styles.container}>

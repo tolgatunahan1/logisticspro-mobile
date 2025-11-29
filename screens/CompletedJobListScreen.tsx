@@ -445,7 +445,7 @@ export default function CompletedJobListScreen() {
     </View>
   );
 
-  const renderSearchHeader = () => (
+  const renderSearchHeader = useCallback(() => (
     <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={[
@@ -457,15 +457,15 @@ export default function CompletedJobListScreen() {
         ]}
       >
         <Feather name="search" size={18} color={colors.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="İş ara..."
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-        </View>
+        <TextInput
+          style={[styles.searchInput, { color: theme.text }]}
+          placeholder="İş ara..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
       </View>
-    );
+    </View>
+  ), [searchQuery, colors.backgroundDefault, colors.border, colors.textSecondary, theme.text, handleSearch, headerHeight]);
 
   return (
     <ThemedView style={styles.container}>

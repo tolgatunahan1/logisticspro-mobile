@@ -238,7 +238,7 @@ export default function JobListScreen() {
     </View>
   );
 
-  const renderSearchHeader = () => (
+  const renderSearchHeader = useCallback(() => (
     <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={[
@@ -255,11 +255,10 @@ export default function JobListScreen() {
           placeholder="İş ara..."
           value={searchQuery}
           onChangeText={handleSearch}
-          autoCapitalize="characters"
         />
       </View>
     </View>
-  );
+  ), [searchQuery, colors.backgroundDefault, colors.border, colors.textSecondary, theme.text, handleSearch]);
 
   return (
     <ThemedView style={styles.container}>
