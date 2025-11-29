@@ -5,50 +5,20 @@
     "version": "1.0.0",
     "runtimeVersion": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/splash-icon.png",
     "scheme": "logisticspro",
     "userInterfaceStyle": "light",
-    "description": "Profesyonel lojistik yönetim uygulaması. İşleri, nakliyecileri ve firmaları kolayca yönetin.",
-    "platforms": ["ios", "android"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.logisticspro",
-      "buildNumber": "1",
-      "privacyManifests": true
+      "bundleIdentifier": "com.logisticspro"
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-foreground.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.logisticspro",
-      "versionCode": 1,
-      "permissions": []
+      "package": "com.logisticspro"
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png",
-      "meta": {
-        "viewport": "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover, user-scalable=0"
-      }
+      "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/logo-transparent.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#FFFFFF",
-          "dark": {
-            "backgroundColor": "#1C1C1E"
-          }
-        }
-      ]
-    ]
+    "plugins": []
   }
 }
