@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, memo } from "react";
 import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -192,7 +192,7 @@ export default function CarrierListScreen() {
     </View>
   );
 
-  const renderSearchBar = useCallback(() => (
+  const SearchBarComponent = memo(() => (
     <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
@@ -202,6 +202,8 @@ export default function CarrierListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
@@ -210,7 +212,7 @@ export default function CarrierListScreen() {
         ) : null}
       </View>
     </View>
-  ), [searchQuery, colors.backgroundSecondary, colors.textSecondary, theme.text]);
+  ));
 
   return (
     <ThemedView style={styles.container}>
@@ -218,7 +220,7 @@ export default function CarrierListScreen() {
         data={filteredCarriers}
         keyExtractor={(item) => item.id}
         renderItem={renderCarrierItem}
-        ListHeaderComponent={renderSearchBar}
+        ListHeaderComponent={SearchBarComponent}
         contentContainerStyle={[
           styles.listContent,
           { paddingTop: insets.top + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },

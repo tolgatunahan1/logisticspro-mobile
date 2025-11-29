@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
+import React, { useState, useCallback, useLayoutEffect, useMemo, memo } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
 import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -446,7 +446,7 @@ export default function CompletedJobListScreen() {
     </View>
   );
 
-  const renderSearchHeader = useCallback(() => (
+  const SearchBarComponent = memo(() => (
     <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={[
@@ -463,10 +463,12 @@ export default function CompletedJobListScreen() {
           placeholder="İş ara..."
           value={searchQuery}
           onChangeText={handleSearch}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
       </View>
     </View>
-  ), [searchQuery, colors.backgroundDefault, colors.border, colors.textSecondary, theme.text, handleSearch, headerHeight]);
+  ));
 
   return (
     <ThemedView style={styles.container}>
@@ -475,7 +477,7 @@ export default function CompletedJobListScreen() {
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={renderSearchHeader}
+        ListHeaderComponent={SearchBarComponent}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />
