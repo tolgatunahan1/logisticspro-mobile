@@ -179,7 +179,7 @@ export default function CompanyListScreen() {
   );
 
   const renderSearchBar = () => (
-    <View style={[styles.searchContainer, { paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md }]}>
+    <View style={[styles.searchContainer, { paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
       <View
         style={{
           flexDirection: "row",
