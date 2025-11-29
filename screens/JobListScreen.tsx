@@ -325,95 +325,78 @@ export default function JobListScreen() {
               {/* Modal Body - Scrollable Job Details */}
               <ScrollView style={{ flex: 1, paddingHorizontal: Spacing.lg }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {selectedJob && (
-                <View style={{ gap: Spacing.lg }}>
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Firma Adı
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
-                    </ThemedText>
+                <View style={{ gap: Spacing.lg, paddingVertical: Spacing.md }}>
+                  {/* Firma Bölümü */}
+                  <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.lg, borderRadius: BorderRadius.md, gap: Spacing.md }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>📦 Firma Bilgileri</ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                        Firma Adı
+                      </ThemedText>
+                      <ThemedText type="h4">
+                        {companies[selectedJob.companyId]?.name || "Bilinmeyen Firma"}
+                      </ThemedText>
+                    </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Yükün Cinsi
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.cargoType || "-"}
-                    </ThemedText>
+                  {/* Yük Bilgileri Bölümü */}
+                  <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.lg, borderRadius: BorderRadius.md, gap: Spacing.md }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>📍 Yük Bilgileri</ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Yükün Cinsi</ThemedText>
+                      <ThemedText type="h4">{selectedJob.cargoType || "-"}</ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Tonaj</ThemedText>
+                      <ThemedText type="h4">{selectedJob.tonnage || "-"}</ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Ebat</ThemedText>
+                      <ThemedText type="h4">{selectedJob.dimensions || "-"}</ThemedText>
+                    </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Tonaj
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.tonnage || "-"}
-                    </ThemedText>
+                  {/* Lokasyon Bölümü */}
+                  <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.lg, borderRadius: BorderRadius.md, gap: Spacing.md }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>🗺️ Rota Bilgileri</ThemedText>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Yükleme Yeri</ThemedText>
+                      <ThemedText type="h4">{selectedJob.loadingLocation || "-"}</ThemedText>
+                    </View>
+                    <View style={styles.detailSection}>
+                      <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Teslimat Yeri</ThemedText>
+                      <ThemedText type="h4">{selectedJob.deliveryLocation || "-"}</ThemedText>
+                    </View>
                   </View>
 
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Ebat
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.dimensions || "-"}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Yükleme Yeri
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.loadingLocation || "-"}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Teslimat Yeri
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.deliveryLocation || "-"}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Yükleme Tarihi
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {formatDate(selectedJob.loadingDate)}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Teslimat Tarihi
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {formatDate(selectedJob.deliveryDate)}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Nakliye Bedeli
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.transportationCost ? `${selectedJob.transportationCost} ₺` : "-"}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.detailSection}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Komisyon Bedeli
-                    </ThemedText>
-                    <ThemedText type="h4">
-                      {selectedJob.commissionCost ? `${selectedJob.commissionCost} ₺` : "-"}
-                    </ThemedText>
+                  {/* Tarih ve Maliyet Bölümü */}
+                  <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.lg, borderRadius: BorderRadius.md, gap: Spacing.md }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>📅 Tarih ve Maliyet</ThemedText>
+                    <View style={{ flexDirection: "row", gap: Spacing.lg }}>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Yükleme</ThemedText>
+                        <ThemedText type="h4">{formatDate(selectedJob.loadingDate)}</ThemedText>
+                      </View>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Teslimat</ThemedText>
+                        <ThemedText type="h4">{formatDate(selectedJob.deliveryDate)}</ThemedText>
+                      </View>
+                    </View>
+                    <View style={{ height: 1, backgroundColor: colors.border, marginVertical: Spacing.sm }} />
+                    <View style={{ flexDirection: "row", gap: Spacing.lg }}>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Nakliye Bedeli</ThemedText>
+                        <ThemedText type="h4" style={{ color: theme.link, fontWeight: "700" }}>
+                          {selectedJob.transportationCost ? `${selectedJob.transportationCost} ₺` : "-"}
+                        </ThemedText>
+                      </View>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>Komisyon</ThemedText>
+                        <ThemedText type="h4" style={{ color: theme.link, fontWeight: "700" }}>
+                          {selectedJob.commissionCost ? `${selectedJob.commissionCost} ₺` : "-"}
+                        </ThemedText>
+                      </View>
+                    </View>
                   </View>
                 </View>
               )}
