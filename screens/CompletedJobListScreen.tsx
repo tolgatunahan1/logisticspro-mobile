@@ -235,9 +235,9 @@ export default function CompletedJobListScreen() {
     }
   }, [firebaseUser?.uid, selectedJob, carriers, shareIBANWithCarrier]);
 
-  const handleSearch = useCallback((query: string) => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-  }, []);
+  };
 
   const filteredJobs = useMemo(() => {
     if (searchQuery.trim() === "") return jobs;
@@ -461,6 +461,10 @@ export default function CompletedJobListScreen() {
             onChangeText={handleSearch}
             autoCorrect={false}
             autoCapitalize="none"
+            returnKeyType="search"
+            blurOnSubmit={false}
+            underlineColorAndroid="transparent"
+            textContentType="none"
           />
         </View>
       </View>

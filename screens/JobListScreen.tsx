@@ -69,9 +69,9 @@ export default function JobListScreen() {
     }, [loadData])
   );
 
-  const handleSearch = useCallback((query: string) => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-  }, []);
+  };
 
   const handleDeletePress = (job: PlannedJob) => {
     openDeleteConfirm(job);
@@ -254,6 +254,10 @@ export default function JobListScreen() {
           onChangeText={handleSearch}
           autoCorrect={false}
           autoCapitalize="none"
+          returnKeyType="search"
+          blurOnSubmit={false}
+          underlineColorAndroid="transparent"
+          textContentType="none"
         />
       </View>
     </View>
@@ -431,6 +435,10 @@ export default function JobListScreen() {
                         onChangeText={setCarrierSearchQuery}
                         autoCorrect={false}
                         autoCapitalize="none"
+                        returnKeyType="search"
+                        blurOnSubmit={false}
+                        underlineColorAndroid="transparent"
+                        textContentType="none"
                       />
                       {carrierSearchQuery.length > 0 && (
                         <Pressable onPress={() => setCarrierSearchQuery("")}>

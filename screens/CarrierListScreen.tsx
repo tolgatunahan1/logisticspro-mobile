@@ -205,6 +205,10 @@ export default function CarrierListScreen() {
           onChangeText={setSearchQuery}
           autoCorrect={false}
           autoCapitalize="none"
+          returnKeyType="search"
+          blurOnSubmit={false}
+          underlineColorAndroid="transparent"
+          textContentType="none"
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
