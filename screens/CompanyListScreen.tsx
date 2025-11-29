@@ -184,7 +184,7 @@ export default function CompanyListScreen() {
           placeholder="Firma Ara"
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text.toUpperCase())}
+          onChangeText={setSearchQuery}
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>

@@ -238,12 +238,11 @@ export default function CompletedJobListScreen() {
   }, [firebaseUser?.uid, selectedJob, carriers, shareIBANWithCarrier]);
 
   const handleSearch = useCallback((query: string) => {
-    const upperQuery = query.toUpperCase();
-    setSearchQuery(upperQuery);
-    if (upperQuery.trim() === "") {
+    setSearchQuery(query);
+    if (query.trim() === "") {
       setFilteredJobs(jobs);
     } else {
-      setFilteredJobs(searchCompletedJobs(jobs, upperQuery));
+      setFilteredJobs(searchCompletedJobs(jobs, query.toUpperCase()));
     }
   }, [jobs]);
 

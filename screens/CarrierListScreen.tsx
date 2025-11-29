@@ -199,7 +199,7 @@ export default function CarrierListScreen() {
           placeholder="Nakliyeci Ara"
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text.toUpperCase())}
+          onChangeText={setSearchQuery}
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
