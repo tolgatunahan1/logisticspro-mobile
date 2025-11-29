@@ -193,8 +193,8 @@ export default function CarrierListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { padding: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
-      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
+    <View style={[styles.searchContainer, { height: 60, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault, justifyContent: 'center' }]}>
+      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary, height: 40 }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
           style={[styles.searchInput, { color: theme.text }]}

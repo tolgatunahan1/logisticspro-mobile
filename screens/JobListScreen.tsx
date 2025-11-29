@@ -241,13 +241,14 @@ export default function JobListScreen() {
   );
 
   const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { padding: Spacing.md, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.searchContainer, { height: 60, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault, justifyContent: 'center' }]}>
       <View
         style={[
           styles.searchBox,
           {
             backgroundColor: colors.backgroundSecondary,
             borderColor: colors.border,
+            height: 40,
           },
         ]}
       >
