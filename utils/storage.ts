@@ -158,12 +158,12 @@ export const deleteCarrier = async (uid: string, id: string): Promise<boolean> =
 
 export const searchCarriers = (carriers: Carrier[], query: string): Carrier[] => {
   if (!query.trim()) return carriers;
-  const upperQuery = query.toUpperCase().trim();
+  const lowerQuery = query.toLowerCase().trim();
   return carriers.filter(
     (c) =>
-      c.name.toUpperCase().includes(upperQuery) ||
-      c.phone.toUpperCase().includes(upperQuery) ||
-      c.plate.toUpperCase().includes(upperQuery)
+      c.name.toLowerCase().includes(lowerQuery) ||
+      c.phone.toLowerCase().includes(lowerQuery) ||
+      c.plate.toLowerCase().includes(lowerQuery)
   );
 };
 
@@ -219,13 +219,13 @@ export const deleteCompany = async (uid: string, id: string): Promise<boolean> =
 
 export const searchCompanies = (companies: Company[], query: string): Company[] => {
   if (!query.trim()) return companies;
-  const upperQuery = query.toUpperCase().trim();
+  const lowerQuery = query.toLowerCase().trim();
   return companies.filter(
     (c) =>
-      c.name.toUpperCase().includes(upperQuery) ||
-      c.phone.toUpperCase().includes(upperQuery) ||
-      c.contactPerson.toUpperCase().includes(upperQuery) ||
-      c.address.toUpperCase().includes(upperQuery)
+      c.name.toLowerCase().includes(lowerQuery) ||
+      c.phone.toLowerCase().includes(lowerQuery) ||
+      c.contactPerson.toLowerCase().includes(lowerQuery) ||
+      c.address.toLowerCase().includes(lowerQuery)
   );
 };
 
@@ -281,12 +281,12 @@ export const deleteJob = async (uid: string, id: string): Promise<boolean> => {
 
 export const searchJobs = (jobs: PlannedJob[], query: string): PlannedJob[] => {
   if (!query.trim()) return jobs;
-  const upperQuery = query.toUpperCase().trim();
+  const lowerQuery = query.toLowerCase().trim();
   return jobs.filter(
     (j) =>
-      j.cargoType.toUpperCase().includes(upperQuery) ||
-      j.loadingLocation.toUpperCase().includes(upperQuery) ||
-      j.deliveryLocation.toUpperCase().includes(upperQuery)
+      j.cargoType.toLowerCase().includes(lowerQuery) ||
+      j.loadingLocation.toLowerCase().includes(lowerQuery) ||
+      j.deliveryLocation.toLowerCase().includes(lowerQuery)
   );
 };
 
@@ -395,13 +395,13 @@ export const deleteCompletedJob = async (uid: string, id: string): Promise<boole
 
 export const searchCompletedJobs = (jobs: CompletedJob[], query: string): CompletedJob[] => {
   if (!query.trim()) return jobs;
-  const upperQuery = query.toUpperCase().trim();
+  const lowerQuery = query.toLowerCase().trim();
   return jobs.filter(
     (j) =>
-      j.cargoType.toUpperCase().includes(upperQuery) ||
-      j.loadingLocation.toUpperCase().includes(upperQuery) ||
-      j.deliveryLocation.toUpperCase().includes(upperQuery) ||
-      j.notes.toUpperCase().includes(upperQuery)
+      j.cargoType.toLowerCase().includes(lowerQuery) ||
+      j.loadingLocation.toLowerCase().includes(lowerQuery) ||
+      j.deliveryLocation.toLowerCase().includes(lowerQuery) ||
+      j.notes.toLowerCase().includes(lowerQuery)
   );
 };
 
@@ -525,11 +525,11 @@ export const deleteCarrierAvailability = async (id: string): Promise<boolean> =>
 
 export const searchCarrierAvailabilities = (availabilities: CarrierAvailability[], query: string): CarrierAvailability[] => {
   if (!query.trim()) return availabilities;
-  const upperQuery = query.toUpperCase().trim();
+  const lowerQuery = query.toLowerCase().trim();
   return availabilities.filter(
     (a) =>
-      a.carrierName.toUpperCase().includes(upperQuery) ||
-      a.currentLocation.toUpperCase().includes(upperQuery) ||
-      a.destinationLocation.toUpperCase().includes(upperQuery)
+      a.carrierName.toLowerCase().includes(lowerQuery) ||
+      a.currentLocation.toLowerCase().includes(lowerQuery) ||
+      a.destinationLocation.toLowerCase().includes(lowerQuery)
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect, useMemo, memo } from "react";
+import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share } from "react-native";
 import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -14,7 +14,6 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid } from "../utils/storage";
-import { useDebounceSearch } from "../hooks/useDebounceSearch";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -35,6 +34,7 @@ export default function CompletedJobListScreen() {
   const [jobs, setJobs] = useState<CompletedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
   const [carriers, setCarriers] = useState<{ [key: string]: Carrier }>({});
+  const [filteredJobs, setFilteredJobs] = useState<CompletedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -70,6 +70,7 @@ export default function CompletedJobListScreen() {
     setCompanies(companiesMap);
     setCarriers(carriersMap);
     setIbans(allIbans);
+    setFilteredJobs(allJobs);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
@@ -236,17 +237,14 @@ export default function CompletedJobListScreen() {
     }
   }, [firebaseUser?.uid, selectedJob, carriers, shareIBANWithCarrier]);
 
-  const searchFn = useCallback((query: string) => {
-    if (!query.trim()) return jobs;
-    return searchCompletedJobs(jobs, query.toUpperCase());
-  }, [jobs]);
-  
-  const { query: searchQuery2, setQuery: setSearchQuery2, results: filteredJobs } = useDebounceSearch(searchFn, 300);
-  
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    setSearchQuery2(query);
-  };
+    if (query.trim() === "") {
+      setFilteredJobs(jobs);
+    } else {
+      setFilteredJobs(searchCompletedJobs(jobs, query));
+    }
+  }, [jobs]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -446,40 +444,36 @@ export default function CompletedJobListScreen() {
     </View>
   );
 
-  const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { height: 60, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault, justifyContent: 'center' }]}>
+  const renderSearchHeader = () => (
+    <View style={[styles.searchContainer, { paddingTop: headerHeight + Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={[
           styles.searchBox,
           {
-            backgroundColor: colors.backgroundSecondary,
+            backgroundColor: colors.backgroundDefault,
             borderColor: colors.border,
-            height: 40,
           },
         ]}
       >
         <Feather name="search" size={18} color={colors.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
-          placeholder="İş ara..."
-          value={searchQuery}
-          onChangeText={handleSearch}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+          <TextInput
+            style={[styles.searchInput, { color: theme.text }]}
+            placeholder="İş ara..."
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+        </View>
       </View>
-    </View>
-  ));
+    );
 
   return (
-    <ThemedView style={[styles.container, { flex: 1 }]}>
-      <SearchBarComponent />
+    <ThemedView style={styles.container}>
       <FlatList
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
         contentContainerStyle={styles.listContent}
-        style={{ flex: 1 }}
+        ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect, useMemo, memo } from "react";
+import React, { useState, useCallback, useLayoutEffect } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -13,7 +13,6 @@ import { useDeleteOperation } from "../hooks/useDeleteOperation";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { getJobs, getCompanies, deleteJob, PlannedJob, Company, searchJobs, getCarriers, Carrier, addCompletedJob } from "../utils/storage";
-import { useDebounceSearch } from "../hooks/useDebounceSearch";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -27,6 +26,7 @@ export default function JobListScreen() {
 
   const [jobs, setJobs] = useState<PlannedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
+  const [filteredJobs, setFilteredJobs] = useState<PlannedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<PlannedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -66,17 +66,14 @@ export default function JobListScreen() {
     }, [loadData])
   );
 
-  const searchFn = useCallback((query: string) => {
-    if (!query.trim()) return jobs;
-    return searchJobs(jobs, query.toUpperCase());
-  }, [jobs]);
-  
-  const { query: searchQuery2, setQuery: setSearchQuery2, results: filteredJobs } = useDebounceSearch(searchFn, 300);
-  
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    setSearchQuery2(query);
-  };
+    if (query.trim() === "") {
+      setFilteredJobs(jobs);
+    } else {
+      setFilteredJobs(searchJobs(jobs, query));
+    }
+  }, [jobs]);
 
   const handleDeletePress = (job: PlannedJob) => {
     openDeleteConfirm(job);
@@ -102,12 +99,12 @@ export default function JobListScreen() {
     navigation.navigate("JobForm", { job, mode: "edit" });
   };
 
-  const getFilteredCarriers = useMemo(() => {
+  const getFilteredCarriers = useCallback(() => {
     if (!carrierSearchQuery.trim()) return carriers;
-    const query = carrierSearchQuery.toUpperCase().trim();
+    const query = carrierSearchQuery.toLowerCase().trim();
     return carriers.filter((carrier) =>
-      carrier.name.toUpperCase().includes(query) ||
-      carrier.phone.toUpperCase().includes(query)
+      carrier.name.toLowerCase().includes(query) ||
+      carrier.phone.includes(query)
     );
   }, [carriers, carrierSearchQuery]);
 
@@ -240,15 +237,14 @@ export default function JobListScreen() {
     </View>
   );
 
-  const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { height: 60, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault, justifyContent: 'center' }]}>
+  const renderSearchHeader = () => (
+    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
       <View
         style={[
           styles.searchBox,
           {
-            backgroundColor: colors.backgroundSecondary,
+            backgroundColor: colors.backgroundDefault,
             borderColor: colors.border,
-            height: 40,
           },
         ]}
       >
@@ -258,22 +254,19 @@ export default function JobListScreen() {
           placeholder="İş ara..."
           value={searchQuery}
           onChangeText={handleSearch}
-          autoCapitalize="none"
-          autoCorrect={false}
         />
       </View>
     </View>
-  ));
+  );
 
   return (
-    <ThemedView style={[styles.container, { flex: 1 }]}>
-      <SearchBarComponent />
+    <ThemedView style={styles.container}>
       <FlatList
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        style={{ flex: 1 }}
+        ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
       />

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, memo } from "react";
+import React, { useState, useCallback } from "react";
 import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -14,7 +14,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Carrier, getCarriers, searchCarriers, deleteCarrier, getVehicleTypeLabel } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { useDebounceSearch } from "../hooks/useDebounceSearch";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -41,15 +40,13 @@ export default function CarrierListScreen() {
   const { firebaseUser } = useAuth();
   
   const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
-
-  const searchFn = useCallback((query: string) => searchCarriers(carriers, query.toUpperCase()), [carriers]);
-  const { query: searchQuery, setQuery: setSearchQuery, results: filteredCarriers } = useDebounceSearch(searchFn, 300);
 
   const loadCarriers = useCallback(async () => {
     if (!firebaseUser?.uid) return;
@@ -135,6 +132,7 @@ export default function CarrierListScreen() {
     }
   };
 
+  const filteredCarriers = searchCarriers(carriers, searchQuery);
 
   const renderCarrierItem = ({ item }: { item: Carrier }) => (
     <View
@@ -192,9 +190,9 @@ export default function CarrierListScreen() {
     </View>
   );
 
-  const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { height: 60, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault, justifyContent: 'center' }]}>
-      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary, height: 40 }]}>
+  const renderSearchBar = () => (
+    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
+      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
           style={[styles.searchInput, { color: theme.text }]}
@@ -202,8 +200,6 @@ export default function CarrierListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
@@ -212,20 +208,19 @@ export default function CarrierListScreen() {
         ) : null}
       </View>
     </View>
-  ));
+  );
 
   return (
-    <ThemedView style={[styles.container, { flex: 1 }]}>
-      <SearchBarComponent />
+    <ThemedView style={styles.container}>
       <FlatList
         data={filteredCarriers}
         keyExtractor={(item) => item.id}
         renderItem={renderCarrierItem}
+        ListHeaderComponent={renderSearchBar}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Spacing.md, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
-        style={{ flex: 1 }}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl

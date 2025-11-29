@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, memo } from "react";
+import React, { useState, useCallback } from "react";
 import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Modal, ScrollView, Platform } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -14,7 +14,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { Company, getCompanies, searchCompanies, deleteCompany } from "../utils/storage";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { useDebounceSearch } from "../hooks/useDebounceSearch";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -41,15 +40,13 @@ export default function CompanyListScreen() {
   const { firebaseUser } = useAuth();
   
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
-
-  const searchFn = useCallback((query: string) => searchCompanies(companies, query.toUpperCase()), [companies]);
-  const { query: searchQuery, setQuery: setSearchQuery, results: filteredCompanies } = useDebounceSearch(searchFn, 300);
 
   const loadCompanies = useCallback(async () => {
     if (!firebaseUser?.uid) return;
@@ -120,6 +117,7 @@ export default function CompanyListScreen() {
     }
   };
 
+  const filteredCompanies = searchCompanies(companies, searchQuery);
 
   const renderCompanyItem = ({ item }: { item: Company }) => (
     <View
@@ -177,9 +175,9 @@ export default function CompanyListScreen() {
     </View>
   );
 
-  const SearchBarComponent = memo(() => (
-    <View style={[styles.searchContainer, { height: 60, paddingHorizontal: Spacing.xl, backgroundColor: colors.backgroundDefault, justifyContent: 'center' }]}>
-      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary, height: 40 }]}>
+  const renderSearchBar = () => (
+    <View style={[styles.searchContainer, { paddingTop: Spacing.lg, paddingBottom: Spacing.md }]}>
+      <View style={[styles.searchBar, { backgroundColor: colors.backgroundSecondary }]}>
         <Feather name="search" size={18} color={colors.textSecondary} />
         <TextInput
           style={[styles.searchInput, { color: theme.text }]}
@@ -187,8 +185,6 @@ export default function CompanyListScreen() {
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
         />
         {searchQuery ? (
           <Pressable onPress={() => setSearchQuery("")}>
@@ -197,20 +193,19 @@ export default function CompanyListScreen() {
         ) : null}
       </View>
     </View>
-  ));
+  );
 
   return (
-    <ThemedView style={[styles.container, { flex: 1 }]}>
-      <SearchBarComponent />
+    <ThemedView style={styles.container}>
       <FlatList
         data={filteredCompanies}
         keyExtractor={(item) => item.id}
         renderItem={renderCompanyItem}
+        ListHeaderComponent={renderSearchBar}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Spacing.md, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
-        style={{ flex: 1 }}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl
