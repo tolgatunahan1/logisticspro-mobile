@@ -223,7 +223,6 @@ export default function CompanyListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {renderSearchBar()}
       <FlatList
         style={{ flex: 1 }}
         data={filteredCompanies}
@@ -231,7 +230,7 @@ export default function CompanyListScreen() {
         renderItem={renderCompanyItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Spacing.lg, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + Spacing.lg + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
@@ -245,6 +244,9 @@ export default function CompanyListScreen() {
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
+        {renderSearchBar()}
+      </View>
 
       {/* ID Card Detail Modal */}
       <Modal

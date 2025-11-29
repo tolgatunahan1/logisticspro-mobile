@@ -280,18 +280,20 @@ export default function JobListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {renderSearchHeader()}
       <FlatList
         style={{ flex: 1 }}
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingTop: Spacing.lg }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: insets.top + Spacing.lg + 60 }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
+        {renderSearchHeader()}
+      </View>
 
       {/* Detail Modal */}
       <Modal

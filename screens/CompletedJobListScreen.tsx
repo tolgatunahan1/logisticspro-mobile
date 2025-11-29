@@ -487,18 +487,20 @@ export default function CompletedJobListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {renderSearchHeader()}
       <FlatList
         style={{ flex: 1 }}
         data={groupedJobs}
         renderItem={renderDateGroup}
         keyExtractor={(item) => item.date}
-        contentContainerStyle={[styles.listContent, { paddingTop: Spacing.lg }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: headerHeight + Spacing.lg + 60 }]}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
+        {renderSearchHeader()}
+      </View>
 
       {/* Detail Modal */}
       <Modal

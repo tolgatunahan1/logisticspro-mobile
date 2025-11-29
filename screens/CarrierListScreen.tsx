@@ -238,7 +238,6 @@ export default function CarrierListScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {renderSearchBar()}
       <FlatList
         style={{ flex: 1 }}
         data={filteredCarriers}
@@ -246,7 +245,7 @@ export default function CarrierListScreen() {
         renderItem={renderCarrierItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: Spacing.lg, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { paddingTop: insets.top + Spacing.lg + 60, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
@@ -260,6 +259,9 @@ export default function CarrierListScreen() {
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
+        {renderSearchBar()}
+      </View>
 
       {/* ID Card Detail Modal */}
       <Modal
