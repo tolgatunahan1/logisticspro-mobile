@@ -13,7 +13,7 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid, CommissionShare, saveCommissionShares } from "../utils/storage";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid, CommissionShare, saveCommissionShares, getDebts, Debt } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
 
@@ -52,6 +52,7 @@ export default function CompletedJobListScreen() {
   const [shareAmount, setShareAmount] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [sharedPersons, setSharedPersons] = useState<Debt[]>([]);
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<CompletedJob>("CompletedJob");
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -69,6 +70,7 @@ export default function CompletedJobListScreen() {
     const allCompanies = await getCompanies(firebaseUser.uid);
     const allCarriers = await getCarriers(firebaseUser.uid);
     const allIbans = await getIBANs(firebaseUser.uid);
+    const allDebts = await getDebts(firebaseUser.uid);
     
     const companiesMap = allCompanies.reduce((acc, company) => {
       acc[company.id] = company;
@@ -84,6 +86,7 @@ export default function CompletedJobListScreen() {
     setCompanies(companiesMap);
     setCarriers(carriersMap);
     setIbans(allIbans);
+    setSharedPersons(allDebts);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
@@ -824,6 +827,37 @@ export default function CompletedJobListScreen() {
                     )}
                   </View>
 
+                  {/* Financial Information Section */}
+                  <View style={{
+                    backgroundColor: colors.backgroundDefault,
+                    padding: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    gap: Spacing.md,
+                    marginBottom: Spacing.md,
+                  }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                      💵 Finansal Bilgiler
+                    </ThemedText>
+                    <View style={{ flexDirection: "row", gap: Spacing.lg }}>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                          Nakliye Tutarı
+                        </ThemedText>
+                        <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                          ₺{formatCurrency(parseFloat(selectedJob.transportationCost || "0"))}
+                        </ThemedText>
+                      </View>
+                      <View style={{ flex: 1, ...styles.detailSection }}>
+                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
+                          Komisyon Bedeli
+                        </ThemedText>
+                        <ThemedText type="h4" style={{ fontWeight: "700", color: colors.success }}>
+                          ₺{formatCurrency(parseFloat(selectedJob.commissionCost || "0"))}
+                        </ThemedText>
+                      </View>
+                    </View>
+                  </View>
+
                   {/* Commission Share Section */}
                   <View style={{
                     backgroundColor: colors.backgroundDefault,
@@ -833,11 +867,30 @@ export default function CompletedJobListScreen() {
                     marginBottom: Spacing.md,
                   }}>
                       <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                        💰 Komisyonu Paylaş
+                        💰 Komisyon Paylaşımı
                       </ThemedText>
-                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                        Komisyonunuzu paylaştığınız kişileri kaydedin
-                      </ThemedText>
+                      {sharedPersons.length > 0 && (
+                        <>
+                          <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                            Paylaştıkları Kişiler
+                          </ThemedText>
+                          <View style={{ gap: Spacing.sm }}>
+                            {sharedPersons.map((person) => (
+                              <View key={person.id} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", padding: Spacing.md, borderRadius: BorderRadius.sm, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                <View>
+                                  <ThemedText type="small" style={{ fontWeight: "600" }}>{person.personName}</ThemedText>
+                                  <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>Ödenmesi Gereken: ₺{formatCurrency(person.totalAmount - person.paidAmount)}</ThemedText>
+                                </View>
+                                <View style={{ backgroundColor: person.paidAmount >= person.totalAmount ? colors.success : colors.warning, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
+                                  <ThemedText type="small" style={{ color: "#FFF", fontSize: 10, fontWeight: "600" }}>
+                                    {person.paidAmount >= person.totalAmount ? "Ödendi" : "Beklemede"}
+                                  </ThemedText>
+                                </View>
+                              </View>
+                            ))}
+                          </View>
+                        </>
+                      )}
                       <Pressable
                         onPress={() => {
                           setCommissionShares([]);
