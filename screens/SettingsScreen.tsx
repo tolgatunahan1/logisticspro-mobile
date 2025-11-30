@@ -25,6 +25,7 @@ import { Spacing, BorderRadius, Colors } from "../constants/theme";
 import { getIBANs, addIBAN, deleteIBAN, IBAN } from "../utils/storage";
 import { IBANListModal } from "../components/IBANListModal";
 import { firebaseAuthService } from "../utils/firebaseAuth";
+import { useDeleteOperation } from "../hooks/useDeleteOperation";
 
 const AboutModal = ({ isVisible, onClose, colors }) => {
   const { width } = useWindowDimensions();
@@ -391,6 +392,7 @@ export default function SettingsScreen() {
   const [ibanInput, setIbanInput] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<IBAN>("IBAN");
 
   const loadIBANs = useCallback(async () => {
     if (!firebaseUser) return;
@@ -433,45 +435,7 @@ export default function SettingsScreen() {
       );
       return;
     }
-
-    Alert.alert("Sil", "Bu IBAN'ı silmek istediğinizden emin misiniz?", [
-      { text: "İptal", style: "cancel" },
-      {
-        text: "Sil",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            console.log("🗑️ Silme işlemi başlıyor...");
-            console.log("UID:", firebaseUser.uid);
-            console.log("IBAN ID:", ibanToDelete.id);
-            console.log("IBAN Objesi:", ibanToDelete);
-
-            const success = await deleteIBAN(firebaseUser.uid, ibanToDelete.id);
-            console.log("✅ Silme sonucu:", success);
-
-            if (success) {
-              console.log(
-                "✅ Firebase'den silindi, listesi yenileniyor..."
-              );
-              await loadIBANs();
-              Alert.alert("Başarılı", "IBAN başarıyla silindi.");
-            } else {
-              console.error("❌ Firebase silme başarısız");
-              Alert.alert(
-                "Hata",
-                "IBAN silme işlemi başarısız oldu. Tekrar deneyin."
-              );
-            }
-          } catch (error: any) {
-            console.error("❌ Silme hatası:", error);
-            Alert.alert(
-              "Hata",
-              `Silme hatası: ${error?.message || String(error)}`
-            );
-          }
-        },
-      },
-    ]);
+    openDeleteConfirm(ibanToDelete);
   };
 
   const openDeleteModal = () => {
@@ -775,6 +739,78 @@ export default function SettingsScreen() {
             ) : null}
           </Pressable>
         </Pressable>
+      </Modal>
+
+      {/* IBAN Delete Confirmation Modal */}
+      <Modal
+        visible={deleteState.isOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={closeDeleteConfirm}
+      >
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center", paddingHorizontal: Spacing.lg }}>
+          <View style={{
+            backgroundColor: isDark ? "rgba(30, 30, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            borderRadius: BorderRadius.lg,
+            padding: Spacing.xl,
+            width: "100%",
+            maxWidth: 340,
+            borderWidth: 1,
+            borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+            overflow: "hidden",
+          }}>
+            <View style={{ backgroundColor: "transparent", marginBottom: Spacing.lg }}>
+              <ThemedText type="h3" style={{ marginBottom: Spacing.md, fontWeight: "700" }}>IBAN'ı Sil</ThemedText>
+              <ThemedText type="body" style={{ color: colors.textSecondary, lineHeight: 20 }}>
+                Bu IBAN'ı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              </ThemedText>
+            </View>
+            <View style={{ flexDirection: "row", gap: Spacing.md, marginTop: Spacing.lg }}>
+              <Pressable
+                onPress={closeDeleteConfirm}
+                disabled={deleteState.isDeleting}
+                style={({ pressed }) => [
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: theme.link, textAlign: "center", fontWeight: "600" }}>İptal</ThemedText>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  await confirmDelete(async (iban) => {
+                    const success = await deleteIBAN(firebaseUser!.uid, iban.id);
+                    if (success) {
+                      await loadIBANs();
+                    }
+                    return success;
+                  });
+                }}
+                disabled={deleteState.isDeleting}
+                style={({ pressed }) => [
+                  { 
+                    flex: 1, 
+                    paddingVertical: Spacing.md,
+                    paddingHorizontal: Spacing.lg,
+                    borderRadius: BorderRadius.sm,
+                    backgroundColor: colors.destructive,
+                    opacity: pressed || deleteState.isDeleting ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ color: "#FFFFFF", textAlign: "center", fontWeight: "600" }}>
+                  {deleteState.isDeleting ? "Siliniyor..." : "Sil"}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
       </Modal>
     </ScreenScrollView>
   );
