@@ -578,13 +578,23 @@ export const saveCommissionShares = async (uid: string, completedJobId: string, 
       if (existingDebt.exists()) {
         const debts = existingDebt.val();
         debtId = Object.keys(debts).find(
-          (key) => debts[key].personName === share.personName && debts[key].paidAmount < debts[key].totalAmount
+          (key) => debts[key].personName === share.personName
         );
       }
       
       if (debtId) {
-        await updateDebtPayment(uid, debtId, share.amount);
+        // Update existing debt - add to totalAmount
+        const debtRef = ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`);
+        const snapshot = await get(debtRef);
+        if (snapshot.exists()) {
+          const debt = snapshot.val() as Debt;
+          await update(debtRef, {
+            totalAmount: debt.totalAmount + share.amount,
+            updatedAt: Date.now(),
+          });
+        }
       } else {
+        // Create new debt
         await addDebt(uid, {
           personName: share.personName,
           totalAmount: share.amount,
@@ -595,6 +605,7 @@ export const saveCommissionShares = async (uid: string, completedJobId: string, 
     }
     return true;
   } catch (error) {
+    console.error("Commission share save error:", error);
     return false;
   }
 };
