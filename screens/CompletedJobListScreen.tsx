@@ -928,15 +928,20 @@ export default function CompletedJobListScreen() {
 
                 <Pressable
                   onPress={() => {
+                    console.log("Kişi Ekle clicked - personName:", personName, "shareAmount:", shareAmount);
                     if (personName.trim() && shareAmount.trim()) {
                       const newShare: CommissionShare = {
                         personName: personName.trim(),
                         amount: parseFloat(shareAmount),
                         completedJobId: selectedJob?.id || "",
                       };
+                      console.log("Yeni share ekleniyor:", newShare);
                       setCommissionShares([...commissionShares, newShare]);
                       setPersonName("");
                       setShareAmount("");
+                    } else {
+                      console.log("Validasyon hatası - isim veya tutar boş");
+                      Alert.alert("Hata", "Lütfen isim ve tutar girin");
                     }
                   }}
                   style={({ pressed }) => [{
@@ -973,11 +978,25 @@ export default function CompletedJobListScreen() {
 
                 <Pressable
                   onPress={async () => {
-                    if (firebaseUser && selectedJob && commissionShares.length > 0) {
-                      await saveCommissionShares(firebaseUser.uid, selectedJob.id, commissionShares);
-                      setShowCommissionModal(false);
-                      await loadData();
-                      Alert.alert("Başarılı", "Komisyon paylaşımları kaydedildi");
+                    console.log("Kaydet clicked - firebaseUser:", !!firebaseUser, "selectedJob:", !!selectedJob, "shares:", commissionShares.length);
+                    if (commissionShares.length === 0) {
+                      Alert.alert("Hata", "Lütfen en az bir kişi ekleyin");
+                      return;
+                    }
+                    if (firebaseUser && selectedJob) {
+                      try {
+                        console.log("Kaydetme başlıyor...");
+                        await saveCommissionShares(firebaseUser.uid, selectedJob.id, commissionShares);
+                        console.log("Kaydetme başarılı!");
+                        setShowCommissionModal(false);
+                        await loadData();
+                        Alert.alert("Başarılı", "Komisyon paylaşımları kaydedildi");
+                      } catch (error) {
+                        console.error("Kaydetme hatası:", error);
+                        Alert.alert("Hata", "Komisyon paylaşımları kaydedilirken hata oluştu");
+                      }
+                    } else {
+                      Alert.alert("Hata", "Kullanıcı veya sefer bilgisi eksik");
                     }
                   }}
                   style={({ pressed }) => [{
