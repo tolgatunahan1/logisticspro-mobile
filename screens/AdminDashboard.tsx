@@ -59,33 +59,22 @@ export default function AdminDashboard() {
 
   const colors = isDark ? Colors.dark : Colors.light;
 
-  // Listen for logout - if user becomes null, redirect to login
-  useEffect(() => {
-    if (!user) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      });
-    }
-  }, [user, navigation]);
-
   const loadUsers = useCallback(async () => {
-    setLoading(true);
     try {
       const pending = await firebaseAuthService.getPendingUsers();
       const approved = await firebaseAuthService.getApprovedUsers();
       setPendingUsers(pending);
       setApprovedUsers(approved);
     } catch (error: any) {
-      Alert.alert("Hata", "Verileri yüklemede hata: " + (error?.message || "Bilinmeyen hata"));
-    } finally {
-      setLoading(false);
+      console.error("Hata:", error);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       loadUsers();
+      const interval = setInterval(loadUsers, 5000);
+      return () => clearInterval(interval);
     }, [loadUsers])
   );
 
