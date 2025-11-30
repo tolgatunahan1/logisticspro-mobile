@@ -869,13 +869,13 @@ export default function CompletedJobListScreen() {
                       <ThemedText type="h4" style={{ fontWeight: "700" }}>
                         💰 Komisyon Paylaşımı
                       </ThemedText>
-                      {sharedPersons.length > 0 && (
+                      {sharedPersons.filter(d => d.type === 'commission' && d.completedJobId === selectedJob.id).length > 0 && (
                         <>
                           <ThemedText type="small" style={{ color: colors.textSecondary }}>
                             Paylaştıkları Kişiler
                           </ThemedText>
                           <View style={{ gap: Spacing.sm }}>
-                            {sharedPersons.map((person) => (
+                            {sharedPersons.filter(d => d.type === 'commission' && d.completedJobId === selectedJob.id).map((person) => (
                               <View key={person.id} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", padding: Spacing.md, borderRadius: BorderRadius.sm, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                                 <View>
                                   <ThemedText type="small" style={{ fontWeight: "600" }}>{person.personName}</ThemedText>
