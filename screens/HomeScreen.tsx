@@ -16,10 +16,7 @@ import { RootStackParamList } from "../navigation/RootNavigator";
 import { getCarriers, getCompanies, getJobs, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 const formatCurrency = (amount: number): string => {
-  return amount
-    .toFixed(2)
-    .replace(".", ",")
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return amount.toFixed(2);
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
