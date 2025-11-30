@@ -76,12 +76,30 @@ const AboutModal = ({ isVisible, onClose, colors }) => {
               </ThemedText>
 
               <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Destek
+                Uygulama Sahibi
+              </ThemedText>
+
+              <View style={{ marginBottom: Spacing.lg }}>
+                <ThemedText style={{ marginBottom: Spacing.sm, fontWeight: "600", color: colors.text }}>
+                  Tolga Tunahan
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  Telefon: 05423822832
+                </ThemedText>
+                <Pressable onPress={() => Linking.openURL('mailto:tolgatunahan@icloud.com')}>
+                  <ThemedText type="link" style={{ fontSize: 14 }}>
+                    E-posta: tolgatunahan@icloud.com
+                  </ThemedText>
+                </Pressable>
+              </View>
+
+              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
+                Teknik Destek
               </ThemedText>
 
               <Pressable onPress={() => Linking.openURL('mailto:support@logisticspro.com')}>
-                <ThemedText type="link" style={{ fontSize: 16, marginBottom: Spacing.xl }}>
-                  📧 support@logisticspro.com
+                <ThemedText type="link" style={{ fontSize: 14, marginBottom: Spacing.xl }}>
+                  support@logisticspro.com
                 </ThemedText>
               </Pressable>
 
