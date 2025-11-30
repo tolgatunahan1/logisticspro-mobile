@@ -74,7 +74,7 @@ export default function RootNavigator() {
             }}
           />
         </>
-      ) : user.type === "admin" ? (
+      ) : false && user.type === "admin" ? (
         <>
           <Stack.Screen
             name="AdminDashboard"
