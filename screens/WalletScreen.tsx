@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, useWindowDimensions } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, useWindowDimensions, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -114,35 +114,61 @@ export default function WalletScreen() {
     return allJobs.filter(job => job.completionDate >= startDate).sort((a, b) => b.completionDate - a.completionDate);
   }, [allJobs, selectedPeriod]);
 
-  const renderTransactionRow = ({ item: job }: { item: CompletedJob }) => {
+  const renderTransactionCard = ({ item: job }: { item: CompletedJob }) => {
     const company = companies[job.companyId];
+    const isLoading = isTogglingPaid === job.id;
+
     return (
-      <View style={[styles.tableRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }]}>
-        <View style={{ flex: 2 }}>
-          <ThemedText type="small" style={{ fontWeight: "600" }}>{company?.name || "Bilinmeyen"}</ThemedText>
-          <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11, marginTop: 2 }}>
-            {new Date(job.completionDate).toLocaleDateString("tr-TR")}
+      <View style={[styles.card, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }]}>
+        <View style={{ flex: 1 }}>
+          <ThemedText type="body" style={{ fontWeight: "700", marginBottom: Spacing.xs }}>
+            {company?.name || "Bilinmeyen"}
           </ThemedText>
-        </View>
-        <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <ThemedText type="body" style={{ color: theme.link, fontWeight: "700" }}>
-            ₺{formatCurrency(parseFloat(job.commissionCost || "0"))}
-          </ThemedText>
-        </View>
-        <View style={{ width: 60, alignItems: "center" }}>
-          <View style={[styles.statusBadge, { backgroundColor: job.commissionPaid ? colors.success : colors.warning }]}>
-            <ThemedText type="small" style={{ color: "#FFF", fontSize: 10, fontWeight: "600" }}>
-              {job.commissionPaid ? "Ödendi" : "Bekleniyor"}
-            </ThemedText>
+          <View style={{ flexDirection: "row", gap: Spacing.lg, marginBottom: Spacing.md }}>
+            <View>
+              <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>Tarih</ThemedText>
+              <ThemedText type="small" style={{ fontWeight: "600", marginTop: 2 }}>
+                {new Date(job.completionDate).toLocaleDateString("tr-TR")}
+              </ThemedText>
+            </View>
+            <View>
+              <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>Tutar</ThemedText>
+              <ThemedText type="body" style={{ color: theme.link, fontWeight: "700", marginTop: 2 }}>
+                ₺{formatCurrency(parseFloat(job.commissionCost || "0"))}
+              </ThemedText>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.md }}>
+            <View style={[styles.statusBadge, { backgroundColor: job.commissionPaid ? colors.success : colors.warning, flex: 1 }]}>
+              <ThemedText type="small" style={{ color: "#FFF", fontWeight: "600" }}>
+                {job.commissionPaid ? "✓ Ödendi" : "⏱ Bekleniyor"}
+              </ThemedText>
+            </View>
+
+            <Pressable
+              onPress={() => handleTogglePayment(job.id, job.commissionPaid)}
+              disabled={isLoading}
+              style={({ pressed }) => [
+                styles.toggleButton,
+                {
+                  backgroundColor: job.commissionPaid ? "rgba(239, 68, 68, 0.1)" : "rgba(34, 197, 94, 0.1)",
+                  opacity: pressed || isLoading ? 0.6 : 1,
+                },
+              ]}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color={theme.link} />
+              ) : (
+                <Feather
+                  name={job.commissionPaid ? "x" : "check"}
+                  size={18}
+                  color={job.commissionPaid ? "#EF4444" : colors.success}
+                />
+              )}
+            </Pressable>
           </View>
         </View>
-        <Pressable
-          onPress={() => handleTogglePayment(job.id, job.commissionPaid)}
-          disabled={isTogglingPaid === job.id}
-          style={{ width: 40, alignItems: "center", justifyContent: "center", opacity: isTogglingPaid === job.id ? 0.5 : 1 }}
-        >
-          <Feather name={isTogglingPaid === job.id ? "loader" : "edit-3"} size={16} color={theme.link} />
-        </Pressable>
       </View>
     );
   };
@@ -151,10 +177,11 @@ export default function WalletScreen() {
     <ThemedView style={styles.container}>
       <FlatList
         data={filteredJobs}
-        renderItem={renderTransactionRow}
+        renderItem={renderTransactionCard}
         keyExtractor={(item) => item.id}
         scrollEnabled
         contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xl }}
+        ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
         ListHeaderComponent={() => (
           <>
             {/* Summary Cards */}
@@ -280,7 +307,15 @@ const styles = StyleSheet.create({
   reportTable: { marginTop: Spacing.lg, borderRadius: BorderRadius.md, overflow: "hidden", borderWidth: 1, borderColor: "rgba(0,0,0,0.1)" },
   tableHeader: { flexDirection: "row", padding: Spacing.md, backgroundColor: "rgba(0,0,0,0.03)" },
   tableRow: { flexDirection: "row", alignItems: "center", padding: Spacing.md, borderBottomWidth: 1 },
-  statusBadge: { paddingVertical: 2, paddingHorizontal: Spacing.xs, borderRadius: BorderRadius.sm, alignItems: "center" },
+  
+  card: {
+    marginHorizontal: Spacing.lg,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  statusBadge: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md, borderRadius: BorderRadius.md, alignItems: "center", justifyContent: "center" },
+  toggleButton: { width: 44, height: 44, borderRadius: BorderRadius.md, alignItems: "center", justifyContent: "center" },
   transactionsHeader: { paddingHorizontal: Spacing.lg, marginTop: Spacing.xl, paddingBottom: Spacing.md },
   emptyState: { alignItems: "center", justifyContent: "center", paddingVertical: Spacing.xl * 2 },
 });
