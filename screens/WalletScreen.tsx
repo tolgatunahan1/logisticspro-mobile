@@ -343,8 +343,8 @@ export default function WalletScreen() {
             </View>
 
             {/* Tab Navigation */}
-            <View style={{ flexDirection: "row", paddingHorizontal: Spacing.lg, marginTop: Spacing.lg, gap: Spacing.md }}>
-              {(["unpaid", "paid", "all", "debts"] as TabType[]).map((tab) => (
+            <View style={{ flexDirection: "row", paddingHorizontal: Spacing.lg, marginTop: Spacing.lg, gap: Spacing.md, flexWrap: "wrap" }}>
+              {(["all", "paid", "unpaid", "debts"] as TabType[]).map((tab) => (
                 <Pressable
                   key={tab}
                   onPress={() => setActiveTab(tab)}
