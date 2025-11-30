@@ -823,14 +823,13 @@ export default function CompletedJobListScreen() {
                   </View>
 
                   {/* Commission Share Section */}
-                  {selectedJob.commissionPaid && (
-                    <View style={{
-                      backgroundColor: colors.backgroundDefault,
-                      padding: Spacing.lg,
-                      borderRadius: BorderRadius.md,
-                      gap: Spacing.md,
-                      marginBottom: Spacing.md,
-                    }}>
+                  <View style={{
+                    backgroundColor: colors.backgroundDefault,
+                    padding: Spacing.lg,
+                    borderRadius: BorderRadius.md,
+                    gap: Spacing.md,
+                    marginBottom: Spacing.md,
+                  }}>
                       <ThemedText type="h4" style={{ fontWeight: "700" }}>
                         💰 Komisyonu Paylaş
                       </ThemedText>
@@ -859,7 +858,6 @@ export default function CompletedJobListScreen() {
                         </ThemedText>
                       </Pressable>
                     </View>
-                  )}
 
                   <View style={{ marginBottom: Spacing.xl }} />
                 </View>
