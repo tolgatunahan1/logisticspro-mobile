@@ -181,7 +181,7 @@ export default function CompanyListScreen() {
   );
 
   const renderSearchBar = () => (
-    <View style={[styles.searchContainer, { paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.lg, paddingVertical: Spacing.lg, backgroundColor: theme.backgroundRoot }]}>
+    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: insets.top + Spacing.lg, paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.lg, paddingBottom: Spacing.xl, maxWidth: isTablet ? 1200 : undefined, alignSelf: "center" }]}>
       <View
         style={{
           flexDirection: "row",
@@ -233,6 +233,7 @@ export default function CompanyListScreen() {
         contentContainerStyle={[
           styles.listContent,
           { 
+            paddingTop: insets.top + Spacing.xl + 140, 
             paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"],
             paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.lg,
             maxWidth: isTablet ? 1200 : undefined,
@@ -240,7 +241,6 @@ export default function CompanyListScreen() {
             width: "100%",
           },
         ]}
-        ListHeaderComponent={renderSearchBar}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
           <RefreshControl
@@ -253,6 +253,9 @@ export default function CompanyListScreen() {
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
+      <View style={{ position: 'absolute', top: insets.top + headerHeight + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
+        {renderSearchBar()}
+      </View>
 
       {/* ID Card Detail Modal */}
       <Modal
