@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -71,7 +72,8 @@ function AvailabilityStackScreen() {
 export default function BottomTabNavigator() {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
-
+  
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -90,8 +92,8 @@ export default function BottomTabNavigator() {
           backgroundColor: colors.backgroundDefault,
           borderTopWidth: 1,
           borderTopColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)",
-          height: 68,
-          paddingBottom: Spacing.sm,
+          height: 68 + insets.bottom,
+          paddingBottom: insets.bottom + Spacing.sm,
           paddingTop: Spacing.xs,
           elevation: 8,
           shadowColor: "#000",
