@@ -5,20 +5,27 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
 
-import { ScreenScrollView } from "../components/ScreenScrollView";
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
-import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob, getCompanies, Company } from "../utils/storage";
+import { getCompletedJobs, markCommissionAsPaid, CompletedJob, getCompanies, Company } from "../utils/storage";
 
 const formatCurrency = (amount: number): string => {
   const num = Math.floor(amount);
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
-type TabType = "all" | "paid" | "unpaid";
+type ReportPeriod = "weekly" | "monthly" | "yearly";
+
+interface ReportData {
+  period: ReportPeriod;
+  label: string;
+  paid: number;
+  unpaid: number;
+  total: number;
+}
 
 export default function WalletScreen() {
   const { theme, isDark } = useTheme();
@@ -29,42 +36,13 @@ export default function WalletScreen() {
   const isTablet = width >= 768;
   const { firebaseUser } = useAuth();
 
-  const [paidTotal, setPaidTotal] = useState<number>(0);
-  const [unpaidTotal, setUnpaidTotal] = useState<number>(0);
-  const [totalRevenue, setTotalRevenue] = useState<number>(0);
-  const [weeklyRevenue, setWeeklyRevenue] = useState<number>(0);
-  const [monthlyRevenue, setMonthlyRevenue] = useState<number>(0);
   const [allJobs, setAllJobs] = useState<CompletedJob[]>([]);
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
   const [isTogglingPaid, setIsTogglingPaid] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("unpaid");
-
-  const filteredJobs = useMemo(() => {
-    if (activeTab === "all") return allJobs;
-    if (activeTab === "paid") return allJobs.filter(job => job.commissionPaid);
-    return allJobs.filter(job => !job.commissionPaid);
-  }, [allJobs, activeTab]);
-
-  const calculateRevenueData = (completedJobs: CompletedJob[]) => {
-    const now = Date.now();
-    const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
-    const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
-
-    let total = 0, weekly = 0, monthly = 0;
-
-    completedJobs.forEach(job => {
-      const amount = parseFloat(job.commissionCost || "0");
-      total += amount;
-      if (job.completionDate >= oneMonthAgo) monthly += amount;
-      if (job.completionDate >= oneWeekAgo) weekly += amount;
-    });
-
-    return { total, weekly, monthly };
-  };
+  const [selectedPeriod, setSelectedPeriod] = useState<ReportPeriod>("monthly");
 
   const loadData = useCallback(async () => {
     if (!firebaseUser?.uid) return;
-
     try {
       const jobs = await getCompletedJobs(firebaseUser.uid);
       const companiesList = await getCompanies(firebaseUser.uid);
@@ -72,27 +50,6 @@ export default function WalletScreen() {
         acc[company.id] = company;
         return acc;
       }, {} as { [key: string]: Company });
-
-      const paid = jobs.reduce((sum, job) => {
-        if (job.commissionPaid && job.commissionCost) {
-          return sum + parseFloat(job.commissionCost as string);
-        }
-        return sum;
-      }, 0);
-
-      const unpaid = jobs.reduce((sum, job) => {
-        if (!job.commissionPaid && job.commissionCost) {
-          return sum + parseFloat(job.commissionCost as string);
-        }
-        return sum;
-      }, 0);
-      const revenue = calculateRevenueData(jobs);
-
-      setPaidTotal(paid);
-      setUnpaidTotal(unpaid);
-      setTotalRevenue(revenue.total);
-      setWeeklyRevenue(revenue.weekly);
-      setMonthlyRevenue(revenue.monthly);
       setAllJobs(jobs);
       setCompanies(companiesMap);
     } catch (error) {
@@ -100,11 +57,7 @@ export default function WalletScreen() {
     }
   }, [firebaseUser?.uid]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
+  useFocusEffect(useCallback(() => { loadData(); }, [loadData]));
 
   const handleTogglePayment = async (jobId: string, currentPaidStatus: boolean) => {
     if (!firebaseUser?.uid) return;
@@ -113,83 +66,82 @@ export default function WalletScreen() {
     const result = await markCommissionAsPaid(firebaseUser.uid, jobId, newStatus);
     if (result) {
       await loadData();
-      Alert.alert(
-        "Başarılı", 
-        newStatus ? "Komisyon ödendi olarak işaretlendi" : "Komisyon ödenmedi olarak işaretlendi"
-      );
+      Alert.alert("Başarılı", newStatus ? "Komisyon ödendi olarak işaretlendi" : "Komisyon ödenmedi olarak işaretlendi");
     } else {
       Alert.alert("Hata", "İşlem başarısız oldu");
     }
     setIsTogglingPaid(null);
   };
 
+  // Calculate summary stats
+  const totalStats = useMemo(() => {
+    const paid = allJobs.reduce((sum, job) => sum + (job.commissionPaid ? parseFloat(job.commissionCost || "0") : 0), 0);
+    const unpaid = allJobs.reduce((sum, job) => sum + (!job.commissionPaid ? parseFloat(job.commissionCost || "0") : 0), 0);
+    return { paid, unpaid, total: paid + unpaid };
+  }, [allJobs]);
+
+  // Calculate period-based reports
+  const reportData = useMemo(() => {
+    const now = Date.now();
+    const periods = {
+      weekly: { days: 7, label: "Bu Hafta" },
+      monthly: { days: 30, label: "Bu Ay" },
+      yearly: { days: 365, label: "Bu Yıl" },
+    };
+
+    const reports: ReportData[] = [];
+    Object.entries(periods).forEach(([key, value]) => {
+      const startDate = now - value.days * 24 * 60 * 60 * 1000;
+      const periodJobs = allJobs.filter(job => job.completionDate >= startDate);
+      const paid = periodJobs.reduce((sum, job) => sum + (job.commissionPaid ? parseFloat(job.commissionCost || "0") : 0), 0);
+      const unpaid = periodJobs.reduce((sum, job) => sum + (!job.commissionPaid ? parseFloat(job.commissionCost || "0") : 0), 0);
+      reports.push({
+        period: key as ReportPeriod,
+        label: value.label,
+        paid,
+        unpaid,
+        total: paid + unpaid,
+      });
+    });
+    return reports;
+  }, [allJobs]);
+
+  const currentReport = reportData.find(r => r.period === selectedPeriod);
+
+  const filteredJobs = useMemo(() => {
+    const periods = { weekly: 7, monthly: 30, yearly: 365 };
+    const startDate = Date.now() - periods[selectedPeriod] * 24 * 60 * 60 * 1000;
+    return allJobs.filter(job => job.completionDate >= startDate).sort((a, b) => b.completionDate - a.completionDate);
+  }, [allJobs, selectedPeriod]);
+
   const renderTransactionRow = ({ item: job }: { item: CompletedJob }) => {
     const company = companies[job.companyId];
     return (
-      <View
-        style={{
-          flexDirection: "row",
-          paddingVertical: Spacing.md,
-          paddingHorizontal: Spacing.md,
-          borderBottomWidth: 1,
-          borderBottomColor: isDark
-            ? "rgba(255, 255, 255, 0.05)"
-            : "rgba(0, 0, 0, 0.05)",
-          alignItems: "center",
-          gap: Spacing.md,
-        }}
-      >
-        {/* Route & Company Info */}
+      <View style={[styles.tableRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }]}>
         <View style={{ flex: 2 }}>
-          <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.xs }}>
-            {company?.name || "Bilinmeyen"}
-          </ThemedText>
-          <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>
-            {job.cargoType}
-          </ThemedText>
-          <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 10, marginTop: Spacing.xs }}>
-            {job.loadingLocation} → {job.deliveryLocation}
+          <ThemedText type="small" style={{ fontWeight: "600" }}>{company?.name || "Bilinmeyen"}</ThemedText>
+          <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11, marginTop: 2 }}>
+            {new Date(job.completionDate).toLocaleDateString("tr-TR")}
           </ThemedText>
         </View>
-
-        {/* Commission Amount */}
         <View style={{ flex: 1, alignItems: "flex-end" }}>
           <ThemedText type="body" style={{ color: theme.link, fontWeight: "700" }}>
-            {formatCurrency(parseFloat(job.commissionCost))} ₺
+            ₺{formatCurrency(parseFloat(job.commissionCost || "0"))}
           </ThemedText>
-          <View
-            style={{
-              backgroundColor: job.commissionPaid ? colors.success : colors.warning,
-              paddingHorizontal: Spacing.sm,
-              paddingVertical: 2,
-              borderRadius: BorderRadius.sm,
-              marginTop: Spacing.xs,
-            }}
-          >
-            <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "600" }}>
-              {job.commissionPaid ? "Ödendi" : "Ödenmedi"}
+        </View>
+        <View style={{ width: 60, alignItems: "center" }}>
+          <View style={[styles.statusBadge, { backgroundColor: job.commissionPaid ? colors.success : colors.warning }]}>
+            <ThemedText type="small" style={{ color: "#FFF", fontSize: 10, fontWeight: "600" }}>
+              {job.commissionPaid ? "Ödendi" : "Bekleniyor"}
             </ThemedText>
           </View>
         </View>
-
-        {/* Toggle Button */}
         <Pressable
           onPress={() => handleTogglePayment(job.id, job.commissionPaid)}
           disabled={isTogglingPaid === job.id}
-          style={({ pressed }) => [
-            {
-              backgroundColor: job.commissionPaid ? colors.warning : colors.success,
-              padding: Spacing.sm,
-              borderRadius: BorderRadius.sm,
-              opacity: pressed || isTogglingPaid === job.id ? 0.7 : 1,
-            },
-          ]}
+          style={{ width: 40, alignItems: "center", justifyContent: "center", opacity: isTogglingPaid === job.id ? 0.5 : 1 }}
         >
-          <Feather
-            name={isTogglingPaid === job.id ? "loader" : job.commissionPaid ? "x" : "check"}
-            size={16}
-            color="#FFFFFF"
-          />
+          <Feather name={isTogglingPaid === job.id ? "loader" : "edit-3"} size={16} color={theme.link} />
         </Pressable>
       </View>
     );
@@ -201,228 +153,134 @@ export default function WalletScreen() {
         data={filteredJobs}
         renderItem={renderTransactionRow}
         keyExtractor={(item) => item.id}
+        scrollEnabled
+        contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xl }}
         ListHeaderComponent={() => (
           <>
-            {/* Revenue Summary Section */}
-            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg, paddingTop: headerHeight + Spacing.lg, marginBottom: Spacing.md }]}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Spacing.lg }}>
+            {/* Summary Cards */}
+            <View style={styles.header}>
+              <View style={[styles.summaryCard, { backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.08)" }]}>
                 <View>
-                  <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                    Toplam Komisyon Kazancı
+                  <ThemedText type="small" style={{ color: colors.textSecondary }}>Toplam Kazanç</ThemedText>
+                  <ThemedText type="h2" style={{ fontWeight: "700", color: theme.link, marginTop: 4 }}>
+                    ₺{formatCurrency(totalStats.total)}
                   </ThemedText>
-                  <ThemedText type="h2" style={{ fontWeight: "700" }}>
-                    ₺{formatCurrency(totalRevenue)}
-                  </ThemedText>
-                </View>
-                <View style={{ backgroundColor: theme.link + "20", padding: Spacing.md, borderRadius: BorderRadius.md }}>
-                  <Feather name="trending-up" size={28} color={theme.link} />
                 </View>
               </View>
 
-              <View style={{ gap: Spacing.md }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  <View>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Hafta</ThemedText>
-                    <ThemedText type="h4">₺{formatCurrency(weeklyRevenue)}</ThemedText>
-                  </View>
-                  <View>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>Bu Ay</ThemedText>
-                    <ThemedText type="h4">₺{formatCurrency(monthlyRevenue)}</ThemedText>
-                  </View>
+              <View style={{ flexDirection: "row", gap: Spacing.md }}>
+                <View style={[styles.summaryCard, { flex: 1, backgroundColor: isDark ? "rgba(34, 197, 94, 0.15)" : "rgba(34, 197, 94, 0.08)" }]}>
+                  <ThemedText type="small" style={{ color: colors.textSecondary }}>Ödenen</ThemedText>
+                  <ThemedText type="h4" style={{ fontWeight: "700", color: colors.success, marginTop: 4 }}>
+                    ₺{formatCurrency(totalStats.paid)}
+                  </ThemedText>
+                </View>
+
+                <View style={[styles.summaryCard, { flex: 1, backgroundColor: isDark ? "rgba(234, 179, 8, 0.15)" : "rgba(234, 179, 8, 0.08)" }]}>
+                  <ThemedText type="small" style={{ color: colors.textSecondary }}>Bekleniyor</ThemedText>
+                  <ThemedText type="h4" style={{ fontWeight: "700", color: colors.warning, marginTop: 4 }}>
+                    ₺{formatCurrency(totalStats.unpaid)}
+                  </ThemedText>
                 </View>
               </View>
             </View>
 
-            {/* Header Stats */}
-            <View style={[styles.statsContainer, { paddingHorizontal: Spacing.lg }]}>
-              <View style={{ gap: Spacing.md }}>
-                {/* Bekleyen Ödemeler Bakiyesi Card */}
-                <View
-                  style={[
-                    styles.balanceCard,
-                    {
-                      backgroundColor: isDark
-                        ? "rgba(234, 179, 8, 0.15)"
-                        : "rgba(234, 179, 8, 0.08)",
-                      borderColor: isDark
-                        ? "rgba(234, 179, 8, 0.3)"
-                        : "rgba(234, 179, 8, 0.2)",
-                    },
-                  ]}
-                >
-                  <View style={{ flex: 1 }}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
-                      Bekleyen Ödemeler Bakiyesi
-                    </ThemedText>
-                    <ThemedText type="h2" style={{ color: "#EAB308", fontWeight: "700" }}>
-                      {formatCurrency(unpaidTotal)} ₺
-                    </ThemedText>
-                  </View>
-                  <View style={[styles.statsIcon, { backgroundColor: "#EAB308" }]}>
-                    <Feather name="clock" size={20} color="#FFFFFF" />
-                  </View>
-                </View>
-
-                {/* Ödenen Bakiye Card */}
-                <View
-                  style={[
-                    styles.balanceCard,
-                    {
-                      backgroundColor: isDark
-                        ? "rgba(34, 197, 94, 0.15)"
-                        : "rgba(34, 197, 94, 0.08)",
-                      borderColor: isDark
-                        ? "rgba(34, 197, 94, 0.3)"
-                        : "rgba(34, 197, 94, 0.2)",
-                    },
-                  ]}
-                >
-                  <View style={{ flex: 1 }}>
-                    <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
-                      Ödenen Bakiye
-                    </ThemedText>
-                    <ThemedText type="h3" style={{ color: "#22C55E", fontWeight: "700" }}>
-                      {formatCurrency(paidTotal)} ₺
-                    </ThemedText>
-                  </View>
-                  <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
-                    <Feather name="check-circle" size={20} color="#FFFFFF" />
-                  </View>
-                </View>
-              </View>
-            </View>
-
-            {/* Tab Navigation */}
-            <View style={{ flexDirection: "row", paddingHorizontal: Spacing.lg, marginTop: Spacing.lg, gap: Spacing.md }}>
-              {(["unpaid", "paid", "all"] as TabType[]).map((tab) => (
-                <Pressable
-                  key={tab}
-                  onPress={() => setActiveTab(tab)}
-                  style={{
-                    paddingVertical: Spacing.sm,
-                    paddingHorizontal: Spacing.lg,
-                    borderRadius: BorderRadius.sm,
-                    backgroundColor:
-                      activeTab === tab
-                        ? tab === "unpaid"
-                          ? colors.warning
-                          : tab === "paid"
-                          ? colors.success
-                          : theme.link
-                        : colors.backgroundDefault,
-                  }}
-                >
-                  <ThemedText
-                    type="small"
-                    style={{
-                      fontWeight: "600",
-                      color:
-                        activeTab === tab
-                          ? "#FFFFFF"
-                          : colors.textSecondary,
-                    }}
+            {/* Period Selector & Report Table */}
+            <View style={styles.reportSection}>
+              <View style={styles.periodSelector}>
+                {reportData.map((report) => (
+                  <Pressable
+                    key={report.period}
+                    onPress={() => setSelectedPeriod(report.period)}
+                    style={[
+                      styles.periodButton,
+                      selectedPeriod === report.period && { borderBottomWidth: 2, borderBottomColor: theme.link },
+                    ]}
                   >
-                    {tab === "unpaid"
-                      ? `Ödenmedi (${allJobs.filter(j => !j.commissionPaid).length})`
-                      : tab === "paid"
-                      ? `Ödendi (${allJobs.filter(j => j.commissionPaid).length})`
-                      : `Tümü (${allJobs.length})`}
-                  </ThemedText>
-                </Pressable>
-              ))}
-            </View>
+                    <ThemedText
+                      type="small"
+                      style={{
+                        fontWeight: selectedPeriod === report.period ? "700" : "500",
+                        color: selectedPeriod === report.period ? theme.link : colors.textSecondary,
+                      }}
+                    >
+                      {report.label}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
 
-            {/* Transaction List Header */}
-            <View
-              style={{
-                flexDirection: "row",
-                paddingHorizontal: Spacing.lg,
-                paddingVertical: Spacing.md,
-                marginTop: Spacing.lg,
-                gap: Spacing.md,
-              }}
-            >
-              <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                İşlem Geçmişi
-              </ThemedText>
-              {filteredJobs.length > 0 && (
-                <View
-                  style={{
-                    backgroundColor:
-                      activeTab === "unpaid"
-                        ? colors.warning
-                        : activeTab === "paid"
-                        ? colors.success
-                        : theme.link,
-                    paddingHorizontal: Spacing.sm,
-                    paddingVertical: 2,
-                    borderRadius: BorderRadius.sm,
-                    minWidth: 24,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 11 }}>
+              {/* Report Table */}
+              <View style={styles.reportTable}>
+                <View style={styles.tableHeader}>
+                  <ThemedText type="small" style={{ flex: 1, fontWeight: "700", color: colors.textSecondary }}>Metrik</ThemedText>
+                  <ThemedText type="small" style={{ flex: 1, textAlign: "right", fontWeight: "700", color: colors.textSecondary }}>Tutar</ThemedText>
+                </View>
+
+                <View style={[styles.tableRow, { backgroundColor: isDark ? "rgba(34, 197, 94, 0.08)" : "rgba(34, 197, 94, 0.05)" }]}>
+                  <ThemedText type="body" style={{ flex: 1, fontWeight: "600" }}>Ödenen Toplam</ThemedText>
+                  <ThemedText type="body" style={{ flex: 1, textAlign: "right", fontWeight: "700", color: colors.success }}>
+                    ₺{formatCurrency(currentReport?.paid || 0)}
+                  </ThemedText>
+                </View>
+
+                <View style={[styles.tableRow, { backgroundColor: isDark ? "rgba(234, 179, 8, 0.08)" : "rgba(234, 179, 8, 0.05)" }]}>
+                  <ThemedText type="body" style={{ flex: 1, fontWeight: "600" }}>Beklenen Toplam</ThemedText>
+                  <ThemedText type="body" style={{ flex: 1, textAlign: "right", fontWeight: "700", color: colors.warning }}>
+                    ₺{formatCurrency(currentReport?.unpaid || 0)}
+                  </ThemedText>
+                </View>
+
+                <View style={[styles.tableRow, { backgroundColor: isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(59, 130, 246, 0.05)" }]}>
+                  <ThemedText type="body" style={{ flex: 1, fontWeight: "600" }}>Toplam Kazanç</ThemedText>
+                  <ThemedText type="body" style={{ flex: 1, textAlign: "right", fontWeight: "700", color: theme.link }}>
+                    ₺{formatCurrency(currentReport?.total || 0)}
+                  </ThemedText>
+                </View>
+
+                <View style={[styles.tableRow, { borderBottomWidth: 0, backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.05)" }]}>
+                  <ThemedText type="body" style={{ flex: 1, fontWeight: "600" }}>İşlem Sayısı</ThemedText>
+                  <ThemedText type="body" style={{ flex: 1, textAlign: "right", fontWeight: "700", color: colors.textSecondary }}>
                     {filteredJobs.length}
                   </ThemedText>
                 </View>
-              )}
+              </View>
             </View>
+
+            {/* Transactions Header */}
+            {filteredJobs.length > 0 && (
+              <View style={styles.transactionsHeader}>
+                <ThemedText type="h4" style={{ fontWeight: "700" }}>İşlem Detayları</ThemedText>
+              </View>
+            )}
 
             {/* Empty State */}
             {filteredJobs.length === 0 && (
-              <View style={{ paddingHorizontal: Spacing.lg, marginTop: Spacing.lg }}>
-                <View style={[styles.emptyState]}>
-                  <Feather
-                    name={activeTab === "unpaid" ? "check-circle" : "inbox"}
-                    size={48}
-                    color={colors.textSecondary}
-                  />
-                  <ThemedText type="body" style={{ color: colors.textSecondary, marginTop: Spacing.md }}>
-                    {activeTab === "unpaid"
-                      ? "Tüm ödemeler tamamlanmıştır"
-                      : activeTab === "paid"
-                      ? "Henüz ödenen işlem yok"
-                      : "İşlem yok"}
-                  </ThemedText>
-                </View>
+              <View style={styles.emptyState}>
+                <Feather name="inbox" size={48} color={colors.textSecondary} />
+                <ThemedText type="body" style={{ color: colors.textSecondary, marginTop: Spacing.md }}>
+                  Bu dönem için işlem yok
+                </ThemedText>
               </View>
             )}
           </>
         )}
-        scrollEnabled
-        contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xl }}
       />
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  statsContainer: {
-    gap: Spacing.md,
-  },
-  balanceCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    gap: Spacing.md,
-  },
-  statsIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: Spacing.xl * 2,
-    borderRadius: BorderRadius.md,
-    backgroundColor: "rgba(0, 0, 0, 0.02)",
-  },
+  container: { flex: 1 },
+  header: { gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
+  summaryCard: { padding: Spacing.md, borderRadius: BorderRadius.md, justifyContent: "space-between" },
+  reportSection: { marginTop: Spacing.xl, paddingHorizontal: Spacing.lg },
+  periodSelector: { flexDirection: "row", gap: Spacing.md, borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.1)" },
+  periodButton: { paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm },
+  reportTable: { marginTop: Spacing.lg, borderRadius: BorderRadius.md, overflow: "hidden", borderWidth: 1, borderColor: "rgba(0,0,0,0.1)" },
+  tableHeader: { flexDirection: "row", padding: Spacing.md, backgroundColor: "rgba(0,0,0,0.03)" },
+  tableRow: { flexDirection: "row", alignItems: "center", padding: Spacing.md, borderBottomWidth: 1 },
+  statusBadge: { paddingVertical: 2, paddingHorizontal: Spacing.xs, borderRadius: BorderRadius.sm, alignItems: "center" },
+  transactionsHeader: { paddingHorizontal: Spacing.lg, marginTop: Spacing.xl, paddingBottom: Spacing.md },
+  emptyState: { alignItems: "center", justifyContent: "center", paddingVertical: Spacing.xl * 2 },
 });
