@@ -8,6 +8,7 @@ import {
   updateEmail,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  deleteUser,
 } from "firebase/auth";
 import { firebaseAuth, firebaseDatabase } from "@/constants/firebase";
 import { ref, set, get, update, remove } from "firebase/database";
@@ -347,6 +348,49 @@ export const firebaseAuthService = {
       if (error?.message?.includes("email-already-in-use")) {
         throw new Error("Bu email zaten kullanılıyor");
       }
+      throw error;
+    }
+  },
+
+  // Reauthenticate user with password
+  reauthenticate: async (password: string): Promise<boolean> => {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (!user || !user.email) {
+        throw new Error("Kullanıcı oturumu açmamış");
+      }
+
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential);
+      return true;
+    } catch (error: any) {
+      if (error?.message?.includes("wrong-password")) {
+        throw new Error("Şifre yanlış");
+      }
+      throw error;
+    }
+  },
+
+  // Delete account completely - removes all data from Firebase and deletes auth user
+  deleteAccount: async (): Promise<boolean> => {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (!user) {
+        throw new Error("Kullanıcı oturumu açmamış");
+      }
+
+      const uid = user.uid;
+
+      // Delete all user data from Firebase Realtime Database
+      // This includes: companies, carriers, jobs, completed jobs, IBANs, etc.
+      await remove(ref(firebaseDatabase, `users/${uid}`));
+
+      // Delete the authentication user from Firebase Authentication
+      await deleteUser(user);
+
+      return true;
+    } catch (error: any) {
+      console.error("Hesap silme hatası:", error);
       throw error;
     }
   },
