@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, Modal, TextInput, ScrollView, KeyboardAvoidingView, Platform, Keyboard, useWindowDimensions } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { ThemedText } from "../components/ThemedText";
@@ -15,6 +15,8 @@ import {
 
 export default function AvailabilityScreen() {
   const { theme, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [availabilities, setAvailabilities] = useState<CarrierAvailability[]>([]);
@@ -202,7 +204,7 @@ export default function AvailabilityScreen() {
 
       <Modal visible={modalVisible} animationType="fade" transparent={true} onRequestClose={() => setModalVisible(false)}>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ width: "85%", maxWidth: 380, height: "80%", borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12, display: "flex", flexDirection: "column" }}>
+          <View style={{ width: isTablet ? "60%" : "85%", maxWidth: isTablet ? 500 : 380, height: "80%", borderRadius: BorderRadius.md, backgroundColor: colors.backgroundDefault, paddingHorizontal: 12, paddingVertical: 12, display: "flex", flexDirection: "column" }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <ThemedText type="h3">Yeni Bildiri</ThemedText>
               <Pressable onPress={() => setModalVisible(false)}>

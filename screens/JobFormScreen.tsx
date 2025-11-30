@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useEffect, useRef, useCallback } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform, useWindowDimensions } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -208,6 +208,8 @@ export default function JobFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   const { firebaseUser } = useAuth();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   const { job, mode } = route.params || { mode: "add" };
   const isEdit = mode === "edit";

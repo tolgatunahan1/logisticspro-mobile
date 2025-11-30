@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
-import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, Keyboard } from "react-native";
+import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, Keyboard, useWindowDimensions } from "react-native";
 import Checkbox from "expo-checkbox";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -29,6 +29,8 @@ export default function CompletedJobListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { firebaseUser } = useAuth();
 
   const [jobs, setJobs] = useState<CompletedJob[]>([]);

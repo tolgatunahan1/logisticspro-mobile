@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Alert, ActivityIndicator, ScrollView, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -45,6 +45,8 @@ export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { logout } = useAuth();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [approvedUsers, setApprovedUsers] = useState<ApprovedUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -157,8 +159,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={[styles.header, { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.lg }]}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom + Spacing.xl }]}>
+      <View style={[styles.header, { paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.xl, paddingVertical: Spacing.lg }]}>
         <ThemedText type="h2">Admin Panel</ThemedText>
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
@@ -172,14 +174,14 @@ export default function AdminDashboard() {
               );
             }}
             disabled={loading}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, hitSlop: 8 })}
           >
             <Feather name="log-out" size={24} color={theme.text} />
           </Pressable>
         </View>
       </View>
 
-      <View style={[styles.statsContainer, { paddingHorizontal: Spacing.xl }]}>
+      <View style={[styles.statsContainer, { paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.xl }]}>
         <View style={[styles.statCard, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
           <ThemedText type="small" style={{ color: colors.textSecondary }}>
             Aktif
@@ -198,7 +200,13 @@ export default function AdminDashboard() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView 
+        contentContainerStyle={[
+          { flexGrow: 1 },
+          { paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.xl }
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Beklemede */}
         <View style={styles.section}>
           <ThemedText type="h4" style={{ paddingHorizontal: Spacing.xl }}>

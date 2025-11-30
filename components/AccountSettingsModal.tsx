@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Pressable, TextInput, StyleSheet, Alert } from "react-native";
+import { Modal, View, Pressable, TextInput, StyleSheet, Alert, useWindowDimensions, Platform, KeyboardAvoidingView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { ThemedText } from "./ThemedText";
@@ -29,6 +29,9 @@ export function AccountSettingsModal({
 }: AccountSettingsModalProps) {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
+  const { width, height } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const modalHeight = isTablet ? Math.min(height * 0.7, 500) : "auto";
 
   const validatePassword = (password: string) => {
     const hasMinLength = password.length >= 8;
@@ -42,8 +45,9 @@ export function AccountSettingsModal({
 
   return (
     <Modal visible={visible} transparent animationType="slide">
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
       <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
-        <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
+        <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault, maxWidth: isTablet ? 600 : undefined, alignSelf: "center", width: isTablet ? "80%" : "100%", height: modalHeight }]}>
           <View style={styles.modalHeader}>
             <ThemedText type="h3">Hesap Ayarları</ThemedText>
             <Pressable onPress={onClose}>
@@ -139,6 +143,7 @@ export function AccountSettingsModal({
           </View>
         </View>
       </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useEffect, useRef, useCallback } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, Modal, FlatList, Platform, useWindowDimensions, KeyboardAvoidingView } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -23,6 +23,8 @@ export default function CompletedJobFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   const { firebaseUser } = useAuth();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   const { job, mode } = route.params || { mode: "add" };
   const isEdit = mode === "edit";
@@ -179,12 +181,13 @@ export default function CompletedJobFormScreen() {
 
   return (
     <>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-      contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.content}>
+        style={[styles.container, { backgroundColor: theme.backgroundRoot, paddingHorizontal: isTablet ? Spacing["2xl"] : 0 }]}
+        contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl, maxWidth: isTablet ? 800 : undefined, alignSelf: "center", width: "100%" }}
+        keyboardShouldPersistTaps="handled"
+      >
+      <View style={[styles.content, { maxWidth: isTablet ? 800 : undefined }]}>
         {/* Company Selector */}
         <View style={styles.section}>
           <ThemedText type="h4" style={styles.label}>
@@ -507,6 +510,7 @@ export default function CompletedJobFormScreen() {
         </View>
       </Modal>
     </ScrollView>
+      </KeyboardAvoidingView>
 
     {/* Loading Date Picker - Outside ScrollView for Expo Go */}
     {showLoadingDatePicker && Platform.OS !== "web" && (

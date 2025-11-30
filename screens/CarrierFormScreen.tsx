@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, Platform, Modal } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, Platform, Modal, useWindowDimensions } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -23,6 +23,8 @@ export default function CarrierFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   const { firebaseUser } = useAuth();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
   const carrier = route.params?.carrier;
   const mode = route.params?.mode || "add";
@@ -238,9 +240,18 @@ export default function CarrierFormScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingHorizontal: isTablet ? Spacing["2xl"] : 0 }]}>
       <ScreenKeyboardAwareScrollView
-        contentContainerStyle={[styles.content, { paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }]}
+        contentContainerStyle={[
+          styles.content, 
+          { 
+            paddingTop: 100, 
+            paddingBottom: insets.bottom + Spacing.xl,
+            maxWidth: isTablet ? 800 : undefined,
+            alignSelf: "center",
+            width: "100%",
+          }
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

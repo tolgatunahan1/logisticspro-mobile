@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView, Keyboard } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, FlatList, Alert, RefreshControl, Linking, Platform, Modal, ScrollView, Keyboard, useWindowDimensions } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -36,6 +36,8 @@ export default function CarrierListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<Carrier>("Carrier");
   const { firebaseUser } = useAuth();
   
@@ -194,7 +196,7 @@ export default function CarrierListScreen() {
   );
 
   const renderSearchBar = () => (
-    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
+    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: insets.top + Spacing.lg, paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.lg, paddingBottom: Spacing.xl, maxWidth: isTablet ? 1200 : undefined, alignSelf: "center" }]}>
       <View
         style={{
           flexDirection: "row",
@@ -237,7 +239,7 @@ export default function CarrierListScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingBottom: insets.bottom + Spacing.xl }]}>
       <FlatList
         style={{ flex: 1 }}
         data={filteredCarriers}
@@ -245,7 +247,14 @@ export default function CarrierListScreen() {
         renderItem={renderCarrierItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingTop: insets.top + Spacing.xl + 140, paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"] },
+          { 
+            paddingTop: insets.top + Spacing.xl + 140, 
+            paddingBottom: insets.bottom + Spacing.fabSize + Spacing["3xl"],
+            paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.lg,
+            maxWidth: isTablet ? 1200 : undefined,
+            alignSelf: "center",
+            width: "100%",
+          },
         ]}
         ListEmptyComponent={renderEmptyState}
         refreshControl={

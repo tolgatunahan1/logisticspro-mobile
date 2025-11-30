@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, useWindowDimensions, KeyboardAvoidingView, Platform } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -22,6 +22,8 @@ export default function CompanyFormScreen() {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
   const { firebaseUser } = useAuth();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
   const company = route.params?.company;
   const mode = route.params?.mode || "add";
@@ -177,9 +179,19 @@ export default function CompanyFormScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingHorizontal: isTablet ? Spacing["2xl"] : 0 }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingTop: 100, paddingBottom: insets.bottom + Spacing.xl }]}
+        contentContainerStyle={[
+          styles.content, 
+          { 
+            paddingTop: 100, 
+            paddingBottom: insets.bottom + Spacing.xl,
+            maxWidth: isTablet ? 800 : undefined,
+            alignSelf: "center",
+            width: "100%",
+          }
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -188,6 +200,7 @@ export default function CompanyFormScreen() {
         {renderInput("Adres", address, (text) => setAddress(text.toUpperCase()), "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true, autoCapitalize: "none" })}
 
       </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }

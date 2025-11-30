@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { StyleSheet, View, Pressable, Alert, FlatList } from "react-native";
+import { StyleSheet, View, Pressable, Alert, FlatList, useWindowDimensions } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -24,6 +24,8 @@ export default function WalletScreen() {
   const insets = useSafeAreaInsets();
   const colors = isDark ? Colors.dark : Colors.light;
   const headerHeight = useHeaderHeight();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const { firebaseUser } = useAuth();
 
   const [paidTotal, setPaidTotal] = useState<number>(0);
