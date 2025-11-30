@@ -50,6 +50,8 @@ export default function CompletedJobListScreen() {
   const [commissionShares, setCommissionShares] = useState<CommissionShare[]>([]);
   const [personName, setPersonName] = useState("");
   const [shareAmount, setShareAmount] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<CompletedJob>("CompletedJob");
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -937,11 +939,16 @@ export default function CompletedJobListScreen() {
                       };
                       console.log("Yeni share ekleniyor:", newShare);
                       setCommissionShares([...commissionShares, newShare]);
+                      setToastMessage("Kişi eklendi!");
+                      setShowToast(true);
+                      setTimeout(() => setShowToast(false), 2000);
                       setPersonName("");
                       setShareAmount("");
                     } else {
                       console.log("Validasyon hatası - isim veya tutar boş");
-                      Alert.alert("Hata", "Lütfen isim ve tutar girin");
+                      setToastMessage("Lütfen isim ve tutar girin!");
+                      setShowToast(true);
+                      setTimeout(() => setShowToast(false), 2000);
                     }
                   }}
                   style={({ pressed }) => [{
@@ -980,7 +987,9 @@ export default function CompletedJobListScreen() {
                   onPress={async () => {
                     console.log("Kaydet clicked - firebaseUser:", !!firebaseUser, "selectedJob:", !!selectedJob, "shares:", commissionShares.length);
                     if (commissionShares.length === 0) {
-                      Alert.alert("Hata", "Lütfen en az bir kişi ekleyin");
+                      setToastMessage("Lütfen en az bir kişi ekleyin!");
+                      setShowToast(true);
+                      setTimeout(() => setShowToast(false), 2000);
                       return;
                     }
                     if (firebaseUser && selectedJob) {
@@ -990,13 +999,19 @@ export default function CompletedJobListScreen() {
                         console.log("Kaydetme başarılı!");
                         setShowCommissionModal(false);
                         await loadData();
-                        Alert.alert("Başarılı", "Komisyon paylaşımları kaydedildi");
+                        setToastMessage("Komisyon paylaşımları kaydedildi!");
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
                       } catch (error) {
                         console.error("Kaydetme hatası:", error);
-                        Alert.alert("Hata", "Komisyon paylaşımları kaydedilirken hata oluştu");
+                        setToastMessage("Kaydetme hatası oluştu!");
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
                       }
                     } else {
-                      Alert.alert("Hata", "Kullanıcı veya sefer bilgisi eksik");
+                      setToastMessage("Kullanıcı veya sefer bilgisi eksik!");
+                      setShowToast(true);
+                      setTimeout(() => setShowToast(false), 2000);
                     }
                   }}
                   style={({ pressed }) => [{
@@ -1013,6 +1028,22 @@ export default function CompletedJobListScreen() {
                 </Pressable>
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Toast Notification */}
+      <Modal
+        visible={showToast}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowToast(false)}
+      >
+        <View style={{ flex: 1, justifyContent: "flex-end", alignItems: "center", paddingBottom: insets.bottom + Spacing.xl }}>
+          <View style={{ backgroundColor: isDark ? "#333" : "#222", paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.md, marginHorizontal: Spacing.lg }}>
+            <ThemedText type="small" style={{ color: "#FFF", fontWeight: "600" }}>
+              {toastMessage}
+            </ThemedText>
           </View>
         </View>
       </Modal>
