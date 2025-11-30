@@ -390,8 +390,8 @@ export default function WalletScreen() {
             )}
           </>
         )}
-        scrollEnabled={filteredJobs.length > 0}
-        contentContainerStyle={{ paddingBottom: Spacing.xl }}
+        scrollEnabled
+        contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xl }}
       />
     </ThemedView>
   );
