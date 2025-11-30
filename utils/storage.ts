@@ -113,6 +113,7 @@ export interface Debt {
   totalAmount: number;
   paidAmount: number;
   payments: { date: number; amount: number }[];
+  type: 'debt' | 'commission';
   createdAt: number;
   updatedAt: number;
 }
@@ -594,12 +595,13 @@ export const saveCommissionShares = async (uid: string, completedJobId: string, 
           });
         }
       } else {
-        // Create new debt
+        // Create new debt with commission type
         await addDebt(uid, {
           personName: share.personName,
           totalAmount: share.amount,
           paidAmount: 0,
           payments: [],
+          type: 'commission',
         });
       }
     }

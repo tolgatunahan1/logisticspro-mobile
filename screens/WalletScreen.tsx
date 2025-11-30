@@ -41,6 +41,7 @@ export default function WalletScreen() {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [showDebtPaymentInput, setShowDebtPaymentInput] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [netCommissionTotal, setNetCommissionTotal] = useState<number>(0);
 
   const filteredJobs = useMemo(() => {
     if (activeTab === "all") return allJobs;
@@ -91,6 +92,12 @@ export default function WalletScreen() {
         }
         return sum;
       }, 0);
+      
+      // Calculate net commission: unpaid commission - paylaştığı borçlar
+      const commissionShares = debtsList.filter(d => d.type === 'commission');
+      const totalShared = commissionShares.reduce((sum, debt) => sum + (debt.totalAmount - debt.paidAmount), 0);
+      const netCommission = unpaid - totalShared;
+      
       const revenue = calculateRevenueData(jobs);
 
       setPaidTotal(paid);
@@ -98,6 +105,7 @@ export default function WalletScreen() {
       setTotalRevenue(revenue.total);
       setWeeklyRevenue(revenue.weekly);
       setMonthlyRevenue(revenue.monthly);
+      setNetCommissionTotal(netCommission);
       setAllJobs(jobs);
       setCompanies(companiesMap);
       setDebts(debtsList);
@@ -131,19 +139,25 @@ export default function WalletScreen() {
 
   const renderDebtRow = (debt: Debt) => {
     const remaining = debt.totalAmount - debt.paidAmount;
+    const isCommission = debt.type === 'commission';
     return (
       <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, marginHorizontal: Spacing.lg, marginBottom: Spacing.md, gap: Spacing.md }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <ThemedText type="small" style={{ fontWeight: "600" }}>{debt.personName}</ThemedText>
+          <View style={{ flex: 1 }}>
+            <ThemedText type="small" style={{ fontWeight: "600" }}>{debt.personName}</ThemedText>
+            <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 10, marginTop: Spacing.xs }}>
+              {isCommission ? "Komisyon Paylaşımı" : "Borç Defteri"}
+            </ThemedText>
+          </View>
           <View style={{ backgroundColor: remaining > 0 ? colors.destructive : colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
             <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "600" }}>
-              {remaining > 0 ? "Borcunuz Var" : "Ödendi"}
+              {remaining > 0 ? "Beklemede" : "Ödendi"}
             </ThemedText>
           </View>
         </View>
         <View style={{ gap: Spacing.sm }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>Toplam Borç:</ThemedText>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>Toplam {isCommission ? "Paylaşım" : "Borç"}:</ThemedText>
             <ThemedText type="small" style={{ fontWeight: "600" }}>₺{formatCurrency(debt.totalAmount)}</ThemedText>
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -151,7 +165,7 @@ export default function WalletScreen() {
             <ThemedText type="small" style={{ fontWeight: "600", color: colors.success }}>₺{formatCurrency(debt.paidAmount)}</ThemedText>
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>Kalan:</ThemedText>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>Ödenmesi Gereken:</ThemedText>
             <ThemedText type="small" style={{ fontWeight: "600", color: remaining > 0 ? colors.destructive : colors.success }}>₺{formatCurrency(remaining)}</ThemedText>
           </View>
         </View>
@@ -337,6 +351,33 @@ export default function WalletScreen() {
                   </View>
                   <View style={[styles.statsIcon, { backgroundColor: "#22C55E" }]}>
                     <Feather name="check-circle" size={20} color="#FFFFFF" />
+                  </View>
+                </View>
+
+                {/* Net Kazancım Card */}
+                <View
+                  style={[
+                    styles.balanceCard,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(168, 85, 247, 0.15)"
+                        : "rgba(168, 85, 247, 0.08)",
+                      borderColor: isDark
+                        ? "rgba(168, 85, 247, 0.3)"
+                        : "rgba(168, 85, 247, 0.2)",
+                    },
+                  ]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.xs }}>
+                      Net Kazancım
+                    </ThemedText>
+                    <ThemedText type="h3" style={{ color: "#A855F7", fontWeight: "700" }}>
+                      {formatCurrency(Math.max(0, netCommissionTotal))} ₺
+                    </ThemedText>
+                  </View>
+                  <View style={[styles.statsIcon, { backgroundColor: "#A855F7" }]}>
+                    <Feather name="trending-up" size={20} color="#FFFFFF" />
                   </View>
                 </View>
               </View>
