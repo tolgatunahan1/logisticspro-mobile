@@ -384,6 +384,19 @@ export const updateCompletedJob = async (uid: string, jobId: string, updates: Pa
 
 export const deleteCompletedJob = async (uid: string, jobId: string): Promise<boolean> => {
   try {
+    // İş silinirken ilişkili komisyon paylaşımlarını (borçları) da sil
+    const debtsSnapshot = await get(ref(firebaseDatabase, `users/${uid}/data/debts`));
+    if (debtsSnapshot.exists()) {
+      const debts = debtsSnapshot.val();
+      for (const debtId in debts) {
+        const debt = debts[debtId];
+        // Eğer bu borç bu işle ilişkiliyse sil
+        if (debt.type === 'commission' && debt.completedJobId === jobId) {
+          await remove(ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`));
+        }
+      }
+    }
+    // İşi sil
     await remove(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${jobId}`));
     return true;
   } catch (error) {
