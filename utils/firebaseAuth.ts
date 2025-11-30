@@ -362,9 +362,14 @@ export const firebaseAuthService = {
 
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
+      console.log("✅ Reauthentication başarılı");
       return true;
     } catch (error: any) {
-      if (error?.message?.includes("wrong-password")) {
+      console.error("❌ Reauthentication hatası:", error?.message || error);
+      if (error?.message?.includes("wrong-password") || error?.code === "auth/wrong-password") {
+        throw new Error("Şifre yanlış");
+      }
+      if (error?.message?.includes("invalid-credential") || error?.code === "auth/invalid-credential") {
         throw new Error("Şifre yanlış");
       }
       throw error;
@@ -381,16 +386,27 @@ export const firebaseAuthService = {
 
       const uid = user.uid;
 
-      // Delete all user data from Firebase Realtime Database
-      // This includes: companies, carriers, jobs, completed jobs, IBANs, etc.
-      await remove(ref(firebaseDatabase, `users/${uid}`));
+      console.log("🗑️ Hesap silme başladı, UID:", uid);
 
-      // Delete the authentication user from Firebase Authentication
+      // First, delete the authentication user from Firebase Authentication
+      // This must be done while user is authenticated
+      console.log("📍 Firebase hesabı siliniyor...");
       await deleteUser(user);
+      console.log("✅ Firebase hesabı silindi");
 
+      // Then delete all user data from Firebase Realtime Database
+      // This includes: companies, carriers, jobs, completed jobs, IBANs, etc.
+      console.log("📍 Veritabanı verileri siliniyor...");
+      await remove(ref(firebaseDatabase, `users/${uid}`));
+      console.log("✅ Veritabanı verileri silindi");
+
+      console.log("✅ Hesap tamamen silindi");
       return true;
     } catch (error: any) {
-      console.error("Hesap silme hatası:", error);
+      console.error("❌ Hesap silme hatası:", error?.message || error?.code || error);
+      if (error?.code === "auth/requires-recent-login") {
+        throw new Error("Lütfen şifrenizi kontrol edin ve tekrar deneyin");
+      }
       throw error;
     }
   },

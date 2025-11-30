@@ -384,12 +384,19 @@ export default function SettingsScreen() {
     setIsDeleting(true);
     setDeleteError("");
     try {
+      console.log("🔐 Şifre doğrulanıyor...");
       await firebaseAuthService.reauthenticate(deletePassword);
+      console.log("🗑️ Hesap siliniyor...");
       await firebaseAuthService.deleteAccount();
+      console.log("✅ Hesap başarıyla silindi");
       if (logout) logout();
     } catch (error: any) {
-      console.error(error);
-      setDeleteError("İşlem başarısız. Şifrenizi kontrol edin.");
+      console.error("❌ Hesap silme hatası:", error?.message || error);
+      let errorMessage = "İşlem başarısız. Lütfen tekrar deneyin.";
+      if (error?.message?.includes("Şifre yanlış")) {
+        errorMessage = "Şifreniz yanlış. Lütfen kontrol edin.";
+      }
+      setDeleteError(errorMessage);
       setIsDeleting(false);
     }
   };
