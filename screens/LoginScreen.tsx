@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView, useWindowDimensions, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import Checkbox from "expo-checkbox";
@@ -25,6 +25,8 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const { loginWithFirebase, loginAdmin, createAdmin } = useAuth();
   const navigation = useNavigation<NavigationProp>();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -182,7 +184,19 @@ export default function LoginScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <ScrollView 
+        contentContainerStyle={[
+          styles.scrollContent,
+          { 
+            maxWidth: isTablet ? 600 : undefined,
+            alignSelf: "center",
+            width: "100%",
+            paddingHorizontal: isTablet ? Spacing["2xl"] : 0,
+          },
+        ]} 
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Image
             source={require("../assets/images/icon.png")}
@@ -416,6 +430,7 @@ export default function LoginScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -429,6 +444,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     justifyContent: "center",
+    paddingBottom: Spacing.xl,
   },
   header: {
     alignItems: "center",

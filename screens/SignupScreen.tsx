@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView, useWindowDimensions, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -24,6 +24,8 @@ export default function SignupScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { registerWithFirebase } = useAuth();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -137,7 +139,19 @@ export default function SignupScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <ScrollView 
+        contentContainerStyle={[
+          styles.scrollContent,
+          { 
+            maxWidth: isTablet ? 600 : undefined,
+            alignSelf: "center",
+            width: "100%",
+            paddingHorizontal: isTablet ? Spacing["2xl"] : 0,
+          },
+        ]} 
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Pressable
             onPress={() => navigation.goBack()}
@@ -303,6 +317,7 @@ export default function SignupScreen() {
           </View>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -314,6 +329,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.xl,
   },
   header: {
     alignItems: "center",

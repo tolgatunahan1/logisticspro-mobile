@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Modal, ScrollView, Image } from "react-native";
+import { StyleSheet, View, Pressable, Modal, ScrollView, Image, useWindowDimensions } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -26,6 +26,8 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
   const [carrierCount, setCarrierCount] = useState(0);
   const [companyCount, setCompanyCount] = useState(0);
@@ -125,11 +127,18 @@ export default function HomeScreen() {
   }, [navigation, theme]);
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingBottom: insets.bottom + Spacing.xl }]}>
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: headerHeight + Spacing.xl, paddingBottom: Spacing.xl },
+          { 
+            paddingTop: headerHeight + Spacing.xl, 
+            paddingBottom: Spacing.xl,
+            paddingHorizontal: isTablet ? Spacing["2xl"] : Spacing.xl,
+            maxWidth: isTablet ? 1200 : undefined,
+            alignSelf: "center",
+            width: "100%",
+          },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -538,6 +547,7 @@ const styles = StyleSheet.create({
     width: "75%",
     maxWidth: 300,
     backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingBottom: Spacing.xl,
   },
   drawerHeader: {
     alignItems: "flex-start",
