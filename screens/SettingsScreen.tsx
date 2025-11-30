@@ -296,7 +296,7 @@ const AboutModal = ({ isVisible, onClose, colors, isDark }) => {
                   lineHeight: 20,
                 }}
               >
-                © 2025 LogisticsPRO. Tolga Tunahan da saklıdır.
+                © 2025 LogisticsPRO. Geliştirici: Tolga Tunahan
               </ThemedText>
             </View>
           </ScrollView>
