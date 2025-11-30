@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { StyleSheet, View, Pressable, Alert, ActivityIndicator, ScrollView, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
@@ -10,6 +12,9 @@ import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { firebaseAuthService } from "../utils/firebaseAuth";
+import { RootStackParamList } from "../navigation/RootNavigator";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, "AdminDashboard">;
 
 // Alert Helper for Admin Actions
 const showConfirmAlert = (
@@ -44,7 +49,8 @@ interface ApprovedUser {
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const navigation = useNavigation<NavigationProp>();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
@@ -52,6 +58,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   const colors = isDark ? Colors.dark : Colors.light;
+
+  // Listen for logout - if user becomes null, redirect to login
+  useEffect(() => {
+    if (!user) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
+    }
+  }, [user, navigation]);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -164,31 +180,7 @@ export default function AdminDashboard() {
         <ThemedText type="h2">Admin Panel</ThemedText>
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
-            onPress={() => {
-              console.log("🔴 Logout button pressed");
-              Alert.alert(
-                APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TITLE,
-                APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_CONFIRM_MSG,
-                [
-                  { text: APP_CONSTANTS.ALERT_MESSAGES.CANCEL_TEXT },
-                  {
-                    text: APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TEXT,
-                    onPress: async () => {
-                      try {
-                        console.log("🟡 Logout function called");
-                        console.log("📍 Logout function type:", typeof logout);
-                        console.log("📍 Logout:", logout);
-                        await logout();
-                        console.log("✅ Logout completed");
-                      } catch (error) {
-                        console.error("❌ Logout error:", error);
-                      }
-                    },
-                    style: "destructive",
-                  },
-                ]
-              );
-            }}
+            onPress={logout}
             disabled={loading}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, hitSlop: 8 })}
           >
