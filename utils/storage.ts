@@ -597,13 +597,14 @@ export const saveCommissionShares = async (uid: string, completedJobId: string, 
       }
       
       if (debtId) {
-        // Update existing debt - add to totalAmount
+        // Update existing debt - add to totalAmount ve completedJobId ekle
         const debtRef = ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`);
         const snapshot = await get(debtRef);
         if (snapshot.exists()) {
           const debt = snapshot.val() as Debt;
           await update(debtRef, {
             totalAmount: debt.totalAmount + share.amount,
+            completedJobId: completedJobId,
             updatedAt: Date.now(),
           });
         }
@@ -615,6 +616,7 @@ export const saveCommissionShares = async (uid: string, completedJobId: string, 
           paidAmount: 0,
           payments: [],
           type: 'commission',
+          completedJobId: completedJobId,
         });
       }
     }
