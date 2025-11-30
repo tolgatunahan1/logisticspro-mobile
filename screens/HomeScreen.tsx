@@ -242,7 +242,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-
         {/* Menu Cards */}
         <ThemedText type="h4" style={[styles.sectionHeader, { color: colors.textSecondary }]}>
           Hızlı Erişim

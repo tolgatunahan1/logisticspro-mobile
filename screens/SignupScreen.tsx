@@ -317,7 +317,7 @@ export default function SignupScreen() {
           </View>
         </View>
       </ScrollView>
-      </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
     </ThemedView>
   );
 }

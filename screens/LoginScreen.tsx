@@ -430,7 +430,7 @@ export default function LoginScreen() {
           )}
         </View>
       </ScrollView>
-      </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
     </ThemedView>
   );
 }

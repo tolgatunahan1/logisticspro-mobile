@@ -198,9 +198,8 @@ export default function CompanyFormScreen() {
         {renderInput("Firma Adı", name, (text) => setName(text.toUpperCase()), "name", { placeholder: "Firma adı", autoCapitalize: "none" })}
         {renderInput("Telefon Numarası", phone, (text) => setPhone(formatPhoneNumber(text)), "phone", { placeholder: "05XX XXX XXXX", keyboardType: "phone-pad" })}
         {renderInput("Adres", address, (text) => setAddress(text.toUpperCase()), "address", { placeholder: "Firma adresi (opsiyonel)", multiline: true, autoCapitalize: "none" })}
-
       </ScrollView>
-      </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
     </ThemedView>
   );
 }

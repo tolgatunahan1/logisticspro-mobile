@@ -544,6 +544,7 @@ export default function CompletedJobFormScreen() {
         onTouchCancel={() => setShowCompletionDatePicker(false)}
       />
     )}
+  </ThemedView>
   </>
   );
 }
