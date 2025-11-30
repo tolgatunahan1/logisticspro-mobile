@@ -165,12 +165,19 @@ export default function AdminDashboard() {
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
             onPress={() => {
-              showConfirmAlert(
+              Alert.alert(
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TITLE,
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_CONFIRM_MSG,
-                APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TEXT,
-                () => logout(),
-                true
+                [
+                  { text: APP_CONSTANTS.ALERT_MESSAGES.CANCEL_TEXT },
+                  {
+                    text: APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TEXT,
+                    onPress: async () => {
+                      await logout();
+                    },
+                    style: "destructive",
+                  },
+                ]
               );
             }}
             disabled={loading}
