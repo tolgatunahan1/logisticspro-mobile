@@ -87,6 +87,7 @@ export default function HomeScreen() {
   );
 
   const handleSettingsPress = () => {
+    
     navigation.navigate("Settings");
   };
 
