@@ -73,10 +73,11 @@ export interface CompanyWallet {
 
 export interface WalletTransaction {
   id: string;
-  transactionType: "income" | "expense";
+  completedJobId: string;
   amount: number;
+  type: "income" | "payment";
   description: string;
-  timestamp: number;
+  createdAt: number;
 }
 
 export interface IBAN {
@@ -101,68 +102,8 @@ export interface CarrierAvailability {
   expiresAt: number;
 }
 
-export interface CommissionShare {
-  personName: string;
-  amount: number;
-  completedJobId: string;
-}
-
-export interface Debt {
-  id: string;
-  personName: string;
-  totalAmount: number;
-  paidAmount: number;
-  payments: { date: number; amount: number }[];
-  type: 'debt' | 'commission';
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface DashboardWidgetSettings {
-  statCardsVisible: boolean;
-  menuCardsVisible: boolean;
-  revenueWidgetVisible: boolean;
-  commissionWidgetVisible: boolean;
-}
-
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
-};
-
-// Dashboard Widget Settings - Firebase based with uid
-export const getDashboardWidgetSettings = async (uid: string): Promise<DashboardWidgetSettings> => {
-  try {
-    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/settings/dashboardWidgets`));
-    if (snapshot.exists()) {
-      return snapshot.val() as DashboardWidgetSettings;
-    }
-    // Default settings
-    return {
-      statCardsVisible: true,
-      menuCardsVisible: true,
-      revenueWidgetVisible: true,
-      commissionWidgetVisible: true,
-    };
-  } catch (error) {
-    return {
-      statCardsVisible: true,
-      menuCardsVisible: true,
-      revenueWidgetVisible: true,
-      commissionWidgetVisible: true,
-    };
-  }
-};
-
-export const updateDashboardWidgetSettings = async (
-  uid: string,
-  settings: DashboardWidgetSettings
-): Promise<boolean> => {
-  try {
-    await set(ref(firebaseDatabase, `users/${uid}/settings/dashboardWidgets`), settings);
-    return true;
-  } catch (error) {
-    return false;
-  }
 };
 
 // Carrier functions - Firebase based with uid
@@ -194,9 +135,9 @@ export const addCarrier = async (uid: string, carrier: Omit<Carrier, "id" | "cre
   }
 };
 
-export const updateCarrier = async (uid: string, carrierId: string, updates: Partial<Carrier>): Promise<boolean> => {
+export const updateCarrier = async (uid: string, id: string, updates: Partial<Omit<Carrier, "id" | "createdAt">>): Promise<boolean> => {
   try {
-    await update(ref(firebaseDatabase, `users/${uid}/data/carriers/${carrierId}`), {
+    await update(ref(firebaseDatabase, `users/${uid}/data/carriers/${id}`), {
       ...updates,
       updatedAt: Date.now(),
     });
@@ -206,28 +147,24 @@ export const updateCarrier = async (uid: string, carrierId: string, updates: Par
   }
 };
 
-export const deleteCarrier = async (uid: string, carrierId: string): Promise<boolean> => {
+export const deleteCarrier = async (uid: string, id: string): Promise<boolean> => {
   try {
-    await remove(ref(firebaseDatabase, `users/${uid}/data/carriers/${carrierId}`));
+    await remove(ref(firebaseDatabase, `users/${uid}/data/carriers/${id}`));
     return true;
   } catch (error) {
     return false;
   }
 };
 
-export const getVehicleTypeLabel = (type: string): string => {
-  const labels: { [key: string]: string } = {
-    "10-ton": "10 Tonluk",
-    "20-ton": "20 Tonluk",
-    "30-ton": "30 Tonluk",
-    "40-ton": "40 Tonluk",
-    "50-ton": "50 Tonluk",
-    "60-ton": "60 Tonluk",
-    "doseme": "Döşeme",
-    "platformlu": "Platformlu",
-    "kapali": "Kapalı",
-  };
-  return labels[type] || type;
+export const searchCarriers = (carriers: Carrier[], query: string): Carrier[] => {
+  if (!query.trim()) return carriers;
+  const lowerQuery = query.toLowerCase().trim();
+  return carriers.filter(
+    (c) =>
+      c.name?.toLowerCase().includes(lowerQuery) ||
+      c.phone?.toLowerCase().includes(lowerQuery) ||
+      c.plate?.toLowerCase().includes(lowerQuery)
+  );
 };
 
 // Company functions - Firebase based with uid
@@ -259,9 +196,9 @@ export const addCompany = async (uid: string, company: Omit<Company, "id" | "cre
   }
 };
 
-export const updateCompany = async (uid: string, companyId: string, updates: Partial<Company>): Promise<boolean> => {
+export const updateCompany = async (uid: string, id: string, updates: Partial<Omit<Company, "id" | "createdAt">>): Promise<boolean> => {
   try {
-    await update(ref(firebaseDatabase, `users/${uid}/data/companies/${companyId}`), {
+    await update(ref(firebaseDatabase, `users/${uid}/data/companies/${id}`), {
       ...updates,
       updatedAt: Date.now(),
     });
@@ -271,19 +208,31 @@ export const updateCompany = async (uid: string, companyId: string, updates: Par
   }
 };
 
-export const deleteCompany = async (uid: string, companyId: string): Promise<boolean> => {
+export const deleteCompany = async (uid: string, id: string): Promise<boolean> => {
   try {
-    await remove(ref(firebaseDatabase, `users/${uid}/data/companies/${companyId}`));
+    await remove(ref(firebaseDatabase, `users/${uid}/data/companies/${id}`));
     return true;
   } catch (error) {
     return false;
   }
 };
 
+export const searchCompanies = (companies: Company[], query: string): Company[] => {
+  if (!query.trim()) return companies;
+  const lowerQuery = query.toLowerCase().trim();
+  return companies.filter(
+    (c) =>
+      c.name?.toLowerCase().includes(lowerQuery) ||
+      c.phone?.toLowerCase().includes(lowerQuery) ||
+      c.contactPerson?.toLowerCase().includes(lowerQuery) ||
+      c.address?.toLowerCase().includes(lowerQuery)
+  );
+};
+
 // Job functions - Firebase based with uid
 export const getJobs = async (uid: string): Promise<PlannedJob[]> => {
   try {
-    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/data/plannedJobs`));
+    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/data/jobs`));
     if (snapshot.exists()) {
       const data = snapshot.val();
       return Object.values(data) as PlannedJob[];
@@ -302,16 +251,16 @@ export const addJob = async (uid: string, job: Omit<PlannedJob, "id" | "createdA
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    await set(ref(firebaseDatabase, `users/${uid}/data/plannedJobs/${newJob.id}`), newJob);
+    await set(ref(firebaseDatabase, `users/${uid}/data/jobs/${newJob.id}`), newJob);
     return newJob;
   } catch (error) {
     return null;
   }
 };
 
-export const updateJob = async (uid: string, jobId: string, updates: Partial<PlannedJob>): Promise<boolean> => {
+export const updateJob = async (uid: string, id: string, updates: Partial<Omit<PlannedJob, "id" | "createdAt">>): Promise<boolean> => {
   try {
-    await update(ref(firebaseDatabase, `users/${uid}/data/plannedJobs/${jobId}`), {
+    await update(ref(firebaseDatabase, `users/${uid}/data/jobs/${id}`), {
       ...updates,
       updatedAt: Date.now(),
     });
@@ -321,9 +270,9 @@ export const updateJob = async (uid: string, jobId: string, updates: Partial<Pla
   }
 };
 
-export const deleteJob = async (uid: string, jobId: string): Promise<boolean> => {
+export const deleteJob = async (uid: string, id: string): Promise<boolean> => {
   try {
-    await remove(ref(firebaseDatabase, `users/${uid}/data/plannedJobs/${jobId}`));
+    await remove(ref(firebaseDatabase, `users/${uid}/data/jobs/${id}`));
     return true;
   } catch (error) {
     return false;
@@ -335,10 +284,23 @@ export const searchJobs = (jobs: PlannedJob[], query: string): PlannedJob[] => {
   const lowerQuery = query.toLowerCase().trim();
   return jobs.filter(
     (j) =>
-      j.loadingLocation.toLowerCase().includes(lowerQuery) ||
-      j.deliveryLocation.toLowerCase().includes(lowerQuery) ||
-      j.cargoType.toLowerCase().includes(lowerQuery)
+      j.cargoType?.toLowerCase().includes(lowerQuery) ||
+      j.loadingLocation?.toLowerCase().includes(lowerQuery) ||
+      j.deliveryLocation?.toLowerCase().includes(lowerQuery)
   );
+};
+
+export const VEHICLE_TYPES = [
+  { label: "Kamyon", value: "kamyon" },
+  { label: "Kamyonet", value: "kamyonet" },
+  { label: "Tır", value: "tir" },
+  { label: "Açık Kasa", value: "acik_kasa" },
+  { label: "Kapalı Kasa", value: "kapali_kasa" },
+];
+
+export const getVehicleTypeLabel = (value: string): string => {
+  const found = VEHICLE_TYPES.find((v) => v.value === value);
+  return found ? found.label : (value && value.trim() ? value : "-");
 };
 
 // Completed Job functions - Firebase based with uid
@@ -370,9 +332,9 @@ export const addCompletedJob = async (uid: string, job: Omit<CompletedJob, "id" 
   }
 };
 
-export const updateCompletedJob = async (uid: string, jobId: string, updates: Partial<CompletedJob>): Promise<boolean> => {
+export const updateCompletedJob = async (uid: string, id: string, updates: Partial<Omit<CompletedJob, "id" | "createdAt">>): Promise<boolean> => {
   try {
-    await update(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${jobId}`), {
+    await update(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`), {
       ...updates,
       updatedAt: Date.now(),
     });
@@ -382,22 +344,49 @@ export const updateCompletedJob = async (uid: string, jobId: string, updates: Pa
   }
 };
 
-export const deleteCompletedJob = async (uid: string, jobId: string): Promise<boolean> => {
+export const markCommissionAsPaid = async (uid: string, id: string, isPaid: boolean): Promise<boolean> => {
   try {
-    // İş silinirken ilişkili komisyon paylaşımlarını (borçları) da sil
-    const debtsSnapshot = await get(ref(firebaseDatabase, `users/${uid}/data/debts`));
-    if (debtsSnapshot.exists()) {
-      const debts = debtsSnapshot.val();
-      for (const debtId in debts) {
-        const debt = debts[debtId];
-        // Eğer bu borç bu işle ilişkiliyse sil
-        if (debt.type === 'commission' && debt.completedJobId === jobId) {
-          await remove(ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`));
+    await update(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`), {
+      commissionPaid: isPaid,
+      updatedAt: Date.now(),
+    });
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const deleteCompletedJob = async (uid: string, id: string): Promise<boolean> => {
+  try {
+    const completedJob = await get(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`));
+    if (completedJob.exists()) {
+      const job = completedJob.val();
+      // Restore planned job if it exists
+      if (job.plannedJobId) {
+        const plannedJobRef = ref(firebaseDatabase, `users/${uid}/data/jobs/${job.plannedJobId}`);
+        const plannedSnapshot = await get(plannedJobRef);
+        if (!plannedSnapshot.exists()) {
+          const restoredJob: PlannedJob = {
+            id: job.plannedJobId,
+            companyId: job.companyId,
+            cargoType: job.cargoType,
+            tonnage: job.tonnage,
+            dimensions: job.dimensions,
+            loadingLocation: job.loadingLocation,
+            deliveryLocation: job.deliveryLocation,
+            loadingDate: job.loadingDate,
+            deliveryDate: job.deliveryDate,
+            transportationCost: job.transportationCost,
+            commissionCost: job.commissionCost,
+            notes: job.notes || "",
+            createdAt: job.createdAt,
+            updatedAt: Date.now(),
+          };
+          await set(plannedJobRef, restoredJob);
         }
       }
     }
-    // İşi sil
-    await remove(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${jobId}`));
+    await remove(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${id}`));
     return true;
   } catch (error) {
     return false;
@@ -409,22 +398,11 @@ export const searchCompletedJobs = (jobs: CompletedJob[], query: string): Comple
   const lowerQuery = query.toLowerCase().trim();
   return jobs.filter(
     (j) =>
+      j.cargoType.toLowerCase().includes(lowerQuery) ||
       j.loadingLocation.toLowerCase().includes(lowerQuery) ||
       j.deliveryLocation.toLowerCase().includes(lowerQuery) ||
-      j.cargoType.toLowerCase().includes(lowerQuery)
+      j.notes.toLowerCase().includes(lowerQuery)
   );
-};
-
-export const markCommissionAsPaid = async (uid: string, jobId: string, isPaid: boolean): Promise<boolean> => {
-  try {
-    await update(ref(firebaseDatabase, `users/${uid}/data/completedJobs/${jobId}`), {
-      commissionPaid: isPaid,
-      updatedAt: Date.now(),
-    });
-    return true;
-  } catch (error) {
-    return false;
-  }
 };
 
 // IBAN functions - Firebase based with uid
@@ -456,10 +434,49 @@ export const addIBAN = async (uid: string, iban: Omit<IBAN, "id" | "createdAt" |
   }
 };
 
-export const updateIBAN = async (uid: string, ibanId: string, updates: Partial<IBAN>): Promise<boolean> => {
+export const deleteIBAN = async (uid: string, id: string): Promise<boolean> => {
   try {
-    await update(ref(firebaseDatabase, `users/${uid}/data/ibans/${ibanId}`), {
-      ...updates,
+    await remove(ref(firebaseDatabase, `users/${uid}/data/ibans/${id}`));
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Company Wallet functions - Firebase based with uid
+export const getCompanyWallet = async (uid: string): Promise<CompanyWallet> => {
+  try {
+    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/data/wallet`));
+    if (snapshot.exists()) {
+      return snapshot.val() as CompanyWallet;
+    }
+    // Return default wallet
+    return {
+      id: generateId(),
+      totalBalance: 0,
+      totalEarned: 0,
+      totalPaid: 0,
+      transactions: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+  } catch (error) {
+    return {
+      id: generateId(),
+      totalBalance: 0,
+      totalEarned: 0,
+      totalPaid: 0,
+      transactions: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+  }
+};
+
+export const updateCompanyWallet = async (uid: string, wallet: CompanyWallet): Promise<boolean> => {
+  try {
+    await set(ref(firebaseDatabase, `users/${uid}/data/wallet`), {
+      ...wallet,
       updatedAt: Date.now(),
     });
     return true;
@@ -468,49 +485,40 @@ export const updateIBAN = async (uid: string, ibanId: string, updates: Partial<I
   }
 };
 
-export const deleteIBAN = async (uid: string, ibanId: string): Promise<boolean> => {
-  try {
-    await remove(ref(firebaseDatabase, `users/${uid}/data/ibans/${ibanId}`));
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
-// Carrier Availability functions - Firebase based (public)
+// Carrier Availability functions - Firebase based
 export const getCarrierAvailabilities = async (): Promise<CarrierAvailability[]> => {
   try {
-    const snapshot = await get(ref(firebaseDatabase, "public/carrierAvailabilities"));
+    const snapshot = await get(ref(firebaseDatabase, `public/carrierAvailabilities`));
     if (snapshot.exists()) {
       const data = snapshot.val();
-      return Object.values(data) as CarrierAvailability[];
+      if (typeof data === 'object' && data !== null) {
+        const result = Object.values(data).filter(item => item && typeof item === 'object') as CarrierAvailability[];
+        return result;
+      }
     }
     return [];
   } catch (error) {
+    console.error("❌ Firebase read error:", error);
     return [];
   }
 };
 
-export const addCarrierAvailability = async (availability: Omit<CarrierAvailability, "id" | "createdAt">): Promise<CarrierAvailability | null> => {
+export const addCarrierAvailability = async (availability: Omit<CarrierAvailability, "id" | "createdAt" | "expiresAt">): Promise<CarrierAvailability | null> => {
   try {
     const newAvailability: CarrierAvailability = {
       ...availability,
+      carrierPhone: availability.carrierPhone || "",
+      loadType: availability.loadType || "",
       id: generateId(),
       createdAt: Date.now(),
+      expiresAt: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
     };
     await set(ref(firebaseDatabase, `public/carrierAvailabilities/${newAvailability.id}`), newAvailability);
+    await new Promise(resolve => setTimeout(resolve, 300));
     return newAvailability;
   } catch (error) {
+    console.error("Write error:", error);
     return null;
-  }
-};
-
-export const updateCarrierAvailability = async (id: string, updates: Partial<CarrierAvailability>): Promise<boolean> => {
-  try {
-    await update(ref(firebaseDatabase, `public/carrierAvailabilities/${id}`), updates);
-    return true;
-  } catch (error) {
-    return false;
   }
 };
 
@@ -532,97 +540,4 @@ export const searchCarrierAvailabilities = (availabilities: CarrierAvailability[
       a.currentLocation.toLowerCase().includes(lowerQuery) ||
       a.destinationLocation.toLowerCase().includes(lowerQuery)
   );
-};
-
-// Debt functions - Firebase based with uid
-export const getDebts = async (uid: string): Promise<Debt[]> => {
-  try {
-    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/data/debts`));
-    if (snapshot.exists()) {
-      return Object.values(snapshot.val()) as Debt[];
-    }
-    return [];
-  } catch (error) {
-    return [];
-  }
-};
-
-export const addDebt = async (uid: string, debt: Omit<Debt, "id" | "createdAt" | "updatedAt">): Promise<Debt | null> => {
-  try {
-    const newDebt: Debt = {
-      ...debt,
-      id: generateId(),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    await set(ref(firebaseDatabase, `users/${uid}/data/debts/${newDebt.id}`), newDebt);
-    return newDebt;
-  } catch (error) {
-    return null;
-  }
-};
-
-export const updateDebtPayment = async (uid: string, debtId: string, paymentAmount: number): Promise<boolean> => {
-  try {
-    const debtRef = ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`);
-    const snapshot = await get(debtRef);
-    if (!snapshot.exists()) return false;
-    
-    const debt = snapshot.val() as Debt;
-    const newPaidAmount = Math.min(debt.paidAmount + paymentAmount, debt.totalAmount);
-    const newPayment = { date: Date.now(), amount: paymentAmount };
-    
-    await update(debtRef, {
-      paidAmount: newPaidAmount,
-      payments: [...(debt.payments || []), newPayment],
-      updatedAt: Date.now(),
-    });
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
-export const saveCommissionShares = async (uid: string, completedJobId: string, shares: CommissionShare[]): Promise<boolean> => {
-  try {
-    for (const share of shares) {
-      const existingDebt = await get(ref(firebaseDatabase, `users/${uid}/data/debts`));
-      let debtId = null;
-      
-      if (existingDebt.exists()) {
-        const debts = existingDebt.val();
-        debtId = Object.keys(debts).find(
-          (key) => debts[key].personName === share.personName
-        );
-      }
-      
-      if (debtId) {
-        // Update existing debt - add to totalAmount ve completedJobId ekle
-        const debtRef = ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`);
-        const snapshot = await get(debtRef);
-        if (snapshot.exists()) {
-          const debt = snapshot.val() as Debt;
-          await update(debtRef, {
-            totalAmount: debt.totalAmount + share.amount,
-            completedJobId: completedJobId,
-            updatedAt: Date.now(),
-          });
-        }
-      } else {
-        // Create new debt with commission type
-        await addDebt(uid, {
-          personName: share.personName,
-          totalAmount: share.amount,
-          paidAmount: 0,
-          payments: [],
-          type: 'commission',
-          completedJobId: completedJobId,
-        });
-      }
-    }
-    return true;
-  } catch (error) {
-    console.error("Commission share save error:", error);
-    return false;
-  }
 };

@@ -13,16 +13,11 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid, CommissionShare, saveCommissionShares, getDebts, Debt } from "../utils/storage";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-const formatCurrency = (amount: number): string => {
-  const num = Math.floor(amount);
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-};
 
 interface GroupedJobs {
   date: string;
@@ -46,13 +41,6 @@ export default function CompletedJobListScreen() {
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [ibans, setIbans] = useState<IBAN[]>([]);
-  const [showCommissionModal, setShowCommissionModal] = useState(false);
-  const [commissionShares, setCommissionShares] = useState<CommissionShare[]>([]);
-  const [personName, setPersonName] = useState("");
-  const [shareAmount, setShareAmount] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
-  const [showToast, setShowToast] = useState(false);
-  const [sharedPersons, setSharedPersons] = useState<Debt[]>([]);
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<CompletedJob>("CompletedJob");
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -70,7 +58,6 @@ export default function CompletedJobListScreen() {
     const allCompanies = await getCompanies(firebaseUser.uid);
     const allCarriers = await getCarriers(firebaseUser.uid);
     const allIbans = await getIBANs(firebaseUser.uid);
-    const allDebts = await getDebts(firebaseUser.uid);
     
     const companiesMap = allCompanies.reduce((acc, company) => {
       acc[company.id] = company;
@@ -86,7 +73,6 @@ export default function CompletedJobListScreen() {
     setCompanies(companiesMap);
     setCarriers(carriersMap);
     setIbans(allIbans);
-    setSharedPersons(allDebts);
   }, [firebaseUser?.uid]);
 
   useFocusEffect(
@@ -827,276 +813,11 @@ export default function CompletedJobListScreen() {
                     )}
                   </View>
 
-                  {/* Financial Information Section */}
-                  <View style={{
-                    backgroundColor: colors.backgroundDefault,
-                    padding: Spacing.lg,
-                    borderRadius: BorderRadius.md,
-                    gap: Spacing.md,
-                    marginBottom: Spacing.md,
-                  }}>
-                    <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                      💵 Finansal Bilgiler
-                    </ThemedText>
-                    <View style={{ flexDirection: "row", gap: Spacing.lg }}>
-                      <View style={{ flex: 1, ...styles.detailSection }}>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
-                          Nakliye Tutarı
-                        </ThemedText>
-                        <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                          ₺{formatCurrency(parseFloat(selectedJob.transportationCost || "0"))}
-                        </ThemedText>
-                      </View>
-                      <View style={{ flex: 1, ...styles.detailSection }}>
-                        <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600" }}>
-                          Komisyon Bedeli
-                        </ThemedText>
-                        <ThemedText type="h4" style={{ fontWeight: "700", color: colors.success }}>
-                          ₺{formatCurrency(parseFloat(selectedJob.commissionCost || "0"))}
-                        </ThemedText>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Commission Share Section */}
-                  <View style={{
-                    backgroundColor: colors.backgroundDefault,
-                    padding: Spacing.lg,
-                    borderRadius: BorderRadius.md,
-                    gap: Spacing.md,
-                    marginBottom: Spacing.md,
-                  }}>
-                      <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                        💰 Komisyon Paylaşımı
-                      </ThemedText>
-                      {sharedPersons.filter(d => d.type === 'commission' && d.completedJobId === selectedJob.id).length > 0 && (
-                        <>
-                          <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                            Paylaştıkları Kişiler
-                          </ThemedText>
-                          <View style={{ gap: Spacing.sm }}>
-                            {sharedPersons.filter(d => d.type === 'commission' && d.completedJobId === selectedJob.id).map((person) => (
-                              <View key={person.id} style={{ backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)", padding: Spacing.md, borderRadius: BorderRadius.sm, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                <View>
-                                  <ThemedText type="small" style={{ fontWeight: "600" }}>{person.personName}</ThemedText>
-                                  <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 11 }}>Ödenmesi Gereken: ₺{formatCurrency(person.totalAmount - person.paidAmount)}</ThemedText>
-                                </View>
-                                <View style={{ backgroundColor: person.paidAmount >= person.totalAmount ? colors.success : colors.warning, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
-                                  <ThemedText type="small" style={{ color: "#FFF", fontSize: 10, fontWeight: "600" }}>
-                                    {person.paidAmount >= person.totalAmount ? "Ödendi" : "Beklemede"}
-                                  </ThemedText>
-                                </View>
-                              </View>
-                            ))}
-                          </View>
-                        </>
-                      )}
-                      <Pressable
-                        onPress={() => {
-                          setCommissionShares([]);
-                          setPersonName("");
-                          setShareAmount("");
-                          setShowCommissionModal(true);
-                        }}
-                        style={({ pressed }) => [{
-                          backgroundColor: theme.link,
-                          opacity: pressed ? 0.9 : 1,
-                          paddingVertical: Spacing.md,
-                          paddingHorizontal: Spacing.lg,
-                          borderRadius: BorderRadius.md,
-                          alignItems: "center",
-                          minHeight: 44,
-                        }]}
-                      >
-                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                          Komisyon Paylaş
-                        </ThemedText>
-                      </Pressable>
-                    </View>
 
                   <View style={{ marginBottom: Spacing.xl }} />
                 </View>
               )}
             </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Commission Share Modal */}
-      <Modal
-        visible={showCommissionModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowCommissionModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">Komisyon Paylaş</ThemedText>
-              <Pressable onPress={() => setShowCommissionModal(false)}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              <View style={{ gap: Spacing.lg }}>
-                <View>
-                  <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
-                    Kişi Adı
-                  </ThemedText>
-                  <TextInput
-                    style={{
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      padding: Spacing.md,
-                      borderRadius: BorderRadius.sm,
-                      color: colors.text,
-                      backgroundColor: colors.backgroundDefault,
-                    }}
-                    placeholder="Adı soyadı"
-                    placeholderTextColor={colors.textSecondary}
-                    value={personName}
-                    onChangeText={setPersonName}
-                  />
-                </View>
-
-                <View>
-                  <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
-                    Paylaş Tutarı (₺)
-                  </ThemedText>
-                  <TextInput
-                    style={{
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      padding: Spacing.md,
-                      borderRadius: BorderRadius.sm,
-                      color: colors.text,
-                      backgroundColor: colors.backgroundDefault,
-                    }}
-                    placeholder="0"
-                    placeholderTextColor={colors.textSecondary}
-                    keyboardType="decimal-pad"
-                    value={shareAmount}
-                    onChangeText={setShareAmount}
-                  />
-                </View>
-
-                <Pressable
-                  onPress={() => {
-                    console.log("Kişi Ekle clicked - personName:", personName, "shareAmount:", shareAmount);
-                    if (personName.trim() && shareAmount.trim()) {
-                      const newShare: CommissionShare = {
-                        personName: personName.trim(),
-                        amount: parseFloat(shareAmount),
-                        completedJobId: selectedJob?.id || "",
-                      };
-                      console.log("Yeni share ekleniyor:", newShare);
-                      setCommissionShares([...commissionShares, newShare]);
-                      setToastMessage("Kişi eklendi!");
-                      setShowToast(true);
-                      setTimeout(() => setShowToast(false), 2000);
-                      setPersonName("");
-                      setShareAmount("");
-                    } else {
-                      console.log("Validasyon hatası - isim veya tutar boş");
-                      setToastMessage("Lütfen isim ve tutar girin!");
-                      setShowToast(true);
-                      setTimeout(() => setShowToast(false), 2000);
-                    }
-                  }}
-                  style={({ pressed }) => [{
-                    backgroundColor: theme.link,
-                    opacity: pressed ? 0.9 : 1,
-                    paddingVertical: Spacing.md,
-                    borderRadius: BorderRadius.sm,
-                    alignItems: "center",
-                  }]}
-                >
-                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Kişi Ekle
-                  </ThemedText>
-                </Pressable>
-
-                {commissionShares.length > 0 && (
-                  <>
-                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
-                      Eklenen Kişiler ({commissionShares.length})
-                    </ThemedText>
-                    {commissionShares.map((share, index) => (
-                      <View key={index} style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                        <View>
-                          <ThemedText type="small" style={{ fontWeight: "600" }}>{share.personName}</ThemedText>
-                          <ThemedText type="small" style={{ color: colors.textSecondary }}>₺{formatCurrency(share.amount)}</ThemedText>
-                        </View>
-                        <Pressable onPress={() => setCommissionShares(commissionShares.filter((_, i) => i !== index))}>
-                          <Feather name="x" size={18} color={colors.destructive} />
-                        </Pressable>
-                      </View>
-                    ))}
-                  </>
-                )}
-
-                <Pressable
-                  onPress={async () => {
-                    console.log("Kaydet clicked - firebaseUser:", !!firebaseUser, "selectedJob:", !!selectedJob, "shares:", commissionShares.length);
-                    if (commissionShares.length === 0) {
-                      setToastMessage("Lütfen en az bir kişi ekleyin!");
-                      setShowToast(true);
-                      setTimeout(() => setShowToast(false), 2000);
-                      return;
-                    }
-                    if (firebaseUser && selectedJob) {
-                      try {
-                        console.log("Kaydetme başlıyor...");
-                        await saveCommissionShares(firebaseUser.uid, selectedJob.id, commissionShares);
-                        console.log("Kaydetme başarılı!");
-                        setShowCommissionModal(false);
-                        await loadData();
-                        setToastMessage("Komisyon paylaşımları kaydedildi!");
-                        setShowToast(true);
-                        setTimeout(() => setShowToast(false), 2000);
-                      } catch (error) {
-                        console.error("Kaydetme hatası:", error);
-                        setToastMessage("Kaydetme hatası oluştu!");
-                        setShowToast(true);
-                        setTimeout(() => setShowToast(false), 2000);
-                      }
-                    } else {
-                      setToastMessage("Kullanıcı veya sefer bilgisi eksik!");
-                      setShowToast(true);
-                      setTimeout(() => setShowToast(false), 2000);
-                    }
-                  }}
-                  style={({ pressed }) => [{
-                    backgroundColor: colors.success,
-                    opacity: pressed ? 0.9 : 1,
-                    paddingVertical: Spacing.md,
-                    borderRadius: BorderRadius.sm,
-                    alignItems: "center",
-                  }]}
-                >
-                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
-                    Kaydet
-                  </ThemedText>
-                </Pressable>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Toast Notification */}
-      <Modal
-        visible={showToast}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowToast(false)}
-      >
-        <View style={{ flex: 1, justifyContent: "flex-end", alignItems: "center", paddingBottom: insets.bottom + Spacing.xl }}>
-          <View style={{ backgroundColor: isDark ? "#333" : "#222", paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.md, marginHorizontal: Spacing.lg }}>
-            <ThemedText type="small" style={{ color: "#FFF", fontWeight: "600" }}>
-              {toastMessage}
-            </ThemedText>
           </View>
         </View>
       </Modal>

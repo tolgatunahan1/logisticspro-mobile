@@ -5,7 +5,6 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import Checkbox from "expo-checkbox";
 
 import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
@@ -14,7 +13,7 @@ import { LiftPressable } from "../components/LiftPressable";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { getCarriers, getCompanies, getJobs, getCompletedJobs, CompletedJob, getDashboardWidgetSettings, updateDashboardWidgetSettings, DashboardWidgetSettings } from "../utils/storage";
+import { getCarriers, getCompanies, getJobs, getCompletedJobs, CompletedJob } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 const formatCurrency = (amount: number): string => {
   const num = Math.floor(amount);
@@ -41,13 +40,6 @@ export default function HomeScreen() {
   const [pendingCommissions, setPendingCommissions] = useState(0);
   const [paidCommissions, setPaidCommissions] = useState(0);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [customizeModalVisible, setCustomizeModalVisible] = useState(false);
-  const [widgetSettings, setWidgetSettings] = useState<DashboardWidgetSettings>({
-    statCardsVisible: true,
-    menuCardsVisible: true,
-    revenueWidgetVisible: true,
-    commissionWidgetVisible: true,
-  });
   const { firebaseUser } = useAuth();
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -77,13 +69,11 @@ export default function HomeScreen() {
     const companies = await getCompanies(firebaseUser.uid);
     const jobs = await getJobs(firebaseUser.uid);
     const completedJobs = await getCompletedJobs(firebaseUser.uid);
-    const settings = await getDashboardWidgetSettings(firebaseUser.uid);
     
     setCarrierCount(carriers.length);
     setCompanyCount(companies.length);
     setJobCount(jobs.length);
     setCompletedJobCount(completedJobs.length);
-    setWidgetSettings(settings);
     
     const revenue = calculateRevenueData(completedJobs);
     setTotalRevenue(revenue.total);
@@ -124,26 +114,15 @@ export default function HomeScreen() {
         </Pressable>
       ),
       headerRight: () => (
-        <View style={{ flexDirection: "row", gap: Spacing.md }}>
-          <Pressable
-            onPress={() => setCustomizeModalVisible(true)}
-            style={({ pressed }) => [
-              styles.headerButton,
-              { opacity: pressed ? 0.6 : 1 },
-            ]}
-          >
-            <Feather name="sliders" size={APP_CONSTANTS.ICON_SIZE_MEDIUM} color={theme.text} />
-          </Pressable>
-          <Pressable
-            onPress={handleSettingsPress}
-            style={({ pressed }) => [
-              styles.headerButton,
-              { opacity: pressed ? 0.6 : 1 },
-            ]}
-          >
-            <Feather name="settings" size={APP_CONSTANTS.ICON_SIZE_MEDIUM} color={theme.text} />
-          </Pressable>
-        </View>
+        <Pressable
+          onPress={handleSettingsPress}
+          style={({ pressed }) => [
+            styles.headerButton,
+            { opacity: pressed ? 0.6 : 1 },
+          ]}
+        >
+          <Feather name="settings" size={APP_CONSTANTS.ICON_SIZE_MEDIUM} color={theme.text} />
+        </Pressable>
       ),
     });
   }, [navigation, theme]);
@@ -186,8 +165,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Stats Cards - Row 1 */}
-        {widgetSettings.statCardsVisible && (
-        <View style={styles.statsContainer} key="stats1">
+        <View style={styles.statsContainer}>
           <View
             style={[
               styles.statCard,
@@ -224,10 +202,8 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-        )}
 
         {/* Stats Cards - Row 2 */}
-        {widgetSettings.statCardsVisible && (
         <View style={styles.statsContainer}>
           <View
             style={[
@@ -265,11 +241,9 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-        )}
 
-        {/* Menu Cards - Conditional Rendering */}
-        {widgetSettings.menuCardsVisible && (
-        <>
+
+        {/* Menu Cards */}
         <ThemedText type="h4" style={[styles.sectionHeader, { color: colors.textSecondary }]}>
           Hızlı Erişim
         </ThemedText>
@@ -393,67 +367,7 @@ export default function HomeScreen() {
           </View>
           <Feather name="chevron-right" size={24} color={colors.textSecondary} />
         </LiftPressable>
-        </>
-        )}
       </ScrollView>
-
-      {/* Widget Customization Modal */}
-      <Modal
-        visible={customizeModalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setCustomizeModalVisible(false)}
-      >
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "flex-end" }}>
-          <View style={{ backgroundColor: theme.backgroundRoot, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.lg, paddingTop: Spacing.xl }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Spacing.lg }}>
-              <ThemedText type="h3" style={{ fontWeight: "700" }}>Widget Özelleştir</ThemedText>
-              <Pressable onPress={() => setCustomizeModalVisible(false)}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-
-            <View style={{ gap: Spacing.lg }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: Spacing.md }}>
-                <ThemedText type="body">İstatistik Kartları</ThemedText>
-                <Checkbox
-                  value={widgetSettings.statCardsVisible}
-                  onValueChange={(val) => setWidgetSettings({ ...widgetSettings, statCardsVisible: val })}
-                  color={widgetSettings.statCardsVisible ? theme.link : colors.border}
-                />
-              </View>
-
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: Spacing.md }}>
-                <ThemedText type="body">Hızlı Erişim Menüsü</ThemedText>
-                <Checkbox
-                  value={widgetSettings.menuCardsVisible}
-                  onValueChange={(val) => setWidgetSettings({ ...widgetSettings, menuCardsVisible: val })}
-                  color={widgetSettings.menuCardsVisible ? theme.link : colors.border}
-                />
-              </View>
-
-              <Pressable
-                onPress={async () => {
-                  if (firebaseUser?.uid) {
-                    await updateDashboardWidgetSettings(firebaseUser.uid, widgetSettings);
-                    setCustomizeModalVisible(false);
-                  }
-                }}
-                style={({ pressed }) => [{
-                  backgroundColor: theme.link,
-                  opacity: pressed ? 0.9 : 1,
-                  paddingVertical: Spacing.md,
-                  borderRadius: BorderRadius.sm,
-                  alignItems: "center",
-                  marginTop: Spacing.lg,
-                }]}
-              >
-                <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>Kaydet</ThemedText>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
       <Modal
         visible={drawerVisible}
