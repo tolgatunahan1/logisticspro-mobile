@@ -51,7 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authUser) {
         // Kullanıcı Firebase'de giriş yapmış
         // Eğer admin ise admin dashboard'a, user ise user dashboard'a git
-        const isAdmin = await firebaseAuthService.isUserAdmin(authUser.uid);
+        
+        // Admin email list
+        const ADMIN_EMAILS = ["tolgatunahan@icloud.com"];
+        
+        // Check if user is admin (by email or database)
+        let isAdmin = ADMIN_EMAILS.includes(authUser.email || "");
+        if (!isAdmin) {
+          isAdmin = await firebaseAuthService.isUserAdmin(authUser.uid);
+        }
+        
         const userData: User = {
           email: authUser.email || "",
           type: isAdmin ? "admin" : "user",
@@ -106,8 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const fbUser = await firebaseAuthService.login(email, password);
       if (fbUser) {
-        // Admin hesabı kontrol et
-        const isAdmin = await firebaseAuthService.isUserAdmin(fbUser.uid);
+        // Admin email list
+        const ADMIN_EMAILS = ["tolgatunahan@icloud.com"];
+        
+        // Check if user is admin (by email or database)
+        let isAdmin = ADMIN_EMAILS.includes(fbUser.email || "");
+        if (!isAdmin) {
+          isAdmin = await firebaseAuthService.isUserAdmin(fbUser.uid);
+        }
+        
         if (isAdmin) {
           return true;
         } else {
