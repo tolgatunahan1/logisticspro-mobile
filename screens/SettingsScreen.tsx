@@ -285,18 +285,40 @@ const AboutModal = ({ isVisible, onClose, colors }) => {
               </AboutSection>
 
               {/* TELİF HAKKI */}
-              <ThemedText
-                type="caption"
-                style={{
-                  color: colors.textSecondary,
-                  textAlign: "center",
-                  marginTop: Spacing.xl,
-                  marginBottom: Spacing.lg,
-                  lineHeight: 20,
-                }}
-              >
-                © 2024 LogisticsPRO. Tüm hakları saklıdır.
-              </ThemedText>
+              <View style={{ marginTop: Spacing.xl, marginBottom: Spacing.lg, paddingHorizontal: Spacing.sm }}>
+                <ThemedText
+                  type="caption"
+                  style={{
+                    color: colors.textSecondary,
+                    textAlign: "center",
+                    lineHeight: 20,
+                  }}
+                >
+                  © 2025 LogisticsPRO
+                </ThemedText>
+                <ThemedText
+                  type="caption"
+                  style={{
+                    color: colors.textSecondary,
+                    textAlign: "center",
+                    marginTop: Spacing.sm,
+                    lineHeight: 20,
+                  }}
+                >
+                  Geliştirici: Tolga Tunahan
+                </ThemedText>
+                <ThemedText
+                  type="caption"
+                  style={{
+                    color: colors.textSecondary,
+                    textAlign: "center",
+                    marginTop: Spacing.sm,
+                    lineHeight: 20,
+                  }}
+                >
+                  Tüm telif hakları korunmaktadır. LogisticsPRO platformu, tasarımı, kodu ve özellikleri Tolga Tunahan'ın mülkiyetindedir. Bu uygulamanın herhangi bir kısmı izin almaksızın kopyalanamaz, değiştirilemez veya dağıtılamaz.
+                </ThemedText>
+              </View>
             </View>
           </ScrollView>
         </Pressable>
