@@ -500,7 +500,7 @@ export default function CompletedJobListScreen() {
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
-      <View style={{ position: 'absolute', top: insets.top + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
+      <View style={{ position: 'absolute', top: insets.top + headerHeight + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
         {renderSearchHeader()}
       </View>
 
