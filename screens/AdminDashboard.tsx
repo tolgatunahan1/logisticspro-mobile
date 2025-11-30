@@ -169,7 +169,7 @@ export default function AdminDashboard() {
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TITLE,
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_CONFIRM_MSG,
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TEXT,
-                logout,
+                () => logout(),
                 true
               );
             }}
