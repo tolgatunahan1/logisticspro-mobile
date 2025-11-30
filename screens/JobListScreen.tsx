@@ -2,6 +2,7 @@ import React, { useState, useCallback, useLayoutEffect, useMemo } from "react";
 import { StyleSheet, View, Pressable, FlatList, Alert, TextInput, Modal, ScrollView, Platform, Share, KeyboardAvoidingView, Keyboard, useWindowDimensions } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -21,6 +22,7 @@ export default function JobListScreen() {
   const { theme, isDark } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<PlannedJob>("Job");
@@ -293,7 +295,7 @@ export default function JobListScreen() {
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
-      <View style={{ position: 'absolute', top: insets.top + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
+      <View style={{ position: 'absolute', top: insets.top + headerHeight + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
         {renderSearchHeader()}
       </View>
 
