@@ -102,6 +102,22 @@ export interface CarrierAvailability {
   expiresAt: number;
 }
 
+export interface CommissionShare {
+  personName: string;
+  amount: number;
+  completedJobId: string;
+}
+
+export interface Debt {
+  id: string;
+  personName: string;
+  totalAmount: number;
+  paidAmount: number;
+  payments: { date: number; amount: number }[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
@@ -540,4 +556,83 @@ export const searchCarrierAvailabilities = (availabilities: CarrierAvailability[
       a.currentLocation.toLowerCase().includes(lowerQuery) ||
       a.destinationLocation.toLowerCase().includes(lowerQuery)
   );
+};
+
+// Debt functions - Firebase based with uid
+export const getDebts = async (uid: string): Promise<Debt[]> => {
+  try {
+    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/data/debts`));
+    if (snapshot.exists()) {
+      return Object.values(snapshot.val()) as Debt[];
+    }
+    return [];
+  } catch (error) {
+    return [];
+  }
+};
+
+export const addDebt = async (uid: string, debt: Omit<Debt, "id" | "createdAt" | "updatedAt">): Promise<Debt | null> => {
+  try {
+    const newDebt: Debt = {
+      ...debt,
+      id: generateId(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    await set(ref(firebaseDatabase, `users/${uid}/data/debts/${newDebt.id}`), newDebt);
+    return newDebt;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const updateDebtPayment = async (uid: string, debtId: string, paymentAmount: number): Promise<boolean> => {
+  try {
+    const debtRef = ref(firebaseDatabase, `users/${uid}/data/debts/${debtId}`);
+    const snapshot = await get(debtRef);
+    if (!snapshot.exists()) return false;
+    
+    const debt = snapshot.val() as Debt;
+    const newPaidAmount = Math.min(debt.paidAmount + paymentAmount, debt.totalAmount);
+    const newPayment = { date: Date.now(), amount: paymentAmount };
+    
+    await update(debtRef, {
+      paidAmount: newPaidAmount,
+      payments: [...(debt.payments || []), newPayment],
+      updatedAt: Date.now(),
+    });
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const saveCommissionShares = async (uid: string, completedJobId: string, shares: CommissionShare[]): Promise<boolean> => {
+  try {
+    for (const share of shares) {
+      const existingDebt = await get(ref(firebaseDatabase, `users/${uid}/data/debts`));
+      let debtId = null;
+      
+      if (existingDebt.exists()) {
+        const debts = existingDebt.val();
+        debtId = Object.keys(debts).find(
+          (key) => debts[key].personName === share.personName && debts[key].paidAmount < debts[key].totalAmount
+        );
+      }
+      
+      if (debtId) {
+        await updateDebtPayment(uid, debtId, share.amount);
+      } else {
+        await addDebt(uid, {
+          personName: share.personName,
+          totalAmount: share.amount,
+          paidAmount: 0,
+          payments: [],
+        });
+      }
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
