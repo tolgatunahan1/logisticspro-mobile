@@ -165,6 +165,7 @@ export default function AdminDashboard() {
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
             onPress={() => {
+              console.log("🔴 Logout button pressed");
               Alert.alert(
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TITLE,
                 APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_CONFIRM_MSG,
@@ -173,7 +174,15 @@ export default function AdminDashboard() {
                   {
                     text: APP_CONSTANTS.ALERT_MESSAGES.LOGOUT_TEXT,
                     onPress: async () => {
-                      await logout();
+                      try {
+                        console.log("🟡 Logout function called");
+                        console.log("📍 Logout function type:", typeof logout);
+                        console.log("📍 Logout:", logout);
+                        await logout();
+                        console.log("✅ Logout completed");
+                      } catch (error) {
+                        console.error("❌ Logout error:", error);
+                      }
                     },
                     style: "destructive",
                   },
