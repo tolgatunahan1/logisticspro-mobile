@@ -93,8 +93,8 @@ export default function WalletScreen() {
         return sum;
       }, 0);
       
-      // Calculate net commission: unpaid commission - paylaştığı borçlar
-      const commissionShares = debtsList.filter(d => d.type === 'commission');
+      // Calculate net commission: unpaid commission - paylaştığı ÖDENMEMIŞ borçlar
+      const commissionShares = debtsList.filter(d => d.type === 'commission' && d.paidAmount < d.totalAmount);
       const totalShared = commissionShares.reduce((sum, debt) => sum + (debt.totalAmount - debt.paidAmount), 0);
       const netCommission = unpaid - totalShared;
       
@@ -140,47 +140,118 @@ export default function WalletScreen() {
   const renderDebtRow = (debt: Debt) => {
     const remaining = debt.totalAmount - debt.paidAmount;
     const isCommission = debt.type === 'commission';
+    const progress = (debt.paidAmount / debt.totalAmount) * 100;
+    
     return (
-      <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, marginHorizontal: Spacing.lg, marginVertical: Spacing.sm, gap: Spacing.md }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+      <View style={{ marginHorizontal: Spacing.lg, marginVertical: Spacing.sm }}>
+        {/* Header */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: Spacing.sm }}>
           <View style={{ flex: 1 }}>
-            <ThemedText type="small" style={{ fontWeight: "600" }}>{debt.personName}</ThemedText>
+            <ThemedText type="small" style={{ fontWeight: "700", fontSize: 14 }}>
+              {debt.personName}
+            </ThemedText>
+            <View style={{ flexDirection: "row", gap: Spacing.xs, marginTop: Spacing.xs, alignItems: "center" }}>
+              <View style={{ 
+                backgroundColor: isCommission ? "rgba(168, 85, 247, 0.2)" : "rgba(59, 130, 246, 0.2)", 
+                paddingHorizontal: Spacing.sm, 
+                paddingVertical: 2, 
+                borderRadius: BorderRadius.sm 
+              }}>
+                <ThemedText type="small" style={{ 
+                  color: isCommission ? "#A855F7" : "#3B82F6", 
+                  fontSize: 10, 
+                  fontWeight: "600" 
+                }}>
+                  {isCommission ? "Komisyon" : "Borç"}
+                </ThemedText>
+              </View>
+              <View style={{ 
+                backgroundColor: remaining > 0 ? "rgba(239, 68, 68, 0.2)" : "rgba(34, 197, 94, 0.2)", 
+                paddingHorizontal: Spacing.sm, 
+                paddingVertical: 2, 
+                borderRadius: BorderRadius.sm 
+              }}>
+                <ThemedText type="small" style={{ 
+                  color: remaining > 0 ? "#EF4444" : "#22C55E", 
+                  fontSize: 10, 
+                  fontWeight: "600" 
+                }}>
+                  {remaining > 0 ? "Beklemede" : "Ödendi"}
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+          <View style={{ alignItems: "flex-end" }}>
+            <ThemedText type="small" style={{ fontWeight: "700", color: remaining > 0 ? colors.destructive : colors.success, fontSize: 16 }}>
+              ₺{formatCurrency(remaining)}
+            </ThemedText>
             <ThemedText type="small" style={{ color: colors.textSecondary, fontSize: 10, marginTop: Spacing.xs }}>
-              {isCommission ? "Komisyon Paylaşımı" : "Borç Defteri"}
-            </ThemedText>
-          </View>
-          <View style={{ backgroundColor: remaining > 0 ? colors.destructive : colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
-            <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "600" }}>
-              {remaining > 0 ? "Beklemede" : "Ödendi"}
+              {remaining > 0 ? "Ödenecek" : "Tamamlandı"}
             </ThemedText>
           </View>
         </View>
-        <View style={{ gap: Spacing.sm }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>Toplam {isCommission ? "Paylaşım" : "Borç"}:</ThemedText>
-            <ThemedText type="small" style={{ fontWeight: "600" }}>₺{formatCurrency(debt.totalAmount)}</ThemedText>
-          </View>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>Ödenen:</ThemedText>
-            <ThemedText type="small" style={{ fontWeight: "600", color: colors.success }}>₺{formatCurrency(debt.paidAmount)}</ThemedText>
-          </View>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>Ödenmesi Gereken:</ThemedText>
-            <ThemedText type="small" style={{ fontWeight: "600", color: remaining > 0 ? colors.destructive : colors.success }}>₺{formatCurrency(remaining)}</ThemedText>
+
+        {/* Progress Bar */}
+        <View style={{ height: 4, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)", borderRadius: 2, marginBottom: Spacing.sm, overflow: "hidden" }}>
+          <View style={{ height: "100%", width: `${progress}%`, backgroundColor: remaining > 0 ? colors.warning : colors.success }} />
+        </View>
+
+        {/* Details Grid */}
+        <View style={{ 
+          backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)", 
+          padding: Spacing.md, 
+          borderRadius: BorderRadius.md, 
+          borderWidth: 1, 
+          borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+          marginBottom: Spacing.md 
+        }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: Spacing.lg }}>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600", fontSize: 11 }}>
+                Toplam
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "700", marginTop: Spacing.xs }}>
+                ₺{formatCurrency(debt.totalAmount)}
+              </ThemedText>
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600", fontSize: 11 }}>
+                Ödenen
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "700", marginTop: Spacing.xs, color: colors.success }}>
+                ₺{formatCurrency(debt.paidAmount)}
+              </ThemedText>
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="small" style={{ color: colors.textSecondary, fontWeight: "600", fontSize: 11 }}>
+                Kalan
+              </ThemedText>
+              <ThemedText type="body" style={{ fontWeight: "700", marginTop: Spacing.xs, color: remaining > 0 ? colors.destructive : colors.success }}>
+                ₺{formatCurrency(remaining)}
+              </ThemedText>
+            </View>
           </View>
         </View>
+
+        {/* Action Button */}
         {remaining > 0 && (
           <Pressable
             onPress={() => setShowDebtPaymentInput(debt.id)}
             style={({ pressed }) => [{
               backgroundColor: theme.link,
-              opacity: pressed ? 0.9 : 1,
-              paddingVertical: Spacing.sm,
-              borderRadius: BorderRadius.sm,
+              opacity: pressed ? 0.8 : 1,
+              paddingVertical: Spacing.md,
+              borderRadius: BorderRadius.md,
               alignItems: "center",
+              marginBottom: Spacing.md,
             }]}
           >
-            <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>Ödeme Yap</ThemedText>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm }}>
+              <Feather name="credit-card" size={16} color="#FFFFFF" />
+              <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "700" }}>
+                Ödeme Yap
+              </ThemedText>
+            </View>
           </Pressable>
         )}
       </View>
@@ -263,7 +334,28 @@ export default function WalletScreen() {
     <ThemedView style={styles.container}>
       <FlatList
         data={activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount) : filteredJobs}
-        renderItem={({ item }) => activeTab === "debts" ? renderDebtRow(item as Debt) : renderTransactionRow({ item: item as CompletedJob })}
+        renderItem={({ item, index }) => {
+          if (activeTab === "debts") {
+            const debt = item as Debt;
+            const isCommission = debt.type === 'commission';
+            const debtList = debts.filter(d => d.paidAmount < d.totalAmount);
+            const isFirstOfType = index === 0 || (debtList[index - 1]?.type !== isCommission);
+            
+            return (
+              <View>
+                {isFirstOfType && (
+                  <View style={{ paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, marginTop: index > 0 ? Spacing.md : 0 }}>
+                    <ThemedText type="h4" style={{ fontWeight: "700", color: isCommission ? "#A855F7" : theme.link }}>
+                      {isCommission ? "💜 Komisyon Paylaşımları" : "📖 Borç Defteri"}
+                    </ThemedText>
+                  </View>
+                )}
+                {renderDebtRow(debt)}
+              </View>
+            );
+          }
+          return renderTransactionRow({ item: item as CompletedJob });
+        }}
         keyExtractor={(item) => (item as any).id || (item as any).personName}
         ListHeaderComponent={() => (
           <>
