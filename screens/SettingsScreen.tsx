@@ -37,74 +37,153 @@ const AboutModal = ({ isVisible, onClose, colors }) => {
             style={{ flex: 1 }}
           >
             <View style={{ paddingRight: Spacing.lg }}>
-              <ThemedText type="h4" style={{ marginBottom: Spacing.md, fontWeight: "600" }}>
+              {/* UYGULAMA BİLGİLERİ */}
+              <ThemedText type="h4" style={{ marginBottom: Spacing.sm, fontWeight: "700" }}>
                 LogisticsPRO v1.0.0
               </ThemedText>
-              
+              <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary, lineHeight: 24, fontStyle: "italic" }}>
+                Profesyonel Nakliye ve Lojistik Yönetim Platformu
+              </ThemedText>
+
+              {/* ÜRÜN AÇIKLAMASI */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Ürün Açıklaması
+              </ThemedText>
               <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary, lineHeight: 24 }}>
-                LogisticsPRO, Türkiye'de faaliyet gösteren nakliye ve lojistik şirketleri için geliştirilmiş, profesyonel bir yönetim platformudur.
+                LogisticsPRO, Türkiye'de faaliyet gösteren nakliye ve lojistik şirketleri için geliştirilmiş, kurumsal düzeyde bir yönetim platformudur. Uygulama, operasyonel verimliliği artırmak, veri yönetimini merkezileştirmek ve iş süreçlerini dijitalleştirmek amacıyla tasarlanmıştır.
               </ThemedText>
 
-              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Temel Özellikler
+              {/* TEMEL İŞLEVLER */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Temel İşlevler
               </ThemedText>
-
-              <View style={{ marginBottom: Spacing.lg }}>
+              <View style={{ marginBottom: Spacing.lg, paddingLeft: Spacing.md }}>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • Nakliyeci Yönetimi - Araç ve operatör bilgileri
+                  • Nakliyeci Yönetimi - Araç, operatör ve sürücü profil yönetimi
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • Şirket Yönetimi - Müşteri ve gönderici bilgileri
+                  • Şirket Yönetimi - Müşteri ve gönderici bilgisi saklama ve erişimi
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • Sevkiyat Planlama - Yükleme ve teslimat takibi
+                  • Sevkiyat Planlama - Rota tasarımı ve lojistik takibi
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • Tamamlanan İşler - İş geçmişi ve arşiv
+                  • Tamamlanan İşler - İş geçmişi ve arşivleme
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
-                  • IBAN Yönetimi - Ödeme bilgileri ve finansal yönetim
+                  • IBAN Yönetimi - Finansal işlem ve ödeme yönetimi
                 </ThemedText>
               </View>
 
-              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Güvenlik
+              {/* YETKILI KİŞİ BİLGİLERİ */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Yetkili Kişi ve İletişim
               </ThemedText>
-
-              <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary, lineHeight: 24 }}>
-                Tüm verileriniz Firebase güvenlik altyapısı tarafından korunmakta ve şifreli olarak saklanmaktadır.
-              </ThemedText>
-
-              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Uygulama Sahibi
-              </ThemedText>
-
-              <View style={{ marginBottom: Spacing.lg }}>
-                <ThemedText style={{ marginBottom: Spacing.sm, fontWeight: "600", color: colors.text }}>
+              <View style={{ marginBottom: Spacing.lg, paddingLeft: Spacing.md }}>
+                <ThemedText style={{ marginBottom: Spacing.xs, fontWeight: "600", color: colors.text }}>
                   Tolga Tunahan
                 </ThemedText>
-                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  Telefon: 05423822832
+                <ThemedText style={{ marginBottom: Spacing.xs, fontSize: 13, color: colors.textSecondary }}>
+                  Uygulama Yöneticisi ve Proje Sahibi
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.xs, fontSize: 13, color: colors.textSecondary }}>
+                  📱 05423822832
                 </ThemedText>
                 <Pressable onPress={() => Linking.openURL('mailto:tolgatunahan@icloud.com')}>
-                  <ThemedText type="link" style={{ fontSize: 14 }}>
-                    E-posta: tolgatunahan@icloud.com
+                  <ThemedText type="link" style={{ fontSize: 13 }}>
+                    📧 tolgatunahan@icloud.com
                   </ThemedText>
                 </Pressable>
               </View>
 
-              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Teknik Destek
+              {/* GÜVENLİK MİMARİSİ */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Güvenlik Mimarisi
+              </ThemedText>
+              <View style={{ marginBottom: Spacing.lg, paddingLeft: Spacing.md }}>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Firebase Authentication - Güvenli kullanıcı kimlik doğrulaması ve oturum yönetimi
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • End-to-End Encryption - Hassas verilerin şifrelenmesi ve korunması
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • SSL/TLS Protokolü - İletişim kanallarının güvenliği
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                  • Role-Based Access Control - Rol ve yetkilendirme yönetimi
+                </ThemedText>
+              </View>
+
+              {/* VERİ SAKLAMA POLİTİKASI */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Veri Saklama Politikası
+              </ThemedText>
+              <View style={{ marginBottom: Spacing.lg, paddingLeft: Spacing.md }}>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Kişisel Bilgiler - Firebase Realtime Database'de şifreli olarak saklanır
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • İşlem Verileri - İş geçmişi ve finansal kayıtlar uzun dönem için arşivlenir
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Otomatik Yedekleme - Veriler düzenli olarak yedeklenir
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                  • GDPR Uyumluluğu - Kullanıcı gizliliği ve veri koruma düzenlemeleri
+                </ThemedText>
+              </View>
+
+              {/* ALT YAPIYI BILEŞENLERI */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Altyapı Bileşenleri
+              </ThemedText>
+              <View style={{ marginBottom: Spacing.lg, paddingLeft: Spacing.md }}>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Frontend - React Native ve Expo ile mobil-first geliştirme
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Backend - Google Firebase Cloud Services (Realtime Database, Authentication)
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Hosting - Replit üzerinde sunulan dinamik uygulama sunucusu
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                  • Protokol - REST API ve gerçek zamanlı veri senkronizasyonu
+                </ThemedText>
+              </View>
+
+              {/* GİZLİLİK VE GÜVENLIK POLİTİKASI */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Gizlilik ve Güvenlik Politikası
+              </ThemedText>
+              <View style={{ marginBottom: Spacing.lg, paddingLeft: Spacing.md }}>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Veri Kullanımı - Kullanıcı verileri yalnızca belirtilen amaçlar için kullanılır
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Üçüncü Taraf - Veriler, kullanıcı izni olmaksızın üçüncü taraflara paylaşılmaz
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Hesap Silme - Hesap silindiğinde, ilgili tüm veriler kalıcı olarak silinir
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                  • Şifre Politikası - Şifreler tek yönlü şifreleme ile korunur ve hiç depolanmaz
+                </ThemedText>
+              </View>
+
+              {/* SÜRÜMLENDİRME VE DESTEK */}
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.sm, fontWeight: "700" }}>
+                Sürüm ve Güncellemeler
+              </ThemedText>
+              <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                Uygulama, sürekli olarak iyileştirme ve güvenlik güncellemeleri alır. Yeni özellikler ve düzeltmeler düzenli olarak yayınlanır.
               </ThemedText>
 
-              <Pressable onPress={() => Linking.openURL('mailto:support@logisticspro.com')}>
-                <ThemedText type="link" style={{ fontSize: 14, marginBottom: Spacing.xl }}>
-                  support@logisticspro.com
-                </ThemedText>
-              </Pressable>
-
-              <ThemedText type="caption" style={{ color: colors.textSecondary, marginBottom: Spacing.xl }}>
-                © 2024 LogisticsPRO. Tüm hakları saklıdır.
+              {/* TELİF HAKKI */}
+              <ThemedText type="caption" style={{ color: colors.textSecondary, textAlign: "center", marginTop: Spacing.xl, marginBottom: Spacing.xl, lineHeight: 20 }}>
+                © 2024 LogisticsPRO. Tüm hakları saklıdır.{"\n"}
+                Geliştirici tarafından gizlilik, güvenlik ve yasal uyumluluğu dikkate alarak tasarlanmıştır.
               </ThemedText>
             </View>
           </ScrollView>
