@@ -8,6 +8,8 @@ import { ScreenScrollView } from "../components/ScreenScrollView";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { getIBANs, addIBAN, deleteIBAN, IBAN } from "../utils/storage";
+import { IBANListModal } from "../components/IBANListModal";
 import { firebaseAuthService } from "../utils/firebaseAuth";
 
 // --- Hakkımızda Modalı ---
@@ -49,6 +51,57 @@ export default function SettingsScreen() {
   const [deleteError, setDeleteError] = useState("");
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
 
+  const [ibanList, setIbanList] = useState<IBAN[]>([]);
+  const [ibanModalVisible, setIbanModalVisible] = useState(false);
+  const [ibanInput, setIbanInput] = useState("");
+  const [nameInput, setNameInput] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+
+  const loadIBANs = useCallback(async () => {
+    if (!firebaseUser) return;
+    try {
+      const ibans = await getIBANs(firebaseUser.uid);
+      setIbanList(ibans);
+    } catch (error) { 
+      console.error(error); 
+    }
+  }, [firebaseUser]);
+
+  const closeIBANModal = () => {
+    setIbanModalVisible(false);
+    setIbanInput("");
+    setNameInput("");
+  };
+
+  const handleAddIBAN = async () => {
+    if (!nameInput.trim() || !ibanInput.trim()) { 
+      Alert.alert("Hata", "Eksik bilgi."); 
+      return; 
+    }
+    setIsAdding(true);
+    try {
+      await addIBAN(firebaseUser.uid, { name: nameInput.trim(), iban: ibanInput.trim() });
+      await loadIBANs();
+      closeIBANModal();
+    } catch (error) {
+      Alert.alert("Hata", "IBAN eklenirken hata oluştu.");
+    }
+    setIsAdding(false);
+  };
+
+  const handleDeleteIBAN = async (ibanToDelete: IBAN) => {
+    Alert.alert("Sil", "Bu IBAN'ı silmek istediğinizden emin misiniz?", [
+      { text: "İptal" },
+      {
+        text: "Sil",
+        onPress: async () => {
+          await deleteIBAN(firebaseUser.uid, ibanToDelete.iban);
+          await loadIBANs();
+        },
+      },
+    ]);
+  };
+
   const openDeleteModal = () => {
     setDeleteError("");
     setDeletePassword("");
@@ -77,13 +130,31 @@ export default function SettingsScreen() {
   
   useFocusEffect(
     useCallback(() => {
-      // Settings ekranı yüklendiğinde yapılacak işlemler
-    }, [])
+      loadIBANs();
+    }, [loadIBANs])
   );
 
   return (
     <ScreenScrollView>
-      {/* Bilgi Bölümü */}
+      {/* Ödeme ve Hesap Bölümü */}
+      <View style={[styles.section, { borderColor: colors.border }]}>
+        <ThemedText type="h4" style={styles.sectionTitle}>Ödeme ve Hesap</ThemedText>
+        
+        <Pressable 
+          style={styles.listItem} 
+          onPress={() => setIbanModalVisible(true)}
+        >
+          <View style={styles.listItemContent}>
+            <ThemedText type="subtitle">IBAN Yönetimi</ThemedText>
+            <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
+              {ibanList.length} kayıtlı
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
+        </Pressable>
+      </View>
+
+      {/* Uygulama Bölümü */}
       <View style={[styles.section, { borderColor: colors.border }]}>
         <ThemedText type="h4" style={styles.sectionTitle}>Uygulama</ThemedText>
         
@@ -130,6 +201,20 @@ export default function SettingsScreen() {
         <Feather name="log-out" size={20} color={colors.text} />
         <ThemedText type="body" style={styles.logoutText}>Çıkış Yap</ThemedText>
       </Pressable>
+
+      {/* IBAN Modal */}
+      <IBANListModal
+        visible={ibanModalVisible}
+        onClose={closeIBANModal}
+        nameInput={nameInput}
+        setNameInput={setNameInput}
+        ibanInput={ibanInput}
+        setIbanInput={setIbanInput}
+        isAdding={isAdding}
+        onSave={handleAddIBAN}
+        ibanList={ibanList}
+        onDeleteIBAN={handleDeleteIBAN}
+      />
 
       <AboutModal isVisible={aboutModalVisible} onClose={() => setAboutModalVisible(false)} colors={colors} />
       
