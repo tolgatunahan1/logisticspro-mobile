@@ -141,6 +141,7 @@ export default function WalletScreen() {
     const remaining = debt.totalAmount - debt.paidAmount;
     const isCommission = debt.type === 'commission';
     const progress = (debt.paidAmount / debt.totalAmount) * 100;
+    const totalShared = debts.filter(d => d.type === 'commission' && d.paidAmount < d.totalAmount).reduce((sum, debt) => sum + (debt.totalAmount - debt.paidAmount), 0);
     
     return (
       <View style={{ marginHorizontal: Spacing.lg, marginVertical: Spacing.sm }}>
