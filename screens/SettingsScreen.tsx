@@ -227,13 +227,12 @@ export default function SettingsScreen() {
   };
 
   const handleAddIBAN = async () => {
-    if (!nameInput.trim() || !ibanInput.trim()) { 
-      Alert.alert("Hata", "Lütfen ad soyad ve IBAN numarası giriniz."); 
-      return; 
-    }
     setIsAdding(true);
     try {
-      await addIBAN(firebaseUser.uid, { name: nameInput.trim(), iban: ibanInput.trim() });
+      await addIBAN(firebaseUser.uid, { 
+        ibanNumber: ibanInput.trim(), 
+        nameSurname: nameInput.trim() 
+      });
       await loadIBANs();
       Alert.alert("Başarılı", "IBAN başarıyla eklendi.");
       closeIBANModal();
@@ -252,7 +251,7 @@ export default function SettingsScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            await deleteIBAN(firebaseUser.uid, ibanToDelete.ibanNumber);
+            await deleteIBAN(firebaseUser.uid, ibanToDelete.id);
             await loadIBANs();
             Alert.alert("Başarılı", "IBAN başarıyla silindi.");
           } catch (error) {
