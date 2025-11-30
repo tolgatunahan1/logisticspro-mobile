@@ -1,11 +1,10 @@
 import React from "react";
-import { Modal, View, Pressable, TextInput, StyleSheet, Alert, ScrollView } from "react-native";
+import { Modal, View, Pressable, TextInput, StyleSheet, ScrollView } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "./ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-
-// --- INTERFACE VE FONKSİYON BAŞLANGICI ---
+import { IBAN } from "../utils/storage";
 
 interface IBANListModalProps {
   visible: boolean;
@@ -16,6 +15,8 @@ interface IBANListModalProps {
   setIbanInput: (value: string) => void;
   isAdding: boolean;
   onSave: () => void;
+  ibanList: IBAN[];
+  onDeleteIBAN: (iban: IBAN) => void;
 }
 
 export function IBANListModal({
@@ -27,30 +28,27 @@ export function IBANListModal({
   setIbanInput,
   isAdding,
   onSave,
+  ibanList,
+  onDeleteIBAN,
 }: IBANListModalProps) {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
 
   return (
-    // Android geri tuşu ve şeffaflık ayarı
     <Modal 
       visible={visible} 
       transparent={true} 
       animationType="slide"
       onRequestClose={onClose} 
     >
-      {/* 1. DIŞ KATMAN (KAPANMA ALANI) */}
       <Pressable 
         style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}
-        onPress={onClose} // Dışarı tıklanınca MODALI KAPAT
+        onPress={onClose}
       >
-        {/* 2. İÇ KATMAN (İÇERİK KORUMASI: İçeriğe tıklayınca kapanmayı engeller) */}
-        <Pressable onPress={(e) => e.stopPropagation()} style={{ width: '100%' }}> 
-        
+        <Pressable onPress={(e) => e.stopPropagation()} style={{ width: '100%', height: '100%' }}> 
           <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
-            
             <View style={styles.modalHeader}>
-              <ThemedText type="h3">İBAN Ekle</ThemedText>
+              <ThemedText type="h3">İBAN Yönetimi</ThemedText>
               <Pressable onPress={onClose}>
                 <Feather name="x" size={24} color={colors.text} />
               </Pressable>
@@ -60,47 +58,89 @@ export function IBANListModal({
               scrollEnabled={true}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
-              style={{ maxHeight: 300 }}
+              style={{ maxHeight: '70%' }}
             >
-              <View style={styles.modalInputs}>
-                <View>
-                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                    Ad Soyad
+              {/* KAYıTLı IBAN'LAR */}
+              {ibanList.length > 0 && (
+                <View style={{ marginBottom: Spacing.lg }}>
+                  <ThemedText type="subtitle" style={{ fontWeight: "600", marginBottom: Spacing.md }}>
+                    Kayıtlı IBAN'lar ({ibanList.length})
                   </ThemedText>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        borderColor: colors.border,
-                        color: colors.text,
-                        backgroundColor: colors.backgroundRoot,
-                      },
-                    ]}
-                    placeholder="Adınız Soyadınız"
-                    placeholderTextColor={colors.textSecondary}
-                    value={nameInput}
-                    onChangeText={setNameInput}
-                  />
+                  {ibanList.map((item) => (
+                    <View 
+                      key={item.id} 
+                      style={[
+                        styles.ibanItem, 
+                        { 
+                          borderColor: colors.border, 
+                          backgroundColor: colors.backgroundRoot 
+                        }
+                      ]}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
+                          {item.nameSurname || "İsimsiz"}
+                        </ThemedText>
+                        <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
+                          {item.ibanNumber}
+                        </ThemedText>
+                      </View>
+                      <Pressable 
+                        onPress={() => onDeleteIBAN(item)}
+                        style={{ padding: Spacing.sm }}
+                      >
+                        <Feather name="trash-2" size={20} color={colors.destructive} />
+                      </Pressable>
+                    </View>
+                  ))}
                 </View>
+              )}
 
-                <View>
-                  <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
-                    IBAN Numarası
-                  </ThemedText>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        borderColor: colors.border,
-                        color: colors.text,
-                        backgroundColor: colors.backgroundRoot,
-                      },
-                    ]}
-                    placeholder="TR00 0000 0000..."
-                    placeholderTextColor={colors.textSecondary}
-                    value={ibanInput}
-                    onChangeText={setIbanInput}
-                  />
+              {/* YENİ IBAN EKLEME FORMU */}
+              <View style={{ borderTopWidth: ibanList.length > 0 ? 1 : 0, borderTopColor: colors.border, paddingTop: ibanList.length > 0 ? Spacing.lg : 0 }}>
+                <ThemedText type="subtitle" style={{ fontWeight: "600", marginBottom: Spacing.md }}>
+                  Yeni IBAN Ekle
+                </ThemedText>
+                <View style={styles.modalInputs}>
+                  <View>
+                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
+                      Ad Soyad
+                    </ThemedText>
+                    <TextInput
+                      style={[
+                        styles.input,
+                        {
+                          borderColor: colors.border,
+                          color: colors.text,
+                          backgroundColor: colors.backgroundRoot,
+                        },
+                      ]}
+                      placeholder="Adınız Soyadınız"
+                      placeholderTextColor={colors.textSecondary}
+                      value={nameInput}
+                      onChangeText={setNameInput}
+                    />
+                  </View>
+
+                  <View>
+                    <ThemedText type="small" style={{ fontWeight: "600", marginBottom: Spacing.sm }}>
+                      IBAN Numarası
+                    </ThemedText>
+                    <TextInput
+                      style={[
+                        styles.input,
+                        {
+                          borderColor: colors.border,
+                          color: colors.text,
+                          backgroundColor: colors.backgroundRoot,
+                        },
+                      ]}
+                      placeholder="TR00 0000 0000..."
+                      placeholderTextColor={colors.textSecondary}
+                      value={ibanInput}
+                      onChangeText={setIbanInput}
+                    />
+                  </View>
                 </View>
               </View>
             </ScrollView>
@@ -131,12 +171,11 @@ export function IBANListModal({
                 ]}
               >
                 <ThemedText type="body" style={{ textAlign: "center", fontWeight: "600", color: "#FFFFFF" }}>
-                  Kaydet
+                  {isAdding ? "Kaydediliyor..." : "Ekle"}
                 </ThemedText>
               </Pressable>
             </View>
           </View>
-          
         </Pressable> 
       </Pressable>
     </Modal>
@@ -146,19 +185,30 @@ export function IBANListModal({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    justifyContent: "flex-end", // Modalın alttan yukarı çıkması için
+    justifyContent: "flex-end",
   },
   modalContent: {
-    width: '100%', // Tam genişlik ayarı eklendi
+    width: '100%',
+    height: '85%',
     borderTopLeftRadius: BorderRadius.lg,
     borderTopRightRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
     gap: Spacing.lg,
+    flexDirection: 'column',
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  ibanItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
   },
   modalInputs: {
     gap: Spacing.md,

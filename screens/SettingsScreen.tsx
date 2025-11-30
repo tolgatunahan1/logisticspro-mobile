@@ -16,24 +16,74 @@ import { firebaseAuthService } from "../utils/firebaseAuth";
 const AboutModal = ({ isVisible, onClose, colors }) => {
   return (
     <Modal visible={isVisible} transparent={true} animationType="slide" onRequestClose={onClose}>
-      <Pressable onPress={onClose} style={[styles.modalOverlay, { backgroundColor: "rgba(0, 0, 0, 0.5)" }]}>
-        <Pressable onPress={(e) => e.stopPropagation()}>
-          <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">Hakkımızda</ThemedText>
-              <Pressable onPress={onClose}>
-                <Feather name="x" size={24} color={colors.text} />
-              </Pressable>
-            </View>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <ThemedText style={{ marginBottom: Spacing.md }}>
-                LogisticsPRO v1.0.0
-              </ThemedText>
-              <ThemedText style={{ marginBottom: Spacing.md, color: colors.textSecondary }}>
-                Profesyonel nakliye yönetim sistemi
-              </ThemedText>
-            </ScrollView>
+      <Pressable 
+        onPress={onClose} 
+        style={[styles.modalOverlay, { backgroundColor: "rgba(0, 0, 0, 0.5)" }]}
+      >
+        <Pressable 
+          onPress={(e) => e.stopPropagation()}
+          style={[styles.aboutModalContent, { backgroundColor: colors.backgroundDefault }]}
+        >
+          <View style={styles.aboutModalHeader}>
+            <ThemedText type="h3">Hakkımızda</ThemedText>
+            <Pressable onPress={onClose}>
+              <Feather name="x" size={24} color={colors.text} />
+            </Pressable>
           </View>
+          
+          <ScrollView 
+            showsVerticalScrollIndicator={true}
+            scrollEventThrottle={16}
+            style={{ flex: 1 }}
+          >
+            <View style={{ paddingRight: Spacing.lg }}>
+              <ThemedText type="h4" style={{ marginBottom: Spacing.lg, fontWeight: "600" }}>
+                LogisticsPRO
+              </ThemedText>
+              
+              <ThemedText style={{ marginBottom: Spacing.md, lineHeight: 24 }}>
+                Sürüm: 1.0.0
+              </ThemedText>
+              
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.md, fontWeight: "600" }}>
+                Hakkında
+              </ThemedText>
+              
+              <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary, lineHeight: 24 }}>
+                LogisticsPRO, profesyonel nakliye ve lojistik yönetimi için tasarlanmış modern bir uygulamadır. 
+              </ThemedText>
+
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.md, fontWeight: "600" }}>
+                Özellikler
+              </ThemedText>
+
+              <View style={{ marginBottom: Spacing.lg }}>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • IBAN Yönetimi
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Nakliyeci Yönetimi
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • Şirket Yönetimi
+                </ThemedText>
+                <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
+                  • İş Takibi
+                </ThemedText>
+                <ThemedText style={{ color: colors.textSecondary }}>
+                  • Cüzdan Yönetimi
+                </ThemedText>
+              </View>
+
+              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.md, fontWeight: "600" }}>
+                İletişim
+              </ThemedText>
+
+              <ThemedText style={{ marginBottom: Spacing.xl, color: colors.textSecondary, lineHeight: 24 }}>
+                Destek için: support@logisticspro.com
+              </ThemedText>
+            </View>
+          </ScrollView>
         </Pressable>
       </Pressable>
     </Modal>
@@ -141,11 +191,11 @@ export default function SettingsScreen() {
         <ThemedText type="h4" style={styles.sectionTitle}>Ödeme ve Hesap</ThemedText>
         
         <Pressable 
-          style={styles.listItem} 
+          style={[styles.listItem, { borderBottomWidth: 1, borderBottomColor: colors.border }]}
           onPress={() => setIbanModalVisible(true)}
         >
           <View style={styles.listItemContent}>
-            <ThemedText type="subtitle">IBAN Yönetimi</ThemedText>
+            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>IBAN Yönetimi</ThemedText>
             <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
               {ibanList.length} kayıtlı
             </ThemedText>
@@ -159,11 +209,11 @@ export default function SettingsScreen() {
         <ThemedText type="h4" style={styles.sectionTitle}>Uygulama</ThemedText>
         
         <Pressable 
-          style={styles.listItem} 
+          style={styles.listItem}
           onPress={() => setAboutModalVisible(true)}
         >
           <View style={styles.listItemContent}>
-            <ThemedText type="subtitle">Hakkımızda</ThemedText>
+            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>Hakkımızda</ThemedText>
             <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
               v1.0.0
             </ThemedText>
@@ -174,13 +224,13 @@ export default function SettingsScreen() {
 
       {/* Hesap Bölümü */}
       <View style={[styles.section, { borderColor: colors.border }]}>
-        <ThemedText type="h4" style={styles.sectionTitle}>Hesap</ThemedText>
+        <ThemedText type="h4" style={styles.sectionTitle}>Hesap Yönetimi</ThemedText>
         
         <Pressable 
-          style={styles.listItem} 
+          style={styles.listItem}
           onPress={openDeleteModal}
         >
-          <ThemedText type="subtitle" style={{ color: colors.destructive }}>
+          <ThemedText type="subtitle" style={{ color: colors.destructive, fontWeight: "600" }}>
             Hesabımı Sil
           </ThemedText>
           <Feather name="trash-2" size={24} color={colors.destructive} />
@@ -249,7 +299,7 @@ export default function SettingsScreen() {
                 onPress={closeDeleteModal} 
                 style={[styles.modalButton, { borderColor: colors.border, borderWidth: 1 }]}
               >
-                <ThemedText type="body">İptal</ThemedText>
+                <ThemedText type="body" style={{ fontWeight: "600" }}>İptal</ThemedText>
               </Pressable>
               
               <Pressable
@@ -299,8 +349,8 @@ const styles = StyleSheet.create({
     flexDirection: "row", 
     justifyContent: "space-between", 
     alignItems: "center", 
-    paddingVertical: Spacing.md, 
-    paddingHorizontal: Spacing.sm 
+    paddingVertical: Spacing.lg, 
+    paddingHorizontal: 0
   },
   listItemContent: {
     flex: 1
@@ -310,7 +360,8 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     borderRadius: BorderRadius.sm, 
     paddingHorizontal: Spacing.md, 
-    marginBottom: Spacing.lg 
+    marginBottom: Spacing.lg,
+    fontSize: 16
   },
   logoutButton: { 
     flexDirection: "row", 
@@ -331,24 +382,25 @@ const styles = StyleSheet.create({
     alignItems: "center", 
     zIndex: 1000 
   },
-  modalContent: { 
-    width: '90%', 
-    maxHeight: "90%", 
-    borderRadius: BorderRadius.lg, 
-    paddingHorizontal: Spacing.xl, 
-    paddingVertical: Spacing.lg 
+  aboutModalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    flexDirection: 'column',
+  },
+  aboutModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.lg,
   },
   deleteModalContent: { 
     width: '85%', 
     padding: Spacing.xl, 
     borderRadius: BorderRadius.lg,
     elevation: 5 
-  },
-  modalHeader: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginBottom: Spacing.lg, 
-    alignItems: 'center' 
   },
   modalButtons: { 
     flexDirection: "row", 
