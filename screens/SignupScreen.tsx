@@ -19,6 +19,18 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Signup">;
 
 const REMEMBER_ME_KEY_SIGNUP = "logistics_remember_signup";
 
+// Email validasyonu
+const validateEmail = (email: string): { isValid: boolean; error: string } => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email.trim()) {
+    return { isValid: false, error: "Email gerekli" };
+  }
+  if (!emailRegex.test(email)) {
+    return { isValid: false, error: "Geçerli bir email girin" };
+  }
+  return { isValid: true, error: "" };
+};
+
 export default function SignupScreen() {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -85,23 +97,6 @@ export default function SignupScreen() {
     const emailValidation = validateEmail(username);
     if (!emailValidation.isValid) {
       setError(emailValidation.error);
-      return;
-    }
-
-    if (!password.trim()) {
-      setError("Şifre gerekli");
-      return;
-    }
-
-    // Şifre Validasyonu
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setError(passwordValidation.error);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Şifreler eşleşmiyor");
       return;
     }
 
