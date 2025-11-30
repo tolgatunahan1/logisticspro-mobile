@@ -238,7 +238,7 @@ export default function JobListScreen() {
   );
 
   const renderSearchHeader = () => (
-    <View style={[styles.searchContainer, { width: '100%', backgroundColor: theme.backgroundRoot, paddingTop: insets.top + Spacing.lg, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl }]}>
+    <View style={[styles.searchContainer, { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.lg, backgroundColor: theme.backgroundRoot }]}>
       <View
         style={{
           flexDirection: "row",
@@ -287,15 +287,13 @@ export default function JobListScreen() {
         data={filteredJobs}
         renderItem={renderJobItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingTop: insets.top + Spacing.xl + 140 }]}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={renderSearchHeader}
         ListEmptyComponent={renderEmptyState}
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
       />
-      <View style={{ position: 'absolute', top: insets.top + Spacing.md, left: 0, right: 0, zIndex: 100 }}>
-        {renderSearchHeader()}
-      </View>
 
       {/* Detail Modal */}
       <Modal
