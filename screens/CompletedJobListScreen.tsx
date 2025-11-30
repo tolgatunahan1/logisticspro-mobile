@@ -13,11 +13,16 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid } from "../utils/storage";
+import { getCompletedJobs, getCompanies, deleteCompletedJob, CompletedJob, Company, searchCompletedJobs, getCarriers, Carrier, getVehicleTypeLabel, getIBANs, IBAN, markCommissionAsPaid, CommissionShare, saveCommissionShares } from "../utils/storage";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
 import { useDeleteOperation } from "../hooks/useDeleteOperation";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const formatCurrency = (amount: number): string => {
+  const num = Math.floor(amount);
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
 
 interface GroupedJobs {
   date: string;
@@ -41,6 +46,10 @@ export default function CompletedJobListScreen() {
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [ibans, setIbans] = useState<IBAN[]>([]);
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+  const [commissionShares, setCommissionShares] = useState<CommissionShare[]>([]);
+  const [personName, setPersonName] = useState("");
+  const [shareAmount, setShareAmount] = useState("");
   const { deleteState, openDeleteConfirm, closeDeleteConfirm, confirmDelete } = useDeleteOperation<CompletedJob>("CompletedJob");
 
   const colors = isDark ? Colors.dark : Colors.light;
@@ -813,10 +822,179 @@ export default function CompletedJobListScreen() {
                     )}
                   </View>
 
+                  {/* Commission Share Section */}
+                  {selectedJob.commissionPaid && (
+                    <View style={{
+                      backgroundColor: colors.backgroundDefault,
+                      padding: Spacing.lg,
+                      borderRadius: BorderRadius.md,
+                      gap: Spacing.md,
+                      marginBottom: Spacing.md,
+                    }}>
+                      <ThemedText type="h4" style={{ fontWeight: "700" }}>
+                        💰 Komisyonu Paylaş
+                      </ThemedText>
+                      <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                        Komisyonunuzu paylaştığınız kişileri kaydedin
+                      </ThemedText>
+                      <Pressable
+                        onPress={() => {
+                          setCommissionShares([]);
+                          setPersonName("");
+                          setShareAmount("");
+                          setShowCommissionModal(true);
+                        }}
+                        style={({ pressed }) => [{
+                          backgroundColor: theme.link,
+                          opacity: pressed ? 0.9 : 1,
+                          paddingVertical: Spacing.md,
+                          paddingHorizontal: Spacing.lg,
+                          borderRadius: BorderRadius.md,
+                          alignItems: "center",
+                          minHeight: 44,
+                        }]}
+                      >
+                        <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                          Komisyon Paylaş
+                        </ThemedText>
+                      </Pressable>
+                    </View>
+                  )}
 
                   <View style={{ marginBottom: Spacing.xl }} />
                 </View>
               )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Commission Share Modal */}
+      <Modal
+        visible={showCommissionModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCommissionModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Komisyon Paylaş</ThemedText>
+              <Pressable onPress={() => setShowCommissionModal(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={{ gap: Spacing.lg }}>
+                <View>
+                  <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
+                    Kişi Adı
+                  </ThemedText>
+                  <TextInput
+                    style={{
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      padding: Spacing.md,
+                      borderRadius: BorderRadius.sm,
+                      color: colors.text,
+                      backgroundColor: colors.backgroundDefault,
+                    }}
+                    placeholder="Adı soyadı"
+                    placeholderTextColor={colors.textSecondary}
+                    value={personName}
+                    onChangeText={setPersonName}
+                  />
+                </View>
+
+                <View>
+                  <ThemedText type="small" style={{ color: colors.textSecondary, marginBottom: Spacing.sm }}>
+                    Paylaş Tutarı (₺)
+                  </ThemedText>
+                  <TextInput
+                    style={{
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      padding: Spacing.md,
+                      borderRadius: BorderRadius.sm,
+                      color: colors.text,
+                      backgroundColor: colors.backgroundDefault,
+                    }}
+                    placeholder="0"
+                    placeholderTextColor={colors.textSecondary}
+                    keyboardType="decimal-pad"
+                    value={shareAmount}
+                    onChangeText={setShareAmount}
+                  />
+                </View>
+
+                <Pressable
+                  onPress={() => {
+                    if (personName.trim() && shareAmount.trim()) {
+                      const newShare: CommissionShare = {
+                        personName: personName.trim(),
+                        amount: parseFloat(shareAmount),
+                        completedJobId: selectedJob?.id || "",
+                      };
+                      setCommissionShares([...commissionShares, newShare]);
+                      setPersonName("");
+                      setShareAmount("");
+                    }
+                  }}
+                  style={({ pressed }) => [{
+                    backgroundColor: theme.link,
+                    opacity: pressed ? 0.9 : 1,
+                    paddingVertical: Spacing.md,
+                    borderRadius: BorderRadius.sm,
+                    alignItems: "center",
+                  }]}
+                >
+                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Kişi Ekle
+                  </ThemedText>
+                </Pressable>
+
+                {commissionShares.length > 0 && (
+                  <>
+                    <ThemedText type="small" style={{ color: colors.textSecondary }}>
+                      Eklenen Kişiler ({commissionShares.length})
+                    </ThemedText>
+                    {commissionShares.map((share, index) => (
+                      <View key={index} style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                        <View>
+                          <ThemedText type="small" style={{ fontWeight: "600" }}>{share.personName}</ThemedText>
+                          <ThemedText type="small" style={{ color: colors.textSecondary }}>₺{formatCurrency(share.amount)}</ThemedText>
+                        </View>
+                        <Pressable onPress={() => setCommissionShares(commissionShares.filter((_, i) => i !== index))}>
+                          <Feather name="x" size={18} color={colors.destructive} />
+                        </Pressable>
+                      </View>
+                    ))}
+                  </>
+                )}
+
+                <Pressable
+                  onPress={async () => {
+                    if (firebaseUser && selectedJob && commissionShares.length > 0) {
+                      await saveCommissionShares(firebaseUser.uid, selectedJob.id, commissionShares);
+                      setShowCommissionModal(false);
+                      await loadData();
+                      Alert.alert("Başarılı", "Komisyon paylaşımları kaydedildi");
+                    }
+                  }}
+                  style={({ pressed }) => [{
+                    backgroundColor: colors.success,
+                    opacity: pressed ? 0.9 : 1,
+                    paddingVertical: Spacing.md,
+                    borderRadius: BorderRadius.sm,
+                    alignItems: "center",
+                  }]}
+                >
+                  <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>
+                    Kaydet
+                  </ThemedText>
+                </Pressable>
+              </View>
             </ScrollView>
           </View>
         </View>

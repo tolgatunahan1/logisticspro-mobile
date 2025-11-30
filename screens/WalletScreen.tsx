@@ -11,14 +11,14 @@ import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { useAuth } from "../contexts/AuthContext";
 import { Spacing, BorderRadius, Colors, APP_CONSTANTS } from "../constants/theme";
-import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob, getCompanies, Company } from "../utils/storage";
+import { getCompletedJobs, markCommissionAsPaid, CompanyWallet, CompletedJob, getCompanies, Company, getDebts, Debt, updateDebtPayment } from "../utils/storage";
 
 const formatCurrency = (amount: number): string => {
   const num = Math.floor(amount);
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
-type TabType = "all" | "paid" | "unpaid";
+type TabType = "all" | "paid" | "unpaid" | "debts";
 
 export default function WalletScreen() {
   const { theme, isDark } = useTheme();
@@ -38,6 +38,9 @@ export default function WalletScreen() {
   const [companies, setCompanies] = useState<{ [key: string]: Company }>({});
   const [isTogglingPaid, setIsTogglingPaid] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("unpaid");
+  const [debts, setDebts] = useState<Debt[]>([]);
+  const [showDebtPaymentInput, setShowDebtPaymentInput] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
 
   const filteredJobs = useMemo(() => {
     if (activeTab === "all") return allJobs;
@@ -68,6 +71,8 @@ export default function WalletScreen() {
     try {
       const jobs = await getCompletedJobs(firebaseUser.uid);
       const companiesList = await getCompanies(firebaseUser.uid);
+      const debtsList = await getDebts(firebaseUser.uid);
+      
       const companiesMap = companiesList.reduce((acc, company) => {
         acc[company.id] = company;
         return acc;
@@ -95,6 +100,7 @@ export default function WalletScreen() {
       setMonthlyRevenue(revenue.monthly);
       setAllJobs(jobs);
       setCompanies(companiesMap);
+      setDebts(debtsList);
     } catch (error) {
       // Silent fail
     }
@@ -121,6 +127,50 @@ export default function WalletScreen() {
       Alert.alert("Hata", "İşlem başarısız oldu");
     }
     setIsTogglingPaid(null);
+  };
+
+  const renderDebtRow = (debt: Debt) => {
+    const remaining = debt.totalAmount - debt.paidAmount;
+    return (
+      <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, marginHorizontal: Spacing.lg, marginBottom: Spacing.md, gap: Spacing.md }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <ThemedText type="small" style={{ fontWeight: "600" }}>{debt.personName}</ThemedText>
+          <View style={{ backgroundColor: remaining > 0 ? colors.destructive : colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 2, borderRadius: BorderRadius.sm }}>
+            <ThemedText type="small" style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "600" }}>
+              {remaining > 0 ? "Borcunuz Var" : "Ödendi"}
+            </ThemedText>
+          </View>
+        </View>
+        <View style={{ gap: Spacing.sm }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>Toplam Borç:</ThemedText>
+            <ThemedText type="small" style={{ fontWeight: "600" }}>₺{formatCurrency(debt.totalAmount)}</ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>Ödenen:</ThemedText>
+            <ThemedText type="small" style={{ fontWeight: "600", color: colors.success }}>₺{formatCurrency(debt.paidAmount)}</ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>Kalan:</ThemedText>
+            <ThemedText type="small" style={{ fontWeight: "600", color: remaining > 0 ? colors.destructive : colors.success }}>₺{formatCurrency(remaining)}</ThemedText>
+          </View>
+        </View>
+        {remaining > 0 && (
+          <Pressable
+            onPress={() => setShowDebtPaymentInput(debt.id)}
+            style={({ pressed }) => [{
+              backgroundColor: theme.link,
+              opacity: pressed ? 0.9 : 1,
+              paddingVertical: Spacing.sm,
+              borderRadius: BorderRadius.sm,
+              alignItems: "center",
+            }]}
+          >
+            <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600" }}>Ödeme Yap</ThemedText>
+          </Pressable>
+        )}
+      </View>
+    );
   };
 
   const renderTransactionRow = ({ item: job }: { item: CompletedJob }) => {
@@ -198,9 +248,9 @@ export default function WalletScreen() {
   return (
     <ThemedView style={styles.container}>
       <FlatList
-        data={filteredJobs}
-        renderItem={renderTransactionRow}
-        keyExtractor={(item) => item.id}
+        data={activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount) : filteredJobs}
+        renderItem={({ item }) => activeTab === "debts" ? renderDebtRow(item as Debt) : renderTransactionRow({ item: item as CompletedJob })}
+        keyExtractor={(item) => (item as any).id || (item as any).personName}
         ListHeaderComponent={() => (
           <>
             {/* Revenue Summary Section */}
@@ -294,7 +344,7 @@ export default function WalletScreen() {
 
             {/* Tab Navigation */}
             <View style={{ flexDirection: "row", paddingHorizontal: Spacing.lg, marginTop: Spacing.lg, gap: Spacing.md }}>
-              {(["unpaid", "paid", "all"] as TabType[]).map((tab) => (
+              {(["unpaid", "paid", "all", "debts"] as TabType[]).map((tab) => (
                 <Pressable
                   key={tab}
                   onPress={() => setActiveTab(tab)}
@@ -308,6 +358,8 @@ export default function WalletScreen() {
                           ? colors.warning
                           : tab === "paid"
                           ? colors.success
+                          : tab === "debts"
+                          ? "#8B5CF6"
                           : theme.link
                         : colors.backgroundDefault,
                   }}
@@ -326,6 +378,8 @@ export default function WalletScreen() {
                       ? `Ödenmedi (${allJobs.filter(j => !j.commissionPaid).length})`
                       : tab === "paid"
                       ? `Ödendi (${allJobs.filter(j => j.commissionPaid).length})`
+                      : tab === "debts"
+                      ? `Borçlar (${debts.filter(d => d.paidAmount < d.totalAmount).length})`
                       : `Tümü (${allJobs.length})`}
                   </ThemedText>
                 </Pressable>
@@ -343,9 +397,9 @@ export default function WalletScreen() {
               }}
             >
               <ThemedText type="h4" style={{ fontWeight: "700" }}>
-                İşlem Geçmişi
+                {activeTab === "debts" ? "Borç Takibi" : "İşlem Geçmişi"}
               </ThemedText>
-              {filteredJobs.length > 0 && (
+              {(activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount).length > 0 : filteredJobs.length > 0) && (
                 <View
                   style={{
                     backgroundColor:
@@ -363,14 +417,14 @@ export default function WalletScreen() {
                   }}
                 >
                   <ThemedText type="small" style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 11 }}>
-                    {filteredJobs.length}
+                    {activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount).length : filteredJobs.length}
                   </ThemedText>
                 </View>
               )}
             </View>
 
             {/* Empty State */}
-            {filteredJobs.length === 0 && (
+            {(activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount).length === 0 : filteredJobs.length === 0) && (
               <View style={{ paddingHorizontal: Spacing.lg, marginTop: Spacing.lg }}>
                 <View style={[styles.emptyState]}>
                   <Feather
@@ -390,7 +444,7 @@ export default function WalletScreen() {
             )}
           </>
         )}
-        scrollEnabled={filteredJobs.length > 0}
+        scrollEnabled={activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount).length > 0 : filteredJobs.length > 0}
         contentContainerStyle={{ paddingBottom: Spacing.xl }}
       />
     </ThemedView>
