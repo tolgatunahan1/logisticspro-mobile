@@ -141,7 +141,7 @@ export default function WalletScreen() {
     const remaining = debt.totalAmount - debt.paidAmount;
     const isCommission = debt.type === 'commission';
     return (
-      <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, marginHorizontal: Spacing.lg, marginBottom: Spacing.md, gap: Spacing.md }}>
+      <View style={{ backgroundColor: colors.backgroundDefault, padding: Spacing.md, borderRadius: BorderRadius.sm, marginHorizontal: Spacing.lg, marginVertical: Spacing.sm, gap: Spacing.md }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View style={{ flex: 1 }}>
             <ThemedText type="small" style={{ fontWeight: "600" }}>{debt.personName}</ThemedText>
@@ -485,8 +485,9 @@ export default function WalletScreen() {
             )}
           </>
         )}
-        scrollEnabled={activeTab === "debts" ? debts.filter(d => d.paidAmount < d.totalAmount).length > 0 : filteredJobs.length > 0}
+        scrollEnabled={true}
         contentContainerStyle={{ paddingBottom: Spacing.xl }}
+        nestedScrollEnabled={true}
       />
     </ThemedView>
   );
