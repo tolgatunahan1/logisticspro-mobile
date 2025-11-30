@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, View, Pressable, Alert, Modal, TextInput, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, Pressable, Alert, Modal, TextInput, ActivityIndicator, ScrollView, Linking } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -37,50 +37,56 @@ const AboutModal = ({ isVisible, onClose, colors }) => {
             style={{ flex: 1 }}
           >
             <View style={{ paddingRight: Spacing.lg }}>
-              <ThemedText type="h4" style={{ marginBottom: Spacing.lg, fontWeight: "600" }}>
-                LogisticsPRO
-              </ThemedText>
-              
-              <ThemedText style={{ marginBottom: Spacing.md, lineHeight: 24 }}>
-                Sürüm: 1.0.0
-              </ThemedText>
-              
-              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Hakkında
+              <ThemedText type="h4" style={{ marginBottom: Spacing.md, fontWeight: "600" }}>
+                LogisticsPRO v1.0.0
               </ThemedText>
               
               <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary, lineHeight: 24 }}>
-                LogisticsPRO, profesyonel nakliye ve lojistik yönetimi için tasarlanmış modern bir uygulamadır. 
+                LogisticsPRO, Türkiye'de faaliyet gösteren nakliye ve lojistik şirketleri için geliştirilmiş, profesyonel bir yönetim platformudur.
               </ThemedText>
 
-              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.md, fontWeight: "600" }}>
-                Özellikler
+              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
+                Temel Özellikler
               </ThemedText>
 
               <View style={{ marginBottom: Spacing.lg }}>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • IBAN Yönetimi
+                  • Nakliyeci Yönetimi - Araç ve operatör bilgileri
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • Nakliyeci Yönetimi
+                  • Şirket Yönetimi - Müşteri ve gönderici bilgileri
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • Şirket Yönetimi
+                  • Sevkiyat Planlama - Yükleme ve teslimat takibi
                 </ThemedText>
                 <ThemedText style={{ marginBottom: Spacing.sm, color: colors.textSecondary }}>
-                  • İş Takibi
+                  • Tamamlanan İşler - İş geçmişi ve arşiv
                 </ThemedText>
-                <ThemedText style={{ color: colors.textSecondary }}>
-                  • Cüzdan Yönetimi
+                <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary }}>
+                  • IBAN Yönetimi - Ödeme bilgileri ve finansal yönetim
                 </ThemedText>
               </View>
 
-              <ThemedText type="h4" style={{ marginTop: Spacing.xl, marginBottom: Spacing.md, fontWeight: "600" }}>
-                İletişim
+              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
+                Güvenlik
               </ThemedText>
 
-              <ThemedText style={{ marginBottom: Spacing.xl, color: colors.textSecondary, lineHeight: 24 }}>
-                Destek için: support@logisticspro.com
+              <ThemedText style={{ marginBottom: Spacing.lg, color: colors.textSecondary, lineHeight: 24 }}>
+                Tüm verileriniz Firebase güvenlik altyapısı tarafından korunmakta ve şifreli olarak saklanmaktadır.
+              </ThemedText>
+
+              <ThemedText type="h4" style={{ marginTop: Spacing.lg, marginBottom: Spacing.md, fontWeight: "600" }}>
+                Destek
+              </ThemedText>
+
+              <Pressable onPress={() => Linking.openURL('mailto:support@logisticspro.com')}>
+                <ThemedText type="link" style={{ fontSize: 16, marginBottom: Spacing.xl }}>
+                  📧 support@logisticspro.com
+                </ThemedText>
+              </Pressable>
+
+              <ThemedText type="caption" style={{ color: colors.textSecondary, marginBottom: Spacing.xl }}>
+                © 2024 LogisticsPRO. Tüm hakları saklıdır.
               </ThemedText>
             </View>
           </ScrollView>
@@ -113,7 +119,7 @@ export default function SettingsScreen() {
       const ibans = await getIBANs(firebaseUser.uid);
       setIbanList(ibans);
     } catch (error) { 
-      console.error(error); 
+      console.error("IBAN yükleme hatası:", error); 
     }
   }, [firebaseUser]);
 
@@ -125,28 +131,37 @@ export default function SettingsScreen() {
 
   const handleAddIBAN = async () => {
     if (!nameInput.trim() || !ibanInput.trim()) { 
-      Alert.alert("Hata", "Eksik bilgi."); 
+      Alert.alert("Hata", "Lütfen ad soyad ve IBAN numarası giriniz."); 
       return; 
     }
     setIsAdding(true);
     try {
       await addIBAN(firebaseUser.uid, { name: nameInput.trim(), iban: ibanInput.trim() });
       await loadIBANs();
+      Alert.alert("Başarılı", "IBAN başarıyla eklendi.");
       closeIBANModal();
     } catch (error) {
+      console.error("IBAN ekleme hatası:", error);
       Alert.alert("Hata", "IBAN eklenirken hata oluştu.");
     }
     setIsAdding(false);
   };
 
-  const handleDeleteIBAN = async (ibanToDelete: IBAN) => {
+  const handleDeleteIBAN = (ibanToDelete: IBAN) => {
     Alert.alert("Sil", "Bu IBAN'ı silmek istediğinizden emin misiniz?", [
-      { text: "İptal" },
+      { text: "İptal", style: "cancel" },
       {
         text: "Sil",
+        style: "destructive",
         onPress: async () => {
-          await deleteIBAN(firebaseUser.uid, ibanToDelete.iban);
-          await loadIBANs();
+          try {
+            await deleteIBAN(firebaseUser.uid, ibanToDelete.ibanNumber);
+            await loadIBANs();
+            Alert.alert("Başarılı", "IBAN başarıyla silindi.");
+          } catch (error) {
+            console.error("IBAN silme hatası:", error);
+            Alert.alert("Hata", "IBAN silinirken hata oluştu.");
+          }
         },
       },
     ]);
