@@ -205,6 +205,7 @@ export default function CompanyFormScreen() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

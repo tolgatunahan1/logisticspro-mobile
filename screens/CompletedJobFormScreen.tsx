@@ -544,9 +544,10 @@ export default function CompletedJobFormScreen() {
         onTouchCancel={() => setShowCompletionDatePicker(false)}
       />
     )}
-    </>
+  </>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
