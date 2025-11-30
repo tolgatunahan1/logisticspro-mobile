@@ -244,6 +244,11 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteIBAN = (ibanToDelete: IBAN) => {
+    if (!firebaseUser?.uid) {
+      Alert.alert("Hata", "Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
+
     Alert.alert("Sil", "Bu IBAN'ı silmek istediğinizden emin misiniz?", [
       { text: "İptal", style: "cancel" },
       {
@@ -251,12 +256,25 @@ export default function SettingsScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            await deleteIBAN(firebaseUser.uid, ibanToDelete.id);
-            await loadIBANs();
-            Alert.alert("Başarılı", "IBAN başarıyla silindi.");
-          } catch (error) {
-            console.error("IBAN silme hatası:", error);
-            Alert.alert("Hata", "IBAN silinirken hata oluştu.");
+            console.log("🗑️ Silme işlemi başlıyor...");
+            console.log("UID:", firebaseUser.uid);
+            console.log("IBAN ID:", ibanToDelete.id);
+            console.log("IBAN Objesi:", ibanToDelete);
+            
+            const success = await deleteIBAN(firebaseUser.uid, ibanToDelete.id);
+            console.log("✅ Silme sonucu:", success);
+            
+            if (success) {
+              console.log("✅ Firebase'den silindi, listesi yenileniyor...");
+              await loadIBANs();
+              Alert.alert("Başarılı", "IBAN başarıyla silindi.");
+            } else {
+              console.error("❌ Firebase silme başarısız");
+              Alert.alert("Hata", "IBAN silme işlemi başarısız oldu. Tekrar deneyin.");
+            }
+          } catch (error: any) {
+            console.error("❌ Silme hatası:", error);
+            Alert.alert("Hata", `Silme hatası: ${error?.message || String(error)}`);
           }
         },
       },
