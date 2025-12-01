@@ -60,8 +60,8 @@ export default function RootNavigator() {
         ...getCommonScreenOptions({ theme, isDark }),
       }}
     >
-      {!firebaseUser || !userData ? (
-        // GİRİŞ YAPMAMIŞSA
+      {!firebaseUser || !userData || userData.status !== 'approved' ? (
+        // GİRİŞ YAPMAMIŞSA VEYA ONAY BEKLİYORSA
         <>
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
@@ -70,7 +70,7 @@ export default function RootNavigator() {
         // ADMİN İSE
         <Stack.Screen name="AdminDashboard" component={AdminDashboard} options={{ headerShown: false }} />
       ) : (
-        // NORMAL ONAYLI KULLANICI İSE (Ana Sayfa ve Diğerleri)
+        // ONAYLANMIŞ NORMAL KULLANICI İSE (Ana Sayfa ve Diğerleri)
         <>
           <Stack.Screen name="AnaSayfa" component={BottomTabNavigator} options={{ headerShown: false }} />
           
