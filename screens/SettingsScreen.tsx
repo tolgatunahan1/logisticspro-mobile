@@ -530,7 +530,13 @@ export default function SettingsScreen() {
 
       {/* Çıkış Butonu */}
       <Pressable
-        onPress={logout}
+        onPress={async () => {
+          try {
+            await logout();
+          } catch (error: any) {
+            Alert.alert("Hata", error?.message || "Çıkış yapılırken hata oluştu");
+          }
+        }}
         style={({ pressed }) => [
           styles.logoutButton,
           {

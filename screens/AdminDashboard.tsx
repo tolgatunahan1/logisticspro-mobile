@@ -80,25 +80,29 @@ export default function AdminDashboard() {
 
   const handleApprove = useCallback(
     (uid: string, email: string) => {
-      showConfirmAlert(
-        APP_CONSTANTS.ALERT_MESSAGES.APPROVE_TITLE,
-        `${email} ${APP_CONSTANTS.ALERT_MESSAGES.APPROVE_TITLE.toLowerCase()} kullanıcısını onaylamak istiyor musunuz?`,
-        APP_CONSTANTS.ALERT_MESSAGES.APPROVE_TEXT,
-        async () => {
-          setLoading(true);
-          try {
-            await firebaseAuthService.approveUser(uid);
-            await loadUsers();
-            Alert.alert(
-              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED,
-              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED_MSG
-            );
-          } catch (error: any) {
-            Alert.alert(APP_CONSTANTS.ALERT_MESSAGES.ERROR_TITLE, error?.message || APP_CONSTANTS.ALERT_MESSAGES.ERROR_APPROVE_MSG);
-          } finally {
-            setLoading(false);
-          }
+      const onConfirm = async () => {
+        setLoading(true);
+        try {
+          console.log("✅ User onaylanıyor:", email);
+          await firebaseAuthService.approveUser(uid);
+          await loadUsers();
+          Alert.alert(
+            "Başarılı",
+            "Kullanıcı onaylandı"
+          );
+        } catch (error: any) {
+          console.error("❌ Onay hatası:", error?.message);
+          Alert.alert("Hata", error?.message || "Onaylama başarısız");
+        } finally {
+          setLoading(false);
         }
+      };
+      
+      showConfirmAlert(
+        "Onayla",
+        `${email} kullanıcısını onaylamak istiyor musunuz?`,
+        "Onayla",
+        onConfirm
       );
     },
     [loadUsers]
@@ -106,25 +110,29 @@ export default function AdminDashboard() {
 
   const handleReject = useCallback(
     (uid: string, email: string) => {
+      const onConfirm = async () => {
+        setLoading(true);
+        try {
+          console.log("❌ User reddediliyor:", email);
+          await firebaseAuthService.rejectUser(uid);
+          await loadUsers();
+          Alert.alert(
+            "Başarılı",
+            "Kullanıcı reddedildi"
+          );
+        } catch (error: any) {
+          console.error("❌ Reddetme hatası:", error?.message);
+          Alert.alert("Hata", error?.message || "Reddetme başarısız");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
       showConfirmAlert(
-        APP_CONSTANTS.ALERT_MESSAGES.REJECT_TITLE,
+        "Reddet",
         `${email} kullanıcısını reddetmek istiyor musunuz?`,
-        APP_CONSTANTS.ALERT_MESSAGES.REJECT_TEXT,
-        async () => {
-          setLoading(true);
-          try {
-            await firebaseAuthService.rejectUser(uid);
-            await loadUsers();
-            Alert.alert(
-              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED,
-              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_REJECTED_MSG
-            );
-          } catch (error: any) {
-            Alert.alert(APP_CONSTANTS.ALERT_MESSAGES.ERROR_TITLE, error?.message || APP_CONSTANTS.ALERT_MESSAGES.ERROR_REJECT_MSG);
-          } finally {
-            setLoading(false);
-          }
-        },
+        "Reddet",
+        onConfirm,
         true
       );
     },
@@ -133,25 +141,29 @@ export default function AdminDashboard() {
 
   const handleRevoke = useCallback(
     (uid: string, email: string) => {
+      const onConfirm = async () => {
+        setLoading(true);
+        try {
+          console.log("🔄 Onay kaldırılıyor:", email);
+          await firebaseAuthService.unapproveUser(uid);
+          await loadUsers();
+          Alert.alert(
+            "Başarılı",
+            "Onay kaldırıldı"
+          );
+        } catch (error: any) {
+          console.error("❌ Onay kaldırma hatası:", error?.message);
+          Alert.alert("Hata", error?.message || "Onay kaldırma başarısız");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
       showConfirmAlert(
-        APP_CONSTANTS.ALERT_MESSAGES.REVOKE_TITLE,
+        "Onay Kaldır",
         `${email} kullanıcısının onayını kaldırmak istiyor musunuz?`,
-        APP_CONSTANTS.ALERT_MESSAGES.REVOKE_TEXT,
-        async () => {
-          setLoading(true);
-          try {
-            await firebaseAuthService.unapproveUser(uid);
-            await loadUsers();
-            Alert.alert(
-              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_APPROVED,
-              APP_CONSTANTS.ALERT_MESSAGES.SUCCESS_REVOKED_MSG
-            );
-          } catch (error: any) {
-            Alert.alert(APP_CONSTANTS.ALERT_MESSAGES.ERROR_TITLE, error?.message || APP_CONSTANTS.ALERT_MESSAGES.ERROR_REVOKE_MSG);
-          } finally {
-            setLoading(false);
-          }
-        },
+        "Kaldır",
+        onConfirm,
         true
       );
     },
@@ -169,7 +181,13 @@ export default function AdminDashboard() {
         <ThemedText type="h2">Admin Panel</ThemedText>
         <View style={{ flexDirection: "row", gap: Spacing.md }}>
           <Pressable
-            onPress={logout}
+            onPress={async () => {
+              try {
+                await logout();
+              } catch (error: any) {
+                Alert.alert("Hata", error?.message || "Çıkış yapılırken hata oluştu");
+              }
+            }}
             disabled={loading}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, hitSlop: 8 })}
           >
