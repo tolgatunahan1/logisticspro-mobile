@@ -38,7 +38,7 @@ export default function SignupScreen() {
     if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
       const msg = "Lütfen tüm alanları doldurun.";
       console.error("❌ [VALIDATION ERROR]", msg);
-      Alert.alert("Hata", msg);
+      setErrorMsg("❌ HATA: " + msg);
       return;
     }
     console.log("✅ [VALIDATION] Tüm alanlar dolu");
@@ -47,7 +47,7 @@ export default function SignupScreen() {
     if (password !== confirmPassword) {
       const msg = "Şifreler eşleşmiyor.";
       console.error("❌ [VALIDATION ERROR]", msg);
-      Alert.alert("Hata", msg);
+      setErrorMsg("❌ HATA: " + msg);
       return;
     }
     console.log("✅ [VALIDATION] Şifreler eşleşiyor");
@@ -56,7 +56,7 @@ export default function SignupScreen() {
     if (password.length < 6) {
       const msg = "Şifre en az 6 karakter olmalı.";
       console.error("❌ [VALIDATION ERROR]", msg);
-      Alert.alert("Hata", msg);
+      setErrorMsg("❌ HATA: " + msg);
       return;
     }
     console.log("✅ [VALIDATION] Şifre uzunluğu uygun (", password.length, "karakter)");
@@ -91,14 +91,12 @@ export default function SignupScreen() {
 
       console.log("🎉 [SUCCESS] Kayıt işlemi başarıyla tamamlandı");
       setSuccessMsg("✅ Kayıt Başarılı! Hesabınız oluşturuldu ve yönetici onayına gönderildi.");
-      Alert.alert(
-        "Kayıt Başarılı ✅",
-        "Hesabınız oluşturuldu ve yönetici onayına gönderildi.\n\nOnaylandığında giriş yapabileceksiniz.",
-        [{ text: "Tamam", onPress: () => {
-          console.log("📲 Kullanıcı Login ekranına yönlendiriliyor");
-          navigation.navigate("Login");
-        }}]
-      );
+      
+      // Hemen Login ekranına yönlendir (Alert.alert web'de çalışmıyor)
+      setTimeout(() => {
+        console.log("📲 Kullanıcı Login ekranına yönlendiriliyor");
+        navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      }, 1500);
 
     } catch (error: any) {
       console.error("❌ [ERROR] Kayıt işlemi başarısız:", error);
@@ -124,7 +122,6 @@ export default function SignupScreen() {
       
       console.error("💬 Kullanıcıya gösterilecek mesaj:", msg);
       setErrorMsg("❌ HATA: " + msg);
-      Alert.alert("❌ Hata", msg);
     } finally {
       console.log("🛑 [CLEANUP] İşlem sonlandırılıyor, isLoading false yapılıyor");
       setIsLoading(false);
