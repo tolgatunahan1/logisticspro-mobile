@@ -26,6 +26,8 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const handleSignup = async () => {
     console.log("🚀 [SIGNUP START] handleSignup fonksiyonu çağrıldı");
@@ -88,6 +90,7 @@ export default function SignupScreen() {
       console.log("✅ [DATABASE] Profil başarıyla yazıldı");
 
       console.log("🎉 [SUCCESS] Kayıt işlemi başarıyla tamamlandı");
+      setSuccessMsg("✅ Kayıt Başarılı! Hesabınız oluşturuldu ve yönetici onayına gönderildi.");
       Alert.alert(
         "Kayıt Başarılı ✅",
         "Hesabınız oluşturuldu ve yönetici onayına gönderildi.\n\nOnaylandığında giriş yapabileceksiniz.",
@@ -120,6 +123,7 @@ export default function SignupScreen() {
       }
       
       console.error("💬 Kullanıcıya gösterilecek mesaj:", msg);
+      setErrorMsg("❌ HATA: " + msg);
       Alert.alert("❌ Hata", msg);
     } finally {
       console.log("🛑 [CLEANUP] İşlem sonlandırılıyor, isLoading false yapılıyor");
@@ -138,6 +142,20 @@ export default function SignupScreen() {
         </View>
 
         <View style={styles.formContainer}>
+          {errorMsg ? (
+            <View style={[styles.messageBox, { backgroundColor: colors.error || '#FF4444', borderColor: '#CC0000' }]}>
+              <ThemedText type="small" style={{ color: "#FFF", fontWeight: 'bold', textAlign: 'center' }}>
+                {errorMsg}
+              </ThemedText>
+            </View>
+          ) : successMsg ? (
+            <View style={[styles.messageBox, { backgroundColor: colors.success || '#44AA44', borderColor: '#00AA00' }]}>
+              <ThemedText type="small" style={{ color: "#FFF", fontWeight: 'bold', textAlign: 'center' }}>
+                {successMsg}
+              </ThemedText>
+            </View>
+          ) : null}
+
           {/* Ad Soyad */}
           <View style={styles.inputGroup}>
             <ThemedText type="small" style={{ marginBottom: Spacing.xs, fontWeight: '600' }}>Ad Soyad</ThemedText>
@@ -233,4 +251,5 @@ const styles = StyleSheet.create({
   input: { height: 50, borderWidth: 1, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, fontSize: 16 },
   button: { height: 50, borderRadius: BorderRadius.md, alignItems: "center", justifyContent: "center", marginTop: Spacing.sm },
   loginLink: { flexDirection: "row", justifyContent: "center", marginTop: Spacing.md },
+  messageBox: { borderWidth: 2, borderRadius: BorderRadius.md, padding: Spacing.md, marginBottom: Spacing.md },
 });
