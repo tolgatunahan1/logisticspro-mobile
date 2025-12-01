@@ -1,22 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, FlatList, Alert, ActivityIndicator, Pressable, RefreshControl } from "react-native";
+import { View, StyleSheet, FlatList, ActivityIndicator, Pressable, RefreshControl } from "react-native";
 import { ref, get, update } from "firebase/database";
-import { db } from "../utils/firebaseAuth";
+import { firebaseDatabase } from "../constants/firebase";
 import { Feather } from "@expo/vector-icons";
 
 import { ScreenContainer } from "../components/ScreenContainer";
 import { ThemedText } from "../components/ThemedText";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { useAuth } from "../contexts/AuthContext"; // Çıkış için
+import { useAuth } from "../contexts/AuthContext";
 
-// Kullanıcı Tipi
 interface UserProfile {
   uid: string;
   name: string;
   email: string;
   phone: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'suspended';
   role: 'admin' | 'user';
   createdAt: string;
 }
@@ -24,94 +23,147 @@ interface UserProfile {
 export default function AdminDashboard() {
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
-  const { logout } = useAuth(); // Çıkış fonksiyonu
+  const { logout } = useAuth();
 
   const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
+  const [activeUsers, setActiveUsers] = useState<UserProfile[]>([]);
+  const [suspendedUsers, setSuspendedUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<string | null>(null); // Hangi kullanıcı işlem görüyor
+  const [processing, setProcessing] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchPendingUsers = useCallback(async () => {
+  const fetchAllUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const usersRef = ref(db, 'users');
+      const usersRef = ref(firebaseDatabase, 'users');
       const snapshot = await get(usersRef);
+      
+      const pending: UserProfile[] = [];
+      const active: UserProfile[] = [];
+      const suspended: UserProfile[] = [];
+
       if (snapshot.exists()) {
         const allUsers = snapshot.val();
-        const pendingList: UserProfile[] = [];
-        
         Object.values(allUsers).forEach((user: any) => {
           if (user.status === 'pending') {
-            pendingList.push(user);
+            pending.push(user);
+          } else if (user.status === 'approved') {
+            active.push(user);
+          } else if (user.status === 'suspended') {
+            suspended.push(user);
           }
         });
-        setPendingUsers(pendingList);
-      } else {
-        setPendingUsers([]);
       }
+
+      setPendingUsers(pending);
+      setActiveUsers(active);
+      setSuspendedUsers(suspended);
     } catch (error) {
-      Alert.alert("Hata", "Kullanıcılar yüklenemedi.");
+      console.error("Kullanıcılar yüklenemedi:", error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchPendingUsers();
-  }, [fetchPendingUsers]);
+    fetchAllUsers();
+  }, [fetchAllUsers]);
 
-  const updateUserStatus = async (uid: string, newStatus: 'approved' | 'rejected') => {
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchAllUsers().then(() => setRefreshing(false));
+  }, [fetchAllUsers]);
+
+  const updateUserStatus = async (uid: string, newStatus: 'approved' | 'suspended' | 'rejected') => {
     setProcessing(uid);
     try {
-      await update(ref(db, `users/${uid}`), {
-        status: newStatus
-      });
-      // Listeyi güncelle (lokal olarak çıkar)
-      setPendingUsers(prev => prev.filter(u => u.uid !== uid));
-      Alert.alert("Başarılı", `Kullanıcı ${newStatus === 'approved' ? 'onaylandı' : 'reddedildi'}.`);
+      if (newStatus === 'rejected') {
+        // Delete user completely
+        await update(ref(firebaseDatabase, `users/${uid}`), { _deleted: true });
+        // Remove from list
+        setPendingUsers(prev => prev.filter(u => u.uid !== uid));
+      } else {
+        await update(ref(firebaseDatabase, `users/${uid}`), { status: newStatus });
+        // Refresh lists
+        await fetchAllUsers();
+      }
     } catch (error) {
-      Alert.alert("Hata", "İşlem başarısız.");
+      console.error("İşlem başarısız:", error);
     } finally {
       setProcessing(null);
     }
   };
 
-  const renderItem = ({ item }: { item: UserProfile }) => (
+  const renderUserCard = (item: UserProfile, canDelete?: boolean) => (
     <View style={[styles.card, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
       <View style={styles.cardHeader}>
-        <ThemedText type="h4">{item.name}</ThemedText>
-        <View style={styles.badge}>
-          <ThemedText type="small" style={{ color: '#854d0e' }}>Bekliyor</ThemedText>
+        <View>
+          <ThemedText type="h4">{item.name}</ThemedText>
+          <ThemedText type="small" style={{ color: colors.textSecondary, marginTop: 2 }}>
+            {item.email}
+          </ThemedText>
         </View>
       </View>
-      
-      <View style={styles.infoRow}>
-        <Feather name="mail" size={14} color={colors.textSecondary} />
-        <ThemedText style={{ color: colors.textSecondary }}>{item.email}</ThemedText>
-      </View>
+
       <View style={styles.infoRow}>
         <Feather name="phone" size={14} color={colors.textSecondary} />
         <ThemedText style={{ color: colors.textSecondary }}>{item.phone}</ThemedText>
       </View>
 
-      <View style={styles.actionButtons}>
-        <Pressable 
-          style={[styles.btn, { backgroundColor: colors.destructive, opacity: processing === item.uid ? 0.5 : 1 }]}
-          onPress={() => updateUserStatus(item.uid, 'rejected')}
-          disabled={processing === item.uid}
-        >
-          <Feather name="x" size={18} color="#FFF" />
-          <ThemedText style={{ color: '#FFF', fontWeight: '600' }}>Reddet</ThemedText>
-        </Pressable>
-
-        <Pressable 
-          style={[styles.btn, { backgroundColor: colors.success, opacity: processing === item.uid ? 0.5 : 1 }]}
-          onPress={() => updateUserStatus(item.uid, 'approved')}
-          disabled={processing === item.uid}
-        >
-          <Feather name="check" size={18} color="#FFF" />
-          <ThemedText style={{ color: '#FFF', fontWeight: '600' }}>Onayla</ThemedText>
-        </Pressable>
+      <View style={styles.infoRow}>
+        <Feather name="calendar" size={14} color={colors.textSecondary} />
+        <ThemedText style={{ color: colors.textSecondary }}>
+          {new Date(item.createdAt).toLocaleDateString('tr-TR')}
+        </ThemedText>
       </View>
+
+      {item.status === 'pending' && (
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={[styles.btn, { backgroundColor: colors.destructive, opacity: processing === item.uid ? 0.5 : 1 }]}
+            onPress={() => updateUserStatus(item.uid, 'rejected')}
+            disabled={processing === item.uid}
+          >
+            <Feather name="x" size={16} color="#FFF" />
+            <ThemedText style={{ color: '#FFF', fontWeight: '600', fontSize: 13 }}>Reddet</ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={[styles.btn, { backgroundColor: colors.success, opacity: processing === item.uid ? 0.5 : 1 }]}
+            onPress={() => updateUserStatus(item.uid, 'approved')}
+            disabled={processing === item.uid}
+          >
+            <Feather name="check" size={16} color="#FFF" />
+            <ThemedText style={{ color: '#FFF', fontWeight: '600', fontSize: 13 }}>Onayla</ThemedText>
+          </Pressable>
+        </View>
+      )}
+
+      {item.status === 'approved' && (
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={[styles.btn, { backgroundColor: colors.warning, opacity: processing === item.uid ? 0.5 : 1 }]}
+            onPress={() => updateUserStatus(item.uid, 'suspended')}
+            disabled={processing === item.uid}
+          >
+            <Feather name="pause-circle" size={16} color="#000" />
+            <ThemedText style={{ color: '#000', fontWeight: '600', fontSize: 13 }}>Dondur</ThemedText>
+          </Pressable>
+        </View>
+      )}
+
+      {item.status === 'suspended' && (
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={[styles.btn, { backgroundColor: colors.success, opacity: processing === item.uid ? 0.5 : 1 }]}
+            onPress={() => updateUserStatus(item.uid, 'approved')}
+            disabled={processing === item.uid}
+          >
+            <Feather name="play-circle" size={16} color="#FFF" />
+            <ThemedText style={{ color: '#FFF', fontWeight: '600', fontSize: 13 }}>Aktif Et</ThemedText>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 
@@ -120,28 +172,45 @@ export default function AdminDashboard() {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg, paddingHorizontal: Spacing.md }}>
         <ThemedText type="h2">Yönetici Paneli</ThemedText>
         <Pressable onPress={logout} style={{ padding: 8 }}>
-            <Feather name="log-out" size={24} color={colors.text} />
+          <Feather name="log-out" size={24} color={colors.text} />
         </Pressable>
       </View>
-
-      <ThemedText type="subtitle" style={{ marginBottom: Spacing.md, paddingHorizontal: Spacing.md }}>
-        Onay Bekleyen Kullanıcılar ({pendingUsers.length})
-      </ThemedText>
 
       {loading ? (
         <ActivityIndicator size="large" color={theme.link} style={{ marginTop: 20 }} />
       ) : (
         <FlatList
-          data={pendingUsers}
-          renderItem={renderItem}
-          keyExtractor={item => item.uid}
+          data={[
+            { title: 'Onay Bekleyenler', icon: 'clock', users: pendingUsers, count: pendingUsers.length },
+            { title: 'Aktif Kullanıcılar', icon: 'check-circle', users: activeUsers, count: activeUsers.length },
+            { title: 'Askıya Alınanlar', icon: 'pause-circle', users: suspendedUsers, count: suspendedUsers.length },
+          ]}
+          renderItem={({ item }) => (
+            <View style={{ marginBottom: Spacing.xl }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: Spacing.md, marginBottom: Spacing.md }}>
+                <Feather name={item.icon as any} size={20} color={theme.link} />
+                <ThemedText type="subtitle" style={{ fontWeight: '700' }}>
+                  {item.title} ({item.count})
+                </ThemedText>
+              </View>
+
+              {item.users.length > 0 ? (
+                item.users.map((user) => (
+                  <View key={user.uid} style={{ paddingHorizontal: Spacing.md, marginBottom: Spacing.md }}>
+                    {renderUserCard(user)}
+                  </View>
+                ))
+              ) : (
+                <ThemedText style={{ textAlign: 'center', marginBottom: Spacing.md, color: colors.textSecondary, paddingHorizontal: Spacing.md }}>
+                  Kayıt yok
+                </ThemedText>
+              )}
+            </View>
+          )}
+          keyExtractor={(item, idx) => `${item.title}-${idx}`}
+          scrollEnabled={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={{ paddingBottom: Spacing.xl }}
-          scrollEnabled={false} // ScreenContainer zaten scroll ediyor
-          ListEmptyComponent={
-            <ThemedText style={{ textAlign: 'center', marginTop: 20, color: colors.textSecondary }}>
-              Bekleyen başvuru yok.
-            </ThemedText>
-          }
         />
       )}
     </ScreenContainer>
@@ -154,29 +223,19 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     marginBottom: Spacing.md,
-    marginHorizontal: Spacing.md,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
-  },
-  badge: {
-    backgroundColor: '#fef9c3',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    marginBottom: Spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: Spacing.md,
+    gap: Spacing.sm,
     marginTop: Spacing.md,
   },
   btn: {

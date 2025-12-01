@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 
-// Firebase Config (dari .env)
 const firebaseConfig = {
   apiKey: "AIzaSyB-6vxRV1ayUtKgi-Xl6BR8g9jsUqR8YX8",
   authDomain: "logisticspro-f044a.firebaseapp.com",
@@ -22,7 +21,6 @@ async function seedDatabase() {
   try {
     console.log("🚀 Seed işlemi başlıyor...\n");
 
-    // 1. AUTH: Admin kullanıcısı oluştur
     console.log("📝 1. Firebase Auth'da admin oluşturuluyor...");
     const adminEmail = "tolgatunahan@icloud.com";
     const adminPassword = "1Liraversene";
@@ -35,7 +33,6 @@ async function seedDatabase() {
     const adminUID = userCredential.user.uid;
     console.log(`✅ Auth kullanıcısı oluşturuldu! UID: ${adminUID}\n`);
 
-    // 2. DATABASE: Admin verisi kaydet
     console.log("📝 2. Realtime Database'de admin profili oluşturuluyor...");
     const adminData = {
       uid: adminUID,
@@ -47,10 +44,10 @@ async function seedDatabase() {
       createdAt: new Date().toISOString(),
     };
 
+    // FLAT STRUCTURE: /users/{uid}
     await set(ref(db, `users/${adminUID}`), adminData);
     console.log(`✅ Database kaydı oluşturuldu!\n`);
 
-    // 3. SONUÇ
     console.log("=" + "=".repeat(49));
     console.log("✨ SEED İŞLEMİ BAŞARILI! ✨");
     console.log("=" + "=".repeat(49));
@@ -59,13 +56,12 @@ async function seedDatabase() {
     console.log(`  Şifre: ${adminPassword}`);
     console.log(`  UID: ${adminUID}`);
     console.log(`  Rol: Admin`);
-    console.log(`  Durum: Onaylı`);
+    console.log(`  Durum: Onaylı ✅`);
     console.log("\n✅ Artık uygulamaya giriş yapabilirsiniz!\n");
 
     process.exit(0);
   } catch (error) {
     console.error("❌ HATA:", error.message);
-    console.error("Kod:", error.code);
     process.exit(1);
   }
 }

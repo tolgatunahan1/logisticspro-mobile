@@ -48,18 +48,23 @@ export default function LoginScreen() {
       if (snapshot.exists()) {
         const userData = snapshot.val();
 
+        // STATUS KONTROLÜ
         if (userData.status === 'pending') {
           // ONAYLANMAMIŞSA ÇIKIŞ YAP VE UYARI VER
           await signOut(firebaseAuth);
           setInfoMsg("⏳ Hesabınız henüz yönetici tarafından onaylanmadı. Lütfen bekleyiniz.");
-        } else if (userData.status === 'rejected') {
-          // REDDEDİLMİŞSE
+        } else if (userData.status === 'suspended') {
+          // DONDURULMUŞSA ÇIKIŞ YAP VE UYARI VER
           await signOut(firebaseAuth);
-          setErrorMsg("❌ Hesap başvurunuz reddedilmiştir.");
-        } else {
+          setErrorMsg("❌ Hesabınız askıya alınmıştır. Yöneticiyle iletişime geçin.");
+        } else if (userData.status === 'approved') {
           // ONAYLIYSA İÇERİ AL (RootNavigator zaten auth değişikliğini dinleyip yönlendirecek)
           setInfoMsg("✅ Giriş başarılı, yönlendiriliyor...");
-          console.log("Giriş başarılı, role:", userData.role);
+          console.log("Giriş başarılı, role:", userData.role, "status:", userData.status);
+        } else {
+          // Bilinmeyen durum
+          await signOut(firebaseAuth);
+          setErrorMsg("❌ Hesap durumu geçersizdir.");
         }
       } else {
         // Veritabanında kaydı yoksa

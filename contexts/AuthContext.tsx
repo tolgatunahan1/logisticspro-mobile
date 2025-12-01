@@ -10,7 +10,8 @@ export interface UserData {
   name: string;
   phone: string;
   role: 'admin' | 'user';
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'suspended';
+  createdAt: string;
 }
 
 interface AuthContextType {
