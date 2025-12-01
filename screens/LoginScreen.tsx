@@ -71,7 +71,7 @@ export default function LoginScreen() {
       let msg = "Giriş yapılamadı.";
       if (error?.code === "auth/invalid-credential") msg = "E-posta veya şifre hatalı.";
       else if (error?.code === "auth/user-not-found") msg = "Bu e-posta ile kayıtlı hesap bulunamadı.";
-      else if (error?.code === "auth/invalid-email") msg = "Geçerli Email Veya Şifre Giriniz Yap";
+      else if (error?.code === "auth/invalid-email") msg = "Geçerli Email Veya Şifre Giriniz";
       else if (error?.message) msg = error.message;
       setErrorMsg("❌ HATA: " + msg);
     } finally {
