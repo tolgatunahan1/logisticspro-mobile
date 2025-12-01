@@ -3,8 +3,8 @@ import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, Keybo
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { ref, set } from "firebase/database"; // Veritabanı yazma için
-import { auth, db } from "../utils/firebaseAuth"; // auth ve db importu
+import { ref, set } from "firebase/database";
+import { firebaseAuth, firebaseDatabase } from "../constants/firebase";
 
 import { ThemedText } from "../components/ThemedText";
 import { ScreenContainer } from "../components/ScreenContainer";
@@ -28,48 +28,101 @@ export default function SignupScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async () => {
-    if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
-      Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert("Hata", "Şifreler eşleşmiyor.");
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert("Hata", "Şifre en az 6 karakter olmalı.");
-      return;
-    }
+    console.log("🚀 [SIGNUP START] handleSignup fonksiyonu çağrıldı");
+    console.log("📝 Form Değerleri:", { name, phone, email, passwordLength: password.length });
 
+    // Validasyon Kontrolleri
+    console.log("✅ [VALIDATION] Alan boşluk kontrolü başladı");
+    if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
+      const msg = "Lütfen tüm alanları doldurun.";
+      console.error("❌ [VALIDATION ERROR]", msg);
+      Alert.alert("Hata", msg);
+      return;
+    }
+    console.log("✅ [VALIDATION] Tüm alanlar dolu");
+
+    console.log("✅ [VALIDATION] Şifre eşleşme kontrolü başladı");
+    if (password !== confirmPassword) {
+      const msg = "Şifreler eşleşmiyor.";
+      console.error("❌ [VALIDATION ERROR]", msg);
+      Alert.alert("Hata", msg);
+      return;
+    }
+    console.log("✅ [VALIDATION] Şifreler eşleşiyor");
+
+    console.log("✅ [VALIDATION] Şifre uzunluğu kontrolü başladı");
+    if (password.length < 6) {
+      const msg = "Şifre en az 6 karakter olmalı.";
+      console.error("❌ [VALIDATION ERROR]", msg);
+      Alert.alert("Hata", msg);
+      return;
+    }
+    console.log("✅ [VALIDATION] Şifre uzunluğu uygun (", password.length, "karakter)");
+
+    console.log("✅ [VALIDATION] Tüm validasyonlar geçti");
     setIsLoading(true);
+    
     try {
       // 1. Firebase Auth ile kullanıcı oluştur
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("🔐 [AUTH] Firebase Auth kullanıcı oluşturma başladı");
+      console.log("📧 E-posta:", email);
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
       const user = userCredential.user;
+      console.log("✅ [AUTH] Kullanıcı başarıyla oluşturuldu");
+      console.log("👤 UID:", user.uid);
 
       // 2. Realtime Database'e kullanıcı detaylarını yaz (Onay Bekliyor statüsünde)
-      await set(ref(db, `users/${user.uid}`), {
+      console.log("💾 [DATABASE] Kullanıcı profili veritabanına yazılıyor");
+      const userProfileData = {
         uid: user.uid,
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim(),
-        role: "user",        // Varsayılan rol
-        status: "pending",   // ÖNEMLİ: Onay bekliyor
+        role: "user",
+        status: "pending",
         createdAt: new Date().toISOString(),
-      });
+      };
+      console.log("📋 Yazılacak veri:", userProfileData);
+      
+      await set(ref(firebaseDatabase, `users/${user.uid}`), userProfileData);
+      console.log("✅ [DATABASE] Profil başarıyla yazıldı");
 
+      console.log("🎉 [SUCCESS] Kayıt işlemi başarıyla tamamlandı");
       Alert.alert(
-        "Kayıt Başarılı",
-        "Hesabınız oluşturuldu ve yönetici onayına gönderildi. Onaylandığında giriş yapabileceksiniz.",
-        [{ text: "Tamam", onPress: () => navigation.navigate("Login") }]
+        "Kayıt Başarılı ✅",
+        "Hesabınız oluşturuldu ve yönetici onayına gönderildi.\n\nOnaylandığında giriş yapabileceksiniz.",
+        [{ text: "Tamam", onPress: () => {
+          console.log("📲 Kullanıcı Login ekranına yönlendiriliyor");
+          navigation.navigate("Login");
+        }}]
       );
 
     } catch (error: any) {
-      console.error("Kayıt hatası:", error);
+      console.error("❌ [ERROR] Kayıt işlemi başarısız:", error);
+      console.error("Error Code:", error?.code);
+      console.error("Error Message:", error?.message);
+      console.error("Full Error Object:", error);
+
       let msg = "Kayıt oluşturulamadı.";
-      if (error.code === "auth/email-already-in-use") msg = "Bu e-posta zaten kullanımda.";
-      Alert.alert("Hata", msg);
+      
+      if (error?.code === "auth/email-already-in-use") {
+        msg = "Bu e-posta zaten kullanımda.";
+        console.error("❌ [ERROR] Email-already-in-use hatası");
+      } else if (error?.code === "auth/weak-password") {
+        msg = "Şifre çok zayıf. Daha güçlü bir şifre seçin.";
+        console.error("❌ [ERROR] Weak-password hatası");
+      } else if (error?.code === "auth/invalid-email") {
+        msg = "Geçersiz e-posta adresi.";
+        console.error("❌ [ERROR] Invalid-email hatası");
+      } else if (error?.message?.includes("Firebase")) {
+        msg = "Firebase bağlantı hatası: " + error?.message;
+        console.error("❌ [ERROR] Firebase hatası");
+      }
+      
+      console.error("💬 Kullanıcıya gösterilecek mesaj:", msg);
+      Alert.alert("❌ Hata", msg);
     } finally {
+      console.log("🛑 [CLEANUP] İşlem sonlandırılıyor, isLoading false yapılıyor");
       setIsLoading(false);
     }
   };
