@@ -86,8 +86,18 @@ export const firebaseAuthService = {
         status: "pending", // All users start as pending, need admin approval
       };
 
-      await set(ref(firebaseDatabase, `users/${user.uid}/profile`), userProfile);
-      return user;
+      try {
+        console.log("📝 Database'ye profil yazılıyor:", user.uid);
+        await set(ref(firebaseDatabase, `users/${user.uid}/profile`), userProfile);
+        console.log("✅ Profil başarıyla yazıldı");
+        return user;
+      } catch (dbError: any) {
+        console.error("❌ Database yazma hatası:", dbError?.message || dbError);
+        // Eğer database yazma başarısız olursa, yeni kaydedilen user'ı sil
+        console.log("🗑️ Auth user siliniyor (database yazma başarısız)...");
+        await deleteUser(user);
+        throw new Error("Profil oluştururken veritabanı hatası: " + (dbError?.message || "Bilinmeyen hata"));
+      }
     } catch (error: any) {
       if (error?.message?.includes("api-key-not-valid")) {
         throw new Error(FIREBASE_CONFIG_ERROR);
