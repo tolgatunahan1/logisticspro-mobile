@@ -226,22 +226,31 @@ export const firebaseAuthService = {
   // Get all pending users
   getPendingUsers: async (): Promise<PendingUser[]> => {
     try {
+      console.log("📖 Pending users yükleniyor...");
       const snapshot = await get(ref(firebaseDatabase, "users"));
       const users: PendingUser[] = [];
-      if (snapshot.exists()) {
-        snapshot.forEach((child) => {
-          const profile = child.val()?.profile;
-          if (profile && profile.status === "pending") {
-            users.push({
-              uid: profile.uid,
-              email: profile.email,
-              createdAt: profile.createdAt,
-            });
-          }
-        });
+      
+      if (!snapshot.exists()) {
+        console.log("⚠️ Users node bulunamadı - Firebase Rules kontrol et!");
+        return [];
       }
+      
+      console.log("📊 Users data:", snapshot.val());
+      snapshot.forEach((child) => {
+        const profile = child.val()?.profile;
+        if (profile && profile.status === "pending") {
+          console.log("✅ Pending user found:", profile.email);
+          users.push({
+            uid: profile.uid,
+            email: profile.email,
+            createdAt: profile.createdAt,
+          });
+        }
+      });
+      console.log("🔍 Total pending users:", users.length);
       return users;
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ Error reading pending users:", error?.message || error);
       return [];
     }
   },
