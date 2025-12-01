@@ -474,232 +474,414 @@ export default function SettingsScreen() {
     }, [loadIBANs])
   );
 
-  return (
-    <ScreenScrollView contentContainerStyle={{ paddingHorizontal: isTablet ? Spacing.xl : Spacing.lg }}>
-      {/* Ödeme ve Hesap Bölümü */}
-      <View
-        style={[
-          styles.section,
-          { borderColor: colors.border },
-        ]}
-      >
-        <ThemedText type="h4" style={styles.sectionTitle}>
-          Ödeme ve Hesap
-        </ThemedText>
+  // Get user's first and last initials for avatar
+  const getInitials = () => {
+    if (!firebaseUser?.email) return "?";
+    return firebaseUser.email.charAt(0).toUpperCase();
+  };
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.listItem,
-            {
-              borderBottomWidth: 1,
-              borderBottomColor: colors.border,
-              backgroundColor: pressed
-                ? colors.backgroundSecondary
-                : colors.backgroundRoot,
-            },
-          ]}
-          onPress={() => setIbanModalVisible(true)}
-          hitSlop={8}
+  return (
+    <ScreenScrollView
+      contentContainerStyle={{
+        paddingHorizontal: Spacing.lg,
+        paddingTop: Spacing.md,
+        paddingBottom: insets.paddingBottom + Spacing.xl,
+        backgroundColor: isDark ? "#1a1a1a" : "#f5f5f5",
+      }}
+    >
+      {/* ===== PROFILE CARD ===== */}
+      <View
+        style={{
+          backgroundColor: colors.backgroundRoot,
+          borderRadius: BorderRadius.lg,
+          padding: Spacing.lg,
+          marginBottom: Spacing.xl,
+          flexDirection: "row",
+          alignItems: "center",
+          shadowColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.1)",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 3,
+        }}
+      >
+        {/* Avatar */}
+        <View
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            backgroundColor: theme.link,
+            justifyContent: "center",
+            alignItems: "center",
+            marginRight: Spacing.lg,
+          }}
         >
-          <View style={styles.listItemContent}>
-            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
-              IBAN Yönetimi
-            </ThemedText>
-            <ThemedText
-              type="caption"
-              style={{ color: colors.textSecondary, marginTop: 4 }}
-            >
-              {ibanList.length} kayıtlı
-            </ThemedText>
-          </View>
-          <Feather
-            name="chevron-right"
-            size={24}
-            color={colors.textSecondary}
-          />
-        </Pressable>
+          <ThemedText
+            style={{
+              fontSize: 24,
+              fontWeight: "700",
+              color: "#FFF",
+            }}
+          >
+            {getInitials()}
+          </ThemedText>
+        </View>
+
+        {/* User Info */}
+        <View style={{ flex: 1 }}>
+          <ThemedText
+            type="h4"
+            style={{
+              fontWeight: "700",
+              marginBottom: Spacing.xs,
+            }}
+          >
+            Hesabım
+          </ThemedText>
+          <ThemedText
+            type="caption"
+            style={{
+              color: colors.textSecondary,
+            }}
+          >
+            {firebaseUser?.email || "E-posta yükleniyor..."}
+          </ThemedText>
+        </View>
       </View>
 
-      {/* Uygulama Bölümü */}
-      <View
-        style={[
-          styles.section,
-          { borderColor: colors.border },
-        ]}
-      >
-        <ThemedText type="h4" style={styles.sectionTitle}>
+      {/* ===== ACCOUNT MANAGEMENT GROUP ===== */}
+      <View style={{ marginBottom: Spacing.xl }}>
+        <ThemedText
+          style={{
+            fontSize: 12,
+            fontWeight: "700",
+            color: colors.textSecondary,
+            marginBottom: Spacing.md,
+            marginLeft: Spacing.sm,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+          }}
+        >
+          Hesap Yönetimi
+        </ThemedText>
+
+        <View
+          style={{
+            backgroundColor: colors.backgroundRoot,
+            borderRadius: BorderRadius.md,
+            overflow: "hidden",
+            shadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.05)",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          {/* Change Password */}
+          <Pressable
+            onPress={() => setPasswordChangeModalVisible(true)}
+            style={({ pressed }) => [
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: Spacing.md,
+                paddingHorizontal: Spacing.lg,
+                backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+              },
+            ]}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.sm,
+                backgroundColor: isDark ? "rgba(59,130,246,0.2)" : "rgba(59,130,246,0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: Spacing.lg,
+              }}
+            >
+              <Feather name="lock" size={18} color={theme.link} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                Şifre Değiştir
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          </Pressable>
+
+          {/* Divider */}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+            }}
+          />
+
+          {/* Change Email */}
+          <Pressable
+            onPress={() => setEmailChangeModalVisible(true)}
+            style={({ pressed }) => [
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: Spacing.md,
+                paddingHorizontal: Spacing.lg,
+                backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+              },
+            ]}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.sm,
+                backgroundColor: isDark ? "rgba(34,197,94,0.2)" : "rgba(34,197,94,0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: Spacing.lg,
+              }}
+            >
+              <Feather name="mail" size={18} color="#22C55E" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                E-posta Değiştir
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          </Pressable>
+
+          {/* Divider */}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+            }}
+          />
+
+          {/* IBAN Management */}
+          <Pressable
+            onPress={() => setIbanModalVisible(true)}
+            style={({ pressed }) => [
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: Spacing.md,
+                paddingHorizontal: Spacing.lg,
+                backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+              },
+            ]}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.sm,
+                backgroundColor: isDark ? "rgba(168,85,247,0.2)" : "rgba(168,85,247,0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: Spacing.lg,
+              }}
+            >
+              <Feather name="credit-card" size={18} color="#A855F7" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                IBAN Bilgilerim
+              </ThemedText>
+              <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 2 }}>
+                {ibanList.length} kayıtlı
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* ===== APP INFO GROUP ===== */}
+      <View style={{ marginBottom: Spacing.xl }}>
+        <ThemedText
+          style={{
+            fontSize: 12,
+            fontWeight: "700",
+            color: colors.textSecondary,
+            marginBottom: Spacing.md,
+            marginLeft: Spacing.sm,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+          }}
+        >
           Uygulama
         </ThemedText>
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.listItem,
-            {
-              backgroundColor: pressed
-                ? colors.backgroundSecondary
-                : colors.backgroundRoot,
-            },
-          ]}
-          onPress={() => setAboutModalVisible(true)}
-          hitSlop={8}
-        >
-          <View style={styles.listItemContent}>
-            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
-              Hakkımızda
-            </ThemedText>
-            <ThemedText
-              type="caption"
-              style={{ color: colors.textSecondary, marginTop: 4 }}
-            >
-              v1.0.0
-            </ThemedText>
-          </View>
-          <Feather
-            name="chevron-right"
-            size={24}
-            color={colors.textSecondary}
-          />
-        </Pressable>
-      </View>
-
-      {/* Hesap Yönetimi Bölümü */}
-      <View
-        style={[
-          styles.section,
-          { borderColor: colors.border },
-        ]}
-      >
-        <ThemedText type="h4" style={styles.sectionTitle}>
-          Hesap Bilgileri
-        </ThemedText>
-
-        {/* Mevcut E-posta */}
         <View
-          style={[
-            styles.listItem,
-            {
-              borderBottomWidth: 1,
-              borderBottomColor: colors.border,
-              backgroundColor: colors.backgroundRoot,
-            },
-          ]}
+          style={{
+            backgroundColor: colors.backgroundRoot,
+            borderRadius: BorderRadius.md,
+            overflow: "hidden",
+            shadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.05)",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
         >
-          <View style={styles.listItemContent}>
-            <ThemedText type="caption" style={{ color: colors.textSecondary, marginBottom: 4 }}>
-              Mevcut E-posta
-            </ThemedText>
-            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
-              {firebaseUser?.email || "Bilinmiyor"}
-            </ThemedText>
-          </View>
+          {/* About */}
+          <Pressable
+            onPress={() => setAboutModalVisible(true)}
+            style={({ pressed }) => [
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: Spacing.md,
+                paddingHorizontal: Spacing.lg,
+                backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+              },
+            ]}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.sm,
+                backgroundColor: isDark ? "rgba(59,130,246,0.2)" : "rgba(59,130,246,0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: Spacing.lg,
+              }}
+            >
+              <Feather name="info" size={18} color={theme.link} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                Hakkında
+              </ThemedText>
+              <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 2 }}>
+                v1.0.0
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          </Pressable>
+
+          {/* Divider */}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+            }}
+          />
+
+          {/* Logout */}
+          <Pressable
+            onPress={async () => {
+              try {
+                await logout();
+              } catch (error: any) {
+                Alert.alert("Hata", error?.message || "Çıkış yapılırken hata oluştu");
+              }
+            }}
+            style={({ pressed }) => [
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: Spacing.md,
+                paddingHorizontal: Spacing.lg,
+                backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+              },
+            ]}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: BorderRadius.sm,
+                backgroundColor: isDark ? "rgba(249,115,22,0.2)" : "rgba(249,115,22,0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: Spacing.lg,
+              }}
+            >
+              <Feather name="log-out" size={18} color="#F97316" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="body" style={{ fontWeight: "600" }}>
+                Çıkış Yap
+              </ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          </Pressable>
         </View>
-
-        {/* E-posta Değiştir */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.listItem,
-            {
-              borderBottomWidth: 1,
-              borderBottomColor: colors.border,
-              backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
-            },
-          ]}
-          onPress={() => setEmailChangeModalVisible(true)}
-          hitSlop={8}
-        >
-          <View style={styles.listItemContent}>
-            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
-              E-posta Değiştir
-            </ThemedText>
-            <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
-              Hesap e-postanızı güncelleyin
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
-
-        {/* Şifre Değiştir */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.listItem,
-            {
-              backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
-            },
-          ]}
-          onPress={() => setPasswordChangeModalVisible(true)}
-          hitSlop={8}
-        >
-          <View style={styles.listItemContent}>
-            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
-              Şifre Değiştir
-            </ThemedText>
-            <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
-              Hesap şifrenizi güncelleyin
-            </ThemedText>
-          </View>
-          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
-        </Pressable>
       </View>
 
-      {/* Tehlikeli Bölüm - Hesap Silme */}
-      <View
-        style={[
-          styles.section,
-          { borderColor: colors.border },
-        ]}
-      >
-        <ThemedText type="h4" style={styles.sectionTitle}>
+      {/* ===== DANGER ZONE ===== */}
+      <View style={{ marginBottom: Spacing.xl }}>
+        <ThemedText
+          style={{
+            fontSize: 12,
+            fontWeight: "700",
+            color: colors.destructive,
+            marginBottom: Spacing.md,
+            marginLeft: Spacing.sm,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+          }}
+        >
           Tehlikeli Bölüm
         </ThemedText>
 
         <Pressable
+          onPress={openDeleteModal}
           style={({ pressed }) => [
-            styles.listItem,
             {
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: Spacing.lg,
+              paddingHorizontal: Spacing.lg,
               backgroundColor: pressed
-                ? `${colors.destructive}15`
+                ? isDark
+                  ? "rgba(239,68,68,0.15)"
+                  : "rgba(239,68,68,0.08)"
                 : colors.backgroundRoot,
+              borderRadius: BorderRadius.md,
+              borderWidth: 1.5,
+              borderColor: isDark ? "rgba(239,68,68,0.3)" : "rgba(239,68,68,0.2)",
+              shadowColor: isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.05)",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.08,
+              shadowRadius: 4,
+              elevation: 2,
             },
           ]}
-          onPress={openDeleteModal}
-          hitSlop={8}
         >
-          <ThemedText
-            type="subtitle"
-            style={{ color: colors.destructive, fontWeight: "600", flex: 1 }}
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: BorderRadius.sm,
+              backgroundColor: isDark ? "rgba(239,68,68,0.2)" : "rgba(239,68,68,0.1)",
+              justifyContent: "center",
+              alignItems: "center",
+              marginRight: Spacing.lg,
+            }}
           >
-            Hesabımı Sil
-          </ThemedText>
-          <Feather name="trash-2" size={24} color={colors.destructive} />
+            <Feather name="trash-2" size={18} color={colors.destructive} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <ThemedText
+              type="body"
+              style={{
+                fontWeight: "700",
+                color: colors.destructive,
+              }}
+            >
+              Hesabımı ve Tüm Verilerimi Sil
+            </ThemedText>
+          </View>
         </Pressable>
       </View>
-
-      {/* Çıkış Butonu */}
-      <Pressable
-        onPress={async () => {
-          try {
-            await logout();
-          } catch (error: any) {
-            Alert.alert("Hata", error?.message || "Çıkış yapılırken hata oluştu");
-          }
-        }}
-        style={({ pressed }) => [
-          styles.logoutButton,
-          {
-            backgroundColor: isDark
-              ? colors.backgroundSecondary
-              : colors.backgroundSecondary,
-            opacity: pressed ? 0.8 : 1,
-            marginBottom: insets.paddingBottom + Spacing.xl,
-          },
-        ]}
-        hitSlop={8}
-      >
-        <Feather name="log-out" size={20} color={colors.text} />
-        <ThemedText type="body" style={styles.logoutText}>
-          Çıkış Yap
-        </ThemedText>
-      </Pressable>
 
       {/* IBAN Modal */}
       <IBANListModal
