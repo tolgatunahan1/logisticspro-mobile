@@ -177,14 +177,36 @@ export const firebaseAuthService = {
   },
 
   // Delete user completely from system
-  deleteUserByUid: async (uid: string): Promise<boolean> => {
+  deleteUserByUid: async (uid: string, password?: string): Promise<boolean> => {
     try {
+      console.log("🗑️ User siliniyor:", uid);
+      
+      // Try to delete from Firebase Auth if current user
+      const currentUser = firebaseAuth.currentUser;
+      if (currentUser && currentUser.uid === uid && password) {
+        try {
+          // Reauthenticate and delete
+          const credential = EmailAuthProvider.credential(currentUser.email || "", password);
+          await reauthenticateWithCredential(currentUser, credential);
+          await deleteUser(currentUser);
+          console.log("✅ Firebase Auth'tan silindi");
+        } catch (authError: any) {
+          console.error("⚠️ Firebase Auth deletion hatası:", authError?.message);
+          // Continue with database deletion even if auth deletion fails
+        }
+      }
+      
       // Delete from users table
+      console.log("🗑️ Database'den siliniyor...");
       await remove(ref(firebaseDatabase, `users/${uid}`));
+      
       // Delete any associated data
       await remove(ref(firebaseDatabase, `data/${uid}`));
+      
+      console.log("✅ User tamamen silindi");
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ User deletion hatası:", error?.message);
       return false;
     }
   },
