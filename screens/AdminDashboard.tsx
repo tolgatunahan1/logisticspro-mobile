@@ -45,6 +45,11 @@ export default function AdminDashboard() {
       if (snapshot.exists()) {
         const allUsers = snapshot.val();
         Object.values(allUsers).forEach((user: any) => {
+          // Admin hesaplarını filtrele - sadece normal kullanıcıları göster
+          if (user.role === 'admin') {
+            return; // Admin hesaplarını atla
+          }
+
           if (user.status === 'pending') {
             pending.push(user);
           } else if (user.status === 'approved') {
