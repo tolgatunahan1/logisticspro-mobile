@@ -326,6 +326,7 @@ export default function SettingsScreen() {
   const [emailPassword, setEmailPassword] = useState("");
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [emailSuccess, setEmailSuccess] = useState("");
 
   const [passwordChangeModalVisible, setPasswordChangeModalVisible] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
@@ -333,6 +334,7 @@ export default function SettingsScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   const [ibanList, setIbanList] = useState<IBAN[]>([]);
   const [ibanModalVisible, setIbanModalVisible] = useState(false);
@@ -423,9 +425,13 @@ export default function SettingsScreen() {
       console.log("📧 E-posta güncelleniyor...");
       await firebaseAuthService.updateEmailSecure(newEmail.trim(), emailPassword);
       console.log("✅ E-posta başarıyla güncellendi");
-      setEmailChangeModalVisible(false);
-      setNewEmail("");
-      setEmailPassword("");
+      setEmailSuccess("E-posta başarıyla güncellendi!");
+      setTimeout(() => {
+        setEmailChangeModalVisible(false);
+        setNewEmail("");
+        setEmailPassword("");
+        setEmailSuccess("");
+      }, 1500);
     } catch (error: any) {
       console.error("❌ E-posta güncelleme hatası:", error?.message || error);
       setEmailError(error?.message || "İşlem başarısız. Lütfen tekrar deneyin.");
@@ -445,10 +451,14 @@ export default function SettingsScreen() {
       console.log("🔐 Şifre güncelleniyor...");
       await firebaseAuthService.changePassword(oldPassword, newPassword);
       console.log("✅ Şifre başarıyla güncellendi");
-      setPasswordChangeModalVisible(false);
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      setPasswordSuccess("Şifre başarıyla güncellendi!");
+      setTimeout(() => {
+        setPasswordChangeModalVisible(false);
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordSuccess("");
+      }, 1500);
     } catch (error: any) {
       console.error("❌ Şifre güncelleme hatası:", error?.message || error);
       setPasswordError(error?.message || "İşlem başarısız. Lütfen tekrar deneyin.");
@@ -828,7 +838,19 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
 
-            {emailError ? (
+            {emailSuccess ? (
+              <ThemedText
+                style={{
+                  color: "#10b981",
+                  textAlign: "center",
+                  marginTop: Spacing.md,
+                  fontSize: 14,
+                  fontWeight: "600",
+                }}
+              >
+                ✓ {emailSuccess}
+              </ThemedText>
+            ) : emailError ? (
               <ThemedText
                 style={{
                   color: colors.destructive,
@@ -981,7 +1003,19 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
 
-            {passwordError ? (
+            {passwordSuccess ? (
+              <ThemedText
+                style={{
+                  color: "#10b981",
+                  textAlign: "center",
+                  marginTop: Spacing.md,
+                  fontSize: 14,
+                  fontWeight: "600",
+                }}
+              >
+                ✓ {passwordSuccess}
+              </ThemedText>
+            ) : passwordError ? (
               <ThemedText
                 style={{
                   color: colors.destructive,
