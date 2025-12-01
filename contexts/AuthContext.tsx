@@ -86,7 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Kullanıcı onaylanmış mı kontrol et
         const isApproved = await firebaseAuthService.isUserApproved(fbUser.uid);
         if (!isApproved) {
-          await firebaseAuthService.logout();
+          // Logout without blocking
+          firebaseAuthService.logout().catch(err => console.error("Logout error:", err));
           throw new Error("Admin onayı bekleniyor. Lütfen kısa bir süre sonra tekrar deneyin.");
         }
         return true;
@@ -135,7 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isAdmin) {
           return true;
         } else {
-          await firebaseAuthService.logout();
+          // Logout without blocking
+          firebaseAuthService.logout().catch(err => console.error("Logout error:", err));
           throw new Error("Admin hesabı değil");
         }
       }
