@@ -1,0 +1,87 @@
+FIREBASE RULES - HEMEN BU KURALARI SET ET!
+
+1. Firebase Console: https://console.firebase.google.com/
+2. Proje: logisticspro-f044a
+3. Realtime Database → Rules
+4. HEPSI SİL
+5. AŞAĞIYI YAPIŞT:
+
+{
+  "rules": {
+    "users": {
+      ".read": "root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+      ".write": "root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+      "$uid": {
+        ".read": "$uid === auth.uid || root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+        ".write": "$uid === auth.uid || root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+        "profile": {
+          ".read": "true",
+          ".validate": "newData.hasChildren(['uid', 'email', 'status', 'createdAt'])",
+          "uid": {
+            ".validate": "newData.isString()"
+          },
+          "email": {
+            ".validate": "newData.isString()"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected')"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "approvedAt": {
+            ".validate": "newData.isNumber()"
+          }
+        },
+        "companies": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid",
+          "$companyId": {
+            ".validate": "newData.hasChildren(['name', 'taxId'])"
+          }
+        },
+        "carriers": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        "jobs": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        "completedJobs": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        "ibans": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+    "admins": {
+      ".read": "root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+      ".write": "root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+      "$uid": {
+        ".read": "$uid === auth.uid || root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+        ".write": "root.child('admins').child(auth.uid).child('isAdmin').val() === true",
+        "isAdmin": {
+          ".validate": "newData.isBoolean()"
+        },
+        "email": {
+          ".validate": "newData.isString()"
+        }
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}
+
+6. Publish → Onay ver
+7. BAŞARILI mesajı çıkacak
+8. App Refresh (F5)
+9. TEST ET:
+   - Signup yap
+   - Admin Dashboard → Pending users görsün
+   - Approve/Reject yapabilsin
+   - Login başarılı olsun
