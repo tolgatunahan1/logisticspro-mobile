@@ -108,29 +108,38 @@ export default function SignupScreen() {
 
     setIsLoading(true);
     try {
+      console.log("📝 Signup başladı:", username);
       const success = await registerWithFirebase(username.trim(), password);
+      console.log("✅ Signup sonucu:", success);
+      
       if (success) {
         // Save credentials if remember me is checked
         try {
           await saveCredentials();
         } catch (e) {
-          // Ignore credential save errors on web
+          console.log("Credentials save hatası:", e);
         }
+        
+        console.log("🎉 Başarılı - Login sayfasına yönlendiriliyor");
         Alert.alert(
           "Başarılı",
           "Hesabınız oluşturuldu! Admin onayı bekleniyor. Onaylandıktan sonra giriş yapabilirsiniz.",
           [{ 
             text: "Anladım", 
             onPress: () => {
+              console.log("Alert callback çalışıyor - Login'e gidiliyor");
+              setIsLoading(false);
               navigation.navigate("Login");
             } 
           }]
         );
       } else {
+        console.log("❌ Signup başarısız");
         setError("Kayıt başarısız oldu");
+        setIsLoading(false);
       }
     } catch (error: any) {
-      console.error("Signup error:", error);
+      console.error("❌ Signup error:", error?.message || error);
       const errorMsg = error?.message || "Kayıt sırasında hata oluştu";
       if (errorMsg.includes("Firebase yapılandırılmamış")) {
         setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
@@ -139,7 +148,6 @@ export default function SignupScreen() {
       } else {
         setError(errorMsg);
       }
-    } finally {
       setIsLoading(false);
     }
   };

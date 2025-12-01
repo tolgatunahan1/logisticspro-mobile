@@ -99,14 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerWithFirebase = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log("🔵 registerWithFirebase çalışıyor:", email);
       const fbUser = await firebaseAuthService.register(email, password);
+      console.log("🟢 User oluşturuldu:", fbUser?.uid);
       if (fbUser) {
         // Kullanıcı kaydedildi, admin onayını bekliyor
-        await firebaseAuthService.logout();
+        // IMPORTANT: Logout immediately so pending users can't access system
+        // This happens silently so Alert shows before logout completes
+        console.log("📝 Background logout başladı...");
+        firebaseAuthService.logout().catch(err => console.error("Logout error:", err));
+        console.log("✅ Registration başarılı");
         return true;
       }
+      console.log("❌ fbUser null");
       return false;
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ registerWithFirebase hatası:", error?.message || error);
       throw error;
     }
   };
