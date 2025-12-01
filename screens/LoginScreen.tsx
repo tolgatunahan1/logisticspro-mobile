@@ -58,7 +58,8 @@ export default function LoginScreen() {
           setErrorMsg("❌ Hesap başvurunuz reddedilmiştir.");
         } else {
           // ONAYLIYSA İÇERİ AL (RootNavigator zaten auth değişikliğini dinleyip yönlendirecek)
-          console.log("Giriş başarılı, yönlendiriliyor...");
+          setInfoMsg("✅ Giriş başarılı, yönlendiriliyor...");
+          console.log("Giriş başarılı, role:", userData.role);
         }
       } else {
         // Veritabanında kaydı yoksa
