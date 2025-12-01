@@ -320,6 +320,20 @@ export default function SettingsScreen() {
   const [deleteError, setDeleteError] = useState("");
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
 
+  // Hesap Yönetimi Modal States
+  const [emailChangeModalVisible, setEmailChangeModalVisible] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const [passwordChangeModalVisible, setPasswordChangeModalVisible] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
   const [ibanList, setIbanList] = useState<IBAN[]>([]);
   const [ibanModalVisible, setIbanModalVisible] = useState(false);
   const [ibanInput, setIbanInput] = useState("");
@@ -398,6 +412,47 @@ export default function SettingsScreen() {
       }
       setDeleteError(errorMessage);
       setIsDeleting(false);
+    }
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!newEmail.trim() || !emailPassword.trim()) return;
+    setIsUpdatingEmail(true);
+    setEmailError("");
+    try {
+      console.log("📧 E-posta güncelleniyor...");
+      await firebaseAuthService.updateEmailSecure(newEmail.trim(), emailPassword);
+      console.log("✅ E-posta başarıyla güncellendi");
+      setEmailChangeModalVisible(false);
+      setNewEmail("");
+      setEmailPassword("");
+    } catch (error: any) {
+      console.error("❌ E-posta güncelleme hatası:", error?.message || error);
+      setEmailError(error?.message || "İşlem başarısız. Lütfen tekrar deneyin.");
+      setIsUpdatingEmail(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) return;
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Yeni şifreler eşleşmiyor");
+      return;
+    }
+    setIsUpdatingPassword(true);
+    setPasswordError("");
+    try {
+      console.log("🔐 Şifre güncelleniyor...");
+      await firebaseAuthService.changePassword(oldPassword, newPassword);
+      console.log("✅ Şifre başarıyla güncellendi");
+      setPasswordChangeModalVisible(false);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error("❌ Şifre güncelleme hatası:", error?.message || error);
+      setPasswordError(error?.message || "İşlem başarısız. Lütfen tekrar deneyin.");
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -495,7 +550,7 @@ export default function SettingsScreen() {
         </Pressable>
       </View>
 
-      {/* Hesap Bölümü */}
+      {/* Hesap Yönetimi Bölümü */}
       <View
         style={[
           styles.section,
@@ -503,7 +558,86 @@ export default function SettingsScreen() {
         ]}
       >
         <ThemedText type="h4" style={styles.sectionTitle}>
-          Hesap Yönetimi
+          Hesap Bilgileri
+        </ThemedText>
+
+        {/* Mevcut E-posta */}
+        <View
+          style={[
+            styles.listItem,
+            {
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
+              backgroundColor: colors.backgroundRoot,
+            },
+          ]}
+        >
+          <View style={styles.listItemContent}>
+            <ThemedText type="caption" style={{ color: colors.textSecondary, marginBottom: 4 }}>
+              Mevcut E-posta
+            </ThemedText>
+            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
+              {firebaseUser?.email || "Bilinmiyor"}
+            </ThemedText>
+          </View>
+        </View>
+
+        {/* E-posta Değiştir */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.listItem,
+            {
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
+              backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+            },
+          ]}
+          onPress={() => setEmailChangeModalVisible(true)}
+          hitSlop={8}
+        >
+          <View style={styles.listItemContent}>
+            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
+              E-posta Değiştir
+            </ThemedText>
+            <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
+              Hesap e-postanızı güncelleyin
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
+        </Pressable>
+
+        {/* Şifre Değiştir */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.listItem,
+            {
+              backgroundColor: pressed ? colors.backgroundSecondary : colors.backgroundRoot,
+            },
+          ]}
+          onPress={() => setPasswordChangeModalVisible(true)}
+          hitSlop={8}
+        >
+          <View style={styles.listItemContent}>
+            <ThemedText type="subtitle" style={{ fontWeight: "600" }}>
+              Şifre Değiştir
+            </ThemedText>
+            <ThemedText type="caption" style={{ color: colors.textSecondary, marginTop: 4 }}>
+              Hesap şifrenizi güncelleyin
+            </ThemedText>
+          </View>
+          <Feather name="chevron-right" size={24} color={colors.textSecondary} />
+        </Pressable>
+      </View>
+
+      {/* Tehlikeli Bölüm - Hesap Silme */}
+      <View
+        style={[
+          styles.section,
+          { borderColor: colors.border },
+        ]}
+      >
+        <ThemedText type="h4" style={styles.sectionTitle}>
+          Tehlikeli Bölüm
         </ThemedText>
 
         <Pressable
@@ -575,6 +709,293 @@ export default function SettingsScreen() {
         colors={colors}
         isDark={isDark}
       />
+
+      {/* E-POSTA DEĞİŞTİR MODALI */}
+      <Modal
+        visible={emailChangeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setEmailChangeModalVisible(false);
+          setNewEmail("");
+          setEmailPassword("");
+          setEmailError("");
+        }}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            setEmailChangeModalVisible(false);
+            setNewEmail("");
+            setEmailPassword("");
+            setEmailError("");
+          }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={[
+              styles.deleteModalContent,
+              {
+                backgroundColor: colors.backgroundDefault,
+                maxWidth: isTablet ? 500 : "85%",
+              },
+            ]}
+          >
+            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>
+              E-posta Değiştir
+            </ThemedText>
+            <ThemedText
+              style={{
+                marginBottom: Spacing.md,
+                color: colors.textSecondary,
+              }}
+            >
+              Yeni e-posta adresini gir ve şifreni doğrula.
+            </ThemedText>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.backgroundRoot,
+                },
+              ]}
+              placeholder="Yeni E-posta"
+              placeholderTextColor={colors.textSecondary}
+              value={newEmail}
+              onChangeText={setNewEmail}
+              keyboardType="email-address"
+            />
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.backgroundRoot,
+                },
+              ]}
+              placeholder="Mevcut Şifren"
+              placeholderTextColor={colors.textSecondary}
+              secureTextEntry
+              value={emailPassword}
+              onChangeText={setEmailPassword}
+            />
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                onPress={() => {
+                  setEmailChangeModalVisible(false);
+                  setNewEmail("");
+                  setEmailPassword("");
+                  setEmailError("");
+                }}
+                style={[
+                  styles.modalButton,
+                  {
+                    borderColor: colors.border,
+                    borderWidth: 1,
+                    backgroundColor: colors.backgroundRoot,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ fontWeight: "600" }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                onPress={handleUpdateEmail}
+                disabled={!newEmail.trim() || !emailPassword.trim() || isUpdatingEmail}
+                style={[
+                  styles.modalButton,
+                  {
+                    backgroundColor: theme.link,
+                    opacity: !newEmail.trim() || !emailPassword.trim() || isUpdatingEmail ? 0.5 : 1,
+                  },
+                ]}
+              >
+                {isUpdatingEmail ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <ThemedText style={{ color: "#FFF", fontWeight: "600" }}>
+                    Güncelle
+                  </ThemedText>
+                )}
+              </Pressable>
+            </View>
+
+            {emailError ? (
+              <ThemedText
+                style={{
+                  color: colors.destructive,
+                  textAlign: "center",
+                  marginTop: Spacing.md,
+                  fontSize: 14,
+                }}
+              >
+                {emailError}
+              </ThemedText>
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* ŞİFRE DEĞİŞTİR MODALI */}
+      <Modal
+        visible={passwordChangeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setPasswordChangeModalVisible(false);
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+          setPasswordError("");
+        }}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            setPasswordChangeModalVisible(false);
+            setOldPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setPasswordError("");
+          }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={[
+              styles.deleteModalContent,
+              {
+                backgroundColor: colors.backgroundDefault,
+                maxWidth: isTablet ? 500 : "85%",
+              },
+            ]}
+          >
+            <ThemedText type="h3" style={{ marginBottom: Spacing.md }}>
+              Şifre Değiştir
+            </ThemedText>
+            <ThemedText
+              style={{
+                marginBottom: Spacing.md,
+                color: colors.textSecondary,
+              }}
+            >
+              Eski şifreni ve yeni şifreni gir.
+            </ThemedText>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.backgroundRoot,
+                },
+              ]}
+              placeholder="Mevcut Şifre"
+              placeholderTextColor={colors.textSecondary}
+              secureTextEntry
+              value={oldPassword}
+              onChangeText={setOldPassword}
+            />
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.backgroundRoot,
+                },
+              ]}
+              placeholder="Yeni Şifre"
+              placeholderTextColor={colors.textSecondary}
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.backgroundRoot,
+                },
+              ]}
+              placeholder="Yeni Şifreyi Onayla"
+              placeholderTextColor={colors.textSecondary}
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+
+            <View style={styles.modalButtons}>
+              <Pressable
+                onPress={() => {
+                  setPasswordChangeModalVisible(false);
+                  setOldPassword("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                  setPasswordError("");
+                }}
+                style={[
+                  styles.modalButton,
+                  {
+                    borderColor: colors.border,
+                    borderWidth: 1,
+                    backgroundColor: colors.backgroundRoot,
+                  },
+                ]}
+              >
+                <ThemedText type="body" style={{ fontWeight: "600" }}>
+                  İptal
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                onPress={handleUpdatePassword}
+                disabled={!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim() || isUpdatingPassword}
+                style={[
+                  styles.modalButton,
+                  {
+                    backgroundColor: theme.link,
+                    opacity: !oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim() || isUpdatingPassword ? 0.5 : 1,
+                  },
+                ]}
+              >
+                {isUpdatingPassword ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <ThemedText style={{ color: "#FFF", fontWeight: "600" }}>
+                    Güncelle
+                  </ThemedText>
+                )}
+              </Pressable>
+            </View>
+
+            {passwordError ? (
+              <ThemedText
+                style={{
+                  color: colors.destructive,
+                  textAlign: "center",
+                  marginTop: Spacing.md,
+                  fontSize: 14,
+                }}
+              >
+                {passwordError}
+              </ThemedText>
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* HESAP SİLME ONAY MODALI */}
       <Modal

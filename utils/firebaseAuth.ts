@@ -187,6 +187,42 @@ const firebaseAuthService = {
     }
   },
 
+  // Update email with reauthentication
+  updateEmailSecure: async (newEmail: string, currentPassword: string): Promise<boolean> => {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (!user || !user.email) {
+        throw new Error("Kullanıcı oturumu açmamış");
+      }
+
+      // Reauthenticate first
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      console.log("✅ Reauthentication başarılı");
+
+      // Update email in Firebase Auth
+      await updateEmail(user, newEmail);
+      console.log("✅ Firebase Auth e-posta güncellendi");
+
+      // Update email in database
+      await update(ref(firebaseDatabase, `users/${user.uid}`), {
+        email: newEmail,
+      });
+      console.log("✅ Database e-posta güncellendi");
+
+      return true;
+    } catch (error: any) {
+      console.error("❌ E-posta güncelleme hatası:", error?.message || error);
+      if (error?.code === "auth/wrong-password" || error?.code === "auth/invalid-credential") {
+        throw new Error("Şifre yanlış");
+      }
+      if (error?.code === "auth/email-already-in-use") {
+        throw new Error("Bu e-posta zaten kullanımda");
+      }
+      throw error;
+    }
+  },
+
   // Reauthenticate user with password
   reauthenticate: async (password: string): Promise<boolean> => {
     try {
