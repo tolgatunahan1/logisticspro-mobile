@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import { onAuthStateChanged, User, signOut } from "firebase/auth";
-import { auth, db } from "../utils/firebaseAuth"; // db eklendi
+import { firebaseAuth, firebaseDatabase } from "../constants/firebase";
 import { ref, get } from "firebase/database";
 
 // Kullanıcı Veri Tipi
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Kullanıcı verisini veritabanından çekme fonksiyonu
   const fetchUserData = async (uid: string) => {
     try {
-      const userRef = ref(db, `users/${uid}`);
+      const userRef = ref(firebaseDatabase, `users/${uid}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
         setUserData(snapshot.val() as UserData);
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user) {
         setFirebaseUser(user);
         await fetchUserData(user.uid);
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logout = async () => {
-    await signOut(auth);
+    await signOut(firebaseAuth);
     setFirebaseUser(null);
     setUserData(null);
   };
