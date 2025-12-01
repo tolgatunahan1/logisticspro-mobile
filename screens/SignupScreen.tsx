@@ -113,26 +113,21 @@ export default function SignupScreen() {
       console.log("✅ Signup sonucu:", success);
       
       if (success) {
-        // Save credentials if remember me is checked
         try {
           await saveCredentials();
         } catch (e) {
           console.log("Credentials save hatası:", e);
         }
         
-        console.log("🎉 Başarılı - Login sayfasına yönlendiriliyor");
-        Alert.alert(
-          "Başarılı",
-          "Hesabınız oluşturuldu! Admin onayı bekleniyor. Onaylandıktan sonra giriş yapabilirsiniz.",
-          [{ 
-            text: "Anladım", 
-            onPress: () => {
-              console.log("Alert callback çalışıyor - Login'e gidiliyor");
-              setIsLoading(false);
-              navigation.navigate("Login");
-            } 
-          }]
-        );
+        console.log("🎉 KAYIT BAŞARILI - Login'e yönlendiriliyor");
+        setError("Başarılı! Hesabınız oluşturuldu. Admin onayını bekleyin...");
+        setIsLoading(false);
+        
+        // Direct navigation after 1.5 seconds
+        setTimeout(() => {
+          console.log("Navigating to Login");
+          navigation.navigate("Login");
+        }, 1500);
       } else {
         console.log("❌ Signup başarısız");
         setError("Kayıt başarısız oldu");
