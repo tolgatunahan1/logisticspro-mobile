@@ -426,6 +426,7 @@ export default function SettingsScreen() {
       await firebaseAuthService.updateEmailSecure(newEmail.trim(), emailPassword);
       console.log("✅ E-posta başarıyla güncellendi");
       setEmailSuccess("E-posta başarıyla güncellendi!");
+      setIsUpdatingEmail(false);
       setTimeout(() => {
         setEmailChangeModalVisible(false);
         setNewEmail("");
@@ -452,6 +453,7 @@ export default function SettingsScreen() {
       await firebaseAuthService.changePassword(oldPassword, newPassword);
       console.log("✅ Şifre başarıyla güncellendi");
       setPasswordSuccess("Şifre başarıyla güncellendi!");
+      setIsUpdatingPassword(false);
       setTimeout(() => {
         setPasswordChangeModalVisible(false);
         setOldPassword("");
