@@ -168,10 +168,12 @@ export default function LoginScreen() {
     } catch (error: any) {
       const errorMsg = error?.message || "Giriş sırasında hata oluştu";
       // Check if user is not registered
-      if (errorMsg.includes("invalid-credential") || errorMsg.includes("henüz onaylanmamıştır")) {
+      if (errorMsg.includes("invalid-credential") || errorMsg.includes("user-not-found")) {
+        setError("Email veya şifre yanlış");
+      } else if (errorMsg.includes("Admin onayı bekleniyor") || errorMsg.includes("Admin onayı")) {
+        setError("Hesapınız henüz admin tarafından onaylanmadı");
+      } else if (errorMsg.includes("henüz onaylanmamıştır")) {
         setError("Lütfen geçerli bir mail adresi veya şifre giriniz. Yoksa kayıt olunuz.");
-      } else if (errorMsg.includes("Admin onayı bekleniyor")) {
-        setError("Admin onayı bekleniyor. Lütfen kısa bir süre sonra tekrar deneyin.");
       } else {
         setError(errorMsg);
       }

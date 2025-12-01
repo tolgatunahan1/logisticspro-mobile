@@ -100,12 +100,22 @@ export default function SignupScreen() {
       return;
     }
 
+    // Password validation
+    if (password.length < 6) {
+      setError("Şifre en az 6 karakter olmalı");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const success = await registerWithFirebase(username.trim(), password);
       if (success) {
         // Save credentials if remember me is checked
-        await saveCredentials();
+        try {
+          await saveCredentials();
+        } catch (e) {
+          // Ignore credential save errors on web
+        }
         Alert.alert(
           "Başarılı",
           "Hesabınız oluşturuldu! Admin onayı bekleniyor. Onaylandıktan sonra giriş yapabilirsiniz.",
@@ -124,6 +134,8 @@ export default function SignupScreen() {
       const errorMsg = error?.message || "Kayıt sırasında hata oluştu";
       if (errorMsg.includes("Firebase yapılandırılmamış")) {
         setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
+      } else if (errorMsg.includes("EMAIL_EXISTS") || errorMsg.includes("email-already-in-use")) {
+        setError("Bu email zaten kayıtlı");
       } else {
         setError(errorMsg);
       }
