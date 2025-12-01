@@ -1,408 +1,183 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, TextInput, Pressable, Image, Alert, ActivityIndicator, ScrollView, useWindowDimensions, KeyboardAvoidingView, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useState } from "react";
+import { StyleSheet, View, TextInput, Pressable, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Feather } from "@expo/vector-icons";
-import * as SecureStore from "expo-secure-store";
-import Checkbox from "expo-checkbox";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, set } from "firebase/database"; // Veritabanı yazma için
+import { auth, db } from "../utils/firebaseAuth"; // auth ve db importu
 
-import { ThemedView } from "../components/ThemedView";
 import { ThemedText } from "../components/ThemedText";
+import { ScreenContainer } from "../components/ScreenContainer";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
-import { validatePassword as validatePasswordUtil } from "../utils/userManagement";
 import { RootStackParamList } from "../navigation/RootNavigator";
-import { useAuth } from "../contexts/AuthContext";
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Signup">;
-
-const REMEMBER_ME_KEY_SIGNUP = "logistics_remember_signup";
-
-// Email validasyonu
-const validateEmail = (email: string): { isValid: boolean; error: string } => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email.trim()) {
-    return { isValid: false, error: "Email gerekli" };
-  }
-  if (!emailRegex.test(email)) {
-    return { isValid: false, error: "Geçerli bir email girin" };
-  }
-  return { isValid: true, error: "" };
-};
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SignupScreen() {
   const { theme, isDark } = useTheme();
-  const insets = useSafeAreaInsets();
+  const colors = isDark ? Colors.dark : Colors.light;
   const navigation = useNavigation<NavigationProp>();
-  const { registerWithFirebase } = useAuth();
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  
-  const [username, setUsername] = useState("");
+
+  // Form State
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState(0);
-  const [isFirebaseMode, setIsFirebaseMode] = useState(true);
-
-  const colors = isDark ? Colors.dark : Colors.light;
-
-  // Load saved credentials on mount
-  useEffect(() => {
-    loadSavedCredentials();
-  }, []);
-
-  const loadSavedCredentials = async () => {
-    try {
-      const saved = await SecureStore.getItemAsync(REMEMBER_ME_KEY_SIGNUP);
-      if (saved) {
-        const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
-        setUsername(savedEmail || "");
-        setPassword(savedPassword || "");
-        setRememberMe(true);
-      }
-    } catch (error) {
-      console.log("Could not load saved credentials:", error);
-    }
-  };
-
-  const saveCredentials = async () => {
-    try {
-      if (rememberMe) {
-        await SecureStore.setItemAsync(REMEMBER_ME_KEY_SIGNUP, JSON.stringify({ email: username, password }));
-      } else {
-        await SecureStore.deleteItemAsync(REMEMBER_ME_KEY_SIGNUP);
-      }
-    } catch (error) {
-      console.log("Could not save credentials:", error);
-    }
-  };
-
-  const checkPasswordStrength = (pwd: string) => {
-    let strength = 0;
-    if (pwd.length >= 8) strength += 25;
-    if (/[A-Z]/.test(pwd)) strength += 25;
-    if (/[0-9]/.test(pwd)) strength += 25;
-    if (/[!@#$%^&*]/.test(pwd)) strength += 25;
-    setPasswordStrength(strength);
-  };
 
   const handleSignup = async () => {
-    setError("");
-
-    // Email Validasyonu
-    const emailValidation = validateEmail(username);
-    if (!emailValidation.isValid) {
-      setError(emailValidation.error);
+    if (!name.trim() || !phone.trim() || !email.trim() || !password.trim()) {
+      Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
       return;
     }
-
-    // Password validation
+    if (password !== confirmPassword) {
+      Alert.alert("Hata", "Şifreler eşleşmiyor.");
+      return;
+    }
     if (password.length < 6) {
-      setError("Şifre en az 6 karakter olmalı");
+      Alert.alert("Hata", "Şifre en az 6 karakter olmalı.");
       return;
     }
 
     setIsLoading(true);
     try {
-      console.log("📝 Signup başladı:", username);
-      const success = await registerWithFirebase(username.trim(), password);
-      console.log("✅ Signup sonucu:", success);
-      
-      if (success) {
-        try {
-          await saveCredentials();
-        } catch (e) {
-          console.log("Credentials save hatası:", e);
-        }
-        
-        console.log("🎉 KAYIT BAŞARILI - Login'e yönlendiriliyor");
-        setError("Başarılı! Hesabınız oluşturuldu. Admin onayını bekleyin...");
-        setIsLoading(false);
-        
-        // Direct navigation after 1.5 seconds
-        setTimeout(() => {
-          console.log("Navigating to Login");
-          navigation.navigate("Login");
-        }, 1500);
-      } else {
-        console.log("❌ Signup başarısız");
-        setError("Kayıt başarısız oldu");
-        setIsLoading(false);
-      }
+      // 1. Firebase Auth ile kullanıcı oluştur
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // 2. Realtime Database'e kullanıcı detaylarını yaz (Onay Bekliyor statüsünde)
+      await set(ref(db, `users/${user.uid}`), {
+        uid: user.uid,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        role: "user",        // Varsayılan rol
+        status: "pending",   // ÖNEMLİ: Onay bekliyor
+        createdAt: new Date().toISOString(),
+      });
+
+      Alert.alert(
+        "Kayıt Başarılı",
+        "Hesabınız oluşturuldu ve yönetici onayına gönderildi. Onaylandığında giriş yapabileceksiniz.",
+        [{ text: "Tamam", onPress: () => navigation.navigate("Login") }]
+      );
+
     } catch (error: any) {
-      console.error("❌ Signup error:", error?.message || error);
-      const errorMsg = error?.message || "Kayıt sırasında hata oluştu";
-      if (errorMsg.includes("Firebase yapılandırılmamış")) {
-        setError("Firebase kurulu değil. Lütfen FIREBASE_SETUP.md dosyasını okuyun.");
-      } else if (errorMsg.includes("EMAIL_EXISTS") || errorMsg.includes("email-already-in-use")) {
-        setError("Bu email zaten kayıtlı");
-      } else {
-        setError(errorMsg);
-      }
+      console.error("Kayıt hatası:", error);
+      let msg = "Kayıt oluşturulamadı.";
+      if (error.code === "auth/email-already-in-use") msg = "Bu e-posta zaten kullanımda.";
+      Alert.alert("Hata", msg);
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }]}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-      <ScrollView 
-        contentContainerStyle={[
-          styles.scrollContent,
-          { 
-            maxWidth: isTablet ? 600 : undefined,
-            alignSelf: "center",
-            width: "100%",
-            paddingHorizontal: isTablet ? Spacing["2xl"] : 0,
-          },
-        ]} 
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, marginBottom: Spacing.lg })}
-          >
-            <Feather name="arrow-left" size={24} color={theme.text} />
-          </Pressable>
-          <Image
-            source={require("../assets/images/icon.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <ThemedText type="h2" style={styles.title}>
-            Kayıt Ol
-          </ThemedText>
-          <ThemedText type="body" style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Yeni hesap oluştur
+    <ScreenContainer>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <View style={styles.headerContainer}>
+          <ThemedText type="h1" style={{ textAlign: "center", marginBottom: Spacing.sm }}>Kayıt Ol</ThemedText>
+          <ThemedText type="subtitle" style={{ textAlign: "center", color: colors.textSecondary }}>
+            Lojistik yönetimine katılın
           </ThemedText>
         </View>
 
-
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              Email
-            </ThemedText>
+        <View style={styles.formContainer}>
+          {/* Ad Soyad */}
+          <View style={styles.inputGroup}>
+            <ThemedText type="small" style={{ marginBottom: Spacing.xs, fontWeight: '600' }}>Ad Soyad</ThemedText>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
-                  color: theme.text,
-                },
-              ]}
-              placeholder="Email adresiniz"
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.backgroundRoot }]}
+              placeholder="Adınız Soyadınız"
               placeholderTextColor={colors.textSecondary}
-              value={username}
-              onChangeText={setUsername}
-              editable={!isLoading}
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+
+          {/* Telefon */}
+          <View style={styles.inputGroup}>
+            <ThemedText type="small" style={{ marginBottom: Spacing.xs, fontWeight: '600' }}>Telefon</ThemedText>
+            <TextInput
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.backgroundRoot }]}
+              placeholder="0555 555 55 55"
+              placeholderTextColor={colors.textSecondary}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          {/* E-posta */}
+          <View style={styles.inputGroup}>
+            <ThemedText type="small" style={{ marginBottom: Spacing.xs, fontWeight: '600' }}>E-posta</ThemedText>
+            <TextInput
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.backgroundRoot }]}
+              placeholder="ornek@email.com"
+              placeholderTextColor={colors.textSecondary}
+              value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
-              autoCorrect={false}
               keyboardType="email-address"
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              Şifre
-            </ThemedText>
+          {/* Şifre */}
+          <View style={styles.inputGroup}>
+            <ThemedText type="small" style={{ marginBottom: Spacing.xs, fontWeight: '600' }}>Şifre</ThemedText>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
-                  color: theme.text,
-                },
-              ]}
-              placeholder="Min 8 karakter, 1 büyük harf, 1 rakam"
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.backgroundRoot }]}
+              placeholder="******"
               placeholderTextColor={colors.textSecondary}
-              value={password}
-              onChangeText={(pwd) => {
-                setPassword(pwd);
-                checkPasswordStrength(pwd);
-              }}
               secureTextEntry
-              editable={!isLoading}
-              autoCapitalize="none"
-              autoCorrect={false}
+              value={password}
+              onChangeText={setPassword}
             />
-            {password.length > 0 && (
-              <View style={[styles.strengthBar, { backgroundColor: colors.border, marginTop: Spacing.sm }]}>
-                <View
-                  style={[
-                    styles.strengthFill,
-                    {
-                      width: `${passwordStrength}%`,
-                      backgroundColor:
-                        passwordStrength < 50
-                          ? colors.destructive
-                          : passwordStrength < 75
-                          ? colors.warning
-                          : colors.success,
-                    },
-                  ]}
-                />
-              </View>
-            )}
           </View>
 
-          <View style={styles.inputContainer}>
-            <ThemedText type="small" style={[styles.label, { color: colors.textSecondary }]}>
-              Şifre Onayla
-            </ThemedText>
+          {/* Şifre Tekrar */}
+          <View style={styles.inputGroup}>
+            <ThemedText type="small" style={{ marginBottom: Spacing.xs, fontWeight: '600' }}>Şifre Tekrar</ThemedText>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
-                  color: theme.text,
-                },
-              ]}
-              placeholder="Şifrenizi tekrar girin"
+              style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.backgroundRoot }]}
+              placeholder="******"
               placeholderTextColor={colors.textSecondary}
+              secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              secureTextEntry
-              editable={!isLoading}
-              autoCapitalize="none"
-              autoCorrect={false}
             />
           </View>
-
-          {/* Remember Me Checkbox */}
-          <View style={[styles.rememberMeContainer, { flexDirection: "row", alignItems: "center", gap: Spacing.md }]}>
-            <Checkbox
-              value={rememberMe}
-              onValueChange={setRememberMe}
-              color={rememberMe ? theme.link : undefined}
-            />
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Beni Hatırla
-            </ThemedText>
-          </View>
-
-          {error ? (
-            <ThemedText type="small" style={[styles.error, { color: colors.destructive }]}>
-              {error}
-            </ThemedText>
-          ) : null}
 
           <Pressable
             onPress={handleSignup}
             disabled={isLoading}
             style={({ pressed }) => [
               styles.button,
-              {
-                backgroundColor: colors.link,
-                opacity: isLoading || pressed ? 0.7 : 1,
-              },
+              { backgroundColor: theme.link, opacity: pressed || isLoading ? 0.8 : 1 },
             ]}
           >
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <ThemedText type="body" style={styles.buttonText}>
-                Kayıt Ol
-              </ThemedText>
-            )}
+            {isLoading ? <ActivityIndicator color="#FFF" /> : <ThemedText type="body" style={{ color: "#FFF", fontWeight: "bold" }}>Kayıt Ol</ThemedText>}
           </Pressable>
 
           <View style={styles.loginLink}>
-            <ThemedText type="small" style={{ color: colors.textSecondary }}>
-              Zaten hesabın var mı?{" "}
-            </ThemedText>
+            <ThemedText type="small" style={{ color: colors.textSecondary }}>Zaten hesabınız var mı? </ThemedText>
             <Pressable onPress={() => navigation.navigate("Login")}>
-              <ThemedText type="small" style={{ color: colors.link, fontWeight: "600" }}>
-                Giriş Yap
-              </ThemedText>
+              <ThemedText type="small" style={{ color: theme.link, fontWeight: "bold" }}>Giriş Yap</ThemedText>
             </Pressable>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-    </ThemedView>
+      </KeyboardAvoidingView>
+    </ScreenContainer>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: Spacing["3xl"],
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: Spacing.lg,
-  },
-  title: {
-    marginBottom: Spacing.sm,
-    textAlign: "center",
-  },
-  subtitle: {
-    textAlign: "center",
-  },
-  form: {
-    gap: Spacing.lg,
-  },
-  inputContainer: {
-    gap: Spacing.sm,
-  },
-  label: {
-    fontWeight: "500",
-  },
-  input: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    fontSize: 16,
-  },
-  rememberMeContainer: {
-    marginVertical: Spacing.md,
-  },
-  strengthBar: {
-    height: 4,
-    borderRadius: 2,
-    overflow: "hidden",
-  },
-  strengthFill: {
-    height: "100%",
-    borderRadius: 2,
-  },
-  error: {
-    textAlign: "center",
-  },
-  button: {
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.sm,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    fontWeight: "600",
-  },
-  loginLink: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: Spacing.xs,
-    marginTop: Spacing.lg,
-  },
+  headerContainer: { marginTop: Spacing.xl * 2, marginBottom: Spacing.xl },
+  formContainer: { gap: Spacing.md, paddingHorizontal: Spacing.lg },
+  inputGroup: { gap: 4 },
+  input: { height: 50, borderWidth: 1, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, fontSize: 16 },
+  button: { height: 50, borderRadius: BorderRadius.md, alignItems: "center", justifyContent: "center", marginTop: Spacing.sm },
+  loginLink: { flexDirection: "row", justifyContent: "center", marginTop: Spacing.md },
 });

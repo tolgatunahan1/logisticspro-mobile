@@ -1,195 +1,85 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
-import { firebaseAuth } from "../constants/firebase";
-import { firebaseAuthService } from "../utils/firebaseAuth";
-import { initializeConnectionMonitoring, onConnectionStatusChange, ConnectionStatus } from "../utils/firebaseConnection";
+import React, { createContext, useState, useEffect, useContext, ReactNode } from "react";
+import { onAuthStateChanged, User, signOut } from "firebase/auth";
+import { auth, db } from "../utils/firebaseAuth"; // db eklendi
+import { ref, get } from "firebase/database";
 
-interface User {
-  id?: string;
+// Kullanıcı Veri Tipi
+export interface UserData {
+  uid: string;
   email: string;
-  type: "admin" | "user";
-  firebaseUid: string;
+  name: string;
+  phone: string;
+  role: 'admin' | 'user';
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 interface AuthContextType {
-  user: User | null;
-  firebaseUser: FirebaseUser | null;
+  firebaseUser: User | null;
+  userData: UserData | null; // Veritabanındaki detaylı veri
   isLoading: boolean;
-  connectionStatus: ConnectionStatus;
-  loginWithFirebase: (email: string, password: string) => Promise<boolean>;
-  registerWithFirebase: (email: string, password: string) => Promise<boolean>;
-  loginAdmin: (email: string, password: string) => Promise<boolean>;
-  createAdmin: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  refreshUserData: () => Promise<void>; // Veriyi elle yenilemek için
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("checking");
 
-  // Initialize Firebase connection monitoring on mount
-  useEffect(() => {
-    initializeConnectionMonitoring();
-  }, []);
-
-  // Subscribe to connection status changes
-  useEffect(() => {
-    const unsubscribe = onConnectionStatusChange((status) => {
-      setConnectionStatus(status);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Firebase Authentication State
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, async (authUser) => {
-      if (authUser) {
-        // Kullanıcı Firebase'de giriş yapmış
-        // Eğer admin ise admin dashboard'a, user ise user dashboard'a git
-        
-        // Admin email list
-        const ADMIN_EMAILS = ["tolgatunahan@icloud.com"];
-        
-        // Check if user is admin (by email or database)
-        let isAdmin = ADMIN_EMAILS.includes(authUser.email || "");
-        if (!isAdmin) {
-          isAdmin = await firebaseAuthService.isUserAdmin(authUser.uid);
-        }
-        
-        const userData: User = {
-          email: authUser.email || "",
-          type: isAdmin ? "admin" : "user",
-          firebaseUid: authUser.uid,
-        };
-        setFirebaseUser(authUser);
-        setUser(userData);
+  // Kullanıcı verisini veritabanından çekme fonksiyonu
+  const fetchUserData = async (uid: string) => {
+    try {
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        setUserData(snapshot.val() as UserData);
       } else {
-        // Kullanıcı Firebase'de giriş yapmamış
+        console.log("Kullanıcı verisi veritabanında bulunamadı.");
+        setUserData(null);
+      }
+    } catch (error) {
+      console.error("Kullanıcı verisi çekilemedi:", error);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setFirebaseUser(user);
+        await fetchUserData(user.uid);
+      } else {
         setFirebaseUser(null);
-        setUser(null);
+        setUserData(null);
       }
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  const loginWithFirebase = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const fbUser = await firebaseAuthService.login(email, password);
-      if (fbUser) {
-        // Kullanıcı onaylanmış mı kontrol et
-        const isApproved = await firebaseAuthService.isUserApproved(fbUser.uid);
-        if (!isApproved) {
-          // Logout without blocking
-          firebaseAuthService.logout().catch(err => console.error("Logout error:", err));
-          throw new Error("Admin onayı bekleniyor. Lütfen kısa bir süre sonra tekrar deneyin.");
-        }
-        return true;
-      }
-      return false;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const registerWithFirebase = async (email: string, password: string): Promise<boolean> => {
-    try {
-      console.log("🔵 registerWithFirebase çalışıyor:", email);
-      const fbUser = await firebaseAuthService.register(email, password);
-      console.log("🟢 User oluşturuldu:", fbUser?.uid);
-      if (fbUser) {
-        // Kullanıcı kaydedildi, admin onayını bekliyor
-        // IMPORTANT: Logout immediately so pending users can't access system
-        // This happens silently so Alert shows before logout completes
-        console.log("📝 Background logout başladı...");
-        firebaseAuthService.logout().catch(err => console.error("Logout error:", err));
-        console.log("✅ Registration başarılı");
-        return true;
-      }
-      console.log("❌ fbUser null");
-      return false;
-    } catch (error: any) {
-      console.error("❌ registerWithFirebase hatası:", error?.message || error);
-      throw error;
-    }
-  };
-
-  const loginAdmin = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const fbUser = await firebaseAuthService.login(email, password);
-      if (fbUser) {
-        // Admin email list
-        const ADMIN_EMAILS = ["tolgatunahan@icloud.com"];
-        
-        // Check if user is admin (by email or database)
-        let isAdmin = ADMIN_EMAILS.includes(fbUser.email || "");
-        if (!isAdmin) {
-          isAdmin = await firebaseAuthService.isUserAdmin(fbUser.uid);
-        }
-        
-        if (isAdmin) {
-          return true;
-        } else {
-          // Logout without blocking
-          firebaseAuthService.logout().catch(err => console.error("Logout error:", err));
-          throw new Error("Admin hesabı değil");
-        }
-      }
-      return false;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const createAdmin = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const success = await firebaseAuthService.initializeAdmin(email, password);
-      return success;
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const logout = async () => {
-    try {
-      await firebaseAuthService.logout();
-      setUser(null);
-      setFirebaseUser(null);
-    } catch (error) {
-      setUser(null);
-      setFirebaseUser(null);
+    await signOut(auth);
+    setFirebaseUser(null);
+    setUserData(null);
+  };
+
+  const refreshUserData = async () => {
+    if (firebaseUser) {
+      await fetchUserData(firebaseUser.uid);
     }
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        firebaseUser,
-        isLoading,
-        connectionStatus,
-        loginWithFirebase,
-        registerWithFirebase,
-        loginAdmin,
-        createAdmin,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ firebaseUser, userData, isLoading, logout, refreshUserData }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
-}
+};
