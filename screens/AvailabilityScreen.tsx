@@ -6,6 +6,7 @@ import { ThemedText } from "../components/ThemedText";
 import { ScreenScrollView } from "../components/ScreenScrollView";
 import { useTheme } from "../hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "../constants/theme";
+import { useAuth } from "../contexts/AuthContext";
 import {
   getCarrierAvailabilities,
   addCarrierAvailability,
@@ -15,6 +16,7 @@ import {
 
 export default function AvailabilityScreen() {
   const { theme, isDark } = useTheme();
+  const { firebaseUser } = useAuth();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const colors = isDark ? Colors.dark : Colors.light;
@@ -31,13 +33,14 @@ export default function AvailabilityScreen() {
   const [isSaving, setIsSaving] = useState(false);
 
   const loadData = useCallback(async () => {
+    if (!firebaseUser?.uid) return;
     try {
-      const data = await getCarrierAvailabilities();
+      const data = await getCarrierAvailabilities(firebaseUser.uid);
       setAvailabilities(data || []);
     } catch (e) {
       console.error("Load error:", e);
     }
-  }, []);
+  }, [firebaseUser?.uid]);
 
   useFocusEffect(useCallback(() => {
     loadData();
@@ -54,10 +57,11 @@ export default function AvailabilityScreen() {
   }, [availabilities, searchQuery]);
 
   const handleDelete = async (item: CarrierAvailability) => {
+    if (!firebaseUser?.uid) return;
     const backup = [...availabilities];
     setAvailabilities(prev => prev.filter(a => a.id !== item.id));
     
-    const success = await deleteCarrierAvailability(item.id);
+    const success = await deleteCarrierAvailability(firebaseUser.uid, item.id);
     if (!success) {
       setAvailabilities(backup);
       Alert.alert("Hata", "Bildiri silinemedi");
@@ -65,9 +69,10 @@ export default function AvailabilityScreen() {
   };
 
   const handleSave = async () => {
+    if (!firebaseUser?.uid) return;
     setIsSaving(true);
     try {
-      await addCarrierAvailability({
+      await addCarrierAvailability(firebaseUser.uid, {
         carrierName: name.trim() === "" ? "Belirtilmedi" : name.trim(),
         carrierPhone: phone.trim() === "" ? undefined : phone.trim(),
         currentLocation: currentLocation.trim() === "" ? "Belirtilmedi" : currentLocation.trim(),

@@ -485,10 +485,10 @@ export const updateCompanyWallet = async (uid: string, wallet: CompanyWallet): P
   }
 };
 
-// Carrier Availability functions - Firebase based
-export const getCarrierAvailabilities = async (): Promise<CarrierAvailability[]> => {
+// Carrier Availability functions - Firebase based with uid
+export const getCarrierAvailabilities = async (uid: string): Promise<CarrierAvailability[]> => {
   try {
-    const snapshot = await get(ref(firebaseDatabase, `public/carrierAvailabilities`));
+    const snapshot = await get(ref(firebaseDatabase, `users/${uid}/data/carrierAvailabilities`));
     if (snapshot.exists()) {
       const data = snapshot.val();
       if (typeof data === 'object' && data !== null) {
@@ -503,7 +503,7 @@ export const getCarrierAvailabilities = async (): Promise<CarrierAvailability[]>
   }
 };
 
-export const addCarrierAvailability = async (availability: Omit<CarrierAvailability, "id" | "createdAt" | "expiresAt">): Promise<CarrierAvailability | null> => {
+export const addCarrierAvailability = async (uid: string, availability: Omit<CarrierAvailability, "id" | "createdAt" | "expiresAt">): Promise<CarrierAvailability | null> => {
   try {
     const newAvailability: CarrierAvailability = {
       ...availability,
@@ -513,20 +513,21 @@ export const addCarrierAvailability = async (availability: Omit<CarrierAvailabil
       createdAt: Date.now(),
       expiresAt: Date.now() + 12 * 60 * 60 * 1000, // 12 hours
     };
-    await set(ref(firebaseDatabase, `public/carrierAvailabilities/${newAvailability.id}`), newAvailability);
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await set(ref(firebaseDatabase, `users/${uid}/data/carrierAvailabilities/${newAvailability.id}`), newAvailability);
+    console.log("✅ Bildirim Firebase'e kaydedildi:", newAvailability);
     return newAvailability;
   } catch (error) {
-    console.error("Write error:", error);
+    console.error("❌ Firebase yazma hatası:", error);
     return null;
   }
 };
 
-export const deleteCarrierAvailability = async (id: string): Promise<boolean> => {
+export const deleteCarrierAvailability = async (uid: string, id: string): Promise<boolean> => {
   try {
-    await remove(ref(firebaseDatabase, `public/carrierAvailabilities/${id}`));
+    await remove(ref(firebaseDatabase, `users/${uid}/data/carrierAvailabilities/${id}`));
     return true;
   } catch (error) {
+    console.error("❌ Firebase silme hatası:", error);
     return false;
   }
 };
